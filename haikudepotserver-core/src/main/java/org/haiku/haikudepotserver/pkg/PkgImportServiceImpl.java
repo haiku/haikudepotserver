@@ -163,7 +163,7 @@ public class PkgImportServiceImpl implements PkgImportService {
         // failing the import at this stage since this is "just" meta data.  The length of the payload is being used as
         // a signal that the payload was downloaded and processed at some point.
 
-        if(populateFromPayload && shouldPopulateFromPayload(persistedPkgVersion)) {
+        if (populateFromPayload && shouldPopulateFromPayload(persistedPkgVersion)) {
             populateFromPayload(objectContext, persistedPkgVersion);
         }
 
@@ -203,7 +203,7 @@ public class PkgImportServiceImpl implements PkgImportService {
         Optional<PkgVersionUrl> homeUrlOptional = persistedPkgVersion.getPkgVersionUrlForType(pkgUrlType);
 
         if (null != pkg.getHomePageUrl()) {
-            if(homeUrlOptional.isPresent()) {
+            if (homeUrlOptional.isPresent()) {
                 homeUrlOptional.get().setUrl(pkg.getHomePageUrl().getUrl());
                 homeUrlOptional.get().setName(pkg.getHomePageUrl().getName());
             } else {
@@ -222,7 +222,7 @@ public class PkgImportServiceImpl implements PkgImportService {
         // now add the licenses that are not already there.
 
         for (String license : pkg.getLicenses()) {
-            if(!existingLicenses.contains(license)) {
+            if (!existingLicenses.contains(license)) {
                 PkgVersionLicense persistedPkgVersionLicense = objectContext.newObject(PkgVersionLicense.class);
                 persistedPkgVersionLicense.setBody(license);
                 persistedPkgVersionLicense.setPkgVersion(persistedPkgVersion);
@@ -231,8 +231,8 @@ public class PkgImportServiceImpl implements PkgImportService {
 
         // remove those licenses that are no longer present
 
-        for(PkgVersionLicense pkgVersionLicense : ImmutableList.copyOf(persistedPkgVersion.getPkgVersionLicenses())) {
-            if(!pkg.getLicenses().contains(pkgVersionLicense.getBody())) {
+        for (PkgVersionLicense pkgVersionLicense : ImmutableList.copyOf(persistedPkgVersion.getPkgVersionLicenses())) {
+            if (!pkg.getLicenses().contains(pkgVersionLicense.getBody())) {
                 persistedPkgVersion.removeFromPkgVersionLicenses(pkgVersionLicense);
                 objectContext.deleteObjects(pkgVersionLicense);
             }
@@ -245,7 +245,7 @@ public class PkgImportServiceImpl implements PkgImportService {
         // now add the copyrights that are not already there.
 
         for (String copyright : pkg.getCopyrights()) {
-            if(!existingCopyrights.contains(copyright)) {
+            if (!existingCopyrights.contains(copyright)) {
                 PkgVersionCopyright persistedPkgVersionCopyright = objectContext.newObject(PkgVersionCopyright.class);
                 persistedPkgVersionCopyright.setBody(copyright);
                 persistedPkgVersionCopyright.setPkgVersion(persistedPkgVersion);
@@ -254,8 +254,8 @@ public class PkgImportServiceImpl implements PkgImportService {
 
         // remove those copyrights that are no longer present
 
-        for(PkgVersionCopyright pkgVersionCopyright : ImmutableList.copyOf(persistedPkgVersion.getPkgVersionCopyrights())) {
-            if(!pkg.getCopyrights().contains(pkgVersionCopyright.getBody())) {
+        for (PkgVersionCopyright pkgVersionCopyright : ImmutableList.copyOf(persistedPkgVersion.getPkgVersionCopyrights())) {
+            if (!pkg.getCopyrights().contains(pkgVersionCopyright.getBody())) {
                 persistedPkgVersion.removeFromPkgVersionCopyrights(pkgVersionCopyright);
                 objectContext.deleteObjects(pkgVersionCopyright);
             }
@@ -298,8 +298,7 @@ public class PkgImportServiceImpl implements PkgImportService {
 
             try {
                 urlHelperService.transferPayloadToFile(url, temporaryFile);
-            }
-            catch (IOException ioe) {
+            } catch (IOException ioe) {
                 // if we can't download then don't stop the entire import process - just log and carry on.
                 LOGGER.warn("unable to download from the url [{}] --> [{}]; will ignore", url, temporaryFile);
                 return;
@@ -309,7 +308,7 @@ public class PkgImportServiceImpl implements PkgImportService {
             // the data downloaded.
 
             if (null == persistedPkgVersion.getPayloadLength()
-                || persistedPkgVersion.getPayloadLength() != temporaryFile.length()) {
+                    || persistedPkgVersion.getPayloadLength() != temporaryFile.length()) {
                 persistedPkgVersion.setPayloadLength(temporaryFile.length());
                 LOGGER.info("recording new length for [{}] version [{}] of {}bytes",
                         persistedPkgVersion.getPkg(), persistedPkgVersion, temporaryFile.length());
@@ -321,24 +320,20 @@ public class PkgImportServiceImpl implements PkgImportService {
 
             try {
                 hpkgFileExtractor = new HpkgFileExtractor(temporaryFile);
-            }
-            catch (Throwable th) {
+            } catch (Throwable th) {
                 // if it is not possible to parse the HPKG then log and carry on.
                 LOGGER.warn("unable to parse the payload from [{}]", url, th);
                 return;
             }
 
             populateIconFromPayload(objectContext, persistedPkgVersion, hpkgFileExtractor);
-        }
-        catch (IOException ioe) {
+        } catch (IOException ioe) {
             throw new UncheckedIOException(ioe);
-        }
-        finally {
+        } finally {
             if (null != temporaryFile && temporaryFile.exists()) {
                 if (temporaryFile.delete()) {
                     LOGGER.debug("did delete the temporary file");
-                }
-                else {
+                } else {
                     LOGGER.error("unable to delete the temporary file [{}]", temporaryFile);
                 }
             }
@@ -379,8 +374,7 @@ public class PkgImportServiceImpl implements PkgImportService {
         try {
             LOGGER.info("did find {} bytes of icon data for package [{}] version [{}]",
                     byteSource.size(), persistedPkgVersion.getPkg(), persistedPkgVersion);
-        }
-        catch (IOException ignore) {
+        } catch (IOException ignore) {
             LOGGER.warn("cannot get the size of the icon payload for package [{}] version [{}]",
                     persistedPkgVersion.getPkg(), persistedPkgVersion);
         }
@@ -393,11 +387,9 @@ public class PkgImportServiceImpl implements PkgImportService {
                     objectContext,
                     new NonUserPkgSupplementModificationAgent(null, PkgSupplementModificationAgent.HDS_HPKG_ORIGIN_SYSTEM_DESCRIPTION),
                     persistedPkgVersion.getPkg().getPkgSupplement());
-        }
-        catch (IOException ioe) {
+        } catch (IOException ioe) {
             throw new UncheckedIOException(ioe);
-        }
-        catch (BadPkgIconException e) {
+        } catch (BadPkgIconException e) {
             LOGGER.info("a failure has arisen loading a package icon data", e);
         }
     }
@@ -407,7 +399,7 @@ public class PkgImportServiceImpl implements PkgImportService {
             PkgVersion persistedLatestExistingPkgVersion,
             PkgVersion persistedPkgVersion) {
 
-        if(null != persistedLatestExistingPkgVersion) {
+        if (null != persistedLatestExistingPkgVersion) {
             VersionCoordinatesComparator versionCoordinatesComparator = new VersionCoordinatesComparator();
             VersionCoordinates persistedPkgVersionCoords = persistedPkgVersion.toVersionCoordinates();
             VersionCoordinates persistedLatestExistingPkgVersionCoords = persistedLatestExistingPkgVersion.toVersionCoordinates();
@@ -416,57 +408,51 @@ public class PkgImportServiceImpl implements PkgImportService {
                     persistedPkgVersionCoords,
                     persistedLatestExistingPkgVersionCoords);
 
-            if(c > 0) {
+            if (c > 0) {
                 persistedPkgVersion.setIsLatest(true);
                 persistedLatestExistingPkgVersion.setIsLatest(false);
             } else {
-                boolean isRealArchitecture = !persistedPkgVersion.getArchitecture().getCode().equals(Architecture.CODE_SOURCE);
-
                 if (0 == c) {
-                    if (isRealArchitecture) {
-                        LOGGER.debug(
-                                "imported a package version [{}] of [{}] which is the same as the existing [{}]",
-                                persistedPkgVersionCoords,
-                                persistedPkgVersion.getPkg().getName(),
-                                persistedLatestExistingPkgVersionCoords);
-                    }
+                    LOGGER.debug(
+                            "imported a package version [{}] of [{}] which is the same as the existing [{}]",
+                            persistedPkgVersionCoords,
+                            persistedPkgVersion.getPkg().getName(),
+                            persistedLatestExistingPkgVersionCoords);
                 } else {
-                    if (isRealArchitecture) {
 
-                        // [apl 3.dec.2016]
-                        // If the package from the repository is older than the one that is presently marked as latest
-                        // then a regression has occurred.  In this case make the imported one be the latest and mark
-                        // the later ones as "inactive".
+                    // [apl 3.dec.2016]
+                    // If the package from the repository is older than the one that is presently marked as latest
+                    // then a regression has occurred.  In this case make the imported one be the latest and mark
+                    // the later ones as "inactive".
 
-                        List<PkgVersion> pkgVersionsToDeactivate = PkgVersion.findForPkg(
-                                objectContext,
-                                persistedPkgVersion.getPkg(),
-                                persistedPkgVersion.getRepositorySource(),
-                                false)
-                                .stream()
-                                .filter((pv) -> pv.getArchitecture().equals(persistedPkgVersion.getArchitecture()))
-                                .filter((pv) -> versionCoordinatesComparator.compare(
-                                        persistedPkgVersionCoords,
-                                        pv.toVersionCoordinates()) < 0)
-                                .toList();
+                    List<PkgVersion> pkgVersionsToDeactivate = PkgVersion.findForPkg(
+                                    objectContext,
+                                    persistedPkgVersion.getPkg(),
+                                    persistedPkgVersion.getRepositorySource(),
+                                    false)
+                            .stream()
+                            .filter((pv) -> pv.getArchitecture().equals(persistedPkgVersion.getArchitecture()))
+                            .filter((pv) -> versionCoordinatesComparator.compare(
+                                    persistedPkgVersionCoords,
+                                    pv.toVersionCoordinates()) < 0)
+                            .toList();
 
-                        LOGGER.warn(
-                                "imported a package version {} of {} which is older or the same as the existing {}" +
-                                        " -- will deactivate {} pkg versions after the imported one and make the" +
-                                        " imported one as latest",
-                                persistedPkgVersionCoords,
-                                persistedPkgVersion.getPkg().getName(),
-                                persistedLatestExistingPkgVersionCoords,
-                                pkgVersionsToDeactivate.size());
+                    LOGGER.warn(
+                            "imported a package version {} of {} which is older or the same as the existing {}" +
+                                    " -- will deactivate {} pkg versions after the imported one and make the" +
+                                    " imported one as latest",
+                            persistedPkgVersionCoords,
+                            persistedPkgVersion.getPkg().getName(),
+                            persistedLatestExistingPkgVersionCoords,
+                            pkgVersionsToDeactivate.size());
 
-                        for (PkgVersion pkgVersionToDeactivate : pkgVersionsToDeactivate) {
-                            pkgVersionToDeactivate.setActive(false);
-                            pkgVersionToDeactivate.setIsLatest(false);
-                            LOGGER.info("deactivated {}", pkgVersionToDeactivate);
-                        }
-
-                        persistedPkgVersion.setIsLatest(true);
+                    for (PkgVersion pkgVersionToDeactivate : pkgVersionsToDeactivate) {
+                        pkgVersionToDeactivate.setActive(false);
+                        pkgVersionToDeactivate.setIsLatest(false);
+                        LOGGER.info("deactivated {}", pkgVersionToDeactivate);
                     }
+
+                    persistedPkgVersion.setIsLatest(true);
                 }
             }
         } else {
