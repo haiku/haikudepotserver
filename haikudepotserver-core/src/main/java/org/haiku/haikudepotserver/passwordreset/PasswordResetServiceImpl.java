@@ -1,5 +1,5 @@
 /*
- * Copyright 2018-2023, Andrew Lindesay
+ * Copyright 2018-2024, Andrew Lindesay
  * Distributed under the terms of the MIT License.
  */
 
@@ -7,31 +7,21 @@ package org.haiku.haikudepotserver.passwordreset;
 
 import com.google.common.base.Preconditions;
 import com.google.common.base.Strings;
-import freemarker.ext.beans.BeansWrapper;
-import freemarker.ext.beans.BeansWrapperBuilder;
-import freemarker.template.Configuration;
-import freemarker.template.Template;
-import freemarker.template.TemplateException;
 import org.apache.cayenne.ObjectContext;
 import org.apache.cayenne.configuration.server.ServerRuntime;
 import org.apache.cayenne.query.ObjectSelect;
-import org.haiku.haikudepotserver.dataobjects.NaturalLanguage;
 import org.haiku.haikudepotserver.dataobjects.User;
 import org.haiku.haikudepotserver.dataobjects.UserPasswordResetToken;
 import org.haiku.haikudepotserver.passwordreset.model.PasswordResetMail;
 import org.haiku.haikudepotserver.passwordreset.model.PasswordResetService;
 import org.haiku.haikudepotserver.security.model.UserAuthenticationService;
+import org.haiku.haikudepotserver.support.mail.model.MailSupportService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.mail.MailException;
-import org.springframework.mail.MailSender;
-import org.springframework.mail.SimpleMailMessage;
 import org.springframework.stereotype.Service;
 
-import java.io.IOException;
-import java.io.StringWriter;
 import java.time.Clock;
 import java.time.Instant;
 import java.time.temporal.ChronoUnit;
@@ -44,52 +34,26 @@ public class PasswordResetServiceImpl implements PasswordResetService {
 
     protected final static Logger LOGGER = LoggerFactory.getLogger(PasswordResetServiceImpl.class);
 
-    private final static String MAIL_SUBJECT = "passwordreset-subject";
-    private final static String MAIL_PLAINTEXT = "passwordreset-plaintext";
+    private final static String MAIL_TEMPLATE_PREFIX = "passwordreset";
 
-    private final MailSender mailSender;
     private final ServerRuntime serverRuntime;
     private final UserAuthenticationService userAuthenticationService;
-    private final Configuration freemarkerConfiguration;
     private final Integer timeToLiveHours;
     private final String baseUrl;
-    private final String from;
+    private final MailSupportService mailSupportService;
 
     public PasswordResetServiceImpl(
             ServerRuntime serverRuntime,
-            MailSender mailSender,
+            MailSupportService mailSupportService,
             UserAuthenticationService userAuthenticationService,
-            @Qualifier("emailFreemarkerConfiguration") Configuration freemarkerConfiguration,
             @Value("${hds.passwordreset.ttlhours:1}") Integer timeToLiveHours,
-            @Value("${hds.base-url}") String baseUrl,
-            @Value("${hds.email.from}") String from
+            @Value("${hds.base-url}") String baseUrl
     ) {
-        this.mailSender = Preconditions.checkNotNull(mailSender);
+        this.mailSupportService = Preconditions.checkNotNull(mailSupportService);
         this.serverRuntime = Preconditions.checkNotNull(serverRuntime);
         this.userAuthenticationService = Preconditions.checkNotNull(userAuthenticationService);
-        this.freemarkerConfiguration = Preconditions.checkNotNull(freemarkerConfiguration);
         this.timeToLiveHours = Preconditions.checkNotNull(timeToLiveHours);
         this.baseUrl = Preconditions.checkNotNull(baseUrl);
-        this.from = Preconditions.checkNotNull(from);
-    }
-
-    private String fillFreemarkerTemplate(
-            PasswordResetMail mailModel,
-            String templateLeafName,
-            NaturalLanguage naturalLanguage) throws PasswordResetException {
-
-        BeansWrapper wrapper = new BeansWrapperBuilder(Configuration.VERSION_2_3_21).build();
-
-        try {
-            StringWriter writer = new StringWriter();
-            Template template = freemarkerConfiguration.getTemplate(templateLeafName + "_" + naturalLanguage.getCode());
-            template.process(wrapper.wrap(mailModel), writer);
-            return writer.toString();
-        } catch (TemplateException te) {
-            throw new PasswordResetException("unable to process the freemarker template for sending out mail for the password reset token", te);
-        } catch (IOException ioe) {
-            throw new PasswordResetException("unable to obtain the freemarker templates for sending out mail for the password reset token",ioe);
-        }
     }
 
     /**
@@ -115,16 +79,12 @@ public class PasswordResetServiceImpl implements PasswordResetService {
         mailModel.setUserNickname(user.getNickname());
         mailModel.setUserPasswordResetTokenCode(userPasswordResetToken.getCode());
 
-        SimpleMailMessage message = new SimpleMailMessage();
-        message.setFrom(from);
-        message.setTo(user.getEmail());
-        message.setSubject(fillFreemarkerTemplate(mailModel, MAIL_SUBJECT, user.getNaturalLanguage()));
-        message.setText(fillFreemarkerTemplate(mailModel, MAIL_PLAINTEXT, user.getNaturalLanguage()));
-
         contextLocal.commitChanges();
 
         try {
-            this.mailSender.send(message);
+            mailSupportService.sendMail(
+                    user,
+                    mailModel, MAIL_TEMPLATE_PREFIX);
         } catch (MailException me) {
             throw new PasswordResetException("the password reset email to "+user.toString()+" was not able to be sent",me);
         }

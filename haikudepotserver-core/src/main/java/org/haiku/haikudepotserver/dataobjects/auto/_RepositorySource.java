@@ -10,6 +10,7 @@ import org.apache.cayenne.exp.property.BaseProperty;
 import org.apache.cayenne.exp.property.DateProperty;
 import org.apache.cayenne.exp.property.EntityProperty;
 import org.apache.cayenne.exp.property.ListProperty;
+import org.apache.cayenne.exp.property.NumericProperty;
 import org.apache.cayenne.exp.property.PropertyFactory;
 import org.apache.cayenne.exp.property.StringProperty;
 import org.haiku.haikudepotserver.dataobjects.Architecture;
@@ -33,6 +34,7 @@ public abstract class _RepositorySource extends AbstractDataObject {
 
     public static final BaseProperty<Boolean> ACTIVE = PropertyFactory.createBase("active", Boolean.class);
     public static final StringProperty<String> CODE = PropertyFactory.createString("code", String.class);
+    public static final NumericProperty<Integer> EXPECTED_UPDATE_FREQUENCY_HOURS = PropertyFactory.createNumeric("expectedUpdateFrequencyHours", Integer.class);
     public static final StringProperty<String> FORCED_INTERNAL_BASE_URL = PropertyFactory.createString("forcedInternalBaseUrl", String.class);
     public static final StringProperty<String> IDENTIFIER = PropertyFactory.createString("identifier", String.class);
     public static final DateProperty<Timestamp> LAST_IMPORT_TIMESTAMP = PropertyFactory.createDate("lastImportTimestamp", Timestamp.class);
@@ -44,6 +46,7 @@ public abstract class _RepositorySource extends AbstractDataObject {
 
     protected Boolean active;
     protected String code;
+    protected Integer expectedUpdateFrequencyHours;
     protected String forcedInternalBaseUrl;
     protected String identifier;
     protected Timestamp lastImportTimestamp;
@@ -72,6 +75,16 @@ public abstract class _RepositorySource extends AbstractDataObject {
     public String getCode() {
         beforePropertyRead("code");
         return this.code;
+    }
+
+    public void setExpectedUpdateFrequencyHours(Integer expectedUpdateFrequencyHours) {
+        beforePropertyWrite("expectedUpdateFrequencyHours", this.expectedUpdateFrequencyHours, expectedUpdateFrequencyHours);
+        this.expectedUpdateFrequencyHours = expectedUpdateFrequencyHours;
+    }
+
+    public Integer getExpectedUpdateFrequencyHours() {
+        beforePropertyRead("expectedUpdateFrequencyHours");
+        return this.expectedUpdateFrequencyHours;
     }
 
     public void setForcedInternalBaseUrl(String forcedInternalBaseUrl) {
@@ -170,6 +183,8 @@ public abstract class _RepositorySource extends AbstractDataObject {
                 return this.active;
             case "code":
                 return this.code;
+            case "expectedUpdateFrequencyHours":
+                return this.expectedUpdateFrequencyHours;
             case "forcedInternalBaseUrl":
                 return this.forcedInternalBaseUrl;
             case "identifier":
@@ -203,6 +218,9 @@ public abstract class _RepositorySource extends AbstractDataObject {
                 break;
             case "code":
                 this.code = (String)val;
+                break;
+            case "expectedUpdateFrequencyHours":
+                this.expectedUpdateFrequencyHours = (Integer)val;
                 break;
             case "forcedInternalBaseUrl":
                 this.forcedInternalBaseUrl = (String)val;
@@ -246,6 +264,7 @@ public abstract class _RepositorySource extends AbstractDataObject {
         super.writeState(out);
         out.writeObject(this.active);
         out.writeObject(this.code);
+        out.writeObject(this.expectedUpdateFrequencyHours);
         out.writeObject(this.forcedInternalBaseUrl);
         out.writeObject(this.identifier);
         out.writeObject(this.lastImportTimestamp);
@@ -261,6 +280,7 @@ public abstract class _RepositorySource extends AbstractDataObject {
         super.readState(in);
         this.active = (Boolean)in.readObject();
         this.code = (String)in.readObject();
+        this.expectedUpdateFrequencyHours = (Integer)in.readObject();
         this.forcedInternalBaseUrl = (String)in.readObject();
         this.identifier = (String)in.readObject();
         this.lastImportTimestamp = (Timestamp)in.readObject();

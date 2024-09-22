@@ -32,6 +32,20 @@
             <error-messages key-prefix="addEditRepositorySource.forcedInternalBaseUrl" error="addEditRepositorySourceForm.forcedInternalBaseUrl.$error"></error-messages>
         </div>
 
+        <label for="expectedUpdateFrequencyHours"><message key="addEditRepositorySource.expectedUpdateFrequencyHours.title"></message></label>
+        <div class="form-control-group" ng-class="deriveFormControlsContainerClasses('expectedUpdateFrequencyHours')">
+            <input
+                    id="expectedUpdateFrequencyHours"
+                    type="number"
+                    min="1"
+                    size="6"
+                    name="expectedUpdateFrequencyHours"
+                    autocomplete="off"
+                    ng-model="workingRepositorySource.expectedUpdateFrequencyHours"/>
+            <message key="addEditRepositorySource.expectedUpdateFrequencyHours.unit"></message>
+            <error-messages key-prefix="addEditRepositorySource.expectedUpdateFrequencyHours" error="addEditRepositorySourceForm.expectedUpdateFrequencyHours.$error"></error-messages>
+        </div>
+
         <label ng-show="amEditing"><message key="addEditRepositorySource.extraIdentifiers.title"></message></label>
         <div class="form-control-group" ng-show="amEditing">
 

@@ -37,4 +37,11 @@ public interface RepositoryService {
 
     long total(ObjectContext context, RepositorySearchSpecification search);
 
+    /**
+     * <p>Sends out an alert message in the situation that repositories do not have an
+     * update within the expected number of hours.</p>
+     */
+
+    void alertForRepositoriesAbsentUpdates(ObjectContext context);
+
 }

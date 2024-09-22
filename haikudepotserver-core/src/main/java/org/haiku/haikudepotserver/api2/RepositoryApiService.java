@@ -308,6 +308,7 @@ public class RepositoryApiService extends AbstractApiService {
                         .orElse(null))
                 .lastImportTimestamp(Optional.ofNullable(repositorySource.getLastImportTimestamp()).map(Date::getTime).orElse(null))
                 .extraIdentifiers(repositorySource.getExtraIdentifiers())
+                .expectedUpdateFrequencyHours(repositorySource.getExpectedUpdateFrequencyHours())
                 .repositorySourceMirrors(repositorySource.getRepositorySourceMirrors()
                         .stream()
                         .filter(m -> m.getActive() || BooleanUtils.isTrue(request.getIncludeInactiveRepositorySourceMirrors()))
@@ -575,6 +576,12 @@ public class RepositoryApiService extends AbstractApiService {
                         rsei.setIdentifier(i);
                         repositorySource.addToRepositorySourceExtraIdentifiers(rsei);
                     });
+                    break;
+                }
+
+                case EXPECTED_UPDATE_FREQUENCY_HOURS: {
+                    repositorySource.setExpectedUpdateFrequencyHours(request.getExpectedUpdateFrequencyHours());
+                    LOGGER.info("did set the repository source expected update frequency hours");
                     break;
                 }
 

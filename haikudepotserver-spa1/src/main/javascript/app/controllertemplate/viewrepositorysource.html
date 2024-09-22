@@ -48,8 +48,21 @@
             </span>
         </dd>
 
+        <dt><message key="viewRepositorySource.expectedUpdateFrequencyHours.title"></message></dt>
+        <dd>
+            <span ng-show="repositorySource.expectedUpdateFrequencyHours">
+                <message
+                        key="viewRepositorySource.expectedUpdateFrequencyHours.value"
+                        parameters="[repositorySource.expectedUpdateFrequencyHours]"></message>
+            </span>
+            <span ng-show="!repositorySource.expectedUpdateFrequencyHours">
+                <message key="viewRepositorySource.expectedUpdateFrequencyHours.none.description"></message>
+            </span>
+        </dd>
+
         <dt><message key="viewRepositorySource.repository.title"></message></dt>
         <dd><repository-label repository="repositorySource.repository"></repository-label></dd>
+
     </dl>
 
     <h2><message key="viewRepositorySource.extraIdentifiers.title"></message></h2>

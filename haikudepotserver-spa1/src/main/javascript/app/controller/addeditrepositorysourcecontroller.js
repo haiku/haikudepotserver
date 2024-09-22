@@ -118,9 +118,10 @@ angular.module('haikudepotserver').controller(
                         constants.ENDPOINT_API_V2_REPOSITORY,
                         "update-repository-source",
                         {
-                            filter : [ 'FORCED_INTERNAL_BASE_URL', 'EXTRA_IDENTIFIERS' ],
+                            filter : [ 'FORCED_INTERNAL_BASE_URL', 'EXTRA_IDENTIFIERS', 'EXPECTED_UPDATE_FREQUENCY_HOURS' ],
                             forcedInternalBaseUrl : $scope.workingRepositorySource.forcedInternalBaseUrl,
                             extraIdentifiers: $scope.workingRepositorySource.extraIdentifiers,
+                            expectedUpdateFrequencyHours: $scope.workingRepositorySource.expectedUpdateFrequencyHours,
                             code : $routeParams.repositorySourceCode
                         }
                     ).then(
