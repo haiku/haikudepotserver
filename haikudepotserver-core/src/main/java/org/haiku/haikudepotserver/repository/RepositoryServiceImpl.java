@@ -1,5 +1,5 @@
 /*
- * Copyright 2018-2023, Andrew Lindesay
+ * Copyright 2018-2024, Andrew Lindesay
  * Distributed under the terms of the MIT License.
  */
 
@@ -8,27 +8,29 @@ package org.haiku.haikudepotserver.repository;
 import com.google.common.base.Preconditions;
 import com.google.common.base.Splitter;
 import com.google.common.base.Strings;
-import com.google.common.collect.ImmutableList;
 import org.apache.cayenne.ObjectContext;
 import org.apache.cayenne.query.EJBQLQuery;
+import org.apache.cayenne.query.ObjectSelect;
 import org.apache.commons.lang3.StringUtils;
-import org.haiku.haikudepotserver.dataobjects.HaikuDepot;
-import org.haiku.haikudepotserver.dataobjects.Pkg;
-import org.haiku.haikudepotserver.dataobjects.PkgVersion;
-import org.haiku.haikudepotserver.dataobjects.Repository;
+import org.haiku.haikudepotserver.dataobjects.*;
+import org.haiku.haikudepotserver.naturallanguage.model.NaturalLanguageCoordinates;
+import org.haiku.haikudepotserver.repository.model.AlertRepositoryAbsentUpdateMail;
 import org.haiku.haikudepotserver.repository.model.RepositorySearchSpecification;
 import org.haiku.haikudepotserver.repository.model.RepositoryService;
 import org.haiku.haikudepotserver.support.DateTimeHelper;
 import org.haiku.haikudepotserver.support.LikeHelper;
+import org.haiku.haikudepotserver.support.mail.model.MailSupportService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.Date;
 import java.util.List;
+import java.util.Optional;
+import java.util.concurrent.TimeUnit;
 
 /**
  * <p>This service provides non-trivial operations and processes around repositories.</p>
@@ -41,8 +43,18 @@ public class RepositoryServiceImpl implements RepositoryService {
 
     private final PasswordEncoder passwordEncoder;
 
-    public RepositoryServiceImpl(PasswordEncoder passwordEncoder) {
+    private final MailSupportService mailSupportService;
+
+    private final List<String> alertsRepositoryAbsentUpdatesTo;
+
+    public RepositoryServiceImpl(
+            PasswordEncoder passwordEncoder,
+            MailSupportService mailSupportService,
+            @Value("${hds.alerts.repository-absent-updates.to:}") List<String> alertsRepositoryAbsentUpdatesTo
+    ) {
         this.passwordEncoder = Preconditions.checkNotNull(passwordEncoder);
+        this.mailSupportService = Preconditions.checkNotNull(mailSupportService);
+        this.alertsRepositoryAbsentUpdatesTo = alertsRepositoryAbsentUpdatesTo;
     }
 
     // ------------------------------
@@ -215,6 +227,68 @@ public class RepositoryServiceImpl implements RepositoryService {
                 && passwordEncoder.matches(
                 passwordClear,
                 repository.getPasswordSalt() + "." + repository.getPasswordHash());
+    }
+
+    @Override
+    public void alertForRepositoriesAbsentUpdates(ObjectContext context) {
+        java.util.Date now = new java.sql.Timestamp(System.currentTimeMillis());
+
+        List<RepositorySource> repositorySources = ObjectSelect
+                .query(RepositorySource.class)
+                .where(RepositorySource.ACTIVE.isTrue())
+                .and(RepositorySource.EXPECTED_UPDATE_FREQUENCY_HOURS.isNotNull())
+                .orderBy(RepositorySource.CODE.asc())
+                .select(context);
+
+        AlertRepositoryAbsentUpdateMail mailModel = new AlertRepositoryAbsentUpdateMail(
+                repositorySources.stream()
+                        .map(rs -> maybeMapToRepositorySourceAbsentUpdate(now, context, rs))
+                        .filter(Optional::isPresent)
+                        .map(Optional::get)
+                        .toList()
+        );
+
+        if (mailModel.getRepositorySourceAbsentUpdates().isEmpty()) {
+            LOGGER.info("did not find any repository sources requiring alerts for absent updates");
+        } else {
+            mailSupportService.sendMail(
+                    alertsRepositoryAbsentUpdatesTo,
+                    mailModel,
+                    "alertrepositoryabsentupdate",
+                    NaturalLanguageCoordinates.english());
+        }
+    }
+
+    /**
+     * <p>If the supplied {@link RepositorySource} has no update for longer than the expected number of hours
+     * then return a record with the details to be sent out as an email; otherwise empty Optional.</p>
+     */
+
+    private static Optional<AlertRepositoryAbsentUpdateMail.RepositorySourceAbsentUpdate> maybeMapToRepositorySourceAbsentUpdate(
+            java.util.Date now,
+            ObjectContext context,
+            RepositorySource repositorySource
+    ) {
+        Preconditions.checkArgument(null != repositorySource.getExpectedUpdateFrequencyHours());
+
+        PkgVersion pkgVersion = ObjectSelect
+                .query(PkgVersion.class)
+                .orderBy(PkgVersion.MODIFY_TIMESTAMP.desc())
+                .selectFirst(context);
+        Long hoursAgo = Optional.ofNullable(pkgVersion)
+                .map(PkgVersion::getModifyTimestamp)
+                .map(mt -> TimeUnit.MILLISECONDS.toHours(now.getTime() - mt.getTime()))
+                .orElse(null);
+
+        if (null == hoursAgo || hoursAgo > repositorySource.getExpectedUpdateFrequencyHours()) {
+            return Optional.of(new AlertRepositoryAbsentUpdateMail.RepositorySourceAbsentUpdate(
+                    repositorySource.getCode(),
+                    repositorySource.getExpectedUpdateFrequencyHours(),
+                    null == hoursAgo ? null : hoursAgo.intValue()
+            ));
+        }
+
+        return Optional.empty();
     }
 
 }

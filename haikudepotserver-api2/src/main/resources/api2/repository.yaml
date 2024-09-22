@@ -543,6 +543,9 @@ components:
             $ref: "#/components/schemas/getRepositorySourceRepositorySourceMirror"
         architectureCode:
           type: string
+        expectedUpdateFrequencyHours:
+          type: integer
+          format: int32
     getRepositorySourceRepositorySourceMirror:
       type: object
       properties:
@@ -568,6 +571,9 @@ components:
           type: boolean
         forcedInternalBaseUrl:
           type: string
+        expectedUpdateFrequencyHours:
+          type: integer
+          format: int32
         filter:
           type: array
           items:
@@ -591,6 +597,7 @@ components:
         - ACTIVE
         - FORCED_INTERNAL_BASE_URL
         - EXTRA_IDENTIFIERS
+        - EXPECTED_UPDATE_FREQUENCY_HOURS
 
     createRepositorySourceRequestEnvelope:
       type: object

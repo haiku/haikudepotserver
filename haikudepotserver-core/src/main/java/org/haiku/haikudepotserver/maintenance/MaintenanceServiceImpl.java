@@ -1,14 +1,17 @@
+/*
+ * Copyright 2024, Andrew Lindesay
+ * Distributed under the terms of the MIT License.
+ */
+
 package org.haiku.haikudepotserver.maintenance;
 
-import org.apache.cayenne.ObjectContext;
 import org.apache.cayenne.configuration.server.ServerRuntime;
-import org.haiku.haikudepotserver.dataobjects.Repository;
 import org.haiku.haikudepotserver.dataobjects.UserPasswordResetToken;
 import org.haiku.haikudepotserver.job.model.JobService;
 import org.haiku.haikudepotserver.job.model.JobSnapshot;
 import org.haiku.haikudepotserver.maintenance.model.MaintenanceService;
 import org.haiku.haikudepotserver.passwordreset.model.PasswordResetMaintenanceJobSpecification;
-import org.haiku.haikudepotserver.repository.model.RepositoryHpkrIngressJobSpecification;
+import org.haiku.haikudepotserver.repository.model.AlertRepositoryAbsentUpdateJobSpecification;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.scheduling.annotation.Scheduled;
@@ -36,21 +39,27 @@ public class MaintenanceServiceImpl implements MaintenanceService {
     }
 
     // note the hour is GMT0
-    @Scheduled(cron = "12 17 20 * * *")
+    @Scheduled(cron = "12 40 21 * * *")
     @Override
     public void daily() {
-        // go through all of the repositories and fetch them.  This is essentially a mop-up
+        // go through all the repositories and fetch them.  This is essentially a mop-up
         // task for those repositories that are unable to trigger a refresh.
 
-        {
-            ObjectContext context = serverRuntime.newContext();
+//        {
+//            ObjectContext context = serverRuntime.newContext();
+//
+//            for(Repository repository : Repository.getAllActive(context)) {
+//                jobService.submit(
+//                        new RepositoryHpkrIngressJobSpecification(repository.getCode()),
+//                        JobSnapshot.COALESCE_STATUSES_QUEUED);
+//            }
+//        }
 
-            for(Repository repository : Repository.getAllActive(context)) {
-                jobService.submit(
-                        new RepositoryHpkrIngressJobSpecification(repository.getCode()),
-                        JobSnapshot.COALESCE_STATUSES_QUEUED);
-            }
-        }
+        // see if there appear to have been problems with importing HPKR files.
+
+        jobService.submit(
+                new AlertRepositoryAbsentUpdateJobSpecification(),
+                JobSnapshot.COALESCE_STATUSES_QUEUED);
 
         LOGGER.info("did trigger daily maintenance");
     }
