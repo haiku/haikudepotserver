@@ -24,7 +24,7 @@
           },
           "scriptCode": {
             "type": "string",
-            "pattern": "^[A-Z]"
+            "pattern": "^[A-Z]+$"
           },
           "name": {
             "type": "string"
