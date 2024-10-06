@@ -32,9 +32,9 @@
         <maven.compiler.source>21</maven.compiler.source>
         <maven.compiler.parameters>true</maven.compiler.parameters>
 
-        <spring-boot.version>3.3.1</spring-boot.version>
+        <spring-boot.version>3.3.4</spring-boot.version>
 
-        <postgresql.version>42.7.3</postgresql.version>
+        <postgresql.version>42.7.4</postgresql.version>
         <cayenne.version>4.2.1</cayenne.version>
 
         <slf4j.version>2.0.7</slf4j.version>
@@ -58,12 +58,12 @@
         <aircompressor.version>2.0.2</aircompressor.version>
 
         <commons-collections4.version>4.4</commons-collections4.version>
-        <commons-lang3.version>3.14.0</commons-lang3.version>
-        <commons-compress.version>1.26.0</commons-compress.version>
-        <commons-codec.version>1.16.1</commons-codec.version>
-        <commons-csv.version>1.10.0</commons-csv.version>
+        <commons-lang3.version>3.17.0</commons-lang3.version>
+        <commons-compress.version>1.27.1</commons-compress.version>
+        <commons-codec.version>1.17.1</commons-codec.version>
+        <commons-csv.version>1.12.0</commons-csv.version>
 
-        <testcontainers.version>1.19.8</testcontainers.version>
+        <testcontainers.version>1.20.2</testcontainers.version>
     </properties>
 
     <dependencyManagement>
