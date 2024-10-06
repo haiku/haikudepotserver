@@ -524,10 +524,28 @@ components:
         total:
           type: integer
           format: int64
+          description: "The total count of user ratings disregarding the offset and limit."
+        totalsByRating:
+          type: array
+          description: "An array containing a mapping from the rating to the quantity of user ratings with that rating."
+          items:
+            type: object
+            properties:
+              rating:
+                type: integer
+                format: int32
+                description: "The rating assigned to the user-rating or may be -1 to indicate a total for those user-ratings with no rating value."
+              total:
+                type: integer
+                format: int64
         items:
           type: array
           items:
             type: object
+            required:
+              - code
+              - modifyTimestamp
+              - createTimestamp
             properties:
               code:
                 type: string

@@ -1,5 +1,5 @@
 /*
- * Copyright 2016, Andrew Lindesay
+ * Copyright 2016-2024, Andrew Lindesay
  * Distributed under the terms of the MIT License.
  */
 
@@ -11,6 +11,7 @@ import org.haiku.haikudepotserver.dataobjects.UserRating;
 import org.haiku.haikudepotserver.support.StoppableConsumer;
 
 import java.util.List;
+import java.util.Map;
 
 /**
  * <p>This service is able to provide support for non-trivial operations around user ratings.</p>
@@ -25,7 +26,7 @@ public interface UserRatingService {
 
     List<UserRating> search(ObjectContext context, UserRatingSearchSpecification search);
 
-    long total(ObjectContext context, UserRatingSearchSpecification search);
+    Map<Short, Long> totalsByRating(ObjectContext context, UserRatingSearchSpecification search);
 
     /**
      * <p>If a user has their active / inactive state swapped, it is possible that it may have some bearing

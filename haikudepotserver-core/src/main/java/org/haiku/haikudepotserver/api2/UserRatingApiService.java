@@ -1,5 +1,5 @@
 /*
- * Copyright 2022-2023, Andrew Lindesay
+ * Copyright 2022-2024, Andrew Lindesay
  * Distributed under the terms of the MIT License.
  */
 package org.haiku.haikudepotserver.api2;
@@ -452,7 +452,8 @@ public class UserRatingApiService extends AbstractApiService {
         searchSpecification.setLimit(request.getLimit());
         searchSpecification.setOffset(request.getOffset());
 
-        long total = userRatingService.total(context, searchSpecification);
+        Map<Short, Long> totalsByRating = userRatingService.totalsByRating(context, searchSpecification);
+        long total = totalsByRating.values().stream().mapToLong(l -> l).sum();
         List<SearchUserRatingsResultItemsInner> items = List.of();
 
         if (total > 0) {
@@ -486,7 +487,18 @@ public class UserRatingApiService extends AbstractApiService {
 
         return new SearchUserRatingsResult()
                 .total(total)
+                .totalsByRating(
+                        totalsByRating.entrySet().stream()
+                                .map(e -> toApiResponseTotalsByRatingInner(e.getKey().intValue(), e.getValue()))
+                                .sorted(Comparator.comparingInt(SearchUserRatingsResultTotalsByRatingInner::getRating))
+                                .toList())
                 .items(items);
+    }
+
+    private SearchUserRatingsResultTotalsByRatingInner toApiResponseTotalsByRatingInner(int rating, long total) {
+        return new SearchUserRatingsResultTotalsByRatingInner()
+                .rating(rating)
+                .total(total);
     }
 
     public void updateUserRating(UpdateUserRatingRequestEnvelope request) {

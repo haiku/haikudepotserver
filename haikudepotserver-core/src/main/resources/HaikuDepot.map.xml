@@ -1317,6 +1317,58 @@ OFFSET #bind($search.offset)
 LIMIT #bind($search.limit)
 #end]]></sql>
 	</query>
+	<query name="SearchUserRatings" type="SQLTemplate" root="obj-entity" root-name="UserRating">
+		<property name="cayenne.GenericSelectQuery.fetchingDataRows" value="true"/>
+		<sql adapter-class="org.apache.cayenne.dba.postgres.PostgresAdapter"><![CDATA[SELECT
+#if($resultType.name() == "CODE")
+	#result('ur.code', 'String', 'code')
+#end
+#if($resultType.name() == "TOTALS_BY_RATING")
+	#result('COUNT(ur.id)', 'long', 'count'),
+	#result('COALESCE(ur.rating, -1)', 'short', 'rating')
+#end
+FROM
+	haikudepot.user_rating ur
+	JOIN haikudepot.user u ON u.id = ur.user_id
+	JOIN haikudepot.pkg_version pv ON pv.id = ur.pkg_version_id
+	JOIN haikudepot.pkg p ON p.id = pv.pkg_id
+	JOIN haikudepot.architecture a ON a.id = pv.architecture_id
+	JOIN haikudepot.repository_source rs ON rs.id = pv.repository_source_id
+	JOIN haikudepot.repository r ON r.id = rs.repository_id
+WHERE
+	1 = 1
+	AND u.active = true
+#if(! $search.includeInactive)
+	AND ur.active = true
+#end
+#if($search.repository)
+	AND r.code = #bind($search.repository.code)
+#end
+#if($search.repositorySource)
+	AND rs.code = #bind($search.repositorySource.code)
+#end	
+#if($search.daysSinceCreated)
+	AND ur.create_timestamp >= now() - #bind($search.daysSinceCreated, 'INTEGER') * INTERVAL '1 day'
+#end	
+#if($search.pkg && ! $search.pkgVersion)
+	AND p.name = #bind($search.pkg.name)
+#end
+#if($search.architecture && ! $search.pkgVersion)
+	AND a.code = #bind($search.architecture.code)
+#end
+#if($search.pkgVersion)
+	#bindObjectEqual($search.pkgVersion,'pv.id','id')
+#end
+#if($search.user)
+	#bindObjectEqual($search.user,'u.id','id')
+#end
+#if($resultType.name() == "TOTALS_BY_RATING")
+GROUP BY ur.rating
+#end
+#if($resultType.name() == "CODE")
+ORDER BY ur.create_timestamp DESC, pv.id ASC
+#end]]></sql>
+	</query>
 	<cgen xmlns="http://cayenne.apache.org/schema/10/cgen">
 		<destDir>../java</destDir>
 		<mode>all</mode>

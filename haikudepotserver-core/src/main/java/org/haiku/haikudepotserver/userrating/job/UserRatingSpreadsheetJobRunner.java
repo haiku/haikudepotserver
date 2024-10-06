@@ -1,16 +1,16 @@
 /*
- * Copyright 2018-2022, Andrew Lindesay
+ * Copyright 2018-2024, Andrew Lindesay
  * Distributed under the terms of the MIT License.
  */
 
 package org.haiku.haikudepotserver.userrating.job;
 
 import com.google.common.base.Preconditions;
-import com.google.common.base.Strings;
 import com.google.common.net.MediaType;
 import com.opencsv.CSVWriter;
 import org.apache.cayenne.ObjectContext;
 import org.apache.cayenne.configuration.server.ServerRuntime;
+import org.apache.commons.lang3.StringUtils;
 import org.haiku.haikudepotserver.dataobjects.Pkg;
 import org.haiku.haikudepotserver.dataobjects.Repository;
 import org.haiku.haikudepotserver.dataobjects.User;
@@ -80,33 +80,20 @@ public class UserRatingSpreadsheetJobRunner extends AbstractJobRunner<UserRating
                 CSVWriter writer = new CSVWriter(outputStreamWriter)
         ) {
 
-            Optional<Pkg> paramPkgOptional = Optional.empty();
-            Optional<User> paramUserOptional = Optional.empty();
-            Optional<Repository> paramRepositoryOptional = Optional.empty();
+            Pkg pkg = Optional.ofNullable(specification.getPkgName())
+                    .map(StringUtils::trimToNull)
+                    .map(n -> Pkg.getByName(context, n))
+                    .orElse(null);
 
-            if (!Strings.isNullOrEmpty(specification.getRepositoryCode())) {
-                paramRepositoryOptional = Repository.tryGetByCode(context, specification.getRepositoryCode());
+            User user = Optional.ofNullable(specification.getUserNickname())
+                    .map(StringUtils::trimToNull)
+                    .map(n -> User.getByNickname(context, n))
+                    .orElse(null);
 
-                if(paramRepositoryOptional.isEmpty()) {
-                    throw new IllegalStateException("unable to find the repository; " + specification.getRepositoryCode());
-                }
-            }
-
-            if (!Strings.isNullOrEmpty(specification.getUserNickname())) {
-                paramUserOptional = User.tryGetByNickname(context, specification.getUserNickname());
-
-                if(paramUserOptional.isEmpty()) {
-                    throw new IllegalStateException("unable to find the user; " + specification.getUserNickname());
-                }
-            }
-
-            if (!Strings.isNullOrEmpty(specification.getPkgName())) {
-                paramPkgOptional = Pkg.tryGetByName(context, specification.getPkgName());
-
-                if (paramPkgOptional.isEmpty()) {
-                    throw new IllegalStateException("unable to find the package; " + specification.getPkgName());
-                }
-            }
+            Repository repository = Optional.ofNullable(specification.getRepositoryCode())
+                    .map(StringUtils::trimToNull)
+                    .map(c -> Repository.getByCode(context, c))
+                    .orElse(null);
 
             writer.writeNext(new String[]{
                     "pkg-name",
@@ -126,14 +113,14 @@ public class UserRatingSpreadsheetJobRunner extends AbstractJobRunner<UserRating
             // stream out the packages.
 
             long startMs = System.currentTimeMillis();
-            LOGGER.info("will user rating spreadsheet report");
+            LOGGER.info("will produce user rating spreadsheet report");
 
             final DateTimeFormatter dateTimeFormatter = DateTimeHelper.createStandardDateTimeFormat();
 
             UserRatingSearchSpecification spec = new UserRatingSearchSpecification();
-            spec.setPkg(paramPkgOptional.orElse(null));
-            spec.setUser(paramUserOptional.orElse(null));
-            spec.setRepository(paramRepositoryOptional.orElse(null));
+            spec.setPkg(pkg);
+            spec.setUser(user);
+            spec.setRepository(repository);
 
             // TODO; provide a prefetch tree into the user, pkgversion.
             int count = userRatingService.each(context, spec, userRating -> {

@@ -212,8 +212,8 @@ public class UserRatingApiIT extends AbstractIntegrationTest {
         SearchUserRatingsResult result = userRatingApi.searchUserRatings(request);
         // ------------------------------------
 
-        // there are three user ratings, but one is disabled so we will not see that one.
-        Assertions.assertThat(result.items.size()).isEqualTo(2);
+        // there are four user ratings, but one is disabled so we will not see that one.
+        Assertions.assertThat(result.items.size()).isEqualTo(3);
 
         {
             SearchUserRatingsResult.UserRating userRating = result.items.stream().filter(i -> i.code.equals("ABCDEF")).collect(SingleCollector.single());

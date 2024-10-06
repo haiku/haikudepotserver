@@ -1,5 +1,5 @@
 /*
- * Copyright 2018-2023, Andrew Lindesay
+ * Copyright 2018-2024, Andrew Lindesay
  * Distributed under the terms of the MIT License.
  */
 
@@ -8,11 +8,16 @@ package org.haiku.haikudepotserver.userrating;
 import com.google.common.base.Preconditions;
 import com.google.common.base.Strings;
 import com.google.common.collect.ComparisonChain;
+import com.nimbusds.jose.util.Pair;
+import org.apache.cayenne.DataRow;
 import org.apache.cayenne.ObjectContext;
 import org.apache.cayenne.configuration.server.ServerRuntime;
 import org.apache.cayenne.query.EJBQLQuery;
+import org.apache.cayenne.query.MappedSelect;
+import org.apache.cayenne.query.ObjectSelect;
 import org.apache.commons.lang3.StringUtils;
 import org.haiku.haikudepotserver.dataobjects.*;
+import org.haiku.haikudepotserver.dataobjects.auto._HaikuDepot;
 import org.haiku.haikudepotserver.support.StoppableConsumer;
 import org.haiku.haikudepotserver.support.VersionCoordinates;
 import org.haiku.haikudepotserver.support.VersionCoordinatesComparator;
@@ -23,15 +28,38 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
-import java.time.Instant;
-import java.time.temporal.ChronoUnit;
 import java.util.*;
 import java.util.stream.Collectors;
+
+// Implementation note; the search query here is done using raw SQL as a Cayenne template. This is done in this
+// way because the aggregation logic is complex enough to need to be done in SQL and the search query needs to
+// be the same across both.
 
 @Service
 public class UserRatingServiceImpl implements UserRatingService {
 
     protected final static Logger LOGGER = LoggerFactory.getLogger(UserRatingServiceImpl.class);
+
+    /**
+     * <p>When an aggregate query runs over the ratings then some {@link UserRating} may have no rating value and
+     * in this case, im the returned aggregate, the rating used is this one.</p>
+     */
+    private final static int USER_RATING_NONE = -1;
+
+    private final static String KEY_CODE = "code";
+    private final static String KEY_TOTAL = "total";
+    private final static String KEY_COUNT = "count";
+    private final static String KEY_RATING = "rating";
+
+    /**
+     * <p>When the SQL query runs it can return a number of different response types. This enum controls the
+     * different forms that the query can return.</p>
+     */
+    private enum QueryResultType {
+        CODE,
+        TOTAL,
+        TOTALS_BY_RATING
+    }
 
     private final ServerRuntime serverRuntime;
     private final int userRatingDerivationVersionsBack;
@@ -68,34 +96,15 @@ public class UserRatingServiceImpl implements UserRatingService {
         Preconditions.checkNotNull(context);
 
         int count = 0;
-        StringBuilder queryExpression = new StringBuilder();
-        List<Object> parameters = new ArrayList<>();
-
-        queryExpression.append("SELECT ur FROM UserRating ur");
-
-        if(null!=search) {
-            queryExpression.append(" WHERE ");
-            queryExpression.append(prepareWhereClause(parameters, context, search));
-        }
-
-        queryExpression.append(" ORDER BY ur.createTimestamp DESC, ur.code DESC");
-
-        EJBQLQuery query = new EJBQLQuery(queryExpression.toString());
-
-        for(int i=0;i<parameters.size();i++) {
-            query.setParameter(i + 1, parameters.get(i));
-        }
-
-        query.setFetchLimit(100);
+        MappedSelect<DataRow> mappedSelect = createQuery(search, QueryResultType.CODE).limit(100);
 
         // now loop through the user ratings.
 
         while(true) {
+            mappedSelect = mappedSelect.offset(count);
+            List<UserRating> userRatings = dataRowsWithCodeToUserRatings(context, mappedSelect.select(context));
 
-            query.setFetchOffset(count);
-            List<UserRating> userRatings = (List<UserRating>) context.performQuery(query);
-
-            if(userRatings.isEmpty()) {
+            if (userRatings.isEmpty()) {
                 return count;
             }
 
@@ -107,118 +116,48 @@ public class UserRatingServiceImpl implements UserRatingService {
 
             count += userRatings.size();
         }
-
     }
 
     // -------------------------------------
     // SEARCH
 
-    private String prepareWhereClause(
-            List<Object> parameterAccumulator,
-            ObjectContext context,
-            UserRatingSearchSpecification search) {
+    private MappedSelect<DataRow> createQuery(
+            UserRatingSearchSpecification search,
+            QueryResultType queryResultType) {
+        return MappedSelect.query(_HaikuDepot.SEARCH_USER_RATINGS_QUERYNAME, DataRow.class).params(Map.of(
+               "resultType", queryResultType,
+                "search", search
+        )).limit(search.getLimit()).offset(search.getOffset());
+    }
 
-        Preconditions.checkNotNull(search);
-        Preconditions.checkNotNull(context);
-        Instant instant = Instant.now();
 
-        List<String> whereExpressions = new ArrayList<>();
+    private List<UserRating> dataRowsWithCodeToUserRatings(ObjectContext context, List<DataRow> dataRows) {
+        List<String> userRatingCodes = dataRows.stream().map(dr -> (String) dr.get(KEY_CODE)).toList();
 
-        whereExpressions.add("ur.user.active = true");
-
-        if (!search.getIncludeInactive()) {
-            whereExpressions.add("ur." + UserRating.ACTIVE.getName() + " = true");
+        if (userRatingCodes.isEmpty()) {
+            return List.of();
         }
 
-        if (null != search.getRepository()) {
-            parameterAccumulator.add(search.getRepository());
-            whereExpressions.add(
-                    "ur."
-                            + UserRating.PKG_VERSION.getName() + "."
-                            + PkgVersion.REPOSITORY_SOURCE.getName() + "."
-                            + RepositorySource.REPOSITORY.getName() + " = ?" + parameterAccumulator.size());
-        }
-
-        if (null != search.getRepositorySource()) {
-            parameterAccumulator.add(search.getRepositorySource());
-            whereExpressions.add(
-                    "ur."
-                            + UserRating.PKG_VERSION.getName() + "."
-                            + PkgVersion.REPOSITORY_SOURCE.getName() + " = ?" + parameterAccumulator.size());
-        }
-
-        if (null != search.getDaysSinceCreated()) {
-            parameterAccumulator.add(new java.sql.Timestamp(instant.minus(search.getDaysSinceCreated(), ChronoUnit.DAYS).toEpochMilli()));
-            whereExpressions.add("ur." + UserRating.CREATE_TIMESTAMP.getName() + " > ?" + parameterAccumulator.size());
-        }
-
-        if (null != search.getPkg() && null == search.getPkgVersion()) {
-            parameterAccumulator.add(search.getPkg());
-            whereExpressions.add("ur." + UserRating.PKG_VERSION.getName() + "." + PkgVersion.ACTIVE.getName() + " = true");
-            whereExpressions.add("ur." + UserRating.PKG_VERSION.getName() + "." + PkgVersion.PKG.getName() + " = ?" + parameterAccumulator.size());
-        }
-
-        if (null != search.getArchitecture() && null == search.getPkgVersion()) {
-            parameterAccumulator.add(search.getArchitecture());
-            whereExpressions.add("ur." + UserRating.PKG_VERSION.getName() + "." + PkgVersion.ARCHITECTURE.getName() + " = ?" + parameterAccumulator.size());
-        }
-
-        if (null != search.getPkgVersion()) {
-            parameterAccumulator.add(search.getPkgVersion());
-            whereExpressions.add("ur." + UserRating.PKG_VERSION.getName() + " = ?" + parameterAccumulator.size());
-        }
-
-        if (null != search.getUser()) {
-            parameterAccumulator.add(search.getUser());
-            whereExpressions.add("ur." + UserRating.USER.getName() + " = ?" + parameterAccumulator.size());
-        }
-
-        return String.join(" AND ", whereExpressions);
-
+        return ObjectSelect.query(UserRating.class).where(UserRating.CODE.in(userRatingCodes)).select(context);
     }
 
     @Override
     public List<UserRating> search(ObjectContext context, UserRatingSearchSpecification search) {
         Preconditions.checkNotNull(search);
         Preconditions.checkNotNull(context);
-
-        List<Object> parameters = new ArrayList<>();
-        EJBQLQuery query = new EJBQLQuery("SELECT ur FROM "
-                + UserRating.class.getSimpleName() + " AS ur WHERE "
-                + prepareWhereClause(parameters, context, search)+ " ORDER BY ur." + UserRating.CREATE_TIMESTAMP.getName() + " DESC");
-        query.setFetchOffset(search.getOffset());
-        query.setFetchLimit(search.getLimit());
-
-        for(int i=0;i<parameters.size();i++) {
-            query.setParameter(i+1,parameters.get(i));
-        }
-
-        //noinspection unchecked
-        return context.performQuery(query);
+        return dataRowsWithCodeToUserRatings(context, createQuery(search, QueryResultType.CODE).select(context));
     }
 
     @Override
-    public long total(ObjectContext context, UserRatingSearchSpecification search) {
+    public Map<Short, Long> totalsByRating(ObjectContext context, UserRatingSearchSpecification search) {
         Preconditions.checkNotNull(search);
         Preconditions.checkNotNull(context);
-
-        List<Object> parameters = new ArrayList<>();
-        EJBQLQuery ejbQuery = new EJBQLQuery("SELECT COUNT(ur) FROM UserRating AS ur WHERE " + prepareWhereClause(parameters, context, search));
-
-        for (int i = 0; i < parameters.size(); i++) {
-            ejbQuery.setParameter(i+1,parameters.get(i));
-        }
-
-        @SuppressWarnings("unchecked") List<Number> result = context.performQuery(ejbQuery);
-
-        switch (result.size()) {
-            case 1:
-                return result.getFirst().longValue();
-
-            default:
-                throw new IllegalStateException("expected 1 row from count query, but got "+result.size());
-        }
+        return createQuery(search, QueryResultType.TOTALS_BY_RATING).select(context)
+                .stream()
+                .map(dr -> Pair.of(((Number) dr.get(KEY_RATING)).shortValue(), ((Number) dr.get(KEY_COUNT)).longValue()))
+                .collect(Collectors.toMap(Pair::getLeft, Pair::getRight));
     }
+
 
     // ------------------------------
     // DERIVATION ALGORITHM
@@ -428,7 +367,7 @@ public class UserRatingServiceImpl implements UserRatingService {
         Preconditions.checkNotNull(context);
         Preconditions.checkNotNull(pkg);
 
-        // haul all of the pkg versions into memory first.
+        // haul all the pkg versions into memory first.
 
         List<PkgVersion> pkgVersions = repository.getRepositorySources().stream()
                 .flatMap(rs -> PkgVersion.findForPkg(context, pkg, rs, false).stream()) // active only
@@ -469,7 +408,7 @@ public class UserRatingServiceImpl implements UserRatingService {
                         .collect(Collectors.toList());
             }
 
-            // only one user rating should taken from each user; the latest one.  Get a list of all of the
+            // only one user rating should taken from each user; the latest one.  Get a list of all the
             // people who have rated these versions.
 
             List<Short> ratings = new ArrayList<>();

@@ -435,11 +435,26 @@ public class IntegrationTestSupportService {
                 UserRating userRating = context.newObject(UserRating.class);
                 userRating.setRating((short) 1);
                 userRating.setUser(user);
-                userRating.setActive(false);
+                userRating.setActive(false); // <-- note
                 userRating.setNaturalLanguage(english);
                 userRating.setPkgVersion(pkgVersion);
                 userRating.setComment("Kingston black apples");
                 userRating.setCode("MNOPQR"); // known code that can be used for reference later
+            }
+        }
+
+        {
+            User user = createBasicUser(context, "urtest4", "password");
+
+            {
+                UserRating userRating = context.newObject(UserRating.class);
+                userRating.setRating(null); // <-- note
+                userRating.setUser(user);
+                userRating.setActive(true); // <-- note
+                userRating.setNaturalLanguage(english);
+                userRating.setPkgVersion(pkgVersion);
+                userRating.setComment("Cardboard packaging");
+                userRating.setCode("RSRSRSRS"); // known code that can be used for reference later
             }
         }
 
