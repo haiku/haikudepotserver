@@ -432,6 +432,27 @@ angular.module('haikudepotserver').controller(
 
             };
 
+            $scope.goToggleIsNativeDesktop = function() {
+                remoteProcedureCall.call(
+                    constants.ENDPOINT_API_V2_PKG,
+                    "update-pkg",
+                    {
+                        filter : [ 'IS_NATIVE_DESKTOP' ],
+                        name : $routeParams.name,
+                        isNativeDesktop : !$scope.pkg.isNativeDesktop
+                    }
+                ).then(
+                    function () {
+                        $log.info('toggled ' + $routeParams.name + ' pkg is native desktop');
+                        $scope.pkg.isNativeDesktop = !$scope.pkg.isNativeDesktop;
+                    },
+                    function (err) {
+                        $log.error('unable to toggle [' + $routeParams.name + '] is native desktop');
+                        errorHandling.handleRemoteProcedureCallError(err);
+                    }
+                );
+            }
+
             $scope.goDeactivate = function () {
               var pv = $scope.pkg.versions[0];
 

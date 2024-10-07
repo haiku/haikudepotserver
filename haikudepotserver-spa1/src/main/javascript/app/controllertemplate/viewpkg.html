@@ -284,6 +284,16 @@
                     <message key="viewPkg.editPkgCategoriesAction.title"></message>
                 </a>
             </li>
+            <li pkg="pkg" show-if-pkg-permission="'PKG_EDITCATEGORIES'">
+                <a href="" ng-click="goToggleIsNativeDesktop()">
+                    <span ng-show="!pkg.isNativeDesktop">
+                        <message key="viewPkg.enableIsNativeDesktop.title"></message>
+                    </span>
+                    <span ng-show="pkg.isNativeDesktop">
+                        <message key="viewPkg.disableIsNativeDesktop.title"></message>
+                    </span>
+                </a>
+            </li>
             <li>
                 <a
                         breadcrumb-link="viewPkgVersionLocalization"
