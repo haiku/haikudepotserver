@@ -256,6 +256,15 @@ public class PkgJobApiService extends AbstractApiService {
                 .guid(jobService.submit(specification, JobSnapshot.COALESCE_STATUSES_NONE));
     }
 
+    public QueuePkgNativeDesktopExportScreensheetJobJobResult queuePkgNativeDesktopExportSpreadsheetJob() {
+        final ObjectContext context = serverRuntime.newContext();
+        User user = obtainAuthenticatedUser(context);
+        PkgNativeDesktopExportSpreadsheetJobSpecification specification = new PkgNativeDesktopExportSpreadsheetJobSpecification();
+        specification.setOwnerUserNickname(user.getNickname());
+        return new QueuePkgNativeDesktopExportScreensheetJobJobResult()
+                .guid(jobService.submit(specification, JobSnapshot.COALESCE_STATUSES_NONE));
+    }
+
     private String queueSimplePkgJob(
             Class<? extends AbstractJobSpecification> jobSpecificationClass,
             Permission permission) {

@@ -362,6 +362,28 @@ paths:
               schema:
                 $ref: "#/components/schemas/queuePkgScreenshotArchiveImportJobResponseEnvelope"
 
+  /__api/v2/pkg-job/queue-pkg-native-desktop-export-spreadsheet-job:
+    description: >
+      Produces a spreadsheet of the packages marking which are native desktop flagged.
+    post:
+      tags:
+        - pkg-job
+      operationId: queuePkgNativeDesktopExportScreensheetJob
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/queuePkgNativeDesktopExportScreensheetJobRequestEnvelope"
+      responses:
+        200:
+          description: >
+            The result data.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/queuePkgNativeDesktopExportScreensheetJobResponseEnvelope"
+
 components:
   schemas:
 
@@ -622,6 +644,21 @@ components:
         error:
           $ref: "./error.yaml#/components/schemas/error"
     queuePkgDumpLocalizationImportJobResult:
+      type: object
+      properties:
+        guid:
+          type: string
+
+    queuePkgNativeDesktopExportScreensheetJobRequestEnvelope:
+      type: object
+    queuePkgNativeDesktopExportScreensheetJobResponseEnvelope:
+      type: object
+      properties:
+        result:
+          $ref: "#/components/schemas/queuePkgNativeDesktopExportScreensheetJobJobResult"
+        error:
+          $ref: "./error.yaml#/components/schemas/error"
+    queuePkgNativeDesktopExportScreensheetJobJobResult:
       type: object
       properties:
         guid:
