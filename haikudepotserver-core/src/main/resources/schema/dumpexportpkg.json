@@ -14,6 +14,10 @@
     "modifyTimestamp": {
       "type": "integer"
     },
+    "isNativeDesktop": {
+      "type": "boolean",
+      "description": "True if the package supplies a Haiku native desktop application."
+    },
     "prominenceOrdering": {
       "type": "integer"
     },

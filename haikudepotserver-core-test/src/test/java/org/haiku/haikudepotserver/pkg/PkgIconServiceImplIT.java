@@ -232,6 +232,7 @@ public class PkgIconServiceImplIT extends AbstractIntegrationTest {
             ObjectContext context = serverRuntime.newContext();
             org.haiku.haikudepotserver.dataobjects.Pkg pkg1Devel = context.newObject(org.haiku.haikudepotserver.dataobjects.Pkg.class);
             pkg1Devel.setActive(true);
+            pkg1Devel.setIsNativeDesktop(false);
             pkg1Devel.setName("pkg1" + PkgServiceImpl.SUFFIX_PKG_DEVELOPMENT);
             pkg1Devel.setPkgSupplement(PkgSupplement.getByBasePkgName(context, "pkg1"));
             context.commitChanges();

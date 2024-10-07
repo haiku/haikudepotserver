@@ -15,39 +15,10 @@ import org.apache.cayenne.query.SortOrder;
 import org.fest.assertions.Assertions;
 import org.haiku.haikudepotserver.AbstractIntegrationTest;
 import org.haiku.haikudepotserver.IntegrationTestSupportService;
-import org.haiku.haikudepotserver.api2.model.ConfigurePkgIconPkgIcon;
-import org.haiku.haikudepotserver.api2.model.ConfigurePkgIconRequestEnvelope;
-import org.haiku.haikudepotserver.api2.model.GetPkgChangelogRequestEnvelope;
-import org.haiku.haikudepotserver.api2.model.GetPkgChangelogResult;
-import org.haiku.haikudepotserver.api2.model.GetPkgIconsRequestEnvelope;
-import org.haiku.haikudepotserver.api2.model.GetPkgIconsResult;
-import org.haiku.haikudepotserver.api2.model.GetPkgLocalizationsPkgLocalization;
-import org.haiku.haikudepotserver.api2.model.GetPkgLocalizationsRequestEnvelope;
-import org.haiku.haikudepotserver.api2.model.GetPkgLocalizationsResult;
-import org.haiku.haikudepotserver.api2.model.GetPkgRequestEnvelope;
-import org.haiku.haikudepotserver.api2.model.GetPkgResult;
-import org.haiku.haikudepotserver.api2.model.GetPkgScreenshotRequestEnvelope;
-import org.haiku.haikudepotserver.api2.model.GetPkgScreenshotResult;
-import org.haiku.haikudepotserver.api2.model.GetPkgScreenshotsRequestEnvelope;
-import org.haiku.haikudepotserver.api2.model.GetPkgScreenshotsResult;
-import org.haiku.haikudepotserver.api2.model.GetPkgScreenshotsScreenshot;
-import org.haiku.haikudepotserver.api2.model.GetPkgVersionLocalizationsRequestEnvelope;
-import org.haiku.haikudepotserver.api2.model.GetPkgVersionLocalizationsResult;
-import org.haiku.haikudepotserver.api2.model.IncrementViewCounterRequestEnvelope;
-import org.haiku.haikudepotserver.api2.model.PkgVersionType;
-import org.haiku.haikudepotserver.api2.model.RemovePkgIconRequestEnvelope;
-import org.haiku.haikudepotserver.api2.model.RemovePkgScreenshotRequestEnvelope;
-import org.haiku.haikudepotserver.api2.model.ReorderPkgScreenshotsRequestEnvelope;
-import org.haiku.haikudepotserver.api2.model.SearchPkgsRequestEnvelope;
-import org.haiku.haikudepotserver.api2.model.SearchPkgsResult;
-import org.haiku.haikudepotserver.api2.model.UpdatePkgCategoriesRequestEnvelope;
-import org.haiku.haikudepotserver.api2.model.UpdatePkgChangelogRequestEnvelope;
-import org.haiku.haikudepotserver.api2.model.UpdatePkgLocalizationLocalization;
-import org.haiku.haikudepotserver.api2.model.UpdatePkgLocalizationRequestEnvelope;
-import org.haiku.haikudepotserver.api2.model.UpdatePkgProminenceRequestEnvelope;
-import org.haiku.haikudepotserver.api2.model.UpdatePkgVersionFilter;
-import org.haiku.haikudepotserver.api2.model.UpdatePkgVersionRequestEnvelope;
+import org.haiku.haikudepotserver.api2.model.*;
 import org.haiku.haikudepotserver.dataobjects.*;
+import org.haiku.haikudepotserver.dataobjects.Architecture;
+import org.haiku.haikudepotserver.dataobjects.PkgCategory;
 import org.haiku.haikudepotserver.naturallanguage.model.NaturalLanguageCoded;
 import org.haiku.haikudepotserver.naturallanguage.model.NaturalLanguageCoordinates;
 import org.haiku.haikudepotserver.support.exception.BadPkgIconException;
@@ -294,6 +265,27 @@ public class PkgApiServiceIT extends AbstractIntegrationTest {
 
         Assertions.assertThat(onfe.getEntityName()).isEqualTo(Pkg.class.getSimpleName());
         Assertions.assertThat(onfe.getIdentifier()).isEqualTo("pkg9");
+    }
+
+    @Test
+    public void testUpdatePkg() {
+        setAuthenticatedUserToRoot();
+        integrationTestSupportService.createStandardTestData();
+
+        UpdatePkgRequestEnvelope request = new UpdatePkgRequestEnvelope()
+                .name("pkg1")
+                .addFilterItem(UpdatePkgFilter.IS_NATIVE_DESKTOP)
+                .isNativeDesktop(true);
+
+        // ------------------------------------
+        pkgApiService.updatePkg(request);
+        // ------------------------------------
+
+        {
+            ObjectContext context = serverRuntime.newContext();
+            Pkg pkgAfter = Pkg.getByName(context, "pkg1");
+            Assertions.assertThat(pkgAfter.getIsNativeDesktop()).isTrue();
+        }
     }
 
     @Test

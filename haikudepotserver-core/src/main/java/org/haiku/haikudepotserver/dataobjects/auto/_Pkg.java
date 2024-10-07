@@ -32,6 +32,7 @@ public abstract class _Pkg extends AbstractDataObject {
 
     public static final BaseProperty<Boolean> ACTIVE = PropertyFactory.createBase("active", Boolean.class);
     public static final DateProperty<Timestamp> CREATE_TIMESTAMP = PropertyFactory.createDate("createTimestamp", Timestamp.class);
+    public static final BaseProperty<Boolean> IS_NATIVE_DESKTOP = PropertyFactory.createBase("isNativeDesktop", Boolean.class);
     public static final DateProperty<Timestamp> MODIFY_TIMESTAMP = PropertyFactory.createDate("modifyTimestamp", Timestamp.class);
     public static final StringProperty<String> NAME = PropertyFactory.createString("name", String.class);
     public static final ListProperty<PermissionUserPkg> PERMISSION_USER_PKGS = PropertyFactory.createList("permissionUserPkgs", PermissionUserPkg.class);
@@ -41,6 +42,7 @@ public abstract class _Pkg extends AbstractDataObject {
 
     protected Boolean active;
     protected Timestamp createTimestamp;
+    protected Boolean isNativeDesktop;
     protected Timestamp modifyTimestamp;
     protected String name;
 
@@ -67,6 +69,16 @@ public abstract class _Pkg extends AbstractDataObject {
     public Timestamp getCreateTimestamp() {
         beforePropertyRead("createTimestamp");
         return this.createTimestamp;
+    }
+
+    public void setIsNativeDesktop(Boolean isNativeDesktop) {
+        beforePropertyWrite("isNativeDesktop", this.isNativeDesktop, isNativeDesktop);
+        this.isNativeDesktop = isNativeDesktop;
+    }
+
+    public Boolean getIsNativeDesktop() {
+        beforePropertyRead("isNativeDesktop");
+        return this.isNativeDesktop;
     }
 
     public void setModifyTimestamp(Timestamp modifyTimestamp) {
@@ -147,6 +159,8 @@ public abstract class _Pkg extends AbstractDataObject {
                 return this.active;
             case "createTimestamp":
                 return this.createTimestamp;
+            case "isNativeDesktop":
+                return this.isNativeDesktop;
             case "modifyTimestamp":
                 return this.modifyTimestamp;
             case "name":
@@ -176,6 +190,9 @@ public abstract class _Pkg extends AbstractDataObject {
                 break;
             case "createTimestamp":
                 this.createTimestamp = (Timestamp)val;
+                break;
+            case "isNativeDesktop":
+                this.isNativeDesktop = (Boolean)val;
                 break;
             case "modifyTimestamp":
                 this.modifyTimestamp = (Timestamp)val;
@@ -213,6 +230,7 @@ public abstract class _Pkg extends AbstractDataObject {
         super.writeState(out);
         out.writeObject(this.active);
         out.writeObject(this.createTimestamp);
+        out.writeObject(this.isNativeDesktop);
         out.writeObject(this.modifyTimestamp);
         out.writeObject(this.name);
         out.writeObject(this.permissionUserPkgs);
@@ -226,6 +244,7 @@ public abstract class _Pkg extends AbstractDataObject {
         super.readState(in);
         this.active = (Boolean)in.readObject();
         this.createTimestamp = (Timestamp)in.readObject();
+        this.isNativeDesktop = (Boolean)in.readObject();
         this.modifyTimestamp = (Timestamp)in.readObject();
         this.name = (String)in.readObject();
         this.permissionUserPkgs = in.readObject();

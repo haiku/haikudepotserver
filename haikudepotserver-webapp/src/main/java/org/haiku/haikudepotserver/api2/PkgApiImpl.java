@@ -4,42 +4,7 @@
  */
 package org.haiku.haikudepotserver.api2;
 
-import org.haiku.haikudepotserver.api2.model.ConfigurePkgIconRequestEnvelope;
-import org.haiku.haikudepotserver.api2.model.ConfigurePkgIconResponseEnvelope;
-import org.haiku.haikudepotserver.api2.model.GetPkgChangelogRequestEnvelope;
-import org.haiku.haikudepotserver.api2.model.GetPkgChangelogResponseEnvelope;
-import org.haiku.haikudepotserver.api2.model.GetPkgIconsRequestEnvelope;
-import org.haiku.haikudepotserver.api2.model.GetPkgIconsResponseEnvelope;
-import org.haiku.haikudepotserver.api2.model.GetPkgLocalizationsRequestEnvelope;
-import org.haiku.haikudepotserver.api2.model.GetPkgLocalizationsResponseEnvelope;
-import org.haiku.haikudepotserver.api2.model.GetPkgRequestEnvelope;
-import org.haiku.haikudepotserver.api2.model.GetPkgResponseEnvelope;
-import org.haiku.haikudepotserver.api2.model.GetPkgScreenshotRequestEnvelope;
-import org.haiku.haikudepotserver.api2.model.GetPkgScreenshotResponseEnvelope;
-import org.haiku.haikudepotserver.api2.model.GetPkgScreenshotsRequestEnvelope;
-import org.haiku.haikudepotserver.api2.model.GetPkgScreenshotsResponseEnvelope;
-import org.haiku.haikudepotserver.api2.model.GetPkgVersionLocalizationsRequestEnvelope;
-import org.haiku.haikudepotserver.api2.model.GetPkgVersionLocalizationsResponseEnvelope;
-import org.haiku.haikudepotserver.api2.model.IncrementViewCounterRequestEnvelope;
-import org.haiku.haikudepotserver.api2.model.IncrementViewCounterResponseEnvelope;
-import org.haiku.haikudepotserver.api2.model.RemovePkgIconRequestEnvelope;
-import org.haiku.haikudepotserver.api2.model.RemovePkgIconResponseEnvelope;
-import org.haiku.haikudepotserver.api2.model.RemovePkgScreenshotRequestEnvelope;
-import org.haiku.haikudepotserver.api2.model.RemovePkgScreenshotResponseEnvelope;
-import org.haiku.haikudepotserver.api2.model.ReorderPkgScreenshotsRequestEnvelope;
-import org.haiku.haikudepotserver.api2.model.ReorderPkgScreenshotsResponseEnvelope;
-import org.haiku.haikudepotserver.api2.model.SearchPkgsRequestEnvelope;
-import org.haiku.haikudepotserver.api2.model.SearchPkgsResponseEnvelope;
-import org.haiku.haikudepotserver.api2.model.UpdatePkgCategoriesRequestEnvelope;
-import org.haiku.haikudepotserver.api2.model.UpdatePkgCategoriesResponseEnvelope;
-import org.haiku.haikudepotserver.api2.model.UpdatePkgChangelogRequestEnvelope;
-import org.haiku.haikudepotserver.api2.model.UpdatePkgChangelogResponseEnvelope;
-import org.haiku.haikudepotserver.api2.model.UpdatePkgLocalizationRequestEnvelope;
-import org.haiku.haikudepotserver.api2.model.UpdatePkgLocalizationResponseEnvelope;
-import org.haiku.haikudepotserver.api2.model.UpdatePkgProminenceRequestEnvelope;
-import org.haiku.haikudepotserver.api2.model.UpdatePkgProminenceResponseEnvelope;
-import org.haiku.haikudepotserver.api2.model.UpdatePkgVersionRequestEnvelope;
-import org.haiku.haikudepotserver.api2.model.UpdatePkgVersionResponseEnvelope;
+import org.haiku.haikudepotserver.api2.model.*;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 
@@ -127,6 +92,12 @@ public class PkgApiImpl extends AbstractApiImpl implements PkgApi {
         return ResponseEntity.ok(
                 new GetPkgResponseEnvelope()
                         .result(pkgApiService.getPkg(request)));
+    }
+
+    @Override
+    public ResponseEntity<UpdatePkgResponseEnvelope> updatePkg(UpdatePkgRequestEnvelope updatePkgRequestEnvelope) {
+        pkgApiService.updatePkg(updatePkgRequestEnvelope);
+        return ResponseEntity.ok(new UpdatePkgResponseEnvelope().result(Map.of()));
     }
 
     @Override

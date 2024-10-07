@@ -61,6 +61,7 @@ public class PkgDumpLocalizationExportJobRunnerIT extends AbstractIntegrationTes
 
             Pkg pkg999x86 = context.newObject(Pkg.class);
             pkg999x86.setActive(true);
+            pkg999x86.setIsNativeDesktop(false);
             pkg999x86.setName("pkg999_x86");
             pkg999x86.setPkgSupplement(pkg999.getPkgSupplement());
 

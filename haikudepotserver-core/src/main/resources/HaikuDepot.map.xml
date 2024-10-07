@@ -85,6 +85,7 @@
 		<db-attribute name="active" type="BOOLEAN" isMandatory="true"/>
 		<db-attribute name="create_timestamp" type="TIMESTAMP" isMandatory="true"/>
 		<db-attribute name="id" type="BIGINT" isPrimaryKey="true" isMandatory="true"/>
+		<db-attribute name="is_native_desktop" type="BOOLEAN" isMandatory="true"/>
 		<db-attribute name="modify_timestamp" type="TIMESTAMP" isMandatory="true"/>
 		<db-attribute name="name" type="VARCHAR" isMandatory="true" length="255"/>
 		<db-attribute name="pkg_supplement_id" type="BIGINT" isMandatory="true"/>
@@ -508,6 +509,7 @@
 	<obj-entity name="Pkg" className="org.haiku.haikudepotserver.dataobjects.Pkg" lock-type="optimistic" dbEntityName="pkg" superClassName="org.haiku.haikudepotserver.dataobjects.support.AbstractDataObject">
 		<obj-attribute name="active" type="java.lang.Boolean" lock="true" db-attribute-path="active"/>
 		<obj-attribute name="createTimestamp" type="java.sql.Timestamp" db-attribute-path="create_timestamp"/>
+		<obj-attribute name="isNativeDesktop" type="java.lang.Boolean" lock="true" db-attribute-path="is_native_desktop"/>
 		<obj-attribute name="modifyTimestamp" type="java.sql.Timestamp" db-attribute-path="modify_timestamp"/>
 		<obj-attribute name="name" type="java.lang.String" lock="true" db-attribute-path="name"/>
 	</obj-entity>

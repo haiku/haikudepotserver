@@ -126,6 +126,7 @@ public class IntegrationTestSupportService {
         Pkg pkg = context.newObject(Pkg.class);
         pkg.setActive(true);
         pkg.setName(name);
+        pkg.setIsNativeDesktop(false);
 
         PkgSupplement pkgSupplement1 = context.newObject(PkgSupplement.class);
         pkgSupplement1.setBasePkgName(name);

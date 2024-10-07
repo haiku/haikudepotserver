@@ -80,6 +80,28 @@ paths:
               schema:
                 $ref: "#/components/schemas/getPkgResponseEnvelope"
 
+  /__api/v2/pkg/update-pkg:
+    description: >
+      This method allows the pkg to be updated.
+    post:
+      tags:
+        - pkg
+      operationId: updatePkg
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/updatePkgRequestEnvelope"
+      responses:
+        200:
+          description: >
+            The result data.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/updatePkgResponseEnvelope"
+
   /__api/v2/pkg/get-pkg-icons:
     description: >
       Returns a list of meta-data regarding the icon data related to the pkg.  This does not contain the icon
@@ -579,9 +601,17 @@ components:
           type: string
     searchPkgsPkg:
       type: object
+      required:
+        - name
+        - isNativeDesktop
+        - modifyTimestamp
+        - hasAnyPkgIcons
       properties:
         name:
           type: string
+        isNativeDesktop:
+          type: boolean
+          description: "True if the package provides a native desktop application."
         modifyTimestamp:
           type: integer
           format: int64
@@ -650,9 +680,16 @@ components:
       type: object
       description: >
         This is the result model that comes back from the get packages API invocation.
+      required:
+        - name
+        - isNativeDesktop
+        - modifyTimestamp
       properties:
         name:
           type: string
+        isNativeDesktop:
+          type: boolean
+          description: "True if the package delivers a native desktop application"
         modifyTimestamp:
           type: integer
           format: int64
@@ -1130,3 +1167,31 @@ components:
       type: string
       enum:
         - ACTIVE
+
+    updatePkgRequestEnvelope:
+      type: object
+      required:
+        - name
+        - filter
+      properties:
+        isNativeDesktop:
+          type: boolean
+        name:
+          type: string
+        filter:
+          type: array
+          items:
+            $ref: "#/components/schemas/updatePkgFilter"
+    updatePkgResponseEnvelope:
+      type: object
+      properties:
+        result:
+          $ref: "#/components/schemas/updatePkgResult"
+        error:
+          $ref: "./error.yaml#/components/schemas/error"
+    updatePkgResult:
+      type: object
+    updatePkgFilter:
+      type: string
+      enum:
+        - IS_NATIVE_DESKTOP

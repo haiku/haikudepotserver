@@ -223,6 +223,7 @@ public class PkgApiService extends AbstractApiService {
 
         GetPkgResult result = new GetPkgResult()
                 .name(pkg.getName())
+                .isNativeDesktop(pkg.getIsNativeDesktop())
                 .modifyTimestamp(pkg.getModifyTimestamp().getTime())
                 .vanityLinkUrl(pkgService.createVanityLinkUrl(pkg))
                 .hasChangelog(pkg.getPkgSupplement().getPkgChangelog().isPresent())
@@ -255,6 +256,36 @@ public class PkgApiService extends AbstractApiService {
         }
 
         return result;
+    }
+
+    public void updatePkg(UpdatePkgRequestEnvelope request) {
+        Preconditions.checkArgument(null != request, "the request must be provided");
+        Preconditions.checkState(StringUtils.isNotBlank(request.getName()), "request pkg name is required");
+
+        final ObjectContext context = serverRuntime.newContext();
+
+        Pkg pkg = Pkg.getByName(context, request.getName());
+
+        for (UpdatePkgFilter filter : request.getFilter()) {
+            switch (filter) {
+                case IS_NATIVE_DESKTOP:
+                    if (!permissionEvaluator.hasPermission(
+                            SecurityContextHolder.getContext().getAuthentication(),
+                            pkg,
+                            Permission.PKG_EDITCATEGORIES)) {
+                        throw new AccessDeniedException("unable to update the package is native desktop");
+                    }
+                    pkg.setIsNativeDesktop(BooleanUtils.isTrue(request.getIsNativeDesktop()));
+                    break;
+                default:
+                    throw new IllegalStateException("unhandled filter [" + filter.name() + "]");
+            }
+        }
+
+        if (context.hasChanges()) {
+            context.commitChanges();
+            LOGGER.info("did update package [{}]", pkg.getName());
+        }
     }
 
     private GetPkgPkgVersion mapToResultPkgVersion(ObjectContext context, PkgVersion pkgVersion, NaturalLanguage naturalLanguage) {
@@ -292,6 +323,8 @@ public class PkgApiService extends AbstractApiService {
                                 .url(u.getUrl()))
                         .collect(Collectors.toList()));
     }
+
+
 
     private List<PkgVersion> derivePkgVersions(
             ObjectContext context,
@@ -693,6 +726,7 @@ public class PkgApiService extends AbstractApiService {
 
         return new SearchPkgsPkg()
                 .name(pkgVersion.getPkg().getName())
+                .isNativeDesktop(pkgVersion.getPkg().getIsNativeDesktop())
                 .modifyTimestamp(pkgVersion.getPkg().getModifyTimestamp().getTime())
                 .derivedRating(pkgUserRatingAggregateOptional
                         .map(_PkgUserRatingAggregate::getDerivedRating)

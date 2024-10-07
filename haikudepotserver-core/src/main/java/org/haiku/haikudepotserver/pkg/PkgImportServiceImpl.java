@@ -176,6 +176,7 @@ public class PkgImportServiceImpl implements PkgImportService {
         Pkg pkg = objectContext.newObject(Pkg.class);
         pkg.setName(name);
         pkg.setActive(Boolean.TRUE);
+        pkg.setIsNativeDesktop(false);
 
         String basePkgName = pkgServiceImpl
                 .tryGetMainPkgNameForSubordinatePkg(name)
