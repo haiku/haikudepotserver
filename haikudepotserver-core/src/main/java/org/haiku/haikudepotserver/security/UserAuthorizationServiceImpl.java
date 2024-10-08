@@ -191,6 +191,7 @@ public class UserAuthorizationServiceImpl implements UserAuthorizationService {
                         PKG_EDITCATEGORIES,
                         PKG_EDITPROMINENCE,
                         PKG_EDITCHANGELOG,
+                        PKG_EDITNATIVEDESKTOP,
                         PKG_EDITLOCALIZATION -> {
                     List<? extends AuthorizationPkgRule> rules = authenticatedUser.getAuthorizationPkgRules((Pkg) target);
                     if (rules
@@ -204,7 +205,6 @@ public class UserAuthorizationServiceImpl implements UserAuthorizationService {
         }
 
         // fall back to application-logic rules.
-
 
         switch (permission) {
             case AUTHORIZATION_CONFIGURE -> {
@@ -239,7 +239,14 @@ public class UserAuthorizationServiceImpl implements UserAuthorizationService {
             case PKG_CREATEUSERRATING -> {
                 return true;
             }
-            case PKG_EDITICON, PKG_EDITSCREENSHOT, PKG_EDITCATEGORIES, PKG_EDITLOCALIZATION, PKG_EDITCHANGELOG, PKG_EDITPROMINENCE, PKG_EDITVERSION -> {
+            case PKG_EDITICON,
+                 PKG_EDITSCREENSHOT,
+                 PKG_EDITCATEGORIES,
+                 PKG_EDITNATIVEDESKTOP,
+                 PKG_EDITLOCALIZATION,
+                 PKG_EDITCHANGELOG,
+                 PKG_EDITPROMINENCE,
+                 PKG_EDITVERSION -> {
                 return authenticatedUserIsRoot;
             }
             case USERRATING_REMOVE -> {

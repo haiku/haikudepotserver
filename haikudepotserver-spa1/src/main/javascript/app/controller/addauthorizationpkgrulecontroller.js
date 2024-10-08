@@ -30,6 +30,7 @@ angular.module('haikudepotserver').controller(
                     'pkg_editicon',
                     'pkg_editscreenshot',
                     'pkg_editcategories',
+                    'pkg_editnativedesktop',
                     'pkg_editprominence',
                     'pkg_editlocalization',
                     'pkg_editchangelog'

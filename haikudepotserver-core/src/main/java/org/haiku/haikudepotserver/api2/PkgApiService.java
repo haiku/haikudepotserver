@@ -272,7 +272,7 @@ public class PkgApiService extends AbstractApiService {
                     if (!permissionEvaluator.hasPermission(
                             SecurityContextHolder.getContext().getAuthentication(),
                             pkg,
-                            Permission.PKG_EDITCATEGORIES)) {
+                            Permission.PKG_EDITNATIVEDESKTOP)) {
                         throw new AccessDeniedException("unable to update the package is native desktop");
                     }
                     pkg.setIsNativeDesktop(BooleanUtils.isTrue(request.getIsNativeDesktop()));
