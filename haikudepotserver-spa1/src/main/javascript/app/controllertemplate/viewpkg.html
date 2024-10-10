@@ -293,6 +293,7 @@
                         <message key="viewPkg.disableIsNativeDesktop.title"></message>
                     </span>
                 </a>
+                <a href="" ng-click="goShowIsNativeDesktopHelp()"><img src="/__img/help.svg" img-downgrade=""></a>
             </li>
             <li>
                 <a
@@ -319,6 +320,10 @@
     </div>
 
 </div>
+
+<modal-container show="showIsNativeDesktopHelp" width="420" close="goHideIsNativeDesktopHelp()">
+    <p passive-content="isnativedesktophelp.html"></p>
+</modal-container>
 
 <spinner spin="shouldSpin()"></spinner>
 

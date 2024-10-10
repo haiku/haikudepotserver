@@ -38,6 +38,7 @@ angular.module('haikudepotserver').controller(
                 max : PAGESIZE_USERRATING,
                 total : undefined
             };
+            $scope.showIsNativeDesktopHelp = false;
 
             var hasPkgIcons = undefined;
 
@@ -451,6 +452,17 @@ angular.module('haikudepotserver').controller(
                         errorHandling.handleRemoteProcedureCallError(err);
                     }
                 );
+                return false;
+            }
+
+            $scope.goShowIsNativeDesktopHelp = function() {
+                $scope.showIsNativeDesktopHelp = true;
+                return false;
+            }
+
+            $scope.goHideIsNativeDesktopHelp = function() {
+                $scope.showIsNativeDesktopHelp = false;
+                return false;
             }
 
             $scope.goDeactivate = function () {
