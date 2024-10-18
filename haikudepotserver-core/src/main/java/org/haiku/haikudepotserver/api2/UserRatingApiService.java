@@ -50,7 +50,8 @@ public class UserRatingApiService extends AbstractApiService {
             ServerRuntime serverRuntime,
             PermissionEvaluator permissionEvaluator,
             JobService jobService,
-            UserRatingService userRatingService) {
+            UserRatingService userRatingService,
+            PkgService pkgService) {
         this.serverRuntime = Preconditions.checkNotNull(serverRuntime);
         this.permissionEvaluator = Preconditions.checkNotNull(permissionEvaluator);
         this.jobService = Preconditions.checkNotNull(jobService);

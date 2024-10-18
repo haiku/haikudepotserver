@@ -40,7 +40,7 @@
         <slf4j.version>2.0.7</slf4j.version>
         <jackson-databind.version>2.16.1</jackson-databind.version>
 
-        <guava.version>33.2.0-jre</guava.version>
+        <guava.version>33.3.1-jre</guava.version>
 
         <openapi-generator-maven-plugin.version>7.2.0</openapi-generator-maven-plugin.version>
         <springfox.version>3.0.0</springfox.version>
