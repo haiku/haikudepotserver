@@ -173,6 +173,28 @@ paths:
               schema:
                 $ref: "#/components/schemas/searchUserRatingsResponseEnvelope"
 
+  /__api/v2/user-rating/get-summary-by-pkg:
+    description: >
+      This API returns summary data for user ratings for a package.
+    post:
+      tags:
+        - user-rating
+      operationId: getSummaryByPkg
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/getSummaryByPkgRequestEnvelope"
+      responses:
+        200:
+          description: >
+            The summary data.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/getSummaryByPkgResponseEnvelope"
+
   /__api/v2/user-rating/remove-user-rating:
     description: >
       This method will delete a user rating so that it is no longer stored.
@@ -525,19 +547,6 @@ components:
           type: integer
           format: int64
           description: "The total count of user ratings disregarding the offset and limit."
-        totalsByRating:
-          type: array
-          description: "An array containing a mapping from the rating to the quantity of user ratings with that rating."
-          items:
-            type: object
-            properties:
-              rating:
-                type: integer
-                format: int32
-                description: "The rating assigned to the user-rating or may be -1 to indicate a total for those user-ratings with no rating value."
-              total:
-                type: integer
-                format: int64
         items:
           type: array
           items:
@@ -618,3 +627,43 @@ components:
           $ref: "./error.yaml#/components/schemas/error"
     removeUserRatingResult:
       type: object
+
+    getSummaryByPkgRequestEnvelope:
+      allOf:
+        - type: object
+          properties:
+            repositoryCode:
+              type: string
+            pkgName:
+              type: string
+    getSummaryByPkgResponseEnvelope:
+      type: object
+      properties:
+        result:
+          $ref: "#/components/schemas/getSummaryByPkgResult"
+        error:
+          $ref: "./error.yaml#/components/schemas/error"
+    getSummaryByPkgResult:
+      type: object
+      properties:
+        rating:
+          type: number
+          description: >
+            This is a floating point value that represents an average of the user ratings `rating` values.
+        sampleSize:
+          type: integer
+          format: int64
+          description: >
+            This is the quantity of ratings that are included in the average.
+        ratingDistribution:
+          type: array
+          items:
+            $ref: "#/components/schemas/getSummaryByPkgRatingDistribution"
+    getSummaryByPkgRatingDistribution:
+      type: object
+      properties:
+        rating:
+          type: integer
+        total:
+          type: integer
+          format: int64

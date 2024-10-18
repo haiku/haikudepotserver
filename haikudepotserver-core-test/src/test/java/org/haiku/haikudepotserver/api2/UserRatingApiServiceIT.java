@@ -6,6 +6,7 @@
 package org.haiku.haikudepotserver.api2;
 
 import com.google.common.base.Strings;
+import jakarta.annotation.Resource;
 import org.apache.cayenne.ObjectContext;
 import org.fest.assertions.Assertions;
 import org.haiku.haikudepotserver.AbstractIntegrationTest;
@@ -13,18 +14,14 @@ import org.haiku.haikudepotserver.api2.model.*;
 import org.haiku.haikudepotserver.config.TestConfig;
 import org.haiku.haikudepotserver.dataobjects.Architecture;
 import org.haiku.haikudepotserver.dataobjects.NaturalLanguage;
-import org.haiku.haikudepotserver.dataobjects.Pkg;
-import org.haiku.haikudepotserver.dataobjects.RepositorySource;
-import org.haiku.haikudepotserver.dataobjects.User;
-import org.haiku.haikudepotserver.dataobjects.UserRating;
 import org.haiku.haikudepotserver.dataobjects.UserRatingStability;
-import org.haiku.haikudepotserver.pkg.model.PkgService;
+import org.haiku.haikudepotserver.dataobjects.*;
 import org.haiku.haikudepotserver.naturallanguage.model.NaturalLanguageCoordinates;
+import org.haiku.haikudepotserver.pkg.model.PkgService;
 import org.haiku.haikudepotserver.support.SingleCollector;
 import org.junit.jupiter.api.Test;
 import org.springframework.test.context.ContextConfiguration;
 
-import jakarta.annotation.Resource;
 import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
@@ -234,29 +231,6 @@ public class UserRatingApiServiceIT extends AbstractIntegrationTest {
 
         // there are three user ratings, but one is disabled so we will not see that one.
         Assertions.assertThat(result.getItems()).hasSize(3);
-
-        {
-            List<SearchUserRatingsResultTotalsByRatingInner> totalsByRating  = result.getTotalsByRating();
-            Assertions.assertThat(totalsByRating).hasSize(3);
-            Assertions.assertThat(totalsByRating
-                    .stream()
-                    .filter(tbr -> tbr.getRating() == 3)
-                    .findFirst()
-                    .map(SearchUserRatingsResultTotalsByRatingInner::getTotal)
-                    .orElseThrow()).isEqualTo(1L);
-            Assertions.assertThat(totalsByRating
-                    .stream()
-                    .filter(tbr -> tbr.getRating() == 5)
-                    .findFirst()
-                    .map(SearchUserRatingsResultTotalsByRatingInner::getTotal)
-                    .orElseThrow()).isEqualTo(1L);
-            Assertions.assertThat(totalsByRating
-                    .stream()
-                    .filter(tbr -> tbr.getRating() == -1)
-                    .findFirst()
-                    .map(SearchUserRatingsResultTotalsByRatingInner::getTotal)
-                    .orElseThrow()).isEqualTo(1L);
-        }
 
         {
             SearchUserRatingsResultItemsInner userRating = result.getItems()

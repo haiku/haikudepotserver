@@ -8,19 +8,16 @@ package org.haiku.haikudepotserver.userrating;
 import com.google.common.base.Preconditions;
 import com.google.common.base.Strings;
 import com.google.common.collect.ComparisonChain;
-import com.nimbusds.jose.util.Pair;
-import org.apache.cayenne.DataRow;
 import org.apache.cayenne.ObjectContext;
 import org.apache.cayenne.configuration.server.ServerRuntime;
 import org.apache.cayenne.query.EJBQLQuery;
-import org.apache.cayenne.query.MappedSelect;
 import org.apache.cayenne.query.ObjectSelect;
 import org.apache.commons.lang3.StringUtils;
 import org.haiku.haikudepotserver.dataobjects.*;
-import org.haiku.haikudepotserver.dataobjects.auto._HaikuDepot;
 import org.haiku.haikudepotserver.support.StoppableConsumer;
 import org.haiku.haikudepotserver.support.VersionCoordinates;
 import org.haiku.haikudepotserver.support.VersionCoordinatesComparator;
+import org.haiku.haikudepotserver.userrating.model.DerivedUserRating;
 import org.haiku.haikudepotserver.userrating.model.UserRatingSearchSpecification;
 import org.haiku.haikudepotserver.userrating.model.UserRatingService;
 import org.slf4j.Logger;
@@ -29,7 +26,9 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 import java.util.*;
+import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
+import java.util.stream.IntStream;
 
 // Implementation note; the search query here is done using raw SQL as a Cayenne template. This is done in this
 // way because the aggregation logic is complex enough to need to be done in SQL and the search query needs to
@@ -39,27 +38,6 @@ import java.util.stream.Collectors;
 public class UserRatingServiceImpl implements UserRatingService {
 
     protected final static Logger LOGGER = LoggerFactory.getLogger(UserRatingServiceImpl.class);
-
-    /**
-     * <p>When an aggregate query runs over the ratings then some {@link UserRating} may have no rating value and
-     * in this case, im the returned aggregate, the rating used is this one.</p>
-     */
-    private final static int USER_RATING_NONE = -1;
-
-    private final static String KEY_CODE = "code";
-    private final static String KEY_TOTAL = "total";
-    private final static String KEY_COUNT = "count";
-    private final static String KEY_RATING = "rating";
-
-    /**
-     * <p>When the SQL query runs it can return a number of different response types. This enum controls the
-     * different forms that the query can return.</p>
-     */
-    private enum QueryResultType {
-        CODE,
-        TOTAL,
-        TOTALS_BY_RATING
-    }
 
     private final ServerRuntime serverRuntime;
     private final int userRatingDerivationVersionsBack;
@@ -96,13 +74,13 @@ public class UserRatingServiceImpl implements UserRatingService {
         Preconditions.checkNotNull(context);
 
         int count = 0;
-        MappedSelect<DataRow> mappedSelect = createQuery(search, QueryResultType.CODE).limit(100);
+        ObjectSelect<UserRating> select = createQuery(search).limit(100);
 
         // now loop through the user ratings.
 
         while(true) {
-            mappedSelect = mappedSelect.offset(count);
-            List<UserRating> userRatings = dataRowsWithCodeToUserRatings(context, mappedSelect.select(context));
+            select = select.offset(count);
+            List<UserRating> userRatings = select.select(context);
 
             if (userRatings.isEmpty()) {
                 return count;
@@ -121,43 +99,63 @@ public class UserRatingServiceImpl implements UserRatingService {
     // -------------------------------------
     // SEARCH
 
-    private MappedSelect<DataRow> createQuery(
-            UserRatingSearchSpecification search,
-            QueryResultType queryResultType) {
-        return MappedSelect.query(_HaikuDepot.SEARCH_USER_RATINGS_QUERYNAME, DataRow.class).params(Map.of(
-               "resultType", queryResultType,
-                "search", search
-        )).limit(search.getLimit()).offset(search.getOffset());
-    }
+    private ObjectSelect<UserRating> createQuery(UserRatingSearchSpecification search) {
+        ObjectSelect<UserRating> query = ObjectSelect.query(UserRating.class)
+                .where(UserRating.USER.dot(User.ACTIVE).isTrue());
 
-
-    private List<UserRating> dataRowsWithCodeToUserRatings(ObjectContext context, List<DataRow> dataRows) {
-        List<String> userRatingCodes = dataRows.stream().map(dr -> (String) dr.get(KEY_CODE)).toList();
-
-        if (userRatingCodes.isEmpty()) {
-            return List.of();
+        if (!search.getIncludeInactive()) {
+            query = query.and(UserRating.ACTIVE.isTrue());
         }
 
-        return ObjectSelect.query(UserRating.class).where(UserRating.CODE.in(userRatingCodes)).select(context);
+        if (null != search.getRepository()) {
+            query = query.and(
+                    UserRating.PKG_VERSION.dot(PkgVersion.REPOSITORY_SOURCE).dot(RepositorySource.REPOSITORY)
+                            .eq(search.getRepository()));
+        }
+
+        if (null != search.getRepositorySource()) {
+            query = query.and(
+                    UserRating.PKG_VERSION.dot(PkgVersion.REPOSITORY_SOURCE)
+                            .eq(search.getRepositorySource()));
+        }
+
+        if (null != search.getDaysSinceCreated()) {
+            java.sql.Timestamp nowDaysAgoTimestamp = new java.sql.Timestamp(
+                    System.currentTimeMillis() - TimeUnit.DAYS.toMillis(search.getDaysSinceCreated()));
+            query = query.and(UserRating.CREATE_TIMESTAMP.gt(nowDaysAgoTimestamp));
+        }
+
+        if (null != search.getPkg() && null == search.getPkgVersion()) {
+            query = query.and(UserRating.PKG_VERSION.dot(PkgVersion.PKG).eq(search.getPkg()));
+        }
+
+        if (null != search.getArchitecture() && null == search.getPkgVersion()) {
+            query = query.and(UserRating.PKG_VERSION.dot(PkgVersion.ARCHITECTURE).eq(search.getArchitecture()));
+        }
+
+        if (null != search.getPkgVersion()) {
+            query = query.and(UserRating.PKG_VERSION.eq(search.getPkgVersion()));
+        }
+
+        if (null != search.getPkgVersion()) {
+            query = query.and(UserRating.USER.eq(search.getUser()));
+        }
+
+        return query.limit(search.getLimit()).offset(search.getOffset());
     }
 
     @Override
     public List<UserRating> search(ObjectContext context, UserRatingSearchSpecification search) {
         Preconditions.checkNotNull(search);
         Preconditions.checkNotNull(context);
-        return dataRowsWithCodeToUserRatings(context, createQuery(search, QueryResultType.CODE).select(context));
+        return createQuery(search).select(context);
     }
 
-    @Override
-    public Map<Short, Long> totalsByRating(ObjectContext context, UserRatingSearchSpecification search) {
+    public long total(ObjectContext context, UserRatingSearchSpecification search) {
         Preconditions.checkNotNull(search);
         Preconditions.checkNotNull(context);
-        return createQuery(search, QueryResultType.TOTALS_BY_RATING).select(context)
-                .stream()
-                .map(dr -> Pair.of(((Number) dr.get(KEY_RATING)).shortValue(), ((Number) dr.get(KEY_COUNT)).longValue()))
-                .collect(Collectors.toMap(Pair::getLeft, Pair::getRight));
+        return createQuery(search).selectCount(context);
     }
-
 
     // ------------------------------
     // DERIVATION ALGORITHM
@@ -310,7 +308,7 @@ public class UserRatingServiceImpl implements UserRatingService {
                 .orElseThrow(() -> new IllegalStateException("user derivation job submitted, but no repository was found; " + repositoryCode));
 
         long beforeMillis = System.currentTimeMillis();
-        Optional<DerivedUserRating> rating = userRatingDerivation(context, pkg, repository);
+        Optional<DerivedUserRating> rating = tryCreateUserRatingDerivation(context, pkg, repository);
 
         LOGGER.info("calculated the user rating for {} in {} in {}ms", pkg, repository, System.currentTimeMillis() - beforeMillis);
 
@@ -322,8 +320,8 @@ public class UserRatingServiceImpl implements UserRatingService {
                     "user rating established for {} in {}; {} (sample {})",
                     pkg,
                     repository,
-                    rating.get().getRating(),
-                    rating.get().getSampleSize());
+                    rating.get().rating(),
+                    rating.get().sampleSize());
         }
 
         Optional<PkgUserRatingAggregate> pkgUserRatingAggregateOptional = pkg.getPkgUserRatingAggregate(repository);
@@ -337,8 +335,8 @@ public class UserRatingServiceImpl implements UserRatingService {
                 return value;
             });
 
-            pkgUserRatingAggregate.setDerivedRating(rating.get().getRating());
-            pkgUserRatingAggregate.setDerivedRatingSampleSize(rating.get().getSampleSize());
+            pkgUserRatingAggregate.setDerivedRating(rating.get().rating());
+            pkgUserRatingAggregate.setDerivedRatingSampleSize((int) rating.get().sampleSize());
             pkg.setModifyTimestamp();
         }
         else {
@@ -363,7 +361,11 @@ public class UserRatingServiceImpl implements UserRatingService {
      * user rating; in which case, an absent {@link Optional} is returned.</p>
      */
 
-    Optional<DerivedUserRating> userRatingDerivation(ObjectContext context, Pkg pkg, Repository repository) {
+    @Override
+    public Optional<DerivedUserRating> tryCreateUserRatingDerivation(
+            ObjectContext context,
+            Pkg pkg,
+            Repository repository) {
         Preconditions.checkNotNull(context);
         Preconditions.checkNotNull(pkg);
 
@@ -413,8 +415,12 @@ public class UserRatingServiceImpl implements UserRatingService {
 
             List<Short> ratings = new ArrayList<>();
             List<String> userNicknames = getUserNicknamesWhoHaveRatedPkgVersions(context, pkgVersions);
+            Map<Short, Long> ratingDistribution = new HashMap<>();
 
-            for(String nickname : userNicknames) {
+            // write zero values which can be incremented in the algorithm.
+            IntStream.range(0, 6).forEach(i -> ratingDistribution.put((short) i, 0L));
+
+            for (String nickname : userNicknames) {
                 User user = User.getByNickname(context, nickname);
 
                 List<UserRating> userRatingsForUser = new ArrayList<>(UserRating.getByUserAndPkgVersions(
@@ -432,11 +438,13 @@ public class UserRatingServiceImpl implements UserRatingService {
                                         o2.getPkgVersion().getArchitecture().getCode())
                                 .result());
 
-                if(!userRatingsForUser.isEmpty()) {
-                    UserRating latestUserRatingForUser = userRatingsForUser.get(userRatingsForUser.size()-1);
+                if (!userRatingsForUser.isEmpty()) {
+                    UserRating latestUserRatingForUser = userRatingsForUser.getLast();
 
-                    if(null!=latestUserRatingForUser.getRating()) {
-                        ratings.add(latestUserRatingForUser.getRating());
+                    if (null != latestUserRatingForUser.getRating()) {
+                        Short rating = latestUserRatingForUser.getRating();
+                        ratings.add(rating);
+                        ratingDistribution.put(rating, ratingDistribution.get(rating) + 1);
                     }
                 }
 
@@ -444,10 +452,16 @@ public class UserRatingServiceImpl implements UserRatingService {
 
             // now generate an average from those ratings found.
 
-            if(ratings.size() >= userRatingsDerivationMinRatings) {
+            if (ratings.size() >= userRatingsDerivationMinRatings) {
+
+                ratings.forEach(rating -> ratingDistribution.put(
+                        rating,
+                        ratingDistribution.getOrDefault(rating, 0L)));
+
                 return Optional.of(new DerivedUserRating(
-                    averageAsFloat(ratings),
-                    ratings.size()));
+                        averageAsFloat(ratings),
+                        ratings.size(),
+                        ratingDistribution));
             }
         }
 
@@ -463,30 +477,6 @@ public class UserRatingServiceImpl implements UserRatingService {
         context.commitChanges();
 
         LOGGER.info("did delete user rating [{}]", userRatingCode);
-    }
-
-
-    /**
-     * <P>This is used as a model class / return value for the derivation of the user rating.</P>
-     */
-
-    static class DerivedUserRating {
-
-        private final float rating;
-        private final int sampleSize;
-
-        DerivedUserRating(float rating, int sampleSize) {
-            this.rating = rating;
-            this.sampleSize = sampleSize;
-        }
-
-        public float getRating() {
-            return rating;
-        }
-
-        int getSampleSize() {
-            return sampleSize;
-        }
     }
 
 }

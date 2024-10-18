@@ -31,6 +31,7 @@ import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Component;
 
+import java.math.BigDecimal;
 import java.util.*;
 import java.util.stream.Stream;
 
@@ -49,8 +50,7 @@ public class UserRatingApiService extends AbstractApiService {
             ServerRuntime serverRuntime,
             PermissionEvaluator permissionEvaluator,
             JobService jobService,
-            UserRatingService userRatingService,
-            PkgService pkgService) {
+            UserRatingService userRatingService) {
         this.serverRuntime = Preconditions.checkNotNull(serverRuntime);
         this.permissionEvaluator = Preconditions.checkNotNull(permissionEvaluator);
         this.jobService = Preconditions.checkNotNull(jobService);
@@ -80,7 +80,7 @@ public class UserRatingApiService extends AbstractApiService {
         // check to see that the user has not tried to create a user rating with essentially nothing
         // in it.
 
-        if(
+        if (
                 Strings.isNullOrEmpty(request.getComment())
                         && null == request.getUserRatingStabilityCode()
                         && null == request.getRating()) {
@@ -111,10 +111,10 @@ public class UserRatingApiService extends AbstractApiService {
 
         Optional<UserRatingStability> userRatingStabilityOptional = Optional.empty();
 
-        if(null!=request.getUserRatingStabilityCode()) {
+        if (null != request.getUserRatingStabilityCode()) {
             userRatingStabilityOptional = UserRatingStability.tryGetByCode(context, request.getUserRatingStabilityCode());
 
-            if(userRatingStabilityOptional.isEmpty()) {
+            if (userRatingStabilityOptional.isEmpty()) {
                 throw new ObjectNotFoundException(
                         UserRatingStability.class.getSimpleName(),
                         request.getUserRatingStabilityCode());
@@ -125,15 +125,15 @@ public class UserRatingApiService extends AbstractApiService {
 
         Optional<User> authenticatedUserOptional = tryObtainAuthenticatedUser(context);
 
-        if(authenticatedUserOptional.isEmpty()) {
+        if (authenticatedUserOptional.isEmpty()) {
             throw new AccessDeniedException("only authenticated users are able to add user ratings");
         }
 
-        if(!authenticatedUserOptional.get().getNickname().equals(user.getNickname())) {
+        if (!authenticatedUserOptional.get().getNickname().equals(user.getNickname())) {
             throw new AccessDeniedException("it is not allowed to add a user rating for another user");
         }
 
-        if(!permissionEvaluator.hasPermission(
+        if (!permissionEvaluator.hasPermission(
                 SecurityContextHolder.getContext().getAuthentication(),
                 pkg, Permission.PKG_CREATEUSERRATING)) {
             throw new AccessDeniedException("unable to create user ratings for [" + pkg + "]");
@@ -158,19 +158,19 @@ public class UserRatingApiService extends AbstractApiService {
             default -> throw new IllegalStateException("unsupported pkg version type; " + request.getPkgVersionType());
         };
 
-        if(pkgVersionOptional.isEmpty()) {
-            throw new ObjectNotFoundException(PkgVersion.class.getSimpleName(), pkg.getName()+"_"+request.getPkgVersionType());
+        if (pkgVersionOptional.isEmpty()) {
+            throw new ObjectNotFoundException(PkgVersion.class.getSimpleName(), pkg.getName() + "_" + request.getPkgVersionType());
         }
 
-        if(!pkgVersionOptional.get().getIsLatest()) {
+        if (!pkgVersionOptional.get().getIsLatest()) {
             throw new IllegalStateException("it is not possible to add a user rating to a version other than the latest version.");
         }
 
         List<UserRating> legacyUserRatings = UserRating.findByUserAndPkg(context, user, pkg);
 
-        for(UserRating legacyUserRating : legacyUserRatings) {
-            if(legacyUserRating.getPkgVersion().equals(pkgVersionOptional.get())) {
-                throw new IllegalStateException("an existing user rating '"+legacyUserRating.getCode()+"' already exists for this package version; it is not possible to add another one");
+        for (UserRating legacyUserRating : legacyUserRatings) {
+            if (legacyUserRating.getPkgVersion().equals(pkgVersionOptional.get())) {
+                throw new IllegalStateException("an existing user rating '" + legacyUserRating.getCode() + "' already exists for this package version; it is not possible to add another one");
             }
         }
 
@@ -198,7 +198,7 @@ public class UserRatingApiService extends AbstractApiService {
 
         final ObjectContext context = serverRuntime.newContext();
 
-        if(!permissionEvaluator.hasPermission(
+        if (!permissionEvaluator.hasPermission(
                 SecurityContextHolder.getContext().getAuthentication(),
                 null,
                 Permission.USERRATING_DERIVEANDSTOREFORPKG)) {
@@ -206,7 +206,7 @@ public class UserRatingApiService extends AbstractApiService {
         }
 
         Pkg.tryGetByName(context, request.getPkgName())
-            .orElseThrow(() -> new ObjectNotFoundException(Pkg.class.getSimpleName(), request.getPkgName()));
+                .orElseThrow(() -> new ObjectNotFoundException(Pkg.class.getSimpleName(), request.getPkgName()));
 
         UserRatingDerivationJobSpecification specification = new UserRatingDerivationJobSpecification();
         specification.setPkgName(request.getPkgName());
@@ -214,7 +214,7 @@ public class UserRatingApiService extends AbstractApiService {
     }
 
     public void deriveAndStoreUserRatingsForAllPkgs() {
-        if(!permissionEvaluator.hasPermission(
+        if (!permissionEvaluator.hasPermission(
                 SecurityContextHolder.getContext().getAuthentication(),
                 null,
                 Permission.USERRATING_DERIVEANDSTOREFORPKG)) {
@@ -267,7 +267,7 @@ public class UserRatingApiService extends AbstractApiService {
         Preconditions.checkState(!Strings.isNullOrEmpty(request.getPkgName()), "the package name must be supplied");
         Preconditions.checkState(!Strings.isNullOrEmpty(request.getUserNickname()), "the user nickname must be supplied");
         Preconditions.checkState(!Strings.isNullOrEmpty(request.getPkgVersionArchitectureCode()), "the pkg version architecture code must be supplied");
-        Preconditions.checkState(!Strings.isNullOrEmpty(request.getPkgVersionMajor()),"the package version major code must be supplied");
+        Preconditions.checkState(!Strings.isNullOrEmpty(request.getPkgVersionMajor()), "the package version major code must be supplied");
 
         // temporary support the `repositoryCode` for the desktop client.
         Preconditions.checkArgument(
@@ -307,7 +307,7 @@ public class UserRatingApiService extends AbstractApiService {
         Optional<PkgVersion> pkgVersionOptional = PkgVersion.tryGetForPkg(
                 context, pkg, repositorySource, architecture, versionCoordinates);
 
-        if(pkgVersionOptional.isEmpty() || !pkgVersionOptional.get().getActive()) {
+        if (pkgVersionOptional.isEmpty() || !pkgVersionOptional.get().getActive()) {
             throw new ObjectNotFoundException(
                     PkgVersion.class.getSimpleName(),
                     request.getPkgName() + "@" + versionCoordinates);
@@ -436,11 +436,10 @@ public class UserRatingApiService extends AbstractApiService {
                                     request.getPkgVersionPreRelease(),
                                     request.getPkgVersionRevision()))
                     .filter(_PkgVersion::getActive)
-                    .orElseThrow(() -> new ObjectNotFoundException(PkgVersion.class.getSimpleName(),""));
+                    .orElseThrow(() -> new ObjectNotFoundException(PkgVersion.class.getSimpleName(), ""));
 
             searchSpecification.setPkgVersion(pkgVersion);
-        }
-        else {
+        } else {
             searchSpecification.setArchitecture(architecture);
             searchSpecification.setPkg(pkg);
         }
@@ -452,8 +451,7 @@ public class UserRatingApiService extends AbstractApiService {
         searchSpecification.setLimit(request.getLimit());
         searchSpecification.setOffset(request.getOffset());
 
-        Map<Short, Long> totalsByRating = userRatingService.totalsByRating(context, searchSpecification);
-        long total = totalsByRating.values().stream().mapToLong(l -> l).sum();
+        long total = userRatingService.total(context, searchSpecification);
         List<SearchUserRatingsResultItemsInner> items = List.of();
 
         if (total > 0) {
@@ -487,18 +485,7 @@ public class UserRatingApiService extends AbstractApiService {
 
         return new SearchUserRatingsResult()
                 .total(total)
-                .totalsByRating(
-                        totalsByRating.entrySet().stream()
-                                .map(e -> toApiResponseTotalsByRatingInner(e.getKey().intValue(), e.getValue()))
-                                .sorted(Comparator.comparingInt(SearchUserRatingsResultTotalsByRatingInner::getRating))
-                                .toList())
                 .items(items);
-    }
-
-    private SearchUserRatingsResultTotalsByRatingInner toApiResponseTotalsByRatingInner(int rating, long total) {
-        return new SearchUserRatingsResultTotalsByRatingInner()
-                .rating(rating)
-                .total(total);
     }
 
     public void updateUserRating(UpdateUserRatingRequestEnvelope request) {
@@ -547,6 +534,30 @@ public class UserRatingApiService extends AbstractApiService {
 
         context.commitChanges();
 
+    }
+
+    public GetSummaryByPkgResult getSummaryByPkg(GetSummaryByPkgRequestEnvelope request) {
+        Preconditions.checkNotNull(request);
+        Preconditions.checkState(!Strings.isNullOrEmpty(request.getPkgName()));
+        Preconditions.checkState(!Strings.isNullOrEmpty(request.getRepositoryCode()));
+
+        final ObjectContext context = serverRuntime.newContext();
+
+        Pkg pkg = Pkg.getByName(context, request.getPkgName());
+        Repository repository = Repository.getByCode(context, request.getRepositoryCode());
+
+
+        return userRatingService.tryCreateUserRatingDerivation(context, pkg, repository)
+                .map(dur -> new GetSummaryByPkgResult()
+                        .rating(BigDecimal.valueOf(dur.rating()))
+                        .sampleSize(dur.sampleSize())
+                        .ratingDistribution(dur.ratingDistribution().entrySet().stream()
+                                .map(e -> new GetSummaryByPkgRatingDistribution()
+                                        .rating(e.getKey().intValue())
+                                        .total(e.getValue()))
+                                .toList())
+                )
+                .orElse(new GetSummaryByPkgResult().sampleSize(0L));
     }
 
 }

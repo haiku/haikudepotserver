@@ -23,8 +23,6 @@ public class _HaikuDepot {
     public static final String PKG_NAMES_FOR_REPOSITORY_SOURCE_QUERYNAME = "PkgNamesForRepositorySource";
 
     public static final String SEARCH_PKG_VERSIONS_QUERYNAME = "SearchPkgVersions";
-
-    public static final String SEARCH_USER_RATINGS_QUERYNAME = "SearchUserRatings";
     public QueryResult<?> performPkgVersionLocalizationResolution(ObjectContext context, Map<String, ?> parameters) {
         MappedExec query = MappedExec.query(PKG_VERSION_LOCALIZATION_RESOLUTION_QUERYNAME).params(parameters);
         return query.execute(context);
@@ -47,11 +45,6 @@ public class _HaikuDepot {
 
     public QueryResult<?> performSearchPkgVersions(ObjectContext context, Map<String, ?> parameters) {
         MappedExec query = MappedExec.query(SEARCH_PKG_VERSIONS_QUERYNAME).params(parameters);
-        return query.execute(context);
-    }
-
-    public QueryResult<?> performSearchUserRatings(ObjectContext context, Map<String, ?> parameters) {
-        MappedExec query = MappedExec.query(SEARCH_USER_RATINGS_QUERYNAME).params(parameters);
         return query.execute(context);
     }
 

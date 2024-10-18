@@ -21,6 +21,7 @@ import org.haiku.haikudepotserver.dataobjects.User;
 import org.haiku.haikudepotserver.dataobjects.UserRating;
 import org.haiku.haikudepotserver.pkg.model.PkgService;
 import org.haiku.haikudepotserver.naturallanguage.model.NaturalLanguageCoordinates;
+import org.haiku.haikudepotserver.userrating.model.DerivedUserRating;
 import org.junit.jupiter.api.Test;
 import org.springframework.test.context.ContextConfiguration;
 
@@ -131,15 +132,15 @@ public class UserRatingOrchestrationServiceIT extends AbstractIntegrationTest {
         context.commitChanges();
 
         // ----------------------------
-        Optional<UserRatingServiceImpl.DerivedUserRating> result = userRatingServiceImpl.userRatingDerivation(
+        Optional<DerivedUserRating> result = userRatingServiceImpl.tryCreateUserRatingDerivation(
                 context,
                 userRatingData.pkg,
                 Repository.tryGetByCode(context, "testrepo").get());
         // ----------------------------
 
         Assertions.assertThat(result.isPresent()).isTrue();
-        Assertions.assertThat(result.get().getRating()).isEqualTo(1.75f);
-        Assertions.assertThat(result.get().getSampleSize()).isEqualTo(4);
+        Assertions.assertThat(result.get().rating()).isEqualTo(1.75f);
+        Assertions.assertThat(result.get().sampleSize()).isEqualTo(4);
 
     }
 

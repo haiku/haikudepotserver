@@ -4,21 +4,7 @@
  */
 package org.haiku.haikudepotserver.api2;
 
-import org.haiku.haikudepotserver.api2.model.CreateUserRatingRequestEnvelope;
-import org.haiku.haikudepotserver.api2.model.CreateUserRatingResponseEnvelope;
-import org.haiku.haikudepotserver.api2.model.DeriveAndStoreUserRatingForPkgRequestEnvelope;
-import org.haiku.haikudepotserver.api2.model.DeriveAndStoreUserRatingForPkgResponseEnvelope;
-import org.haiku.haikudepotserver.api2.model.DeriveAndStoreUserRatingsForAllPkgsResponseEnvelope;
-import org.haiku.haikudepotserver.api2.model.GetUserRatingByUserAndPkgVersionRequestEnvelope;
-import org.haiku.haikudepotserver.api2.model.GetUserRatingByUserAndPkgVersionResponseEnvelope;
-import org.haiku.haikudepotserver.api2.model.GetUserRatingRequestEnvelope;
-import org.haiku.haikudepotserver.api2.model.GetUserRatingResponseEnvelope;
-import org.haiku.haikudepotserver.api2.model.RemoveUserRatingRequestEnvelope;
-import org.haiku.haikudepotserver.api2.model.RemoveUserRatingResponseEnvelope;
-import org.haiku.haikudepotserver.api2.model.SearchUserRatingsRequestEnvelope;
-import org.haiku.haikudepotserver.api2.model.SearchUserRatingsResponseEnvelope;
-import org.haiku.haikudepotserver.api2.model.UpdateUserRatingRequestEnvelope;
-import org.haiku.haikudepotserver.api2.model.UpdateUserRatingResponseEnvelope;
+import org.haiku.haikudepotserver.api2.model.*;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 
@@ -84,5 +70,12 @@ public class UserRatingApiImpl extends AbstractApiImpl implements UserRatingApi 
     public ResponseEntity<RemoveUserRatingResponseEnvelope> removeUserRating(RemoveUserRatingRequestEnvelope removeUserRatingRequestEnvelope) {
         userRatingApiService.removeUserRating(removeUserRatingRequestEnvelope);
         return ResponseEntity.ok(new RemoveUserRatingResponseEnvelope().result(Map.of()));
+    }
+
+    @Override
+    public ResponseEntity<GetSummaryByPkgResponseEnvelope> getSummaryByPkg(GetSummaryByPkgRequestEnvelope request) {
+        return ResponseEntity.ok(
+                new GetSummaryByPkgResponseEnvelope()
+                        .result(userRatingApiService.getSummaryByPkg(request)));
     }
 }
