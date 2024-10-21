@@ -89,6 +89,11 @@
                         parameters="[pkg.versions[0].architectureCode,pkg.versions[0].repository.name]"></message>)
                 </span>
             </dd>
+            <dt><message key="viewPkg.isNativeDesktop.title"></message></dt>
+            <dd>
+                <boolean-indicator state="!!pkg.isNativeDesktop"></boolean-indicator>
+                <a href="" ng-click="goShowIsNativeDesktopHelp()"><img src="/__img/help.svg" img-downgrade=""></a>
+            </dd>
             <dt ng-show="undefined!=pkg.versions[0].payloadLength"><message key="viewPkg.payloadLength.title"></message></dt>
             <dd ng-show="undefined!=pkg.versions[0].payloadLength">
                 {{pkg.versions[0].payloadLength|dataLength}}
