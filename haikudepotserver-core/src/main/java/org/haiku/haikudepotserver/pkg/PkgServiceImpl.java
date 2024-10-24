@@ -16,11 +16,7 @@ import org.apache.cayenne.ObjectContext;
 import org.apache.cayenne.ObjectId;
 import org.apache.cayenne.access.OptimisticLockException;
 import org.apache.cayenne.configuration.server.ServerRuntime;
-import org.apache.cayenne.query.EJBQLQuery;
-import org.apache.cayenne.query.ObjectIdQuery;
-import org.apache.cayenne.query.ObjectSelect;
-import org.apache.cayenne.query.Query;
-import org.apache.cayenne.query.SQLTemplate;
+import org.apache.cayenne.query.*;
 import org.apache.commons.lang3.ObjectUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.haiku.haikudepotserver.dataobjects.*;
@@ -29,11 +25,7 @@ import org.haiku.haikudepotserver.pkg.model.PkgSearchSpecification;
 import org.haiku.haikudepotserver.pkg.model.PkgService;
 import org.haiku.haikudepotserver.pkg.model.PkgSupplementModificationAgent;
 import org.haiku.haikudepotserver.pkg.model.PkgSupplementModificationService;
-import org.haiku.haikudepotserver.support.DateTimeHelper;
-import org.haiku.haikudepotserver.support.ExposureType;
-import org.haiku.haikudepotserver.support.SingleCollector;
-import org.haiku.haikudepotserver.support.StoppableConsumer;
-import org.haiku.haikudepotserver.support.VersionCoordinatesComparator;
+import org.haiku.haikudepotserver.support.*;
 import org.haiku.haikudepotserver.support.cayenne.ExpressionHelper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -41,7 +33,6 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.web.util.UriComponentsBuilder;
 
-import java.io.IOException;
 import java.net.URL;
 import java.util.*;
 import java.util.concurrent.TimeUnit;
@@ -55,6 +46,8 @@ import java.util.stream.Collectors;
 public class PkgServiceImpl implements PkgService {
 
     protected static Logger LOGGER = LoggerFactory.getLogger(PkgServiceImpl.class);
+
+    private final static int BATCH_SIZE = 200;
 
     private final static List<String> SUFFIXES_SUBORDINATE_PKG_NAMES = ImmutableList.of(
             SUFFIX_PKG_DEVELOPMENT,
@@ -266,24 +259,6 @@ public class PkgServiceImpl implements PkgService {
     // ------------------------------
     // EACH PACKAGE
 
-    private void appendEjbqlAllPkgsWhere(
-            Appendable ejbql,
-            List<Object> parameterList,
-            ObjectContext context,
-            boolean allowSourceOnly) throws IOException {
-
-        ejbql.append("p.active=true\n");
-
-        if(!allowSourceOnly) {
-            ejbql.append("AND EXISTS(");
-            ejbql.append("SELECT pv FROM PkgVersion pv WHERE pv.pkg=p AND pv.active=true AND pv.architecture <> ?");
-            parameterList.add(Architecture.getByCode(context,Architecture.CODE_SOURCE));
-            ejbql.append(Integer.toString(parameterList.size()));
-            ejbql.append(")");
-        }
-
-    }
-
     /**
      * <p>This method will provide a total of the packages.</p>
      */
@@ -291,40 +266,21 @@ public class PkgServiceImpl implements PkgService {
     @Override
     public long totalPkg(
             ObjectContext context,
-            boolean allowSourceOnly) {
+            boolean includeDevelopment) {
         Preconditions.checkArgument(null!=context, "the object context must be provided");
-
-        StringBuilder ejbql = new StringBuilder();
-        List<Object> parameterList = new ArrayList<>();
-
-        ejbql.append("SELECT COUNT(p) FROM Pkg p WHERE \n");
-
-        try {
-            appendEjbqlAllPkgsWhere(ejbql, parameterList, context, allowSourceOnly);
-        }
-        catch(IOException ioe) {
-            throw new IllegalStateException("it was not possible to render the ejbql to get the packages", ioe);
-        }
-
-        EJBQLQuery query = new EJBQLQuery(ejbql.toString());
-
-        for(int i=0;i<parameterList.size();i++) {
-            query.setParameter(i+1, parameterList.get(i));
-        }
-
-        List<Object> result = (List<Object>) context.performQuery(query);
-
-        if(1==result.size()) {
-            return ((Number) result.getFirst()).longValue();
-        }
-
-        throw new IllegalStateException("expecting one result with the total record count");
+        List<DataRow> dataRows = MappedSelect.query(_HaikuDepot.ALL_ACTIVE_PKG_NAMES_QUERYNAME, DataRow.class)
+                .param("isTotal", true)
+                .param("includeDevelopment", includeDevelopment)
+                .select(context);
+        return dataRows.stream()
+                .map(dr -> (Long) dr.get("total"))
+                .collect(SingleCollector.single());
     }
 
     /**
      * <p>This will be called for each package in the system.</p>
      * @param c is the callback to invoke.
-     * @param allowSourceOnly when true implies that a package can be processed which only has versions that are for
+     * @param includeDevelopment when true implies that a package can be processed which only has versions that are for
      *                        the source architecture.
      * @return the quantity of packages processed.
      */
@@ -332,54 +288,44 @@ public class PkgServiceImpl implements PkgService {
     @Override
     public long eachPkg(
             ObjectContext context,
-            boolean allowSourceOnly,
+            boolean includeDevelopment,
             StoppableConsumer<Pkg> c) {
         Preconditions.checkArgument(null!=c, "the callback should be provided to run for each package");
         Preconditions.checkArgument(null!=context, "the object context must be provided");
 
         int offset = 0;
 
-        StringBuilder ejbql = new StringBuilder();
-        List<Object> parameterList = new ArrayList<>();
+        Preconditions.checkArgument(null!=context, "the object context must be provided");
+        MappedSelect<DataRow> query = MappedSelect.query(_HaikuDepot.ALL_ACTIVE_PKG_NAMES_QUERYNAME, DataRow.class)
+                .param("isTotal", false)
+                .param("includeDevelopment", includeDevelopment)
+                .limit(BATCH_SIZE);
 
-        ejbql.append("SELECT p FROM Pkg p WHERE \n");
+        while (true) {
 
-        try {
-            appendEjbqlAllPkgsWhere(ejbql, parameterList, context, allowSourceOnly);
-        }
-        catch(IOException ioe) {
-            throw new IllegalStateException("it was not possible to render the ejbql to get the packages", ioe);
-        }
+            var constrainedQuery = query.offset(offset);
+            List<String> pkgNames = constrainedQuery.select(context)
+                    .stream()
+                    .map(dr -> (String) dr.get("name"))
+                    .toList();
 
-        ejbql.append("\nORDER BY p.name ASC");
-
-        EJBQLQuery query = new EJBQLQuery(ejbql.toString());
-
-        for(int i=0;i<parameterList.size();i++) {
-            query.setParameter(i+1, parameterList.get(i));
-        }
-
-        query.setFetchLimit(100);
-
-        while(true) {
-
-            query.setFetchOffset(offset);
-
-            List<Pkg> pkgs = (List<Pkg>) context.performQuery(query);
-
-            if(pkgs.isEmpty()) {
-                return offset; // stop
+            if (pkgNames.isEmpty()) {
+                return offset;
             }
-            else {
-                for(Pkg pkg : pkgs) {
 
-                    offset++;
+            List<Pkg> pkgs = ObjectSelect.query(Pkg.class)
+                    .where(Pkg.NAME.in(pkgNames))
+                    .orderBy(Pkg.NAME.asc())
+                    .select(context);
 
-                    if(!c.accept(pkg)) {
-                        return offset;
-                    }
+            for (Pkg pkg : pkgs) {
+                if (!c.accept(pkg)) {
+                    return offset;
                 }
+                offset++;
             }
+
+            offset += pkgs.size();
         }
     }
 

@@ -14,6 +14,8 @@ import org.apache.cayenne.query.MappedExec;
  */
 public class _HaikuDepot {
 
+    public static final String ALL_ACTIVE_PKG_NAMES_QUERYNAME = "AllActivePkgNames";
+
     public static final String PKG_VERSION_LOCALIZATION_RESOLUTION_QUERYNAME = "PkgVersionLocalizationResolution";
 
     public static final String ALL_PKG_ICONS_QUERYNAME = "AllPkgIcons";
@@ -23,6 +25,11 @@ public class _HaikuDepot {
     public static final String PKG_NAMES_FOR_REPOSITORY_SOURCE_QUERYNAME = "PkgNamesForRepositorySource";
 
     public static final String SEARCH_PKG_VERSIONS_QUERYNAME = "SearchPkgVersions";
+    public QueryResult<?> performAllActivePkgNames(ObjectContext context, Map<String, ?> parameters) {
+        MappedExec query = MappedExec.query(ALL_ACTIVE_PKG_NAMES_QUERYNAME).params(parameters);
+        return query.execute(context);
+    }
+
     public QueryResult<?> performPkgVersionLocalizationResolution(ObjectContext context, Map<String, ?> parameters) {
         MappedExec query = MappedExec.query(PKG_VERSION_LOCALIZATION_RESOLUTION_QUERYNAME).params(parameters);
         return query.execute(context);

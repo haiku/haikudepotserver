@@ -9,20 +9,18 @@ import com.google.common.net.MediaType;
 import com.opencsv.CSVWriter;
 import org.apache.cayenne.ObjectContext;
 import org.apache.cayenne.configuration.server.ServerRuntime;
-import org.apache.cayenne.query.ObjectSelect;
-import org.haiku.haikudepotserver.dataobjects.Pkg;
 import org.haiku.haikudepotserver.job.AbstractJobRunner;
 import org.haiku.haikudepotserver.job.model.JobDataEncoding;
 import org.haiku.haikudepotserver.job.model.JobDataWithByteSink;
 import org.haiku.haikudepotserver.job.model.JobRunnerException;
 import org.haiku.haikudepotserver.job.model.JobService;
+import org.haiku.haikudepotserver.pkg.PkgServiceImpl;
 import org.haiku.haikudepotserver.pkg.model.PkgNativeDesktopExportSpreadsheetJobSpecification;
 import org.springframework.stereotype.Component;
 
 import java.io.IOException;
 import java.io.OutputStream;
 import java.io.OutputStreamWriter;
-import java.util.List;
 
 @Component
 public class PkgNativeDesktopExportSpreadsheetJobRunner
@@ -30,15 +28,16 @@ public class PkgNativeDesktopExportSpreadsheetJobRunner
 
     private static final String COLUMN_PKG_NAME = "pkg_name";
     private static final String COLUMN_IS_NATIVE_DESKTOP = "is_native_desktop";
-
-    private static final int BATCH_SIZE = 100;
+    private static final String COLUMN_HAS_ICON = "has_icon";
 
     private final ServerRuntime serverRuntime;
+    private final PkgServiceImpl pkgServiceImpl;
 
     public PkgNativeDesktopExportSpreadsheetJobRunner(
-            ServerRuntime serverRuntime) {
+            ServerRuntime serverRuntime, PkgServiceImpl pkgServiceImpl) {
         super();
         this.serverRuntime = serverRuntime;
+        this.pkgServiceImpl = pkgServiceImpl;
     }
 
     @Override
@@ -46,9 +45,7 @@ public class PkgNativeDesktopExportSpreadsheetJobRunner
             JobService jobService,
             PkgNativeDesktopExportSpreadsheetJobSpecification specification) throws JobRunnerException {
 
-        ObjectSelect<Pkg> query = ObjectSelect.query(Pkg.class).where(Pkg.ACTIVE.isTrue()).orderBy(Pkg.NAME.asc()).limit(BATCH_SIZE);
         ObjectContext context = serverRuntime.newContext();
-        int count = 0;
 
         try {
             // this will register the outbound data against the job.
@@ -64,24 +61,18 @@ public class PkgNativeDesktopExportSpreadsheetJobRunner
                     CSVWriter writer = new CSVWriter(outputStreamWriter)
             ) {
 
-                writer.writeNext(new String[] { COLUMN_PKG_NAME, COLUMN_IS_NATIVE_DESKTOP });
+                writer.writeNext(new String[] { COLUMN_PKG_NAME, COLUMN_IS_NATIVE_DESKTOP, COLUMN_HAS_ICON });
 
-                while (true) {
-                    List<Pkg> pkgs = query.offset(count).select(context);
+                pkgServiceImpl.eachPkg(context, false, (pkg) -> {
+                    writer.writeNext(new String[] {
+                            pkg.getName(),
+                            pkg.getIsNativeDesktop() ? AbstractJobRunner.MARKER : "",
+                            !pkg.getPkgSupplement().getPkgIcons().isEmpty() ? AbstractJobRunner.MARKER : "",
+                    });
 
-                    if (pkgs.isEmpty()) {
-                        return;
-                    }
+                    return true;
+                });
 
-                    for (Pkg pkg : pkgs) {
-                        writer.writeNext(new String[] {
-                                pkg.getName(),
-                                pkg.getIsNativeDesktop() ? AbstractJobRunner.MARKER : ""
-                        });
-                    }
-
-                    count += pkgs.size();
-                }
             }
         }
         catch (IOException ioe) {

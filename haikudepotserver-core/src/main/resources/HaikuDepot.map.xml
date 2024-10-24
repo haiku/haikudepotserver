@@ -1009,6 +1009,43 @@
 	<obj-relationship name="userRatingStability" source="UserRating" target="UserRatingStability" deleteRule="Nullify" db-relationship-path="user_rating_stability"/>
 	<obj-relationship name="user" source="UserUsageConditionsAgreement" target="User" lock="true" deleteRule="Nullify" db-relationship-path="user"/>
 	<obj-relationship name="userUsageConditions" source="UserUsageConditionsAgreement" target="UserUsageConditions" deleteRule="Nullify" db-relationship-path="user_usage_conditions"/>
+	<query name="AllActivePkgNames" type="SQLTemplate" root="data-map" root-name="HaikuDepot">
+		<property name="cayenne.GenericSelectQuery.fetchingDataRows" value="true"/>
+		<sql adapter-class="org.apache.cayenne.dba.postgres.PostgresAdapter"><![CDATA[SELECT
+#if($isTotal)
+#result('COUNT(p.id)' 'long' 'total')
+#else
+#result('p.name' 'String' 'name')
+#end
+FROM haikudepot.pkg p
+WHERE
+1 = 1
+AND p.active = true
+#if(! $includeDevelopment)
+AND p.name NOT LIKE '%_devel'
+AND p.name NOT LIKE '%_source'
+AND p.name NOT LIKE '%_debuginfo'
+#end
+AND EXISTS(
+  SELECT pv1.id FROM haikudepot.pkg_version pv1
+  JOIN haikudepot.architecture a1 ON a1.id = pv1.architecture_id
+  JOIN haikudepot.repository_source rs1 ON rs1.id = pv1.repository_source_id
+  JOIN haikudepot.repository r1 ON r1.id = rs1.repository_id
+  WHERE
+    1 = 1
+    AND pv1.pkg_id = p.id
+#if(! $includeDevelopment)
+    AND a1.code <> 'source'
+#end
+    AND pv1.active = true
+    AND rs1.active = true
+    AND r1.active = true
+)
+#if($isTotal)
+#else
+ORDER BY p.name ASC
+#end]]></sql>
+	</query>
 	<query name="AllPkgIcons" type="SQLTemplate" root="data-map" root-name="HaikuDepot">
 		<property name="cayenne.GenericSelectQuery.fetchingDataRows" value="true"/>
 		<sql adapter-class="org.apache.cayenne.dba.postgres.PostgresAdapter"><![CDATA[SELECT

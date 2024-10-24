@@ -39,6 +39,7 @@ import org.springframework.test.context.junit.jupiter.SpringExtension;
 import org.springframework.test.context.support.TestPropertySourceUtils;
 
 import jakarta.annotation.Resource;
+
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.sql.Connection;
@@ -104,21 +105,21 @@ public abstract class AbstractIntegrationTest {
     protected JobService jobService;
 
     protected void assertEqualsLineByLine(BufferedReader expected, BufferedReader actual) throws IOException {
-            String expectedLine;
-            String actualLine;
-            int line = 1;
+        String expectedLine;
+        String actualLine;
+        int line = 1;
 
-            do {
-                expectedLine = expected.readLine();
-                actualLine = actual.readLine();
+        do {
+            expectedLine = expected.readLine();
+            actualLine = actual.readLine();
 
-                if(!Objects.equals(expectedLine, actualLine)) {
-                    Assertions.fail("mismatch expected and actual; [" + expectedLine + "] [" + actualLine + "] @ line " + line);
-                }
-
-                line++;
+            if (!Objects.equals(expectedLine, actualLine)) {
+                Assertions.fail("mismatch expected and actual; [" + expectedLine + "] [" + actualLine + "] @ line " + line);
             }
-            while(null != expectedLine || null != actualLine);
+
+            line++;
+        }
+        while (null != expectedLine || null != actualLine);
     }
 
     protected ByteSource getResourceByteSource(final String path) {
@@ -137,7 +138,7 @@ public abstract class AbstractIntegrationTest {
                 ResultSet resultSet = preparedStatement.executeQuery()
         ) {
 
-            if(!resultSet.next()) {
+            if (!resultSet.next()) {
                 throw new IllegalStateException("unable to get the current database name");
             }
 
@@ -199,11 +200,11 @@ public abstract class AbstractIntegrationTest {
     }
 
     private void clearDatabaseTables() {
-        for(DataNode dataNode : serverRuntime.getDataDomain().getDataNodes()) {
+        for (DataNode dataNode : serverRuntime.getDataDomain().getDataNodes()) {
 
             LOGGER.debug("prep; will clear out data for data node; {}", dataNode.getName());
 
-            try ( Connection connection = dataNode.getDataSource().getConnection() ) {
+            try (Connection connection = dataNode.getDataSource().getConnection()) {
 
                 connection.setAutoCommit(false);
                 connection.rollback();
@@ -227,13 +228,13 @@ public abstract class AbstractIntegrationTest {
 
                     for (ObjEntity objEntity : dataMap.getObjEntities()) {
 
-                        if(!objEntity.isReadOnly() && !CDO_NAMES_RETAINED.contains(objEntity.getName())) {
+                        if (!objEntity.isReadOnly() && !CDO_NAMES_RETAINED.contains(objEntity.getName())) {
                             truncationNames.add(objEntity.getDbEntity().getSchema() + "." + objEntity.getDbEntity().getName());
                         }
 
                     }
 
-                    if(!truncationNames.isEmpty()) {
+                    if (!truncationNames.isEmpty()) {
                         String sql = String.format(
                                 "TRUNCATE %s CASCADE",
                                 String.join(",", truncationNames));
@@ -257,8 +258,7 @@ public abstract class AbstractIntegrationTest {
                 }
 
                 connection.commit();
-            }
-            catch(SQLException se) {
+            } catch (SQLException se) {
                 throw new RuntimeException("unable to clear the data for the data node; " + dataNode.getName(), se);
             }
 
