@@ -141,14 +141,17 @@ public class UserRatingServiceImpl implements UserRatingService {
             query = query.and(UserRating.USER.eq(search.getUser()));
         }
 
-        return query.limit(search.getLimit()).offset(search.getOffset());
+        return query;
     }
 
     @Override
     public List<UserRating> search(ObjectContext context, UserRatingSearchSpecification search) {
         Preconditions.checkNotNull(search);
         Preconditions.checkNotNull(context);
-        return createQuery(search).select(context);
+        return createQuery(search)
+                .limit(search.getLimit())
+                .offset(search.getOffset())
+                .select(context);
     }
 
     public long total(ObjectContext context, UserRatingSearchSpecification search) {
