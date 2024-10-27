@@ -16,6 +16,7 @@
         <module>haikudepotserver-api1</module>
         <module>haikudepotserver-api2</module>
         <module>haikudepotserver-packagefile</module>
+        <module>haikudepotserver-packagetools</module>
         <module>haikudepotserver-driversettings</module>
         <module>haikudepotserver-core</module>
         <module>haikudepotserver-core-test</module>
