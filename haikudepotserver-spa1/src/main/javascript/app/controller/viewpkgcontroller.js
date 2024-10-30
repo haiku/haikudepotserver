@@ -38,6 +38,7 @@ angular.module('haikudepotserver').controller(
                 max : PAGESIZE_USERRATING,
                 total : undefined
             };
+
             $scope.showIsNativeDesktopHelp = false;
 
             var hasPkgIcons = undefined;
