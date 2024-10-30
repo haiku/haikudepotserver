@@ -538,6 +538,11 @@ components:
                 sources and debug-info. By providing this as false, these
                 packages will be excluded from the results. It will default
                 to true.
+            onlyNativeDesktop:
+              type: boolean
+              description: >
+                Only show those packages which are marked as providing a
+                native desktop application.
     searchPkgsResponseEnvelope:
       type: object
       properties:

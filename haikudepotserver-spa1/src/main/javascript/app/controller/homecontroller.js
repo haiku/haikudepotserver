@@ -27,6 +27,7 @@ angular.module('haikudepotserver').controller(
             var KEY_REPOSITORYCODES = 'repos';
             var KEY_SEARCHEXPRESSION = 'srchexpr';
             var KEY_INCLUDEDEVELOPMENT = 'incldev';
+            var KEY_ONLYNATIVEDESKTOP = 'onlynatv';
             var KEY_VIEWCRITERIATYPECODE = 'viewcrttyp';
 
             var ViewCriteriaTypes = {
@@ -52,6 +53,7 @@ angular.module('haikudepotserver').controller(
             $scope.pkgCategories = undefined; // pulled in with a promise later...
             $scope.selectedPkgCategory = undefined;
             $scope.includeDevelopment = 'true' === $location.search()[KEY_INCLUDEDEVELOPMENT];
+            $scope.onlyNativeDesktop = 'true' === $location.search()[KEY_ONLYNATIVEDESKTOP];
             $scope.viewCriteriaTypeOptions = _.map(
                 [
                     ViewCriteriaTypes.FEATURED,
@@ -514,6 +516,13 @@ angular.module('haikudepotserver').controller(
                         }
                     });
 
+                    $scope.$watch('onlyNativeDesktop', function (newValue, oldValue) {
+                        if(newValue !== oldValue) { // already initialized elsewhere
+                            $log.debug('onlyNativeDesktop -> refetching pkgs');
+                            refetchPkgsAtFirstPage();
+                        }
+                    });
+
                     // this gets hit when somebody chooses an architecture such as x86, x86_64 etc...
 
                     $scope.$watch('selectedArchitecture', function (newValue, oldValue) {
@@ -627,9 +636,10 @@ angular.module('haikudepotserver').controller(
                             }
                         ).join(',')
                     );
-                    $location.search(KEY_ARCHITECTURECODE,$scope.selectedArchitecture.code);
-                    $location.search(KEY_INCLUDEDEVELOPMENT,'' + !!($scope.includeDevelopment));
-                    $location.search(KEY_VIEWCRITERIATYPECODE,$scope.selectedViewCriteriaTypeOption.code);
+                    $location.search(KEY_ARCHITECTURECODE, $scope.selectedArchitecture.code);
+                    $location.search(KEY_INCLUDEDEVELOPMENT, '' + !!($scope.includeDevelopment));
+                    $location.search(KEY_ONLYNATIVEDESKTOP, '' + !!($scope.onlyNativeDesktop));
+                    $location.search(KEY_VIEWCRITERIATYPECODE, $scope.selectedViewCriteriaTypeOption.code);
 
                     if (ViewCriteriaTypes.CATEGORIES === $scope.selectedViewCriteriaTypeOption.code) {
                         $location.search(KEY_PKGCATEGORYCODE, $scope.selectedPkgCategory.code);
@@ -661,6 +671,7 @@ angular.module('haikudepotserver').controller(
                         architectureCode: $scope.selectedArchitecture.code,
                         naturalLanguageCode : userState.naturalLanguageCode(),
                         includeDevelopment: $scope.includeDevelopment,
+                        onlyNativeDesktop: $scope.onlyNativeDesktop,
                         offset: $scope.pkgs.offset,
                         limit: PAGESIZE
                     };

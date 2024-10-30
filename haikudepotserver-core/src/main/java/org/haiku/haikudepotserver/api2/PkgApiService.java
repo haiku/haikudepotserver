@@ -679,6 +679,7 @@ public class PkgApiService extends AbstractApiService {
         specification.setArchitecture(getArchitecture(context, request.getArchitectureCode()));
         specification.setRepositories(transformCodesToRepositories(context, request.getRepositoryCodes()));
         specification.setIncludeDevelopment(BooleanUtils.isTrue(request.getIncludeDevelopment()));
+        specification.setOnlyNativeDesktop(BooleanUtils.isTrue(request.getOnlyNativeDesktop()));
         specification.setLimit(request.getLimit());
         specification.setOffset(request.getOffset());
 

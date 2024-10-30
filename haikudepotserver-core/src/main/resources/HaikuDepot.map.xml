@@ -1288,6 +1288,9 @@ AND p.name NOT LIKE '%_devel'
 AND p.name NOT LIKE '%_source'
 AND p.name NOT LIKE '%_debuginfo'
 #end
+#if($search.onlyNativeDesktop)
+AND p.is_native_desktop = true
+#end
 #if(! $search.includeInactive)
 AND p.active = true
 AND pv.active = true

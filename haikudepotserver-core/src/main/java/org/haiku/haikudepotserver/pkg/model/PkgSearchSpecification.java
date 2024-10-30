@@ -51,6 +51,8 @@ public class PkgSearchSpecification extends AbstractSearchSpecification {
 
     private Boolean includeDevelopment;
 
+    private Boolean onlyNativeDesktop;
+
     public List<Repository> getRepositories() {
         return repositories;
     }
@@ -105,5 +107,13 @@ public class PkgSearchSpecification extends AbstractSearchSpecification {
 
     public void setIncludeDevelopment(Boolean includeDevelopment) {
         this.includeDevelopment = includeDevelopment;
+    }
+
+    public Boolean getOnlyNativeDesktop() {
+        return onlyNativeDesktop;
+    }
+
+    public void setOnlyNativeDesktop(Boolean onlyNativeDesktop) {
+        this.onlyNativeDesktop = onlyNativeDesktop;
     }
 }
