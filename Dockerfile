@@ -47,6 +47,7 @@ COPY ./haikudepotserver-core-test/pom.xml /hds-src/haikudepotserver-core-test/po
 COPY ./haikudepotserver-api1/pom.xml /hds-src/haikudepotserver-api1/pom.xml
 COPY ./haikudepotserver-api2/pom.xml /hds-src/haikudepotserver-api2/pom.xml
 COPY ./haikudepotserver-packagefile/pom.xml /hds-src/haikudepotserver-packagefile/pom.xml
+COPY ./haikudepotserver-packagetools/pom.xml /hds-src/haikudepotserver-packagetools/pom.xml
 COPY ./haikudepotserver-spa1/pom.xml /hds-src/haikudepotserver-spa1/pom.xml
 COPY ./haikudepotserver-webapp/pom.xml /hds-src/haikudepotserver-webapp/pom.xml
 COPY ./haikudepotserver-core/pom.xml /hds-src/haikudepotserver-core/pom.xml
@@ -67,6 +68,7 @@ COPY ./haikudepotserver-driversettings /hds-src/haikudepotserver-driversettings
 COPY ./haikudepotserver-core-test /hds-src/haikudepotserver-core-test
 COPY ./haikudepotserver-api2 /hds-src/haikudepotserver-api2
 COPY ./haikudepotserver-packagefile /hds-src/haikudepotserver-packagefile
+COPY ./haikudepotserver-packagetools /hds-src/haikudepotserver-packagetools
 COPY ./haikudepotserver-webapp /hds-src/haikudepotserver-webapp
 COPY ./haikudepotserver-spa1 /hds-src/haikudepotserver-spa1
 COPY ./haikudepotserver-api1 /hds-src/haikudepotserver-api1
