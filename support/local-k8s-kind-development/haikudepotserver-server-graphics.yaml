@@ -1,0 +1,59 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: haikudepotserver-server-graphics
+  labels:
+    app: haikudepotserver-server-graphics
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: haikudepotserver-server-graphics
+  strategy:
+    type: Recreate
+  template:
+    metadata:
+      labels:
+        app: haikudepotserver-server-graphics
+    spec:
+      containers:
+        - name: haikudepotserver-server-graphics
+          image: ghcr.io/haiku/haikudepotserver-server-graphics:1.0.168
+          env:
+            - name: HDS_GFX_QUANTIZE
+              value: "false"
+          resources:
+            limits:
+              cpu: "1.0"
+              memory: "256Mi"
+            requests:
+              cpu: "1.0"
+              memory: "196Mi"
+          startupProbe:
+            httpGet:
+              path: /actuator/health
+              port: 8086
+            initialDelaySeconds: 30
+            periodSeconds: 10
+            failureThreshold: 60
+          livenessProbe:
+            httpGet:
+              path: /actuator/health
+              port: 8086
+            initialDelaySeconds: 10
+            periodSeconds: 30
+            failureThreshold: 2
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: haikudepotserver-server-graphics-svc
+spec:
+  selector:
+    app: haikudepotserver-server-graphics
+  type: NodePort
+  ports:
+    - name: www
+      port: 8085
+      targetPort: 8085
+      nodePort: 30085

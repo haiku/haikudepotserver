@@ -1,5 +1,5 @@
 /*
- * Copyright 2018-2023, Andrew Lindesay
+ * Copyright 2018-2024, Andrew Lindesay
  * Distributed under the terms of the MIT License.
  */
 
@@ -15,6 +15,8 @@ import org.haiku.haikudepotserver.captcha.model.CaptchaRepository;
 import org.haiku.haikudepotserver.captcha.model.CaptchaService;
 import org.haiku.haikudepotserver.graphics.bitmap.PngOptimizationService;
 import org.haiku.haikudepotserver.graphics.bitmap.PngOptimizationServiceFactory;
+import org.haiku.haikudepotserver.graphics.bitmap.PngThumbnailService;
+import org.haiku.haikudepotserver.graphics.bitmap.PngThumbnailServiceFactory;
 import org.haiku.haikudepotserver.graphics.hvif.HvifRenderingService;
 import org.haiku.haikudepotserver.graphics.hvif.HvifRenderingServiceFactory;
 import org.haiku.haikudepotserver.security.PasswordEncoder;
@@ -58,15 +60,27 @@ public class BasicConfig {
     }
 
     @Bean
+    public PngThumbnailService pngThumbnailService(
+            @Value("${hds.graphics-server.base-uri:}") String graphicsServerBaseUri) {
+        return new PngThumbnailServiceFactory(graphicsServerBaseUri).getObject();
+    }
+
+    @Bean
     public PngOptimizationService pngOptimizationService(
-            @Value("${hds.optipng.path:}") String optiPngPath) {
-        return new PngOptimizationServiceFactory(optiPngPath).getObject();
+            @Value("${hds.optipng.path:}") String optiPngPath,
+            @Value("${hds.graphics-server.base-uri:}") String graphicsServerBaseUri) {
+        return new PngOptimizationServiceFactory(
+                optiPngPath,
+                graphicsServerBaseUri).getObject();
     }
 
     @Bean
     public HvifRenderingService hvifRenderingService(
-            @Value("${hds.hvif2png.path:}") String hvif2pngPath) throws Exception {
-        return new HvifRenderingServiceFactory(hvif2pngPath).getObject();
+            @Value("${hds.hvif2png.path:}") String hvif2pngPath,
+            @Value("${hds.graphics-server.base-uri:}") String graphicsServerBaseUri) throws Exception {
+        return new HvifRenderingServiceFactory(
+                hvif2pngPath,
+                graphicsServerBaseUri).getObject();
     }
 
     @Bean

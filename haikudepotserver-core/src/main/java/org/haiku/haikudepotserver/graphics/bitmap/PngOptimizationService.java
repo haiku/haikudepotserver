@@ -24,6 +24,7 @@ public interface PngOptimizationService {
      * <p>This method will optimize the data supplied, producing an optimized output file.</p>
      */
 
+    // TODO; change to io-stream interface
     byte[] optimize(byte[] input) throws IOException;
 
 }
