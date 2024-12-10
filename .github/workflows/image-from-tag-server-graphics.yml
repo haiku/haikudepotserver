@@ -1,14 +1,20 @@
-# Based on: https://docs.github.com/en/actions/publishing-packages/publishing-docker-images#publishing-images-to-github-packages
+# Based on: ./image-from-tag-webapp.yml
+# This will be run on-demand as the image will probably take some time to build
+# It takes a user input of the tag to build for.
 
-name: Create and publish image
+name: Create and publish `-server-graphics` image
 
 on:
-  push:
-    tags: haikudepotserver-*
+  workflow_dispatch:
+    inputs:
+      tag:
+        description: 'Tag to use'
+        required: true
+        type: string
 
 env:
   REGISTRY: ghcr.io
-  IMAGE_NAME: ${{ github.repository }}
+  IMAGE_NAME: haikudepotserver-server-graphics
 
 jobs:
   build-and-push-image:
@@ -20,6 +26,12 @@ jobs:
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
+        with:
+          ref: "${{ inputs.tag }}"
+
+      # This will create the Dockerfile-s
+      - name: Make the Dockerfiles
+        run: make dockerfiles
 
       - name: Log in to the Container registry
         uses: docker/login-action@v3
@@ -36,9 +48,10 @@ jobs:
           tags: type=match,pattern=haikudepotserver-(\d+.\d+.\d+),group=1
 
       - name: Build and push Docker image
-        uses: docker/build-push-action@v5
+        uses: docker/build-push-action@v6
         with:
           context: .
+          file: Dockerfile_server_graphics
           push: true
           tags: ${{ steps.meta.outputs.tags }}
           labels: ${{ steps.meta.outputs.labels }}
