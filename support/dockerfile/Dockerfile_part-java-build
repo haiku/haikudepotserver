@@ -80,5 +80,5 @@ RUN rm -f /hds-src/haikudepotserver-webapp/src/main/resources/local.properties
 # of maven.
 ENV TEST_DATABASE_TYPE "START_LOCAL_DATABASE"
 
-# perform the build of the application.
-RUN ./mvnw clean install
+# The build is now performed for the projects that are required
+# in the respective "last-mile" build phase.

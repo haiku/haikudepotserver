@@ -6,6 +6,12 @@
 # -------------------------------------
 # Create the container that will eventually run the graphics server
 
+FROM java_maven_build AS java_maven_build_server_graphics
+
+# perform the build of the application.
+RUN ./mvnw clean
+RUN ./mvnw install --also-make --projects haikudepotserver-server-graphics
+
 FROM java_base AS runtime
 
 ENV OXIPNG_HOME=/opt/oxipng
@@ -32,7 +38,7 @@ COPY --from=oxipng-build "/opt/oxipng/bin/oxipng" "${OXIPNG_HOME}/bin/oxipng"
 
 RUN chmod +x "${HVIF2PNG_HOME}/bin/hvif2png.sh"
 
-COPY --from=java_maven_build /hds-src/haikudepotserver-server-graphics/target/haikudepotserver-server-graphics-*.jar \
+COPY --from=java_maven_build_server_graphics /hds-src/haikudepotserver-server-graphics/target/haikudepotserver-server-graphics-*.jar \
     ${HDS_SERVER_GRAPHICS_APP_HOME}/app.jar
 
 CMD \

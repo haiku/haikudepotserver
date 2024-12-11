@@ -3,6 +3,12 @@
 # Distributed under the terms of the MIT License.
 # =====================================
 
+FROM java_maven_build AS java_maven_build_webapp
+
+# perform the build of the application.
+RUN ./mvnw clean
+RUN ./mvnw install --also-make --projects haikudepotserver-webapp
+
 FROM java_base AS runtime
 
 RUN apt-get update && \
@@ -14,8 +20,8 @@ ENV HDS_B_HTTP_ACTUATOR_PORT=8081
 ENV HDS_B_INSTALL_ROOT="/opt/haikudepotserver"
 RUN mkdir ${HDS_B_INSTALL_ROOT}
 
-COPY --from=java_maven_build /hds-src/haikudepotserver-core/target/classes/build.properties ${HDS_B_INSTALL_ROOT}
-COPY --from=java_maven_build /hds-src/haikudepotserver-webapp/target/haikudepotserver-webapp-*.jar ${HDS_B_INSTALL_ROOT}/app.jar
+COPY --from=java_maven_build_webapp /hds-src/haikudepotserver-core/target/classes/build.properties ${HDS_B_INSTALL_ROOT}
+COPY --from=java_maven_build_webapp /hds-src/haikudepotserver-webapp/target/haikudepotserver-webapp-*.jar ${HDS_B_INSTALL_ROOT}/app.jar
 
 ENV HDS_B_HVIF2PNG_VERSION="hvif2png-hrev57235-linux-x86_64"
 ENV HDS_B_INSTALL_HVIF2PNG_PATH "${HDS_B_INSTALL_ROOT}/hvif2png-hrev57235/bin/hvif2png.sh"

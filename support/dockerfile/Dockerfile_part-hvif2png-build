@@ -29,7 +29,7 @@ RUN make && ./jam0 install
 
 RUN mkdir "/generated.x86_64"
 WORKDIR "/generated.x86_64"
-RUN ../haiku/configure --cross-tools-source ../buildtools --build-cross-tools x86_64
+RUN ../haiku/configure --host-only
 
 RUN apt-get -y install libpng-dev
 
