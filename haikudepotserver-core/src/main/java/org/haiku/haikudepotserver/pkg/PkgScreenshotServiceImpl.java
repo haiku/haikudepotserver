@@ -1,5 +1,5 @@
 /*
- * Copyright 2018-2023, Andrew Lindesay
+ * Copyright 2018-2024, Andrew Lindesay
  * Distributed under the terms of the MIT License.
  */
 
@@ -18,18 +18,15 @@ import org.haiku.haikudepotserver.dataobjects.PkgSupplement;
 import org.haiku.haikudepotserver.dataobjects.auto._PkgScreenshot;
 import org.haiku.haikudepotserver.graphics.ImageHelper;
 import org.haiku.haikudepotserver.graphics.bitmap.PngOptimizationService;
+import org.haiku.haikudepotserver.graphics.bitmap.PngThumbnailService;
 import org.haiku.haikudepotserver.pkg.model.BadPkgScreenshotException;
 import org.haiku.haikudepotserver.pkg.model.PkgScreenshotService;
 import org.haiku.haikudepotserver.pkg.model.PkgSupplementModificationAgent;
 import org.haiku.haikudepotserver.pkg.model.PkgSupplementModificationService;
-import org.imgscalr.Scalr;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
-import javax.imageio.ImageIO;
-import java.awt.image.BufferedImage;
-import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
@@ -45,13 +42,16 @@ public class PkgScreenshotServiceImpl implements PkgScreenshotService {
 
     private final ImageHelper imageHelper;
     private final PngOptimizationService pngOptimizationService;
+    private final PngThumbnailService pngThumbnailService;
 
     private final PkgSupplementModificationService pkgSupplementModificationService;
 
     public PkgScreenshotServiceImpl(
             PngOptimizationService pngOptimizationService,
+            PngThumbnailService pngThumbnailService,
             PkgSupplementModificationService pkgSupplementModificationService) {
         this.pngOptimizationService = Preconditions.checkNotNull(pngOptimizationService);
+        this.pngThumbnailService = Preconditions.checkNotNull(pngThumbnailService);
         this.pkgSupplementModificationService = Preconditions.checkNotNull(pkgSupplementModificationService);
         imageHelper = new ImageHelper();
     }
@@ -132,18 +132,10 @@ public class PkgScreenshotServiceImpl implements PkgScreenshotService {
             throw new IllegalStateException("the screenshot system only supports png images at the present time");
         }
 
-        byte[] data = pkgScreenshotImageOptional.get().getData();
-        ImageHelper.Size size = imageHelper.derivePngSize(data);
-
-        // check to see if the screenshot needs to be resized to fit.
-        if (size.width > targetWidth || size.height > targetHeight) {
-            ByteArrayInputStream imageInputStream = new ByteArrayInputStream(data);
-            BufferedImage bufferedImage = ImageIO.read(imageInputStream);
-            BufferedImage scaledBufferedImage = Scalr.resize(bufferedImage, targetWidth, targetHeight);
-            ImageIO.write(scaledBufferedImage, "png", output);
-        } else {
-            output.write(data);
-        }
+        output.write(pngThumbnailService.thumbnail(
+                pkgScreenshotImageOptional.get().getData(),
+                targetWidth, targetHeight
+        ));
     }
 
     /**

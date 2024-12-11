@@ -1,0 +1,21 @@
+# =====================================
+# Copyright 2024, Andrew Lindesay
+# Distributed under the terms of the MIT License.
+# =====================================
+
+# -------------------------------------
+# Builds the `oxipng` tool which optimizes PNG images.
+
+FROM base AS oxipng-build
+
+ARG OXIPNG_VERSION=9.1.3
+ARG OXIPNG_ROOT=/opt/oxipng
+
+RUN apt-get update && \
+    apt-get -y install curl gcc
+
+RUN curl --proto '=https' --tlsv1.3 https://sh.rustup.rs -sSf | bash -s -- -y
+
+RUN mkdir -p "${OXIPNG_ROOT}"
+RUN "${HOME}/.cargo/bin/cargo" install --version "${OXIPNG_VERSION}" --root "${OXIPNG_ROOT}" oxipng
+RUN "${OXIPNG_ROOT}/bin/oxipng" --version
