@@ -1,0 +1,6 @@
+# =====================================
+# Copyright 2024, Andrew Lindesay
+# Distributed under the terms of the MIT License.
+# =====================================
+
+FROM debian:12.5-slim AS base

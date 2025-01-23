@@ -1,6 +1,7 @@
 # Based on: https://docs.github.com/en/actions/publishing-packages/publishing-docker-images#publishing-images-to-github-packages
+# This gets run each time that a tag is pushed (new version).
 
-name: Create and publish image
+name: Create and publish images
 
 on:
   push:
@@ -8,7 +9,8 @@ on:
 
 env:
   REGISTRY: ghcr.io
-  IMAGE_NAME: ${{ github.repository }}
+  IMAGE_NAME_WEBAPP: haikudepotserver
+  IMAGE_NAME_SERVER_GRAPHICS: haikudepotserver-server-graphics
 
 jobs:
   build-and-push-image:
@@ -21,6 +23,10 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v4
 
+      # This will create the Dockerfile-s
+      - name: Make the Dockerfiles
+        run: make dockerfiles
+
       - name: Log in to the Container registry
         uses: docker/login-action@v3
         with:
@@ -28,17 +34,34 @@ jobs:
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
 
-      - name: Extract metadata (tags, labels) for Docker
-        id: meta
+      - name: Extract metadata (tags, labels) for Docker (webapp)
+        id: meta_webapp
         uses: docker/metadata-action@v5
         with:
-          images: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}
+          images: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME_WEBAPP }}
           tags: type=match,pattern=haikudepotserver-(\d+.\d+.\d+),group=1
 
-      - name: Build and push Docker image
-        uses: docker/build-push-action@v5
+      - name: Build and push Docker image (webapp)
+        uses: docker/build-push-action@v6
         with:
           context: .
+          file: Dockerfile_webapp
           push: true
-          tags: ${{ steps.meta.outputs.tags }}
-          labels: ${{ steps.meta.outputs.labels }}
+          tags: ${{ steps.meta_webapp.outputs.tags }}
+          labels: ${{ steps.meta_webapp.outputs.labels }}
+
+      - name: Extract metadata (tags, labels) for Docker (server_graphics)
+        id: meta_server_graphics
+        uses: docker/metadata-action@v5
+        with:
+          images: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME_SERVER_GRAPHICS }}
+          tags: type=match,pattern=haikudepotserver-(\d+.\d+.\d+),group=1
+
+      - name: Build and push Docker image (server_graphics)
+        uses: docker/build-push-action@v6
+        with:
+          context: .
+          file: Dockerfile_server_graphics
+          push: true
+          tags: ${{ steps.meta_server_graphics.outputs.tags }}
+          labels: ${{ steps.meta_server_graphics.outputs.labels }}

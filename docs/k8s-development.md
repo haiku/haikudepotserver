@@ -47,6 +47,23 @@ kubectl --context kind-haikudepotserver get pods
 
 A pod with prefix `haikudepotserver-pg` should be listed and eventually `1/1` should be up.
 
+## Deploy graphics services application into the Kubernetes cluster
+
+The HDS system manipulates graphics files as part of its operation. This functionality is supported by a container image that contains tools and an application server that provides an API to those tools. This application can be deployed with;
+
+```
+kubectl --context kind-haikudepotserver apply \
+-f ./support/local-k8s-kind-development/haikudepotserver-server-graphics.yaml
+```
+
+Wait a short while for the system to settle and then check that the application is running.
+
+```
+kubectl --context kind-haikudepotserver get pods
+```
+
+A pod with prefix `haikudepotserver-haikudepotserver-server-graphics` should be listed and eventually `1/1` should be up.
+
 ## Deploy application into the Kubernetes cluster
 
 Later when you wish to import the packages from a repository, the process can be time-consuming and require a large volume of traffic. To reduce the quantity of packages imported, an additional environment variable `HDS_REPOSITORY_IMPORT_ALLOWEDPKGNAMEPATTERN` can be set in the file `./support/local-k8s-kind-development/haikudepotserver-webapp.yaml` to something like `^.[Aa].+$` in order to only import those packages that have the second character as "A" in their name.

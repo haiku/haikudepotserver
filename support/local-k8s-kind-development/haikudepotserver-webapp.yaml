@@ -18,7 +18,7 @@ spec:
     spec:
       containers:
         - name: haikudepotserver-webapp
-          image: ghcr.io/haiku/haikudepotserver:1.0.161
+          image: ghcr.io/haiku/haikudepotserver:1.0.168
           env:
             # Don't test the SMTP server to see if the POD is healthy.
             - name: MANAGEMENT_HEALTH_MAIL_ENABLED
@@ -33,6 +33,8 @@ spec:
               value: haikudepotserver
             - name: SPRING_DATASOURCE_PASSWORD
               value: haikudepotserver
+            - name: HDS_GRAPHICS_SERVER_BASE_URI
+              value: http://haikudepotserver-server-graphics-svc:8085
           resources:
             limits:
               cpu: "1.0"

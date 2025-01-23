@@ -1,0 +1,60 @@
+# =====================================
+# Copyright 2024, Andrew Lindesay
+# Distributed under the terms of the MIT License.
+# =====================================
+
+# -------------------------------------
+# Create the container that will eventually run the graphics server
+
+FROM java_maven_build AS java_maven_build_server_graphics
+
+# perform the build of the application.
+RUN ./mvnw clean
+RUN ./mvnw install --also-make --projects haikudepotserver-server-graphics
+
+FROM java_base AS runtime
+
+ENV OXIPNG_HOME=/opt/oxipng
+ENV HVIF2PNG_HOME=/opt/hvif2png
+ENV HDS_SERVER_GRAPHICS_APP_HOME="/opt/haikudepotserver-server-graphics"
+ENV HDS_SERVER_GRAPHICS_HTTP_PORT=8085
+ENV HDS_SERVER_GRAPHICS_HTTP_ACTUATOR_PORT=8086
+
+# The hvif2png tool requires the png library
+
+RUN apt-get update && \
+    apt-get -y install temurin-21-jdk && \
+    apt-get -y install libpng16-16 imagemagick optipng pngquant
+
+RUN mkdir -p "${HVIF2PNG_HOME}/bin"
+RUN mkdir -p "${HVIF2PNG_HOME}/lib"
+COPY --from=hvif2png-build /generated.x86_64/objects/linux/x86_64/release/tools/hvif2png/hvif2png "${HVIF2PNG_HOME}/bin/hvif2png"
+COPY support/graphics-services/hvif2png.sh "${HVIF2PNG_HOME}/bin/hvif2png.sh"
+COPY --from=hvif2png-build /generated.x86_64/objects/linux/lib/libroot_build.so "${HVIF2PNG_HOME}/lib/libroot_build.so"
+COPY --from=hvif2png-build /generated.x86_64/objects/linux/lib/libbe_build.so "${HVIF2PNG_HOME}/lib/libbe_build.so"
+
+RUN mkdir -p "${OXIPNG_HOME}/bin"
+COPY --from=oxipng-build "/opt/oxipng/bin/oxipng" "${OXIPNG_HOME}/bin/oxipng"
+
+RUN chmod +x "${HVIF2PNG_HOME}/bin/hvif2png.sh"
+
+COPY --from=java_maven_build_server_graphics /hds-src/haikudepotserver-server-graphics/target/haikudepotserver-server-graphics-*.jar \
+    ${HDS_SERVER_GRAPHICS_APP_HOME}/app.jar
+
+CMD \
+    java \
+    -Dfile.encoding=UTF-8 \
+    -Duser.timezone=GMT0 \
+    -Xms196m \
+    -Xmx196m \
+    -Djava.net.preferIPv4Stack=true \
+    -Djava.awt.headless=true \
+    -Dhds.tool.oxipng.path=${OXIPNG_HOME}/bin/oxipng \
+    -Dhds.tool.hvif2png.path=${HVIF2PNG_HOME}/bin/hvif2png.sh \
+    -Dserver.port=${HDS_SERVER_GRAPHICS_HTTP_PORT} \
+    -Dmanagement.server.port=${HDS_SERVER_GRAPHICS_HTTP_ACTUATOR_PORT} \
+    -jar \
+    ${HDS_SERVER_GRAPHICS_APP_HOME}/app.jar
+
+HEALTHCHECK --interval=30s --timeout=10s CMD curl -f http://localhost:${HDS_SERVER_GRAPHICS_HTTP_ACTUATOR_PORT}/actuator/health
+EXPOSE ${HDS_SERVER_GRAPHICS_HTTP_PORT} ${HDS_SERVER_GRAPHICS_HTTP_ACTUATOR_PORT}

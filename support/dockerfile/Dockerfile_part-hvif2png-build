@@ -1,16 +1,19 @@
 # =====================================
-# Copyright 2022-2024, Andrew Lindesay
+# Copyright 2024, Andrew Lindesay
 # Distributed under the terms of the MIT License.
 # =====================================
 
-FROM debian:12.5-slim as base
+# Build the hvif2png tooling
 
-ENV HAIKU_HASH=d75f6109c213b70895a2bf0eed412cdd7a68f990
-ENV BUILDTOOLS_HASH=fef550b1fc8de8810ff74f2edc79a43bc8ec660b
+FROM base AS hvif2png-build
+
+# 2024-11-29
+ENV HAIKU_HASH=4055af5143236b53cf20809bbfe411e977ecf13c
+ENV BUILDTOOLS_HASH=d86b03dc2b1ffbf5361542719a03a701b2d7cbb4
 
 RUN apt-get update && \
     apt-get -y install git nasm bc autoconf automake texinfo flex bison gawk build-essential unzip wget \
-        zip less zlib1g-dev libzstd-dev xorriso libtool gcc-multilib python3 libpng16-16
+        zip less zlib1g-dev libzstd-dev xorriso libtool gcc-multilib python3 libpng16-16 libpng-dev
 
 ADD "https://github.com/haiku/buildtools/archive/${BUILDTOOLS_HASH}.tar.gz" /buildtools.tgz
 ADD "https://github.com/haiku/haiku/archive/${HAIKU_HASH}.tar.gz" /haiku.tgz
@@ -21,7 +24,13 @@ RUN tar -xzf ./haiku.tgz
 RUN mv buildtools-${BUILDTOOLS_HASH} buildtools
 RUN mv haiku-${HAIKU_HASH} haiku
 
-RUN mkdir generated.x86_64
-WORKDIR "generated.x86_64"
-RUN ../haiku/configure --cross-tools-source ../buildtools --build-cross-tools x86_64
-RUN jam -q "<build>hvif2png"
+WORKDIR "/buildtools/jam"
+RUN make && ./jam0 install
+
+RUN mkdir "/generated.x86_64"
+WORKDIR "/generated.x86_64"
+RUN ../haiku/configure --host-only
+
+RUN apt-get -y install libpng-dev
+
+RUN HAIKU_REVISION=123 jam -q "<build>hvif2png"
