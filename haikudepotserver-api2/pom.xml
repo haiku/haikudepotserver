@@ -74,6 +74,7 @@
                                 <skipDefaultInterface>true</skipDefaultInterface>
                                 <generateSupportingFiles>false</generateSupportingFiles>
                                 <useSpringBoot3>true</useSpringBoot3>
+                                <containerDefaultToNull>true</containerDefaultToNull>
                                 <!-- removes some unused import problem -->
                                 <openApiNullable>false</openApiNullable>
                             </configOptions>
@@ -242,6 +243,7 @@
                             <configOptions>
                                 <!-- useTags will use the tags from the spec to drive the generation -->
                                 <useTags>true</useTags>
+                                <containerDefaultToNull>true</containerDefaultToNull>
                             </configOptions>
                             <generatorName>python</generatorName>
                             <generateSupportingFiles>true</generateSupportingFiles>
