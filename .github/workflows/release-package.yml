@@ -9,8 +9,8 @@ on:
 
 env:
   REGISTRY: ghcr.io
-  IMAGE_NAME_WEBAPP: haikudepotserver
-  IMAGE_NAME_SERVER_GRAPHICS: haikudepotserver-server-graphics
+  IMAGE_NAME_WEBAPP: haiku/haikudepotserver
+  IMAGE_NAME_SERVER_GRAPHICS: haiku/haikudepotserver-server-graphics
 
 jobs:
   build-and-push-image:
