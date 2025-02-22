@@ -347,6 +347,10 @@ components:
           type: string
         javaVersion:
           type: string
+        currentTimestamp:
+          description: Current millisecond timestamp relative to UTC.
+          type: integer
+          format: int64
         startTimestamp:
           type: integer
           format: int64

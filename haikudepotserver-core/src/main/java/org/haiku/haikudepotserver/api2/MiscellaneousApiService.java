@@ -52,6 +52,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.MessageSource;
 import org.springframework.stereotype.Component;
 
+import java.time.Clock;
 import java.util.Optional;
 import java.util.Properties;
 import java.util.Set;
@@ -71,6 +72,7 @@ public class MiscellaneousApiService extends AbstractApiService {
     private final Boolean isProduction;
     private final String architectureDefaultCode;
     private final String repositoryDefaultCode;
+    private final Clock clock = Clock.systemUTC();
 
     @Autowired
     public MiscellaneousApiService(
@@ -279,6 +281,7 @@ public class MiscellaneousApiService extends AbstractApiService {
         GetRuntimeInformationResult result = new GetRuntimeInformationResult()
                 .projectVersion(runtimeInformationService.getProjectVersion())
                 .isProduction(isProduction)
+                .currentTimestamp(clock.millis())
                 .defaults(new GetRuntimeInformationResultDefaults()
                         .architectureCode(architectureDefaultCode)
                         .repositoryCode(repositoryDefaultCode));
