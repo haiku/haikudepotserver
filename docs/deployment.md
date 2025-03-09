@@ -1,7 +1,6 @@
 # Deployment
 
-This section outlines the approximate steps to deploy the web application-server.  The application-server
-Maven build process produces a stand-alone self-executing `.jar` file that runs with [SpringBoot](https://spring.io/projects/spring-boot) and [Tomcat](https://tomcat.apache.org/).
+This section outlines the approximate steps to deploy the web application-server.  The application-server Maven build process produces a stand-alone self-executing `.jar` file using [SpringBoot](https://spring.io/projects/spring-boot).
 
 ## Versions
 
@@ -42,22 +41,18 @@ git push
 git push --tags
 ```
 
-## Obtaining Source for a Release and then Building Docker Image
+The tags have the format;
 
-In order to obtain source code state for a specific release, first `git fetch -all` any pending changes from the remote repository and then checkout the source at the particular tag; `git checkout tags/haikudepotserver-2.3.2`.
+- `haikudepotserver-1.0.10`
+- `haikudepotserver-1.0.113`
 
-From there it will be possible to create a build product for that particular release by initiating the build process.
+Upon push, the GitHub Actions defined in `.github/workflows/` will trigger a build, package and release process for HDS and HDS-GS containers. The built containers...
 
-```
-./build.sh
-```
+- `haiku/haikudepotserver-server-graphics`
+- `haiku/haikudepotserver`
 
-This will trigger a multi-stage Docker build described in `Dockerfile`.  The first stage will pull down all of the dependencies of the build and will then build the build products.  The second stage will assemble the immutable Docker container that will run the HDS system.
+...are pushed to the Haiku container registry `ghcr.io` and are tagged with the version such as `1.0.168`.
 
 ## Orchestrating a Release Deployment
 
 The release deployment should be arranged with the Haiku sys-admin team. This can be achieved by opening a ticket on the [Haiku Infrastructure](https://github.com/haiku/infrastructure/issues) project. There is a template for this.
-
-## hvif2png
-
-See [here](hvif2png.md) for details on this tool. There is a build product tar-ball loaded into the HDS repository to be included in the build process in the `support` directory.

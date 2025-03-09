@@ -33,8 +33,8 @@ CMD \
     java \
     -Dfile.encoding=UTF-8 \
     -Duser.timezone=GMT0 \
-    -Xms320m \
-    -Xmx512m \
+    -Xms450m \
+    -Xmx450m \
     -Djava.net.preferIPv4Stack=true \
     -Djava.awt.headless=true \
     -Dconfig.properties=file://${HDS_B_INSTALL_ROOT}/config.properties \

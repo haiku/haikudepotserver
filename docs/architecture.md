@@ -4,33 +4,64 @@ This section covers a broad architectural overview of the system.
 
 ## Elements
 
-Overview of the elements of the system's architecture and how they inter-relate;
+The following diagram provides an overview of the elements of the system's architecture and how they inter-relate;
 
 ![Architecture Overview](images/img-architectureoverview.png)
 
-The application server deploy product is a self-contained java `.jar` file.  The application is using the Spring Boot framework and can run itself using an embedded [Apache Tomcat](https://tomcat.apache.org/) server.
+### HDS
 
-The application server communicates (see [api](/api.md)) with its clients using the HTTP protocol.  The communications are *typically* RPC style in nature, but also straight GET, POST and other requests are employed where appropriate.  The web-front end contains a JavaScript/HTML client that utilizes the same API as is employed by the "Haiku Depot" desktop application running on the Haiku operating system.
+The HDS component provides the bulk of the functionality of the system. It is built and packaged to an executable java `.jar` file and is primarily using Java and the [SpringBoot](https://spring.io/projects/spring-boot) framework. The software is packaged as a container image and deployed as a Kubernetes deployment.
 
-Screenshot of the running HaikuDepot desktop application;
+The HDS application server communicates (see [api](/api.md)) with its clients using the HTTP protocol.  The communications are *typically* RPC style in nature, but also straight GET, POST and other requests are employed where appropriate.
+
+The HDS application server also provides a web-front end contains a JavaScript/HTML client that utilizes the same API as is employed by the "Haiku Depot" desktop application running on the Haiku operating system.
+
+### HDS-GS
+
+The HDS-GS component provides graphics operations for the system including;
+
+- rendering of Haiku-custom HVIF files as `.png`; typically icons
+- scaling of `.png` images
+- optimization of `.png` images
+
+The HDS-GS a thin custom Java / [SpringBoot](https://spring.io/projects/spring-boot) application that delegates to a number of off-the-shelf native binaries such as;
+
+- `convert` from [ImageMagick](https://imagemagick.org/)
+- `optipng`
+- [`oxipng`](https://github.com/shssoichiro/oxipng)
+- [`pngquant`](https://pngquant.org/)
+
+Also packaged into HDS-GS container image is `hvif2png` which is a binary from the Haiku source code. This tool renders Haiku's own native icon format HVIF into `.png` format for use in the web user interface of the HaikuDepotServer system.
+
+The HDS-GS application server is separated from the HDS application server because;
+
+- different scaling behaviours
+- security; a vulnerability in an off-the-shelf native graphics tool is less likely to pose a threat to the core system
+- the graphics binaries do not need to be packaged into the HDS image meaning that it can be a smaller container image.
+
+HDS-GS is stateless and is communicated with using POST HTTP requests.
+
+### HaikuDepot
+
+The HaikuDepot desktop application is an important client of the HDS application server. The source for this application is located in the Haiku source code.
 
 ![Screenshot of HDS](images/img-hd.png)
 
-The application server will, when prompted or on a poll, import Haiku package repository data from configured Haiku package repositories.  To obtain this data it uses HTTP GET requests to obtain the `.hpkr` files from each repository.
+### HPKR and HPKG data
 
-The application server stores all of its core data in a database.  It also uses local storage for
-temporary data storage.
+The HDS application server will, when prompted or on a poll, import Haiku package repository data from configured Haiku package repositories. This fetched data is in the HPKR and HPKG formats. To obtain this data, HDS uses HTTP GET requests to obtain the `.hpkr` files from each repository.
 
-The application server uses the `optipng` tool on the deployment host in order to optimize image
-data.
+### Storage
 
-## Application Server Infrastructure
+The application server stores all of its core data in a database.  It also uses local storage for temporary data storage.
 
-The application server uses a number of technologies to provide infrastructure for the application server. The application server is based on [SpringBoot](https://spring.io/projects/spring-boot) technology. You can find out more about those APIs in [this](api.md) document.
-
-### Logging
+### Logging for HDS and HDS-GS
 
 The application server uses [SLF4J](http://www.slf4j.org/) to provide for logging. Other common logging frameworks are re-plumbed into SLF4J in order to centralize logging management.
+
+## HDS Specifics
+
+The following sections are specific to the HDS application server.
 
 ### Object-Relational / Data
 

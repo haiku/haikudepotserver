@@ -6,13 +6,11 @@ For local development, say in an IDE system, HDS can be launched as a SpringBoot
 
 ## Preparation
 
-1. Install [`hvif2png`](./hvif2png.md)
 1. Install the necessary software for HDS
   - Java 21+
   - Postgres Database Server and Client 14+
   - Python 3
   - Docker
-  - `optipng`
 1. Setup the database server
   - Listening on a TCP/IP socket
   - Empty database
@@ -30,11 +28,35 @@ For local development, say in an IDE system, HDS can be launched as a SpringBoot
 
 ## Run from Maven
 
-Run the application server with;
+Build the applications with;
 
 ```
 ./mvnw clean install
+```
+
+Run the graphics application server with;
+
+```
+cd haikudepotserver-server-graphics
+
+SERVER_PORT=8085 \
+HDS_TOOL_HVIF2PNG_PATH=/x/y/z/hvif2png \
+HDS_TOOL_OXIPNG_PATH=/r/s/t/oxipng \
+HDS_GFX_QUANTIZE=false \
+../mvnw \
+spring-boot:run \
+-Dfile.encoding=UTF-8 \
+-Duser.timezone=GMT0 \
+-Djava.awt.headless=true
+```
+
+Run the application server with;
+
+```
 cd haikudepotserver-webapp
+
+SERVER_PORT=8080 \
+HDS_GRAPHICSSERVER_BASE_URI=http://localhost:8085 \
 ../mvnw \
 spring-boot:run \
 -Dfile.encoding=UTF-8 \

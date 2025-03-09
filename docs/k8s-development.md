@@ -4,14 +4,14 @@ These instructions assume a Debian development environment.
 
 No considerations are made in these instructions and notes around system security.
 
-It is possible to run HDS on Kubernetes. This is an ideal way to test-run the system because it is ultimately deployed in Kubernetes. 
+It is possible to run HDS on Kubernetes. This is an ideal way to test-run the system because it is ultimately deployed in Kubernetes.
 
 ## Preparation
 
 1. Install the necessary software
    - Docker
    - [Kubernetes in Docker](https://kind.sigs.k8s.io/) (KIND)
-2. Create a directory on your local disk to store data such as the data for the Postgres database used by HDS; we refer to this as `${K8S_DATA_DIRECTORY}`.
+2. Create a directory on your local disk to store data such as the data for the Postgres database used by HDS; referred to in this text as `${K8S_DATA_DIRECTORY}`.
 
 ## Setup a kubernetes cluster in Docker
 
@@ -36,7 +36,7 @@ Load the manifest YAML files into the Kubernetes cluster in order to stand up th
 kubectl --context kind-haikudepotserver apply \
 -f ./support/local-k8s-kind-development/haikudepotserver-pg-configmap.yaml \
 -f ./support/local-k8s-kind-development/haikudepotserver-pg-volume.yaml \
--f ./support/local-k8s-kind-development/haikudepotserver-pg-app.yaml \
+-f ./support/local-k8s-kind-development/haikudepotserver-pg-app.yaml
 ```
 
 Wait a short while for the system to settle and then check that the database is running.
@@ -85,7 +85,7 @@ kubectl --context kind-haikudepotserver get pods
 
 A pod with prefix `haikudepotserver-webapp` should be listed and eventually `1/1` should be up.
 
-The application can be accessed on `http://localhost:8089` on the development host. Login as `root` with password `zimmer`.
+The application can be accessed on `http://localhost:8090` on the development host. Login as `root` with password `zimmer`.
 
 ## Get a `psql` session on the Postgres database
 
@@ -102,19 +102,32 @@ kubectl --context kind-haikudepotserver logs deployment/haikudepotserver-webapp 
 
 ## Build locally, deploy to the local cluster
 
-In the sample file `haikudepotserver-webapp.yaml` you will see that a remote image is specified for the HDS application. For example, `ghcr.io/haiku/haikudepotserver:1.0.160`. If you want to run a locally build container image, first build and tag the image;
+In the sample files...
 
-```
-docker build --tag haikudepotserver:999.999.999 .
+- `haikudepotserver-webapp.yaml`
+- `haikudepotserver-server-graphics.yaml`
+
+...you will see that a remote image is specified for the application. For example, `ghcr.io/haiku/haikudepotserver:1.0.160`. If you want to run a locally built container image, first build the images. This is done by creating the `Dockerfile`-s and then building the contains and tagging them.
+
+```bash
+make dockerfiles
+docker build -f Dockerfile_webapp --tag haikudepotserver:999.999.999 .
+docker build -f Dockerfile_server_graphics --tag haikudepotserver-server-graphics:999.999.999 .
 ```
 
-Once this build is complete, make the image available in the cluster;
+Once this build is complete, load the built images into the cluster;
 
 ```
 kind load docker-image haikudepotserver:999.999.999 --name haikudepotserver
+kind load docker-image haikudepotserver-server-graphics:999.999.999 --name haikudepotserver-server-graphics
 ```
 
-Now change the image in the `haikudepotserver-webapp.yaml` file to `haikudepotserver:999.999.999` and then re-apply the file to the cluster.
+Change the image specified in the Kubernetes manifests;
+
+- in the `haikudepotserver-webapp.yaml` set the image to `haikudepotserver:999.999.999`
+- in the `haikudepotserver-server-graphics.yaml` set the image to `haikudepotserver-server-graphics:999.999.999`
+
+and then re-apply these two manifests to the cluster.
 
 ## Setup and import a repository
 
