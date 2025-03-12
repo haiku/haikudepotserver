@@ -1,5 +1,5 @@
 /*
- * Copyright 2024, Andrew Lindesay
+ * Copyright 2024-2025, Andrew Lindesay
  * Distributed under the terms of the MIT License.
  */
 package org.haiku.haikudepotserver.graphics.bitmap;
@@ -26,7 +26,7 @@ public class PngThumbnailServiceFactory implements FactoryBean<PngThumbnailServi
             return new ServerPngThumbnailService(graphicsServerBaseUri);
         }
 
-        return new ImgScalrPngThumbnailService();
+        return new FallbackThumbnailServiceImpl();
     }
 
     @Override

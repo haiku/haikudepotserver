@@ -1,5 +1,5 @@
 /*
- * Copyright 2018-2024, Andrew Lindesay
+ * Copyright 2018-2025, Andrew Lindesay
  * Distributed under the terms of the MIT License.
  */
 
@@ -18,14 +18,10 @@ public class PngOptimizationServiceFactory implements FactoryBean<PngOptimizatio
 
     protected final static Logger LOGGER = LoggerFactory.getLogger(PngOptimizationServiceFactory.class);
 
-    private final String optiPngPath;
-
     private final String graphicsServerBaseUri;
 
     public PngOptimizationServiceFactory(
-            String optiPngPath,
             String graphicsServerBaseUri) {
-        this.optiPngPath = optiPngPath;
         this.graphicsServerBaseUri = graphicsServerBaseUri;
     }
 
@@ -34,11 +30,6 @@ public class PngOptimizationServiceFactory implements FactoryBean<PngOptimizatio
         if (StringUtils.isNotBlank(graphicsServerBaseUri)) {
             LOGGER.info("will use graphics server [{}]", graphicsServerBaseUri);
             return new ServerOptimizationServiceImpl(graphicsServerBaseUri);
-        }
-
-        if(StringUtils.isNotBlank(optiPngPath)) {
-            LOGGER.info("will use optipng [{}]", optiPngPath);
-            return new OptipngPngOptimizationServiceImpl(optiPngPath);
         }
 
         LOGGER.info("will no-op png optimization");

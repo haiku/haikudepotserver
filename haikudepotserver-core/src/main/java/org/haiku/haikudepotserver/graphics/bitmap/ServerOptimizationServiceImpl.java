@@ -1,10 +1,11 @@
 /*
- * Copyright 2024, Andrew Lindesay
+ * Copyright 2024-2025, Andrew Lindesay
  * Distributed under the terms of the MIT License.
  */
 package org.haiku.haikudepotserver.graphics.bitmap;
 
 import com.google.common.base.Preconditions;
+import com.google.common.io.ByteStreams;
 import com.google.common.net.HttpHeaders;
 import com.google.common.net.MediaType;
 import org.haiku.haikudepotserver.graphics.ImageHelper;
@@ -12,6 +13,8 @@ import org.springframework.http.HttpStatusCode;
 import org.springframework.web.util.UriComponentsBuilder;
 
 import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
 import java.net.URI;
 import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
@@ -44,26 +47,21 @@ public class ServerOptimizationServiceImpl implements PngOptimizationService {
     }
 
     @Override
-    public byte[] optimize(byte[] input) throws IOException {
+    public void optimize(InputStream input, OutputStream output) throws IOException {
         Preconditions.checkArgument(null != input, "expected the input data to be provided");
-
-        // checks to make sure that the image is actually a PNG.
-
-        if (null == imageHelper.derivePngSize(input)) {
-            throw new IOException("data is not a png");
-        }
+        Preconditions.checkArgument(null != output, "expected the output data to be provided");
 
         HttpRequest request = HttpRequest.newBuilder()
                 .uri(uri)
                 .header(HttpHeaders.CONTENT_TYPE, MediaType.PNG.toString())
-                .POST(HttpRequest.BodyPublishers.ofByteArray(input))
+                .POST(HttpRequest.BodyPublishers.ofInputStream(() -> input))
                 .build();
 
         try {
-            HttpResponse<byte[]> response = httpClient.send(request, HttpResponse.BodyHandlers.ofByteArray());
+            HttpResponse<InputStream> response = httpClient.send(request, HttpResponse.BodyHandlers.ofInputStream());
 
             if (HttpStatusCode.valueOf(response.statusCode()).is2xxSuccessful()) {
-                return response.body();
+                ByteStreams.copy(response.body(), output);
             }
 
             throw new IOException("the request to the server to produce the image optimization returns ["

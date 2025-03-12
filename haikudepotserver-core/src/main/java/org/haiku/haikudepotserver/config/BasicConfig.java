@@ -67,20 +67,15 @@ public class BasicConfig {
 
     @Bean
     public PngOptimizationService pngOptimizationService(
-            @Value("${hds.optipng.path:}") String optiPngPath,
             @Value("${hds.graphics-server.base-uri:}") String graphicsServerBaseUri) {
         return new PngOptimizationServiceFactory(
-                optiPngPath,
                 graphicsServerBaseUri).getObject();
     }
 
     @Bean
     public HvifRenderingService hvifRenderingService(
-            @Value("${hds.hvif2png.path:}") String hvif2pngPath,
             @Value("${hds.graphics-server.base-uri:}") String graphicsServerBaseUri) throws Exception {
-        return new HvifRenderingServiceFactory(
-                hvif2pngPath,
-                graphicsServerBaseUri).getObject();
+        return new HvifRenderingServiceFactory(graphicsServerBaseUri).getObject();
     }
 
     @Bean

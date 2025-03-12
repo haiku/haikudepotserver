@@ -1,10 +1,11 @@
 /*
- * Copyright 2024, Andrew Lindesay
+ * Copyright 2024-2025, Andrew Lindesay
  * Distributed under the terms of the MIT License.
  */
 package org.haiku.haikudepotserver.graphics.bitmap;
 
 import com.google.common.base.Preconditions;
+import com.google.common.io.ByteStreams;
 import com.google.common.net.HttpHeaders;
 import com.google.common.net.MediaType;
 import org.haiku.haikudepotserver.graphics.ImageHelper;
@@ -12,6 +13,9 @@ import org.springframework.http.HttpStatusCode;
 import org.springframework.web.util.UriComponentsBuilder;
 
 import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
+import java.io.PushbackInputStream;
 import java.net.URI;
 import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
@@ -42,48 +46,54 @@ public class ServerPngThumbnailService implements PngThumbnailService{
     }
 
     @Override
-    public byte[] thumbnail(byte[] input, int width, int height) throws IOException {
+    public void thumbnail(InputStream input, OutputStream output, int width, int height) throws IOException {
         Preconditions.checkArgument(null != input);
+        Preconditions.checkArgument(null != output);
         Preconditions.checkArgument(width > 0, "width  must be greater than 0");
         Preconditions.checkArgument(height > 0, "height must be greater than 0");
 
+        PushbackInputStream pushbackInputStream = new PushbackInputStream(input, 24);
+        byte[] dataHeader = new byte[24];
+        ByteStreams.readFully(pushbackInputStream, dataHeader);
+        pushbackInputStream.unread(dataHeader);
+
         // checks to make sure that the image is actually a PNG.
 
-        ImageHelper.Size size = imageHelper.derivePngSize(input);
+        ImageHelper.Size size = imageHelper.derivePngSize(dataHeader);
 
         if (null == size) {
             throw new IOException("unable to derive size for png image");
         }
 
         // check to see if the screenshot needs to be resized to fit.
-        if (size.width > width || size.height > height) {
-            URI renderUri = UriComponentsBuilder.fromUri(uri)
-                    .queryParam(KEY_HEIGHT, Integer.toString(height))
-                    .queryParam(KEY_WIDTH, Integer.toString(width))
-                    .build().toUri();
-
-            HttpRequest request = HttpRequest.newBuilder()
-                    .uri(renderUri)
-                    .header(HttpHeaders.CONTENT_TYPE, MediaType.PNG.toString())
-                    .POST(HttpRequest.BodyPublishers.ofByteArray(input))
-                    .build();
-
-            try {
-                HttpResponse<byte[]> response = httpClient.send(request, HttpResponse.BodyHandlers.ofByteArray());
-
-                if (HttpStatusCode.valueOf(response.statusCode()).is2xxSuccessful()) {
-                    return response.body();
-                }
-
-                throw new IOException("the request to the server to produce the thumbnail returns ["
-                        + response.statusCode() + "]");
-            } catch (InterruptedException ie) {
-                Thread.currentThread().interrupt();
-                throw new IOException("optimization was cancelled", ie);
-            }
+        if (size.width <= width || size.height <= height) {
+            ByteStreams.copy(input, output);
         }
 
-        return input;
+        URI renderUri = UriComponentsBuilder.fromUri(uri)
+                .queryParam(KEY_HEIGHT, Integer.toString(height))
+                .queryParam(KEY_WIDTH, Integer.toString(width))
+                .build().toUri();
+
+        HttpRequest request = HttpRequest.newBuilder()
+                .uri(renderUri)
+                .header(HttpHeaders.CONTENT_TYPE, MediaType.PNG.toString())
+                .POST(HttpRequest.BodyPublishers.ofInputStream(() -> pushbackInputStream))
+                .build();
+
+        try {
+            HttpResponse<InputStream> response = httpClient.send(request, HttpResponse.BodyHandlers.ofInputStream());
+
+            if (HttpStatusCode.valueOf(response.statusCode()).is2xxSuccessful()) {
+                ByteStreams.copy(response.body(), output);
+            }
+
+            throw new IOException("the request to the server to produce the thumbnail returns ["
+                    + response.statusCode() + "]");
+        } catch (InterruptedException ie) {
+            Thread.currentThread().interrupt();
+            throw new IOException("optimization was cancelled", ie);
+        }
     }
 
 }

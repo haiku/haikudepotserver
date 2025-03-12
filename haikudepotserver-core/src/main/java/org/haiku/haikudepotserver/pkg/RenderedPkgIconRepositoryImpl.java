@@ -1,5 +1,5 @@
 /*
- * Copyright 2018-2023, Andrew Lindesay
+ * Copyright 2018-2025, Andrew Lindesay
  * Distributed under the terms of the MIT License.
  */
 
@@ -14,12 +14,10 @@ import org.haiku.haikudepotserver.dataobjects.MediaType;
 import org.haiku.haikudepotserver.dataobjects.PkgIcon;
 import org.haiku.haikudepotserver.dataobjects.PkgSupplement;
 import org.haiku.haikudepotserver.dataobjects.auto._PkgIcon;
-import org.haiku.haikudepotserver.graphics.bitmap.PngOptimizationService;
 import org.haiku.haikudepotserver.graphics.hvif.HvifRenderingService;
 import org.springframework.stereotype.Repository;
 
-import java.io.IOException;
-import java.io.InputStream;
+import java.io.*;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Optional;
@@ -29,7 +27,6 @@ import java.util.concurrent.TimeUnit;
 public class RenderedPkgIconRepositoryImpl implements RenderedPkgIconRepository {
 
     private final HvifRenderingService hvifRenderingService;
-    private final PngOptimizationService pngOptimizationService;
     private final Cache<String, Cache<Integer, Optional<byte[]>>> cache;
 
     /**
@@ -40,9 +37,8 @@ public class RenderedPkgIconRepositoryImpl implements RenderedPkgIconRepository 
 
     private byte[] genericHvif;
 
-    public RenderedPkgIconRepositoryImpl(HvifRenderingService hvifRenderingService, PngOptimizationService pngOptimizationService) {
+    public RenderedPkgIconRepositoryImpl(HvifRenderingService hvifRenderingService) {
         this.hvifRenderingService = hvifRenderingService;
-        this.pngOptimizationService = pngOptimizationService;
 
         cache = CacheBuilder
                 .newBuilder()
@@ -101,7 +97,7 @@ public class RenderedPkgIconRepositoryImpl implements RenderedPkgIconRepository 
         try {
             return genericCache.get(
                     size,
-                    () -> pngOptimizationService.optimize(hvifRenderingService.render(size, getGenericHvif())));
+                    () -> hvifRenderingService.render(size, getGenericHvif()));
         }
         catch(Exception e) {
             throw new IllegalStateException("unable to render a generic image", e);
@@ -131,7 +127,7 @@ public class RenderedPkgIconRepositoryImpl implements RenderedPkgIconRepository 
 
                     if (hvifPkgIconOptional.isPresent()) {
                         byte[] hvifData = hvifPkgIconOptional.get().getPkgIconImage().getData();
-                        byte[] pngData = pngOptimizationService.optimize(hvifRenderingService.render(size, hvifData));
+                        byte[] pngData = hvifRenderingService.render(size, hvifData);
                         return Optional.of(pngData);
                     }
                 }

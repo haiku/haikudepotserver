@@ -1,5 +1,5 @@
 /*
- * Copyright 2018-2024, Andrew Lindesay
+ * Copyright 2018-2025, Andrew Lindesay
  * Distributed under the terms of the MIT License.
  */
 
@@ -27,9 +27,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.OutputStream;
+import java.io.*;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -74,7 +72,14 @@ public class PkgScreenshotServiceImpl implements PkgScreenshotService {
             if (pkgScreenshotImage.getMediaType().getCode().equals(com.google.common.net.MediaType.PNG.withoutParameters().toString())) {
 
                 byte[] originalImageData = pkgScreenshotImage.getData();
-                byte[] optimizedData = pngOptimizationService.optimize(originalImageData);
+                byte[] optimizedData;
+
+                try (
+                        InputStream input = new ByteArrayInputStream(originalImageData);
+                        ByteArrayOutputStream output = new ByteArrayOutputStream()) {
+                    pngOptimizationService.optimize(input, output);
+                    optimizedData = output.toByteArray();
+                }
 
                 if (optimizedData.length < originalImageData.length) {
                     pkgScreenshotImage.setData(optimizedData);
@@ -132,10 +137,9 @@ public class PkgScreenshotServiceImpl implements PkgScreenshotService {
             throw new IllegalStateException("the screenshot system only supports png images at the present time");
         }
 
-        output.write(pngThumbnailService.thumbnail(
-                pkgScreenshotImageOptional.get().getData(),
-                targetWidth, targetHeight
-        ));
+        try (InputStream inputStream = new ByteArrayInputStream(pkgScreenshotImageOptional.get().getData())) {
+            pngThumbnailService.thumbnail(inputStream, output, targetWidth, targetHeight);
+        }
     }
 
     /**

@@ -12,6 +12,7 @@ import java.util.Arrays;
  * assembly of images.</p>
  */
 
+@Deprecated
 public class IndexBitmap {
 
     private final int width;

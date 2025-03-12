@@ -1,14 +1,15 @@
 /*
- * Copyright 2018, Andrew Lindesay
+ * Copyright 2018-2025, Andrew Lindesay
  * Distributed under the terms of the MIT License.
  */
 
 package org.haiku.haikudepotserver.graphics.hvif;
 
-import com.google.common.io.ByteStreams;
+import org.haiku.haikudepotserver.graphics.ImageHelper;
 
+import java.io.ByteArrayOutputStream;
 import java.io.IOException;
-import java.io.InputStream;
+import java.util.Random;
 
 /**
  * <p>This rendering service will render the HVIF as a "placeholder" bitmap.  It is a dummy
@@ -17,14 +18,21 @@ import java.io.InputStream;
 
 class FallbackHvifRenderingServiceImpl implements HvifRenderingService {
 
-    private byte[] generic(int size) throws IOException {
-        String resourcePath = String.format("/img/generic%derror.png",size);
-        try (InputStream inputStream = FallbackHvifRenderingServiceImpl.class.getResourceAsStream(resourcePath)) {
-            if(null==inputStream) {
-                throw new IllegalStateException("unable to find the fallback resource; " + resourcePath);
-            }
+    private final Random random = new Random();
 
-            return ByteStreams.toByteArray(inputStream);
+    private final ImageHelper imageHelper = new ImageHelper();
+
+    private byte[] generic(int size) throws IOException {
+
+        try (ByteArrayOutputStream output = new ByteArrayOutputStream()) {
+            imageHelper.createFilledPng(
+                    output,
+                    size,
+                    size,
+                    random.nextInt(0, 256),
+                    random.nextInt(0, 256),
+                    random.nextInt(0, 256));
+            return output.toByteArray();
         }
     }
 

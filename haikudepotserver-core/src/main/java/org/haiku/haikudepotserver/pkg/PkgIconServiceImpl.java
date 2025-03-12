@@ -122,11 +122,6 @@ public class PkgIconServiceImpl implements PkgIconService {
                             + " match the expected size", pkgSupplement.getBasePkgName());
                     throw new BadPkgIconException("size of image was not as expected");
                 }
-                try {
-                    imageData = pngOptimizationService.optimize(imageData);
-                } catch (IOException ioe) {
-                    throw new RuntimeException("the png optimization process has failed; ", ioe);
-                }
                 size = pngSize.width;
                 pkgIconOptional = pkgSupplement.tryGetPkgIcon(mediaType, pngSize.width);
             }

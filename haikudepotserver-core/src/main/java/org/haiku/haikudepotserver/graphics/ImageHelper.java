@@ -1,13 +1,21 @@
 /*
- * Copyright 2013-2023, Andrew Lindesay
+ * Copyright 2013-2025, Andrew Lindesay
  * Distributed under the terms of the MIT License.
  */
 
 package org.haiku.haikudepotserver.graphics;
 
+import ar.com.hjg.pngj.ImageInfo;
+import ar.com.hjg.pngj.ImageLineInt;
+import ar.com.hjg.pngj.PngWriter;
+import ar.com.hjg.pngj.chunks.PngChunkPLTE;
 import com.google.common.base.Preconditions;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import java.io.IOException;
+import java.io.OutputStream;
+import java.util.Arrays;
 
 /**
  * <p>This class provides simple, static manipulations or inspections of image data.</p>
@@ -101,6 +109,41 @@ public class ImageHelper {
                         | (0xff & data[offset + 1]) << 16
                         | (0xff & data[offset + 2]) << 8
                         | (0xff & data[offset + 3]);
+    }
+
+    /**
+     * <p>Produces a rectangle PNG of the specified size with the interior filled with the
+     * colour specified.</p>
+     */
+
+    public void createFilledPng(OutputStream output, int width, int height, int r, int g, int b) throws IOException {
+        ImageInfo imi = new ImageInfo(
+                width, height,
+                2, false, false, true);
+
+        PngWriter png = new PngWriter(output, imi);
+
+        png.getMetadata().setDpi(72);
+        png.getMetadata().setTimeNow();
+
+        PngChunkPLTE palette = png.getMetadata().createPLTEChunk();
+        palette.setNentries(2);
+        palette.setEntry(0, 0, 0, 0);
+        palette.setEntry(1, r, g, b);
+
+        ImageLineInt topBottomLine = new ImageLineInt(imi);
+        Arrays.fill(topBottomLine.getScanline(), 0, width, 0);
+        ImageLineInt middleLine = new ImageLineInt(imi);
+        Arrays.fill(middleLine.getScanline(), 0, width, 1);
+        middleLine.getScanline()[0] = 0;
+        middleLine.getScanline()[width - 1] = 0;
+
+        png.writeRow(topBottomLine);
+        for (int i = 0; i < height - 2; i++)
+            png.writeRow(middleLine);
+        png.writeRow(topBottomLine);
+
+        png.end();
     }
 
     public static class Size {
