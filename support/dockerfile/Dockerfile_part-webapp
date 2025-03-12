@@ -13,7 +13,7 @@ FROM java_base AS runtime
 
 RUN apt-get update && \
     apt-get -y install temurin-21-jre && \
-    apt-get -y install optipng libpng16-16 curl fontconfig fonts-dejavu-core
+    apt-get -y install curl fontconfig fonts-dejavu-core
 
 ENV HDS_B_HTTP_PORT=8080
 ENV HDS_B_HTTP_ACTUATOR_PORT=8081
@@ -23,11 +23,7 @@ RUN mkdir ${HDS_B_INSTALL_ROOT}
 COPY --from=java_maven_build_webapp /hds-src/haikudepotserver-core/target/classes/build.properties ${HDS_B_INSTALL_ROOT}
 COPY --from=java_maven_build_webapp /hds-src/haikudepotserver-webapp/target/haikudepotserver-webapp-*.jar ${HDS_B_INSTALL_ROOT}/app.jar
 
-ENV HDS_B_HVIF2PNG_VERSION="hvif2png-hrev57235-linux-x86_64"
-ENV HDS_B_INSTALL_HVIF2PNG_PATH "${HDS_B_INSTALL_ROOT}/hvif2png-hrev57235/bin/hvif2png.sh"
-
 COPY ./support/deployment/config.properties ${HDS_B_INSTALL_ROOT}
-ADD ./support/deployment/${HDS_B_HVIF2PNG_VERSION}.tgz ${HDS_B_INSTALL_ROOT}
 
 CMD \
     java \
@@ -38,7 +34,6 @@ CMD \
     -Djava.net.preferIPv4Stack=true \
     -Djava.awt.headless=true \
     -Dconfig.properties=file://${HDS_B_INSTALL_ROOT}/config.properties \
-    -Dhds.hvif2png.path=${HDS_B_INSTALL_HVIF2PNG_PATH} \
     -Dserver.port=${HDS_B_HTTP_PORT} \
     -Dmanagement.server.port=${HDS_B_HTTP_ACTUATOR_PORT} \
     -jar \
