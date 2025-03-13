@@ -23,6 +23,6 @@ class NoOpPngOptimizationServiceImpl implements PngOptimizationService {
 
     @Override
     public void optimize(InputStream input, OutputStream output) throws IOException {
-        ByteStreams.copy(input, output);
+        input.transferTo(output);
     }
 }

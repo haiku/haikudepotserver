@@ -42,14 +42,14 @@ public class ToolHelper {
 
         Thread.ofVirtual().start(() -> {
             try (OutputStream processOutputStream = processes.getFirst().getOutputStream()) {
-                ByteStreams.copy(dataFromRequest, processOutputStream);
+                dataFromRequest.transferTo(processOutputStream);
             } catch (IOException e) {
                 throw new UncheckedIOException("unable to write to the tools input stream", e);
             }
         });
 
         try (InputStream processInputStream = processes.getLast().getInputStream()) {
-            ByteStreams.copy(processInputStream, dataForResponse);
+            processInputStream.transferTo(dataForResponse);
         }
     }
 

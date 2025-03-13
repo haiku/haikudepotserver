@@ -61,7 +61,9 @@ public class ServerOptimizationServiceImpl implements PngOptimizationService {
             HttpResponse<InputStream> response = httpClient.send(request, HttpResponse.BodyHandlers.ofInputStream());
 
             if (HttpStatusCode.valueOf(response.statusCode()).is2xxSuccessful()) {
-                ByteStreams.copy(response.body(), output);
+                try (InputStream responseStream = response.body()) {
+                    responseStream.transferTo(output);
+                }
             }
 
             throw new IOException("the request to the server to produce the image optimization returns ["

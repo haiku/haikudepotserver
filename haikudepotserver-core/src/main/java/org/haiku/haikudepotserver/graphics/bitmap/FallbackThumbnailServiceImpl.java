@@ -15,14 +15,14 @@ import java.util.Random;
  * This will produce a placeholder image instead of the thumbnail of the actual image.
  */
 
-public class FallbackThumbnailServiceImpl implements PngThumbnailService {
+public class FallbackThumbnailServiceImpl extends AbstractThumbnailServiceImpl {
 
     private final Random random = new Random();
 
     private final ImageHelper imageHelper = new ImageHelper();
 
     @Override
-    public void thumbnail(InputStream input, OutputStream output, int width, int height) throws IOException {
+    public void thumbnailIgnoringExistingSizes(InputStream input, OutputStream output, int width, int height) throws IOException {
         imageHelper.createFilledPng(
                 output,
                 width,

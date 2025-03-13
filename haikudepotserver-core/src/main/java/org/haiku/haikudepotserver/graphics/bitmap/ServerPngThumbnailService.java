@@ -26,7 +26,7 @@ import java.net.http.HttpResponse;
  * produce the thumbnail. See <code>haikudepotserver-server-graphics</code>.</p>
  */
 
-public class ServerPngThumbnailService implements PngThumbnailService{
+public class ServerPngThumbnailService extends AbstractThumbnailServiceImpl {
 
     private final static String[] PATH_COMPONENTS = new String[] {"__gfx", "thumbnail"};
 
@@ -46,29 +46,7 @@ public class ServerPngThumbnailService implements PngThumbnailService{
     }
 
     @Override
-    public void thumbnail(InputStream input, OutputStream output, int width, int height) throws IOException {
-        Preconditions.checkArgument(null != input);
-        Preconditions.checkArgument(null != output);
-        Preconditions.checkArgument(width > 0, "width  must be greater than 0");
-        Preconditions.checkArgument(height > 0, "height must be greater than 0");
-
-        PushbackInputStream pushbackInputStream = new PushbackInputStream(input, 24);
-        byte[] dataHeader = new byte[24];
-        ByteStreams.readFully(pushbackInputStream, dataHeader);
-        pushbackInputStream.unread(dataHeader);
-
-        // checks to make sure that the image is actually a PNG.
-
-        ImageHelper.Size size = imageHelper.derivePngSize(dataHeader);
-
-        if (null == size) {
-            throw new IOException("unable to derive size for png image");
-        }
-
-        // check to see if the screenshot needs to be resized to fit.
-        if (size.width <= width || size.height <= height) {
-            ByteStreams.copy(input, output);
-        }
+    public void thumbnailIgnoringExistingSizes(InputStream input, OutputStream output, int width, int height) throws IOException {
 
         URI renderUri = UriComponentsBuilder.fromUri(uri)
                 .queryParam(KEY_HEIGHT, Integer.toString(height))
@@ -78,14 +56,16 @@ public class ServerPngThumbnailService implements PngThumbnailService{
         HttpRequest request = HttpRequest.newBuilder()
                 .uri(renderUri)
                 .header(HttpHeaders.CONTENT_TYPE, MediaType.PNG.toString())
-                .POST(HttpRequest.BodyPublishers.ofInputStream(() -> pushbackInputStream))
+                .POST(HttpRequest.BodyPublishers.ofInputStream(() -> input))
                 .build();
 
         try {
             HttpResponse<InputStream> response = httpClient.send(request, HttpResponse.BodyHandlers.ofInputStream());
 
             if (HttpStatusCode.valueOf(response.statusCode()).is2xxSuccessful()) {
-                ByteStreams.copy(response.body(), output);
+                try (InputStream responseStream = response.body()){
+                    responseStream.transferTo(output);
+                }
             }
 
             throw new IOException("the request to the server to produce the thumbnail returns ["

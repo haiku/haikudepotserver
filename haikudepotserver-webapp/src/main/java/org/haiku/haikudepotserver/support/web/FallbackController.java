@@ -134,7 +134,7 @@ public class FallbackController {
 
         try (InputStream inputStream = faviconResource.getInputStream()) {
             if (method != RequestMethod.HEAD) {
-                ByteStreams.copy(inputStream, response.getOutputStream());
+                inputStream.transferTo(response.getOutputStream());
             }
         }
     }

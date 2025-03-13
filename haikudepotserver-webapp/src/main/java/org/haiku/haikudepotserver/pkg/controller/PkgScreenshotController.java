@@ -37,6 +37,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseStatus;
 
 import java.io.IOException;
+import java.io.OutputStream;
 
 @Controller
 @RequestMapping(value = {
@@ -117,8 +118,11 @@ public class PkgScreenshotController extends AbstractController {
                 pkgScreenshotService.writePkgScreenshotImage(byteCounter, context, screenshot, targetWidth, targetHeight);
                 response.setContentLength((int) byteCounter.getCounter());
             }
-            case GET ->
-                    pkgScreenshotService.writePkgScreenshotImage(response.getOutputStream(), context, screenshot, targetWidth, targetHeight);
+            case GET -> {
+                OutputStream outputStream = response.getOutputStream();
+                pkgScreenshotService.writePkgScreenshotImage(outputStream, context, screenshot, targetWidth, targetHeight);
+                outputStream.flush();
+            }
             default -> throw new IllegalStateException("unhandled request method; " + requestMethod);
         }
 
@@ -159,7 +163,6 @@ public class PkgScreenshotController extends AbstractController {
                 targetHeight,
                 format,
                 screenshotCode);
-
     }
 
     /**

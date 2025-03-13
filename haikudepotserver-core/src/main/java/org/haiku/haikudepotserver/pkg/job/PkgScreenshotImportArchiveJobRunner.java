@@ -286,7 +286,7 @@ public class PkgScreenshotImportArchiveJobRunner extends AbstractJobRunner<PkgSc
             HashingInputStream hashingInputStream = new HashingInputStream(HASH_FUNCTION, archiveInputStream);
 
             try {
-                ByteStreams.copy(hashingInputStream, ByteStreams.nullOutputStream());
+                hashingInputStream.transferTo(ByteStreams.nullOutputStream());
             } catch(IOException ioe) {
                 throw new UncheckedIOException(ioe);
             }

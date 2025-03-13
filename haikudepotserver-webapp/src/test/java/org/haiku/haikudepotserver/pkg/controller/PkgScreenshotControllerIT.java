@@ -5,6 +5,8 @@
 
 package org.haiku.haikudepotserver.pkg.controller;
 
+import com.google.common.hash.HashCode;
+import com.google.common.hash.Hashing;
 import com.google.common.net.MediaType;
 import org.apache.cayenne.ObjectContext;
 import org.fest.assertions.Assertions;
@@ -108,8 +110,9 @@ public class PkgScreenshotControllerIT extends AbstractIntegrationTest {
         // -----------------------------------
 
         Assertions.assertThat(response.getContentType()).isEqualTo(MediaType.PNG.toString());
-        Assertions.assertThat(response.getContentAsByteArray()).isEqualTo(imageData);
-
+        HashCode responseData = Hashing.sha256().hashBytes(response.getContentAsByteArray());
+        HashCode sourceImageData = Hashing.sha256().hashBytes(imageData);
+        Assertions.assertThat(responseData).isEqualTo(sourceImageData);
     }
 
     @Test
