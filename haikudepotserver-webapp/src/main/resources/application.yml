@@ -41,3 +41,4 @@ management:
         include:
           - health
           - metrics
+          - hdsmaintenance

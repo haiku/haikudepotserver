@@ -265,3 +265,17 @@ curl -X POST -H "Content-Type: image/png" --data-binary @file.png \
 The HTTP status code `200` indicates that the screenshot was uploaded. In this case a header `X-HaikuDepotServer-ScreenshotCode` will also be returned which contains the screenshot's code.
 
 The HTTP status code `415` indicates that the size of the image was too large or the format was not supplied, `404` indicates that the package was unable to be found and `400` indicates that the package name was not supplied.
+
+## Actuator
+
+SpringBoot actuator is an API, in the case of HDS exposed on a **different port**, which allows for observability and maintenance. In addition to any standard actuator endpoints, HDS also offers a maintenance service. It is possible to send HTTP `POST` requests to the endpoint to trigger the daily and hourly maintenance within the application.
+
+```
+curl -X POST -H "Content-Type: application/json" \
+--data '{"type":"HOURLY"}' "${BASE_URL}/actuator/hdsmaintenance"
+```
+
+Possible values for `type` are;
+
+- `HOURLY`
+- `DAILY`
