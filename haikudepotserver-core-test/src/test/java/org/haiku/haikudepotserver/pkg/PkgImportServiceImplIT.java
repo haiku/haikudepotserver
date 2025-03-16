@@ -356,7 +356,8 @@ public class PkgImportServiceImplIT extends AbstractIntegrationTest {
     }
 
     /**
-     * <p>What this test is checking is that on a second import, the import-timestamp is not updated.</p>
+     * <p>What this test is checking is that if there is no change to a pacakge version, that the import timestamp should
+     * not be updated.</p>
      */
 
     @Test
@@ -445,6 +446,82 @@ public class PkgImportServiceImplIT extends AbstractIntegrationTest {
                 }
             }
 
+        }
+    }
+
+    /**
+     * <p>If a package already has a URL then an import with no URL should remove the URLs that are already present.</p>
+     */
+
+    @Test
+    public void testImport_removalOfUrl() {
+
+        var testData = integrationTestSupportService.createStandardTestData();
+
+        // add a url to the pkg 3 version.
+
+        {
+            ObjectContext context = serverRuntime.newContext();
+
+            String pkgUrlTypeCode = org.haiku.pkg.model.PkgUrlType.HOMEPAGE.name().toLowerCase();
+            PkgUrlType pkgUrlType = PkgUrlType.getByCode(context, pkgUrlTypeCode).orElseThrow(IllegalStateException::new);
+
+            org.haiku.haikudepotserver.dataobjects.PkgVersion pkgVersion
+                    = org.haiku.haikudepotserver.dataobjects.PkgVersion.get(context, testData.pkg3Version1.getObjectId());
+            PkgVersionUrl pkgVersionUrl = context.newObject(PkgVersionUrl.class);
+            pkgVersionUrl.setName("Harry");
+            pkgVersionUrl.setUrl("http://www.example.com");
+            pkgVersionUrl.setPkgUrlType(pkgUrlType);
+            pkgVersion.addToPkgVersionUrls(pkgVersionUrl);
+
+            context.commitChanges();
+        }
+
+        // update it with no url
+
+        Pkg inputPackage = new Pkg(
+                testData.pkg3.getName(),
+                new PkgVersion(
+                        testData.pkg3Version1.getMajor(),
+                        testData.pkg3Version1.getMinor(),
+                        testData.pkg3Version1.getMicro(),
+                        testData.pkg3Version1.getPreRelease(),
+                        testData.pkg3Version1.getRevision()
+                ),
+                PkgArchitecture.X86_64,
+                null,
+                Collections.emptyList(),
+                Collections.emptyList(),
+                "test-summary-en",
+                "test-description-en",
+                null // <-- note no URL!
+        );
+
+        {
+            ObjectContext context = serverRuntime.newContext();
+            ObjectId repositorySourceObjectId = RepositorySource.getByCode(context, "testreposrc_xyz").getObjectId();
+
+            // ---------------------------------
+
+            pkgImportService.importFrom(
+                    context,
+                    repositorySourceObjectId,
+                    inputPackage,
+                    false);
+
+            // ---------------------------------
+
+            context.commitChanges();
+        }
+
+        // now check to see that the url is no longer present.
+
+        {
+            ObjectContext context = serverRuntime.newContext();
+            org.haiku.haikudepotserver.dataobjects.PkgVersion pkgVersion
+                    = org.haiku.haikudepotserver.dataobjects.PkgVersion.get(context, testData.pkg3Version1.getObjectId());
+            List<PkgVersionUrl> urls = pkgVersion.getPkgVersionUrls();
+            Assertions.assertThat(urls).hasSize(0); // <-- has been removed.
         }
     }
 

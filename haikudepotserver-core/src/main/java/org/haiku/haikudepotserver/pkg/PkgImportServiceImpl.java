@@ -21,6 +21,7 @@ import org.haiku.pkg.AttributeContext;
 import org.haiku.pkg.HpkgFileExtractor;
 import org.haiku.pkg.model.Attribute;
 import org.haiku.pkg.model.AttributeId;
+import org.haiku.pkg.model.PkgUrl;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
@@ -211,18 +212,39 @@ public class PkgImportServiceImpl implements PkgImportService {
                 objectContext,
                 org.haiku.pkg.model.PkgUrlType.HOMEPAGE.name().toLowerCase()).orElseThrow(IllegalStateException::new);
 
-        Optional<PkgVersionUrl> homeUrlOptional = persistedPkgVersion.getPkgVersionUrlForType(pkgUrlType);
+        String url = Optional.ofNullable(pkg.getHomePageUrl())
+                .map(PkgUrl::getUrl)
+                .map(StringUtils::trimToNull)
+                .orElse(null);
 
-        if (null != pkg.getHomePageUrl()) {
-            if (homeUrlOptional.isPresent()) {
-                homeUrlOptional.get().setUrl(pkg.getHomePageUrl().getUrl());
-                homeUrlOptional.get().setName(pkg.getHomePageUrl().getName());
-            } else {
+        String name = Optional.ofNullable(pkg.getHomePageUrl())
+                .map(PkgUrl::getName)
+                .map(StringUtils::trimToNull)
+                .orElse(null);
+
+        if (null != url) {
+            PkgVersionUrl homePkgVersionUrl = persistedPkgVersion.getPkgVersionUrlForType(pkgUrlType).orElse(null);
+
+            if (null == homePkgVersionUrl) {
                 PkgVersionUrl persistedPkgVersionUrl = objectContext.newObject(PkgVersionUrl.class);
-                persistedPkgVersionUrl.setUrl(pkg.getHomePageUrl().getUrl());
-                persistedPkgVersionUrl.setName(pkg.getHomePageUrl().getName());
+                persistedPkgVersionUrl.setUrl(url);
+                persistedPkgVersionUrl.setName(name);
                 persistedPkgVersionUrl.setPkgUrlType(pkgUrlType);
                 persistedPkgVersionUrl.setPkgVersion(persistedPkgVersion);
+            } else {
+                if (!StringUtils.equals(homePkgVersionUrl.getUrl(), url)) {
+                    homePkgVersionUrl.setUrl(url);
+                }
+                if (!StringUtils.equals(homePkgVersionUrl.getName(), name)) {
+                    homePkgVersionUrl.setName(name);
+                }
+            }
+        } else {
+            PkgVersionUrl homePkgVersionUrl = persistedPkgVersion.getPkgVersionUrlForType(pkgUrlType).orElse(null);
+
+            if (null != homePkgVersionUrl) {
+                persistedPkgVersion.removeFromPkgVersionUrls(homePkgVersionUrl);
+                objectContext.deleteObject(homePkgVersionUrl);
             }
         }
     }
