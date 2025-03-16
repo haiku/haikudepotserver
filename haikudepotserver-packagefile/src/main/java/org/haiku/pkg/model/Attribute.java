@@ -1,5 +1,5 @@
 /*
- * Copyright 2018-2021, Andrew Lindesay
+ * Copyright 2018-2025, Andrew Lindesay
  * Distributed under the terms of the MIT License.
  */
 
@@ -9,6 +9,7 @@ import com.google.common.base.Preconditions;
 import com.google.common.collect.ImmutableList;
 import org.haiku.pkg.AttributeContext;
 
+import javax.annotation.Nullable;
 import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
@@ -20,11 +21,18 @@ import java.util.stream.Collectors;
 
 public abstract class Attribute {
 
+    /**
+     * <p>This field is able to be <code>null</code> because the HDS code needs to be able
+     * to cope with attribute-ids that are introduced in the Haiku side before they are
+     * introduced in the HDS side.</p>
+     */
+
+    @Nullable
     private final AttributeId attributeId;
 
     private List<Attribute> childAttributes = Collections.emptyList();
 
-    public Attribute(AttributeId attributeId) {
+    public Attribute(@Nullable AttributeId attributeId) {
         super();
         this.attributeId = attributeId;
     }
@@ -68,7 +76,11 @@ public abstract class Attribute {
 
     @Override
     public String toString() {
-        return getAttributeId().getName() + " : " + getAttributeType().toString();
+        return String.format("%s:%s",
+                Optional.ofNullable(getAttributeId())
+                        .map(AttributeId::name)
+                        .orElse("unknown"),
+            getAttributeType().toString());
     }
 
 }

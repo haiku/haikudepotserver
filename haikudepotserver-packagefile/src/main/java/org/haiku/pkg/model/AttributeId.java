@@ -1,9 +1,12 @@
 /*
- * Copyright 2018, Andrew Lindesay
+ * Copyright 2018-2025, Andrew Lindesay
  * Distributed under the terms of the MIT License.
  */
 
 package org.haiku.pkg.model;
+
+import java.util.Arrays;
+import java.util.Optional;
 
 /**
  * <p>These constants define the meaning of an {@link Attribute}.  The numerical value is a value that comes up
@@ -17,6 +20,8 @@ package org.haiku.pkg.model;
  */
 
 public enum AttributeId {
+
+    // These are defined in the `PackageAttributes.h` file in the Haiku source.
 
     DIRECTORY_ENTRY(0, "dir:entry", AttributeType.STRING),
     FILE_TYPE(1, "file:type", AttributeType.INT),
@@ -74,6 +79,14 @@ public enum AttributeId {
     PACKAGE_IS_WRITABLE_DIRECTORY(53, "package:is-writable-directory", AttributeType.INT),
     PACKAGE(54, "package", AttributeType.STRING);
 
+    /**
+     * <p>Based on the enum values, this is the highest code that is known.</p>
+     */
+    private final static int MAX_VALID_ATTRIBUTE_CODE = Arrays.stream(values())
+            .mapToInt(AttributeId::getCode)
+            .max()
+            .orElse(-1);
+
     private final int code;
     private final String name;
     private final AttributeType attributeType;
@@ -94,6 +107,13 @@ public enum AttributeId {
 
     public AttributeType getAttributeType() {
         return attributeType;
+    }
+
+    public static Optional<AttributeId> tryGetForCode(int code) {
+        if (code > MAX_VALID_ATTRIBUTE_CODE) {
+            return Optional.empty();
+        }
+        return Optional.of(values()[code]);
     }
 
 }

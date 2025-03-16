@@ -1,19 +1,21 @@
 /*
- * Copyright 2018-2023, Andrew Lindesay
+ * Copyright 2018-2025, Andrew Lindesay
  * Distributed under the terms of the MIT License.
  */
 
 package org.haiku.pkg;
 
-import com.google.common.base.Charsets;
 import com.google.common.base.Preconditions;
 import com.google.common.collect.ImmutableList;
 import com.google.common.io.ByteArrayDataOutput;
 import com.google.common.io.ByteStreams;
 import org.haiku.pkg.heap.HeapCoordinates;
 import org.haiku.pkg.model.*;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.math.BigInteger;
+import java.nio.charset.StandardCharsets;
 import java.util.Iterator;
 import java.util.List;
 
@@ -31,6 +33,8 @@ import java.util.List;
  */
 
 public class AttributeIterator {
+
+    private static final Logger LOGGER = LoggerFactory.getLogger(AttributeIterator.class);
 
     private final static int ATTRIBUTE_TYPE_INVALID = 0;
     private final static int ATTRIBUTE_TYPE_INT = 1;
@@ -102,21 +106,14 @@ public class AttributeIterator {
 
             int encoding = deriveAttributeTagEncoding(tag);
             int id = deriveAttributeTagId(tag);
+            AttributeId attributeId = AttributeId.tryGetForCode(id).orElse(null);
 
-            if (id < 0 || id >= AttributeId.values().length) {
-                throw new HpkException("illegal id; " + id);
+            if (null == attributeId) {
+                LOGGER.warn("encountered unknown attribute [{}]", id);
             }
-            AttributeId attributeId = AttributeId.values()[id];
+
             result = readAttributeByTagType(deriveAttributeTagType(tag), encoding, attributeId);
             ensureAttributeType(result);
-
-            if(result.getAttributeId().getAttributeType() != result.getAttributeType()) {
-                throw new HpkException(String.format(
-                        "mismatch in attribute type for id %s; expecting %s, but got %s",
-                        result.getAttributeId().getName(),
-                        result.getAttributeId().getAttributeType(),
-                        result.getAttributeType()));
-            }
 
             // possibly there are child attributes after this attribute; if this is the
             // case then open-up a new iterator to work across those and load them in.
@@ -149,7 +146,8 @@ public class AttributeIterator {
      */
 
     private void ensureAttributeType(Attribute attribute) {
-        if(attribute.getAttributeId().getAttributeType() != attribute.getAttributeType()) {
+        if(null != attribute.getAttributeId()
+                && attribute.getAttributeId().getAttributeType() != attribute.getAttributeType()) {
             throw new HpkException(String.format(
                     "mismatch in attribute type for id %s; expecting %s, but got %s",
                     attribute.getAttributeId().getName(),
@@ -211,7 +209,7 @@ public class AttributeIterator {
                         attributeId,
                         new String(
                                 assembly.toByteArray(),
-                                Charsets.UTF_8));
+                                StandardCharsets.UTF_8));
             }
         }
     }
