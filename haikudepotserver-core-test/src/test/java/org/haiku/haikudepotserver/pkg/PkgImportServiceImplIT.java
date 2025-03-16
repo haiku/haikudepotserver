@@ -1,5 +1,5 @@
 /*
- * Copyright 2018-2024, Andrew Lindesay
+ * Copyright 2018-2025, Andrew Lindesay
  * Distributed under the terms of the MIT License.
  */
 
@@ -8,6 +8,7 @@ package org.haiku.haikudepotserver.pkg;
 import com.google.common.collect.Iterables;
 import com.google.common.io.Files;
 import com.google.common.io.Resources;
+import junit.framework.AssertionFailedError;
 import org.apache.cayenne.ObjectContext;
 import org.apache.cayenne.ObjectId;
 import org.apache.cayenne.query.ObjectSelect;
@@ -225,6 +226,7 @@ public class PkgImportServiceImplIT extends AbstractIntegrationTest {
                                 Architecture.getByCode(context, "x86_64")
                         )).get();
 
+                Assertions.assertThat(pkgVersion.getImportTimestamp()).isNotNull();
                 Assertions.assertThat(pkgVersion.getPayloadLength()).isEqualTo(expectedPayloadLength);
 
                 List<PkgIcon> pkgIcons = pkg.getPkgSupplement().getPkgIcons();
@@ -333,14 +335,17 @@ public class PkgImportServiceImplIT extends AbstractIntegrationTest {
                     case 1, 2, 3 -> {
                         Assertions.assertThat(pkgVersion.getActive()).isTrue();
                         Assertions.assertThat(pkgVersion.getIsLatest()).isFalse();
+                        Assertions.assertThat(pkgVersion.getImportTimestamp()).isNull(); // no change
                     }
                     case 4 -> {
                         Assertions.assertThat(pkgVersion.getActive()).isTrue();
                         Assertions.assertThat(pkgVersion.getIsLatest()).isTrue();
+                        Assertions.assertThat(pkgVersion.getImportTimestamp()).isNotNull(); // this version import was changed
                     }
                     case 5, 6 -> {
                         Assertions.assertThat(pkgVersion.getActive()).isFalse();
                         Assertions.assertThat(pkgVersion.getIsLatest()).isFalse();
+                        Assertions.assertThat(pkgVersion.getImportTimestamp()).isNull(); // no change
                     }
                     default ->
                             throw new IllegalStateException("unknown pkg version; " + pkgVersion.toVersionCoordinates().toString());
@@ -348,7 +353,99 @@ public class PkgImportServiceImplIT extends AbstractIntegrationTest {
             }
 
         }
+    }
 
+    /**
+     * <p>What this test is checking is that on a second import, the import-timestamp is not updated.</p>
+     */
+
+    @Test
+    public void testImport_noImportChangeNoImportTimestampChange() {
+        IntegrationTestSupportService.StandardTestData testData = integrationTestSupportService.createStandardTestData();
+        long nowMillis = System.currentTimeMillis();
+
+        // Make some minor changes to the PkgVersion to adjust it to match the import.
+
+        {
+            ObjectContext context = serverRuntime.newContext();
+            List<org.haiku.haikudepotserver.dataobjects.PkgVersion> pkgVersions = org.haiku.haikudepotserver.dataobjects.PkgVersion.findForPkg(
+                    context,
+                    org.haiku.haikudepotserver.dataobjects.Pkg.getByName(context, testData.pkg3.getName()),
+                    true);
+
+            for(org.haiku.haikudepotserver.dataobjects.PkgVersion pkgVersion : pkgVersions) {
+                for (PkgVersionLocalization pkgVersionLocalization : pkgVersion.getPkgVersionLocalizations()) {
+                    pkgVersionLocalization.setTitleLocalizationContent(null);
+                    // ^ this is because the import will set this to null for the default; there is no title from the import.
+                }
+            }
+
+            context.commitChanges();
+        }
+
+        // This should end up being a no-op on the existing PkgVersion so the import timestamp should not change.
+        Pkg inputPackage;
+
+        {
+            org.haiku.haikudepotserver.dataobjects.PkgVersion pkgVersion = testData.pkg3Version1;
+            PkgVersionLocalization localization = testData.pkg3Version1
+                    .getPkgVersionLocalization(NaturalLanguageCoordinates.english())
+                    .orElseThrow();
+
+            inputPackage = new Pkg(
+                    testData.pkg3.getName(),
+                    new PkgVersion(
+                            pkgVersion.getMajor(),
+                            pkgVersion.getMinor(),
+                            pkgVersion.getMicro(),
+                            pkgVersion.getPreRelease(),
+                            pkgVersion.getRevision()
+                    ),
+                    PkgArchitecture.X86_64,
+                    null,
+                    Collections.emptyList(),
+                    Collections.emptyList(),
+                    localization.getSummary().orElseThrow(),
+                    localization.getDescription().orElseThrow(),
+                    null
+            );
+        }
+
+        {
+            ObjectContext context = serverRuntime.newContext();
+            ObjectId repositorySourceObjectId = RepositorySource.getByCode(context, testData.repositorySource.getCode()).getObjectId();
+
+            // ---------------------------------
+
+            pkgImportService.importFrom(
+                    context,
+                    repositorySourceObjectId,
+                    inputPackage,
+                    false);
+
+            // ---------------------------------
+
+            context.commitChanges();
+        }
+
+        // now check to see that the import timestamp has not been altered.
+
+        {
+            ObjectContext context = serverRuntime.newContext();
+            List<org.haiku.haikudepotserver.dataobjects.PkgVersion> pkgVersions = org.haiku.haikudepotserver.dataobjects.PkgVersion.findForPkg(
+                    context,
+                    org.haiku.haikudepotserver.dataobjects.Pkg.getByName(context, testData.pkg3.getName()),
+                    true);
+
+            for(org.haiku.haikudepotserver.dataobjects.PkgVersion pkgVersion : pkgVersions) {
+                java.sql.Timestamp importTimestamp = pkgVersion.getImportTimestamp();
+
+                if (importTimestamp != null && importTimestamp.getTime() >= nowMillis) {
+                    throw new AssertionFailedError("expected the import timestamp not be updated");
+                }
+            }
+
+        }
     }
 
     private Pkg createPkg(String minor) {

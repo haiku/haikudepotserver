@@ -1,5 +1,5 @@
 /*
- * Copyright 2018-2024, Andrew Lindesay
+ * Copyright 2018-2025, Andrew Lindesay
  * Distributed under the terms of the MIT License.
  */
 
@@ -244,6 +244,7 @@ public class IntegrationTestSupportService {
         result.pkg1Version1x86_64.setIsLatest(false);
         result.pkg1Version1x86_64.setPkg(result.pkg1);
         result.pkg1Version1x86_64.setRepositorySource(result.repositorySource);
+        result.pkg1Version1x86_64.setImportTimestamp(new java.sql.Timestamp(System.currentTimeMillis() - 30000L));
         addDummyLocalization(context, result.pkg1Version1x86_64);
 
         result.pkg1Version2x86_64 = context.newObject(PkgVersion.class);
@@ -254,6 +255,7 @@ public class IntegrationTestSupportService {
         result.pkg1Version2x86_64.setRevision(4);
         result.pkg1Version2x86_64.setIsLatest(true);
         result.pkg1Version2x86_64.setPkg(result.pkg1);
+        result.pkg1Version1x86_64.setImportTimestamp(new java.sql.Timestamp(System.currentTimeMillis() - 30000L));
         result.pkg1Version2x86_64.setRepositorySource(result.repositorySource);
 
         pkgLocalizationService.updatePkgVersionLocalization(

@@ -1,5 +1,5 @@
 /*
- * Copyright 2021, Andrew Lindesay
+ * Copyright 2021-2025, Andrew Lindesay
  * Distributed under the terms of the MIT License.
  */
 package org.haiku.haikudepotserver.support;
@@ -16,8 +16,8 @@ import java.util.stream.Stream;
 public class HpkgHelper {
 
     /**
-     * <p>This will find all of the directory entries.  In these it will find all of the
-     * directory entries that are executable and then it will find those that have an icon.  It will return
+     * <p>This will find all the directory entries.  In these it will find all the
+     * directory entries that are executable then it will find those that have an icon. It will return
      * a list of those attributes that are the icons.</p>
      */
 

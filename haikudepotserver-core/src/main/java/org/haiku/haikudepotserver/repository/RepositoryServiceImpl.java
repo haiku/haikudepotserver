@@ -1,5 +1,5 @@
 /*
- * Copyright 2018-2024, Andrew Lindesay
+ * Copyright 2018-2025, Andrew Lindesay
  * Distributed under the terms of the MIT License.
  */
 
@@ -273,19 +273,25 @@ public class RepositoryServiceImpl implements RepositoryService {
 
         PkgVersion pkgVersion = ObjectSelect
                 .query(PkgVersion.class)
-                .orderBy(PkgVersion.MODIFY_TIMESTAMP.desc())
+                .where(PkgVersion.IMPORT_TIMESTAMP.isNotNull())
+                .orderBy(PkgVersion.IMPORT_TIMESTAMP.desc())
                 .selectFirst(context);
-        Long hoursAgo = Optional.ofNullable(pkgVersion)
-                .map(PkgVersion::getModifyTimestamp)
-                .map(mt -> TimeUnit.MILLISECONDS.toHours(now.getTime() - mt.getTime()))
-                .orElse(null);
 
-        if (null == hoursAgo || hoursAgo > repositorySource.getExpectedUpdateFrequencyHours()) {
-            return Optional.of(new AlertRepositoryAbsentUpdateMail.RepositorySourceAbsentUpdate(
-                    repositorySource.getCode(),
-                    repositorySource.getExpectedUpdateFrequencyHours(),
-                    null == hoursAgo ? null : hoursAgo.intValue()
-            ));
+        if (null == pkgVersion) {
+            LOGGER.warn("for the repository source [{}] no package versions were found with import timestamps", repositorySource);
+        } else {
+            Long hoursAgo = Optional.ofNullable(pkgVersion)
+                    .map(PkgVersion::getImportTimestamp)
+                    .map(mt -> TimeUnit.MILLISECONDS.toHours(now.getTime() - mt.getTime()))
+                    .orElse(null);
+
+            if (null == hoursAgo || hoursAgo > repositorySource.getExpectedUpdateFrequencyHours()) {
+                return Optional.of(new AlertRepositoryAbsentUpdateMail.RepositorySourceAbsentUpdate(
+                        repositorySource.getCode(),
+                        repositorySource.getExpectedUpdateFrequencyHours(),
+                        null == hoursAgo ? null : hoursAgo.intValue()
+                ));
+            }
         }
 
         return Optional.empty();

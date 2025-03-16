@@ -36,6 +36,7 @@ public abstract class _PkgVersion extends AbstractDataObject {
 
     public static final BaseProperty<Boolean> ACTIVE = PropertyFactory.createBase("active", Boolean.class);
     public static final DateProperty<Timestamp> CREATE_TIMESTAMP = PropertyFactory.createDate("createTimestamp", Timestamp.class);
+    public static final DateProperty<Timestamp> IMPORT_TIMESTAMP = PropertyFactory.createDate("importTimestamp", Timestamp.class);
     public static final BaseProperty<Boolean> IS_LATEST = PropertyFactory.createBase("isLatest", Boolean.class);
     public static final StringProperty<String> MAJOR = PropertyFactory.createString("major", String.class);
     public static final StringProperty<String> MICRO = PropertyFactory.createString("micro", String.class);
@@ -55,6 +56,7 @@ public abstract class _PkgVersion extends AbstractDataObject {
 
     protected Boolean active;
     protected Timestamp createTimestamp;
+    protected Timestamp importTimestamp;
     protected Boolean isLatest;
     protected String major;
     protected String micro;
@@ -91,6 +93,16 @@ public abstract class _PkgVersion extends AbstractDataObject {
     public Timestamp getCreateTimestamp() {
         beforePropertyRead("createTimestamp");
         return this.createTimestamp;
+    }
+
+    public void setImportTimestamp(Timestamp importTimestamp) {
+        beforePropertyWrite("importTimestamp", this.importTimestamp, importTimestamp);
+        this.importTimestamp = importTimestamp;
+    }
+
+    public Timestamp getImportTimestamp() {
+        beforePropertyRead("importTimestamp");
+        return this.importTimestamp;
     }
 
     public void setIsLatest(Boolean isLatest) {
@@ -270,6 +282,8 @@ public abstract class _PkgVersion extends AbstractDataObject {
                 return this.active;
             case "createTimestamp":
                 return this.createTimestamp;
+            case "importTimestamp":
+                return this.importTimestamp;
             case "isLatest":
                 return this.isLatest;
             case "major":
@@ -319,6 +333,9 @@ public abstract class _PkgVersion extends AbstractDataObject {
                 break;
             case "createTimestamp":
                 this.createTimestamp = (Timestamp)val;
+                break;
+            case "importTimestamp":
+                this.importTimestamp = (Timestamp)val;
                 break;
             case "isLatest":
                 this.isLatest = (Boolean)val;
@@ -386,6 +403,7 @@ public abstract class _PkgVersion extends AbstractDataObject {
         super.writeState(out);
         out.writeObject(this.active);
         out.writeObject(this.createTimestamp);
+        out.writeObject(this.importTimestamp);
         out.writeObject(this.isLatest);
         out.writeObject(this.major);
         out.writeObject(this.micro);
@@ -409,6 +427,7 @@ public abstract class _PkgVersion extends AbstractDataObject {
         super.readState(in);
         this.active = (Boolean)in.readObject();
         this.createTimestamp = (Timestamp)in.readObject();
+        this.importTimestamp = (Timestamp)in.readObject();
         this.isLatest = (Boolean)in.readObject();
         this.major = (String)in.readObject();
         this.micro = (String)in.readObject();

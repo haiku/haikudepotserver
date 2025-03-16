@@ -1,5 +1,5 @@
 /*
- * Copyright 2018-2024, Andrew Lindesay
+ * Copyright 2018-2025, Andrew Lindesay
  * Distributed under the terms of the MIT License.
  */
 
@@ -30,6 +30,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.UncheckedIOException;
 import java.net.URL;
+import java.time.Clock;
 import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
@@ -135,7 +136,9 @@ public class PkgImportServiceImpl implements PkgImportService {
 
         }
 
-        persistedPkgVersion.setActive(Boolean.TRUE);
+        if (null == persistedPkgVersion.getActive() || !persistedPkgVersion.getActive()) {
+            persistedPkgVersion.setActive(Boolean.TRUE);
+        }
 
         importCopyrights(objectContext, pkg, persistedPkgVersion);
         importLicenses(objectContext, pkg, persistedPkgVersion);
@@ -160,11 +163,18 @@ public class PkgImportServiceImpl implements PkgImportService {
         // [apl]
         // If this fails, we will let it go and it can be tried again a bit later on.  The system can try to back-fill
         // those at some later date if any of the latest versions for packages are missing.  This is better than
-        // failing the import at this stage since this is "just" meta data.  The length of the payload is being used as
+        // failing the import at this stage since this is "just" meta-data.  The length of the payload is being used as
         // a signal that the payload was downloaded and processed at some point.
 
         if (populateFromPayload && shouldPopulateFromPayload(persistedPkgVersion)) {
             populateFromPayload(objectContext, persistedPkgVersion);
+        }
+
+        // This is a little strange; if there is a change in anything (even an icon) then we attribute it to an import
+        // on this specific version. It has to be this way because the import is coming from a specific version.
+
+        if (objectContext.hasChanges()) {
+            persistedPkgVersion.setImportTimestamp(new java.sql.Timestamp(Clock.systemUTC().millis()));
         }
 
         LOGGER.debug("have processed package {}", pkg);
@@ -368,6 +378,7 @@ public class PkgImportServiceImpl implements PkgImportService {
         if (null == dataAttr) {
             LOGGER.warn("the icon [{}] found for package [{}] version [{}] does not have a data attribute",
                     AttributeId.FILE_ATTRIBUTE, persistedPkgVersion.getPkg(), persistedPkgVersion);
+            return;
         }
 
         ByteSource byteSource = (ByteSource) dataAttr.getValue(context);

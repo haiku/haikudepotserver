@@ -1,5 +1,5 @@
 /*
- * Copyright 2024, Andrew Lindesay
+ * Copyright 2024-2025, Andrew Lindesay
  * Distributed under the terms of the MIT License.
  */
 package org.haiku.haikudepotserver.repository;
@@ -74,7 +74,7 @@ public class RepositoryServiceImplIT extends AbstractIntegrationTest {
 
         {
             java.sql.Timestamp twoHoursAgo = new java.sql.Timestamp(System.currentTimeMillis() - TimeUnit.HOURS.toMillis(2));
-            setAllPkgVersionModifyTimestamps(twoHoursAgo);
+            setAllPkgVersionModifyAndImportTimestamps(twoHoursAgo);
         }
 
         // ---------------------------------
@@ -100,12 +100,14 @@ public class RepositoryServiceImplIT extends AbstractIntegrationTest {
      * modify timestamp.</p>
      */
 
-    private void setAllPkgVersionModifyTimestamps(java.sql.Timestamp moment) {
+    private void setAllPkgVersionModifyAndImportTimestamps(java.sql.Timestamp moment) {
         try (
                 Connection connection = dataSource.getConnection();
-                PreparedStatement statement = connection.prepareStatement("UPDATE haikudepot.pkg_version SET modify_timestamp = ?")
+                PreparedStatement statement
+                        = connection.prepareStatement("UPDATE haikudepot.pkg_version SET modify_timestamp = ?, import_timestamp = ?")
                 ) {
             statement.setTimestamp(1, moment);
+            statement.setTimestamp(2, moment);
             Assertions.assertThat(statement.executeUpdate()).isGreaterThan(0);
         } catch (SQLException se) {
             throw new RuntimeException("unable to set all PkgVersion modify timestamps", se);
