@@ -66,10 +66,10 @@ public class ServerPngThumbnailService extends AbstractThumbnailServiceImpl {
                 try (InputStream responseStream = response.body()){
                     responseStream.transferTo(output);
                 }
+            } else {
+                throw new IOException("the request to the server to produce the thumbnail returns ["
+                        + response.statusCode() + "]");
             }
-
-            throw new IOException("the request to the server to produce the thumbnail returns ["
-                    + response.statusCode() + "]");
         } catch (InterruptedException ie) {
             Thread.currentThread().interrupt();
             throw new IOException("optimization was cancelled", ie);
