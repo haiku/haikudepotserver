@@ -1,5 +1,5 @@
 /*
- * Copyright 2014-2022, Andrew Lindesay
+ * Copyright 2014-2025, Andrew Lindesay
  * Distributed under the terms of the MIT License.
  */
 
@@ -51,9 +51,7 @@ angular.module('haikudepotserver').controller(
 
                         $log.info('did set the active flag on '+$scope.repository.code+' to '+flag);
                     },
-                    function (err) {
-                        errorHandling.handleRemoteProcedureCallError(err);
-                    }
+                    errorHandling.handleRemoteProcedureCallError
                 );
             }
 
@@ -117,9 +115,7 @@ angular.module('haikudepotserver').controller(
                         $log.info('did delete password for repository [' + $scope.repository.code + ']');
                         $scope.repository.hasPassword = false;
                     },
-                    function (err) {
-                        errorHandling.handleRemoteProcedureCallError(err);
-                    }
+                    errorHandling.handleRemoteProcedureCallError
                 ).finally(function () {
                     amDeletingPassword = false;
                 });
@@ -147,9 +143,7 @@ angular.module('haikudepotserver').controller(
                         }, 3000)
 
                     },
-                    function(err) {
-                        errorHandling.handleRemoteProcedureCallError(err);
-                    }
+                    errorHandling.handleRemoteProcedureCallError
                 );
             };
 
@@ -185,9 +179,7 @@ angular.module('haikudepotserver').controller(
                         $log.info('found '+$scope.repository.code+' repository');
                         refreshBreadcrumbItems();
                     },
-                    function (err) {
-                        errorHandling.handleRemoteProcedureCallError(err);
-                    }
+                    errorHandling.handleRemoteProcedureCallError
                 );
             }
 

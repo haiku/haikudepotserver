@@ -1,5 +1,5 @@
 /*
- * Copyright 2014-2022, Andrew Lindesay
+ * Copyright 2014-2025, Andrew Lindesay
  * Distributed under the terms of the MIT License.
  */
 
@@ -8,8 +8,8 @@
  */
 
 angular.module('haikudepotserver').factory('errorHandling',
-    [ '$http','$log','$location','breadcrumbs','constants',
-        function($http,$log,$location,breadcrumbs,constants) {
+    [ '$http', "$q", '$log', '$location', 'breadcrumbs', 'constants',
+        function($http, $q, $log, $location, breadcrumbs, constants) {
 
             var MAX_COUNTLOGMESSAGESSENTTOSERVER = 5;
 
@@ -68,7 +68,7 @@ angular.module('haikudepotserver').factory('errorHandling',
 
                     countLogMessagesSentToServer++;
 
-                    $http({
+                    return $http({
                         cache: false,
                         method: 'POST',
                         url: '/__log/capture',
@@ -77,31 +77,33 @@ angular.module('haikudepotserver').factory('errorHandling',
                     });
                 }
 
+                return $q.resolve();
             }
 
             function logAndSendErrorMessageToServer(message) {
                 $log.error(message);
-                sendErrorLogMessageToServer(message);
+                return sendErrorLogMessageToServer(message);
             }
 
             function logAndSendRemoteProcedureCallErrorToServer(remoteProcedureCallErrorEnvelope, message) {
                 var prefix = message ? message + ' - rpc error; ' : 'rpc error; ';
 
                 if(!remoteProcedureCallErrorEnvelope) {
-                    logAndSendErrorMessageToServer(prefix+'cause is unknown as no error was available in the envelope');
+                    return logAndSendErrorMessageToServer(prefix+'cause is unknown as no error was available in the envelope');
                 }
-                else {
 
-                    if (remoteProcedureCallErrorEnvelope.error && !remoteProcedureCallErrorEnvelope.code) {
-                        // TODO - remove at some point in the future.
-                        logAndSendErrorMessageToServer('illegal state; provided bad envelope; should be the \'error\' component of the response rather than the entire response -- will try to correct for now');
-                        remoteProcedureCallErrorEnvelope = remoteProcedureCallErrorEnvelope.error;
-                    }
+                var p = $q.resolve(true);
 
-                    var logCode = remoteProcedureCallErrorEnvelope.code ? remoteProcedureCallErrorEnvelope.code : '?';
-                    var logMessage = remoteProcedureCallErrorEnvelope.message ? remoteProcedureCallErrorEnvelope.message : '?';
-                    logAndSendErrorMessageToServer(prefix + 'code:' + logCode + ", msg:" + logMessage);
+                if (remoteProcedureCallErrorEnvelope.error && !remoteProcedureCallErrorEnvelope.code) {
+                    // TODO - remove at some point in the future.
+                    var msg = 'illegal state; provided bad envelope; should be the \'error\' component of the response rather than the entire response -- will try to correct for now';
+                    remoteProcedureCallErrorEnvelope = remoteProcedureCallErrorEnvelope.error;
+                    p = p.then(logAndSendErrorMessageToServer(msg));
                 }
+
+                var logCode = remoteProcedureCallErrorEnvelope.code ? remoteProcedureCallErrorEnvelope.code : '?';
+                var logMessage = remoteProcedureCallErrorEnvelope.message ? remoteProcedureCallErrorEnvelope.message : '?';
+                return p.then(logAndSendErrorMessageToServer(prefix + 'code:' + logCode + ", msg:" + logMessage));
             }
 
             /**
@@ -138,13 +140,16 @@ angular.module('haikudepotserver').factory('errorHandling',
                 },
 
                 handleException: function(exception, cause) {
-                    logAndSendErrorMessageToServer('unhandled error; ' + exception);
-                    breadcrumbs.reset();
-                    window.location.href = '/__error';
+                    return logAndSendErrorMessageToServer(
+                        'unhandled error; ' + exception
+                    ).then(function() {
+                        breadcrumbs.reset();
+                        window.location.href = '/__error';
+                    })
                 },
 
                 logRemoteProcedureCallError : function(remoteProcedureCallErrorEnvelope, message) {
-                    logAndSendRemoteProcedureCallErrorToServer(remoteProcedureCallErrorEnvelope,message);
+                    return logAndSendRemoteProcedureCallErrorToServer(remoteProcedureCallErrorEnvelope,message);
                 },
 
                 /**
@@ -153,14 +158,17 @@ angular.module('haikudepotserver').factory('errorHandling',
                  */
 
                 handleRemoteProcedureCallError : function(remoteProcedureCallErrorEnvelope) {
-                    logAndSendRemoteProcedureCallErrorToServer(remoteProcedureCallErrorEnvelope);
-                    var code = remoteProcedureCallErrorEnvelope ? remoteProcedureCallErrorEnvelope.code : undefined;
+                    return logAndSendRemoteProcedureCallErrorToServer(
+                        remoteProcedureCallErrorEnvelope
+                    ).then(function() {
+                        var code = remoteProcedureCallErrorEnvelope ? remoteProcedureCallErrorEnvelope.code : undefined;
 
-                    if(code == -32803) { // TODO; should be a constant
-                        clearLocalStorage();
-                    }
+                        if (code == -32803) { // TODO; should be a constant
+                            clearLocalStorage();
+                        }
 
-                    navigateToError(code);
+                        navigateToError(code);
+                    });
                 },
 
                 /**
@@ -168,8 +176,11 @@ angular.module('haikudepotserver').factory('errorHandling',
                  */
 
                 handleUnknownLocation : function() {
-                    logAndSendErrorMessageToServer('unknown location; ' + $location.path());
-                    navigateToError();
+                    logAndSendErrorMessageToServer(
+                        'unknown location; ' + $location.path()
+                    ).then(function() {
+                        navigateToError();
+                    });
                 },
 
                 /**

@@ -1,5 +1,5 @@
 /*
- * Copyright 2013-2022, Andrew Lindesay
+ * Copyright 2013-2025, Andrew Lindesay
  * Distributed under the terms of the MIT License.
  */
 
@@ -222,9 +222,7 @@ angular.module('haikudepotserver').controller(
 
                         hasPkgIcons = !!result.pkgIcons.length;
                     },
-                    function (err) {
-                        errorHandling.handleRemoteProcedureCallError(err);
-                    }
+                    errorHandling.handleRemoteProcedureCallError
                 );
 
             }
@@ -354,9 +352,7 @@ angular.module('haikudepotserver').controller(
 
                         $log.info('found '+result.items.length+' screenshots for pkg '+$routeParams.name);
                     },
-                    function (err) {
-                        errorHandling.handleRemoteProcedureCallError(err);
-                    }
+                    errorHandling.handleRemoteProcedureCallError
                 );
 
             }
@@ -521,9 +517,7 @@ angular.module('haikudepotserver').controller(
                             // TODO; some sort of user-facing indication of this?
                         }
                     },
-                    function (err) {
-                        errorHandling.handleRemoteProcedureCallError(err);
-                    }
+                    errorHandling.handleRemoteProcedureCallError
                 );
             };
 

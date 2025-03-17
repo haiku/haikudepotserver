@@ -1,5 +1,5 @@
 /*
- * Copyright 2013-2022, Andrew Lindesay
+ * Copyright 2013-2025, Andrew Lindesay
  * Distributed under the terms of the MIT License.
  */
 
@@ -65,9 +65,7 @@ angular.module('haikudepotserver').controller(
 
                         $log.info('fetched user; '+result.nickname);
                     },
-                    function (err) {
-                        errorHandling.handleRemoteProcedureCallError(err);
-                    }
+                    errorHandling.handleRemoteProcedureCallError
                 );
             }
 
@@ -117,9 +115,7 @@ angular.module('haikudepotserver').controller(
                         $scope.user.active = flag;
                         $log.info('did update user active flag; '+flag);
                     },
-                    function (err) {
-                        errorHandling.handleRemoteProcedureCallError(err);
-                    }
+                    errorHandling.handleRemoteProcedureCallError
                 );
             }
 
@@ -151,9 +147,7 @@ angular.module('haikudepotserver').controller(
                             // TODO; some sort of user-facing indication of this?
                         }
                     },
-                    function (err) {
-                        errorHandling.handleRemoteProcedureCallError(err);
-                    }
+                    errorHandling.handleRemoteProcedureCallError
                 );
             };
 

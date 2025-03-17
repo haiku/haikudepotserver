@@ -1,5 +1,5 @@
 /*
- * Copyright 2018-2022, Andrew Lindesay
+ * Copyright 2018-2025, Andrew Lindesay
  * Distributed under the terms of the MIT License.
  */
 
@@ -36,9 +36,7 @@ angular.module('haikudepotserver').controller(
                         amUpdatingActive = false;
                         return data;
                     },
-                    function (err) {
-                        errorHandling.handleRemoteProcedureCallError(err);
-                    }
+                    errorHandling.handleRemoteProcedureCallError
                 );
             }
 
@@ -127,9 +125,7 @@ angular.module('haikudepotserver').controller(
                             $routeParams.repositorySourceMirrorCode + ']');
                         breadcrumbs.popAndNavigate();
                     },
-                    function (err) {
-                        errorHandling.handleRemoteProcedureCallError(err);
-                    }
+                    errorHandling.handleRemoteProcedureCallError
                 );
             };
 
@@ -166,9 +162,7 @@ angular.module('haikudepotserver').controller(
                                 repositorySourceMirror = result;
                                 fnChain(chain);
                             },
-                            function (err) {
-                                errorHandling.handleRemoteProcedureCallError(err);
-                            }
+                            errorHandling.handleRemoteProcedureCallError
                         );
                     },
 
@@ -182,9 +176,7 @@ angular.module('haikudepotserver').controller(
                                 repositorySourceMirror.repositorySource = result;
                                 fnChain(chain);
                             },
-                            function (err) {
-                                errorHandling.handleRemoteProcedureCallError(err);
-                            }
+                            errorHandling.handleRemoteProcedureCallError
                         );
                     },
 
@@ -198,9 +190,7 @@ angular.module('haikudepotserver').controller(
                                 repositorySourceMirror.repositorySource.repository = result;
                                 fnChain(chain);
                             },
-                            function (err) {
-                                errorHandling.handleRemoteProcedureCallError(err);
-                            }
+                            errorHandling.handleRemoteProcedureCallError
                         );
                     },
 

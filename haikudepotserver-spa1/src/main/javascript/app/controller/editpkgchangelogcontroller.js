@@ -1,5 +1,5 @@
 /*
- * Copyright 2015-2022, Andrew Lindesay
+ * Copyright 2015-2025, Andrew Lindesay
  * Distributed under the terms of the MIT License.
  */
 
@@ -53,9 +53,7 @@ angular.module('haikudepotserver').controller(
                             $log.info('found '+result.name+' pkg');
                             fnChain(chain);
                         },
-                        function (err) {
-                            errorHandling.handleRemoteProcedureCallError(err);
-                        }
+                        errorHandling.handleRemoteProcedureCallError
                     );
                 },
 
@@ -69,9 +67,7 @@ angular.module('haikudepotserver').controller(
                             $scope.changelog.content = data.content;
                             fnChain(chain);
                         },
-                        function (err) {
-                            errorHandling.handleRemoteProcedureCallError(err);
-                        }
+                        errorHandling.handleRemoteProcedureCallError
                     );
                 },
 

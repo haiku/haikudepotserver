@@ -1,5 +1,5 @@
 /*
- * Copyright 2014-2022, Andrew Lindesay
+ * Copyright 2014-2025, Andrew Lindesay
  * Distributed under the terms of the MIT License.
  */
 
@@ -43,9 +43,7 @@ angular.module('haikudepotserver').controller(
                         $scope.repositorySource.active = flag;
                         $log.info('did set the active flag on '+$scope.repositorySource.code+' to '+flag);
                     },
-                    function (err) {
-                        errorHandling.handleRemoteProcedureCallError(err);
-                    }
+                    errorHandling.handleRemoteProcedureCallError
                 );
             }
 
@@ -115,9 +113,7 @@ angular.module('haikudepotserver').controller(
                         }, 3000)
 
                     },
-                    function (err) {
-                        errorHandling.handleRemoteProcedureCallError(err);
-                    }
+                    errorHandling.handleRemoteProcedureCallError
                 );
             };
 
@@ -134,9 +130,7 @@ angular.module('haikudepotserver').controller(
                         $log.info('queued pkg dump export job');
                         breadcrumbs.pushAndNavigate(breadcrumbFactory.createViewJob({ guid:data.guid }))
                     },
-                    function (err) {
-                        errorHandling.handleRemoteProcedureCallError(err);
-                    }
+                    errorHandling.handleRemoteProcedureCallError
                 );
             };
 
@@ -181,14 +175,10 @@ angular.module('haikudepotserver').controller(
                                 $scope.repositorySource = repositorySourceResult;
                                 refreshBreadcrumbItems();
                             },
-                            function (err) {
-                                errorHandling.handleRemoteProcedureCallError(err);
-                            }
+                            errorHandling.handleRemoteProcedureCallError
                         );
                     },
-                    function(err) {
-                        errorHandling.handleRemoteProcedureCallError(err);
-                    }
+                    errorHandling.handleRemoteProcedureCallError
                 );
             }
 

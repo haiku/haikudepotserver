@@ -1,5 +1,5 @@
 /*
- * Copyright 2015-2022, Andrew Lindesay
+ * Copyright 2015-2025, Andrew Lindesay
  * Distributed under the terms of the MIT License.
  */
 
@@ -228,9 +228,7 @@ angular.module('haikudepotserver').controller(
                                 }
 
                             },
-                            function(remoteProcedureCallEnvelope) {
-                                errorHandling.handleRemoteProcedureCallError(remoteProcedureCallEnvelope);
-                            }
+                            errorHandling.handleRemoteProcedureCallError
                         );
                     },
                     function() {
@@ -249,9 +247,7 @@ angular.module('haikudepotserver').controller(
                         $log.info('found '+result.name+' pkg');
                         refreshBreadcrumbItems();
                     },
-                    function (err) {
-                        errorHandling.handleRemoteProcedureCallError(err);
-                    }
+                    errorHandling.handleRemoteProcedureCallError
                 );
             }
 
@@ -371,9 +367,7 @@ angular.module('haikudepotserver').controller(
                         $log.info('updated localization on '+$routeParams.name+' pkg');
                         breadcrumbs.popAndNavigate();
                     },
-                    function (err) {
-                        errorHandling.handleRemoteProcedureCallError(err);
-                    }
+                    errorHandling.handleRemoteProcedureCallError
                 );
 
             };

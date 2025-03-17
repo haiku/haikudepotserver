@@ -1,5 +1,5 @@
 /*
- * Copyright 2014-2022, Andrew Lindesay
+ * Copyright 2014-2025, Andrew Lindesay
  * Distributed under the terms of the MIT License.
  */
 
@@ -72,9 +72,7 @@ angular.module('haikudepotserver').controller(
                         $scope.captchaImageUrl = 'data:image/png;base64,'+result.pngImageDataBase64;
                         refreshBreadcrumbItems();
                     },
-                    function (err) {
-                        errorHandling.handleRemoteProcedureCallError(err);
-                    }
+                    errorHandling.handleRemoteProcedureCallError
                 );
             }
 

@@ -1,5 +1,5 @@
 /*
- * Copyright 2014, Andrew Lindesay
+ * Copyright 2014-2025, Andrew Lindesay
  * Distributed under the terms of the MIT License.
  */
 
@@ -73,7 +73,7 @@ angular.module('haikudepotserver').factory('breadcrumbs',
                     stack = stackIn;
                 }
 
-                $rootScope.$broadcast('breadcrumbChangeSuccess',stack);
+                $rootScope.$broadcast('breadcrumbChangeSuccess', stack);
             }
 
             /**

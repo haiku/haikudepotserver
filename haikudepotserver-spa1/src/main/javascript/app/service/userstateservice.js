@@ -1,5 +1,5 @@
 /*
- * Copyright 2013-2022, Andrew Lindesay
+ * Copyright 2013-2025, Andrew Lindesay
  * Distributed under the terms of the MIT License.
  */
 
@@ -460,9 +460,7 @@ angular.module('haikudepotserver').factory('userState',
                             function (result) {
                                 return !!result.isRoot;
                             },
-                            function (err) {
-                                errorHandling.handleRemoteProcedureCallError(err);
-                            }
+                            errorHandling.handleRemoteProcedureCallError
                         );
                     } else {
                         authorizationData.isRootPromise = $q.resolve(false);

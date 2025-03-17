@@ -1,5 +1,5 @@
 /*
- * Copyright 2018-2022, Andrew Lindesay
+ * Copyright 2018-2025, Andrew Lindesay
  * Distributed under the terms of the MIT License.
  */
 
@@ -80,9 +80,7 @@ angular.module('haikudepotserver').controller(
                                 $log.info('fetched repository source mirror [' + result.code + ']');
                                 fnChain(chain);
                             },
-                            function (err) {
-                                errorHandling.handleRemoteProcedureCallError(err);
-                            }
+                            errorHandling.handleRemoteProcedureCallError
                         );
                     });
                 } else {
@@ -104,9 +102,7 @@ angular.module('haikudepotserver').controller(
                                 workingRepositorySourceMirror.repositorySource = result;
                                 fnChain(chain);
                             },
-                            function (err) {
-                                errorHandling.handleRemoteProcedureCallError(err);
-                            }
+                            errorHandling.handleRemoteProcedureCallError
                         );
                     },
 
@@ -122,9 +118,7 @@ angular.module('haikudepotserver').controller(
                                 workingRepositorySourceMirror.repositorySource.repository = result;
                                 fnChain(chain);
                             },
-                            function (err) {
-                                errorHandling.handleRemoteProcedureCallError(err);
-                            }
+                            errorHandling.handleRemoteProcedureCallError
                         );
                     },
 

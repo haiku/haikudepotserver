@@ -1,5 +1,5 @@
 /*
- * Copyright 2013-2022, Andrew Lindesay
+ * Copyright 2013-2025, Andrew Lindesay
  * Distributed under the terms of the MIT License.
  */
 
@@ -75,9 +75,7 @@ angular.module('haikudepotserver').controller(
                             }
                         );
                     },
-                    function() {
-                        errorHandling.handleRemoteProcedureCallError();
-                    }
+                    errorHandling.handleRemoteProcedureCallError
                 );
             }
 

@@ -1,5 +1,5 @@
 /*
- * Copyright 2015-2022, Andrew Lindesay
+ * Copyright 2015-2025, Andrew Lindesay
  * Distributed under the terms of the MIT License.
  */
 
@@ -70,9 +70,7 @@ angular.module('haikudepotserver').controller(
                             refreshBreadcrumbItems();
                             $log.info('fetched repository source; '+result.code);
                         },
-                        function(err) {
-                            errorHandling.handleRemoteProcedureCallError(err);
-                        }
+                        errorHandling.handleRemoteProcedureCallError
                     );
                 }
                 else {

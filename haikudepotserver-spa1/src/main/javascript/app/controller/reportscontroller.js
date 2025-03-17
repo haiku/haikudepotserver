@@ -1,5 +1,5 @@
 /*
- * Copyright 2014-2023, Andrew Lindesay
+ * Copyright 2014-2025, Andrew Lindesay
  * Distributed under the terms of the MIT License.
  */
 
@@ -63,9 +63,7 @@ angular.module('haikudepotserver').controller(
                     function (data) {
                         navigateToViewJobOrNotifyRejection(data.guid);
                     },
-                    function (err) {
-                        errorHandling.handleRemoteProcedureCallError(err);
-                    }
+                    errorHandling.handleRemoteProcedureCallError
                 );
             }
 
@@ -114,9 +112,7 @@ angular.module('haikudepotserver').controller(
                   function (data) {
                       navigateToViewJobOrNotifyRejection(data.guid);
                   },
-                  function (err) {
-                      errorHandling.handleRemoteProcedureCallError(err);
-                  }
+                  errorHandling.handleRemoteProcedureCallError
                 );
             };
 
@@ -125,9 +121,7 @@ angular.module('haikudepotserver').controller(
                     function (data) {
                         navigateToViewJobOrNotifyRejection(data.guid);
                     },
-                    function (err) {
-                        errorHandling.handleRemoteProcedureCallError(err);
-                    }
+                    errorHandling.handleRemoteProcedureCallError
                 );
             };
 
@@ -136,9 +130,7 @@ angular.module('haikudepotserver').controller(
                     function (data) {
                         navigateToViewJobOrNotifyRejection(data.guid);
                     },
-                    function (err) {
-                        errorHandling.handleRemoteProcedureCallError(err);
-                    }
+                    errorHandling.handleRemoteProcedureCallError
                 );
             };
 
@@ -147,9 +139,7 @@ angular.module('haikudepotserver').controller(
                     function (data) {
                         navigateToViewJobOrNotifyRejection(data.guid);
                     },
-                    function (err) {
-                        errorHandling.handleRemoteProcedureCallError(err);
-                    }
+                    errorHandling.handleRemoteProcedureCallError
                 );
             };
 
@@ -162,9 +152,7 @@ angular.module('haikudepotserver').controller(
                     function (data) {
                         navigateToViewJobOrNotifyRejection(data.guid);
                     },
-                    function (err) {
-                        errorHandling.handleRemoteProcedureCallError(err);
-                    }
+                    errorHandling.handleRemoteProcedureCallError
                 );
             };
 
@@ -177,9 +165,7 @@ angular.module('haikudepotserver').controller(
                     function (data) {
                         navigateToViewJobOrNotifyRejection(data.guid);
                     },
-                    function (err) {
-                        errorHandling.handleRemoteProcedureCallError(err);
-                    }
+                    errorHandling.handleRemoteProcedureCallError
                 );
             };
 

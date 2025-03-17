@@ -1,5 +1,5 @@
 /*
- * Copyright 2018-2022, Andrew Lindesay
+ * Copyright 2018-2025, Andrew Lindesay
  * Distributed under the terms of the MIT License.
  */
 
@@ -27,10 +27,8 @@ angular.module('haikudepotserver').factory('runtimeInformation',
                                 $log.info('have fetched the runtime information');
                                 return result;
                             },
-                            function(err) {
-                                errorHandling.handleRemoteProcedureCallError(err);
-                            }
-                            );
+                            errorHandling.handleRemoteProcedureCallError
+                    );
                     }
 
                     return runtimeInformationPromise;

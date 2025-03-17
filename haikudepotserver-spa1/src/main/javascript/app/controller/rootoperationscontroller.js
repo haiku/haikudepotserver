@@ -1,5 +1,5 @@
 /*
- * Copyright 2014-2024, Andrew Lindesay
+ * Copyright 2014-2025, Andrew Lindesay
  * Distributed under the terms of the MIT License.
  */
 
@@ -99,9 +99,7 @@ angular.module('haikudepotserver').controller(
                     function() {
                         $log.error('the exception raised on the server runtime -> should not have reached this point');
                     },
-                    function(err) {
-                        errorHandling.handleRemoteProcedureCallError(err);
-                    }
+                    errorHandling.handleRemoteProcedureCallError
                 );
             };
         }
