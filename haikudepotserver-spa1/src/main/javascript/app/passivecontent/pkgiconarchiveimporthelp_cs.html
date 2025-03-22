@@ -1,0 +1,32 @@
+<p>
+    Tento proces přijme archivní soubor tar, který byl komprimován gzip.  Typické
+    přípona souboru pro tento formát archivu je "<code>.tgz</code>", ale přípona souboru
+    Někdy se také používá "<code>.tar.gz</code>".  Soubory v archivu by měly mít příponu
+    následující nomenklatura; &quot;<code>hicn/beshare/icon.hvif</code>&quot;.  V tomto příkladu HVIF
+    vektorová ikona je dodávána pro balíček "beshare".
+</p>
+
+<p>
+    Někdy nejsou k dispozici data vektorových ikon.  V tomto případě kombinace 16, 32 a 64
+    mohou být dodány obrázky PNG se čtvercovými pixely.  V tomto případě následující archivní záznam
+    byla by použita nomenklatura; &quot;<code>hicon/beshare/16.px</code>&quot;.
+</p>
+
+<p>
+    Pro každý balíček, který má ikony upravené tímto procesem, budou data předchozí ikony
+    odstraněno.
+</p>
+
+<p>
+    Import tar souboru ikon je "atomový"; což znamená, že bude buď
+    zpracuje archiv úplně, nebo nezmění data na straně serveru.  Toto je in
+    ve vztahu k runtime chybám, jako jsou neplatná vstupní data, která brání procesu
+    běží vůbec.
+</p>
+
+<p>
+    Jsou hlášeny problémy, jako jsou chybějící balíčky nebo úspěšné načtení ikony
+    zpět operátorovi prostřednictvím vygenerovaného souboru CSV.
+</p>
+
+

@@ -37,6 +37,7 @@ This web application is an online tool for working with the software packages of
 - [User Ratings](docs/user-rating.md)
 - [Data Localization](docs/data-localization.md)
 - [HDS Application Localization](docs/application-localization.md)
+- [Polygot update](docs/polygot-update.md)
 
 ### Development and Deployment
 
