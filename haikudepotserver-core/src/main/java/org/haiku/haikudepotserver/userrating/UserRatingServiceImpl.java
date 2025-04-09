@@ -101,7 +101,8 @@ public class UserRatingServiceImpl implements UserRatingService {
 
     private ObjectSelect<UserRating> createQuery(UserRatingSearchSpecification search) {
         ObjectSelect<UserRating> query = ObjectSelect.query(UserRating.class)
-                .where(UserRating.USER.dot(User.ACTIVE).isTrue());
+                .where(UserRating.USER.dot(User.ACTIVE).isTrue())
+                .and(UserRating.PKG_VERSION.dot(PkgVersion.ACTIVE).isTrue());
 
         if (!search.getIncludeInactive()) {
             query = query.and(UserRating.ACTIVE.isTrue());
@@ -403,13 +404,14 @@ public class UserRatingServiceImpl implements UserRatingService {
                 oldestVersionCoordinates = versionCoordinates.get(versionCoordinates.size() - (userRatingDerivationVersionsBack +1));
             }
 
-            // now we need to find all of the package versions that are including this one or newer.
+            // now we need to find all the package versions that are including this one or newer.
 
             {
                 final VersionCoordinatesComparator mainPartsVersionCoordinatesComparator = new VersionCoordinatesComparator(true);
                 pkgVersions = pkgVersions
                         .stream()
                         .filter(pv -> mainPartsVersionCoordinatesComparator.compare(pv.toVersionCoordinates(), oldestVersionCoordinates) >= 0)
+                            // ^ this comparator will ignore the pre-release and revision.
                         .collect(Collectors.toList());
             }
 
