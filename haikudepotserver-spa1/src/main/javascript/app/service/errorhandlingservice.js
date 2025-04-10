@@ -142,10 +142,17 @@ angular.module('haikudepotserver').factory('errorHandling',
                 handleException: function(exception, cause) {
                     return logAndSendErrorMessageToServer(
                         'unhandled error; ' + exception
-                    ).then(function() {
-                        breadcrumbs.reset();
-                        window.location.href = '/__error';
-                    })
+                    ).then(
+                        function() {
+                            breadcrumbs.reset();
+                            window.location.href = '/__error';
+                        },
+                        function() {
+                            console.error("an issue has arisen handling an exception");
+                            breadcrumbs.reset();
+                            window.location.href = '/__error';
+                        }
+                    )
                 },
 
                 logRemoteProcedureCallError : function(remoteProcedureCallErrorEnvelope, message) {
@@ -209,17 +216,20 @@ angular.module('haikudepotserver').config([
             '$delegate','$injector',
             function($delegate, $injector) {
                 return function(exception, cause) {
-                    $delegate(exception,cause);
+                    $delegate(exception, cause);
 
-                    var errorHandling = $injector.get('errorHandling');
+                    try {
+                        var errorHandling = $injector.get('errorHandling');
 
-                    if(errorHandling) {
-                        errorHandling.handleException(exception, cause);
-                    }
-                    else {
-                        if(window && window.console) {
-                            window.console.error('? unhandled error; ' + exception);
+                        if (errorHandling) {
+                            errorHandling.handleException(exception, cause);
+                        } else {
+                            if (window && window.console) {
+                                window.console.error('? unhandled error; ' + exception);
+                            }
                         }
+                    } catch (e) {
+                        console.error("error in error handler; " + e);
                     }
                 }
             }
