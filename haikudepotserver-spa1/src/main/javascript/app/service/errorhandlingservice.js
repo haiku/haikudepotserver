@@ -193,7 +193,7 @@ angular.module('haikudepotserver').factory('errorHandling',
                 /**
                  * <p>Splay validation failures into the form.  The validation failures are objects that are
                  * returned as part of the error envelope in RPC invocations.  This method will return true
-                 * if all of the validation errors were able to be assigned to models in the form.</p>
+                 * if all the validation errors were able to be assigned to models in the form.</p>
                  */
 
                 relayValidationFailuresIntoForm : function(validationFailures, form) {

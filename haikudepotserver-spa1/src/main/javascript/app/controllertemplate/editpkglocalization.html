@@ -79,6 +79,32 @@
             </div>
         </div>
 
+        <div id="edit-localization-import-export-container" ng-show="importExport.show">
+            <div>
+                <textarea
+                        rows="24"
+                        name="importExportText"
+                        ng-model="importExport.text"></textarea>
+
+                <div ng-show="importExport.error" class="text-error">
+                    <message key="editPkgLocalization.exportFromTextGeneralError"></message>
+                </div>
+
+                <ul>
+                    <li>
+                        <a href="" ng-click="goImportToText()">
+                            <message key="editPkgLocalization.importToTextAction.title"></message>
+                        </a>
+                    </li>
+                    <li>
+                        <a href="" ng-click="goExportFromText()">
+                            <message key="editPkgLocalization.exportFromTextAction.title"></message>
+                        </a>
+                    </li>
+                </ul>
+            </div>
+        </div>
+
     </form>
 
     <ul>
@@ -90,6 +116,11 @@
         <li>
             <a href="" ng-click="goShowAnyPkgVersionLocalizations()">
                 <message key="editPkgLocalization.showAnyPkgVersionLocalizationAction.title"></message>
+            </a>
+        </li>
+        <li ng-show="!importExport.show">
+            <a href="" ng-click="goShowImportExport()">
+                <message key="editPkgLocalization.showImportExportAction.title"></message>
             </a>
         </li>
         <li>

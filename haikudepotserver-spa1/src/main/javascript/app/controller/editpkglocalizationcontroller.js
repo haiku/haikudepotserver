@@ -16,13 +16,13 @@
 angular.module('haikudepotserver').controller(
     'EditPkgLocalizationController',
     [
-        '$scope','$log','$location','$routeParams',
-        'remoteProcedureCall','constants','pkgIcon','errorHandling',
-        'breadcrumbs','breadcrumbFactory','userState','referenceData','pkg','messageSource',
+        '$scope', '$log', '$location', '$routeParams',
+        'remoteProcedureCall', 'constants', 'pkgIcon', 'errorHandling',
+        'breadcrumbs', 'breadcrumbFactory', 'userState', 'referenceData', 'pkg', 'messageSource',
         function (
-            $scope,$log,$location,$routeParams,
-            remoteProcedureCall,constants,pkgIcon,errorHandling,
-            breadcrumbs,breadcrumbFactory,userState,referenceData,pkg,messageSource) {
+            $scope, $log, $location, $routeParams,
+            remoteProcedureCall, constants, pkgIcon, errorHandling,
+            breadcrumbs, breadcrumbFactory, userState, referenceData, pkg, messageSource) {
 
             $scope.showHelp = false;
             $scope.pkg = undefined;
@@ -32,6 +32,11 @@ angular.module('haikudepotserver').controller(
             $scope.selectedTranslation = undefined;
             $scope.addableNaturalLanguages = undefined;
             $scope.selectedAddableNaturalLanguage = undefined;
+            $scope.importExport = {
+                show: false,
+                text: "",
+                isError: false,
+            };
 
             $scope.shouldSpin = function() {
                 return undefined === $scope.pkg || $scope.amSaving || undefined === $scope.translations;
@@ -370,6 +375,86 @@ angular.module('haikudepotserver').controller(
                     errorHandling.handleRemoteProcedureCallError
                 );
 
+            };
+
+            // --------------------------
+            // CONVENIENCE IMPORT / EXPORT
+
+            function createExportData() {
+                return _.map(
+                    $scope.translations,
+                    function (t) {
+                        return {
+                            naturalLanguageCode : t.naturalLanguage.code,
+                            title : t.title,
+                            summary : t.summary,
+                            description : t.description
+                        }
+                    }
+                );
+            }
+
+            function copyTextFromUserInterface() {
+                $scope.importExport.text = JSON.stringify(createExportData(), null, 2);
+            }
+
+            function copyTextIntoUserInterface(payloadString) {
+                payload = JSON.parse(payloadString);
+
+                if (!_.isArray(payload)) {
+                    throw Error("expected the payload to be an array");
+                }
+
+                _.each(payload, function(item) {
+                    const expectedKeys = ["naturalLanguageCode", "title", "summary", "description"]
+
+                    if (!_.every(
+                        expectedKeys,
+                        function(k) { return k in item }
+                    )) {
+                        throw Error("every item must have keys [" + expectedKeys.join(",") + "]");
+                    }
+
+                    translationItem = _.find(
+                        $scope.translations,
+                        function(aTranslationItem) {
+                            return aTranslationItem.naturalLanguage.code === item.naturalLanguageCode;
+                        }
+                    )
+
+                    if (!translationItem) {
+                        throw Error("cannot find the translation with natural language [" + item["naturalLanguageCode"] + "]");
+                    }
+
+                    translationItem["title"] = (item["title"] || "").trim();
+                    translationItem["summary"] = (item["summary"] || "").trim();
+                    translationItem["description"] = (item["description"] || "").trim();
+                })
+
+            }
+
+            $scope.goShowImportExport = function() {
+                if (!$scope.importExport.show) {
+                    copyTextFromUserInterface();
+                    $scope.importExport.show = true;
+                }
+            };
+
+            $scope.goImportToText = function() {
+                $scope.importExport.error = false;
+                copyTextFromUserInterface();
+                return null;
+            };
+
+            $scope.goExportFromText = function() {
+                $scope.importExport.error = false;
+                try {
+                    copyTextIntoUserInterface($scope.importExport.text);
+                } catch (e) {
+                    $scope.importExport.error = true;
+                    $log.error("error exporting localizations from text to user interface; " + e);
+                }
+                return null;
             };
 
             // --------------------------

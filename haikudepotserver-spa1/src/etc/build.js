@@ -97,7 +97,7 @@ function concatenateFilesSync(targetFile, sourceFiles) {
         data: minifyObject(extname(file), readFileSync(file, {encoding: 'utf8'}))
       }
     })
-    .map(fileAndData => fileAndData) // TODO obfuscate
+    .map(fileAndData => fileAndData)
     .forEach(fileAndData => {
       appendFileSync(targetFile, fileAndData.data, {encoding: 'utf8'});
       appendFileSync(targetFile, '\n\n');
