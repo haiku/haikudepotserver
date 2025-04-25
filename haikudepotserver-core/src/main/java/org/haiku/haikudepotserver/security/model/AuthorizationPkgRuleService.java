@@ -17,7 +17,7 @@ import java.util.List;
 
 public interface AuthorizationPkgRuleService {
 
-    List<AuthorizationPkgRule> search(
+    List<? extends AuthorizationPkgRule> search(
             ObjectContext context,
             AuthorizationPkgRuleSearchSpecification specification);
 

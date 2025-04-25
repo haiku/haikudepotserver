@@ -163,7 +163,7 @@ public class NaturalLanguageServiceImpl implements NaturalLanguageService {
     }
 
     /**
-     * <p>This method is supplied an EJBQL query that provides a list of the 'true' codes.  It returns
+     * <p>This method is supplied a query that provides a list of the 'true' codes.  It returns
      * a list of all codes that have the 'true' codes set to true.</p>
      */
 

@@ -7,12 +7,14 @@ package org.haiku.haikudepotserver.repository;
 
 import com.google.common.base.Preconditions;
 import com.google.common.base.Splitter;
-import com.google.common.base.Strings;
 import org.apache.cayenne.ObjectContext;
-import org.apache.cayenne.query.EJBQLQuery;
+import org.apache.cayenne.exp.ExpressionFactory;
 import org.apache.cayenne.query.ObjectSelect;
 import org.apache.commons.lang3.StringUtils;
-import org.haiku.haikudepotserver.dataobjects.*;
+import org.haiku.haikudepotserver.dataobjects.Pkg;
+import org.haiku.haikudepotserver.dataobjects.PkgVersion;
+import org.haiku.haikudepotserver.dataobjects.Repository;
+import org.haiku.haikudepotserver.dataobjects.RepositorySource;
 import org.haiku.haikudepotserver.naturallanguage.model.NaturalLanguageCoordinates;
 import org.haiku.haikudepotserver.repository.model.AlertRepositoryAbsentUpdateMail;
 import org.haiku.haikudepotserver.repository.model.RepositorySearchSpecification;
@@ -26,7 +28,6 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
-import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 import java.util.Optional;
@@ -62,22 +63,11 @@ public class RepositoryServiceImpl implements RepositoryService {
 
     @Override
     public Date getLastRepositoryModifyTimestampSecondAccuracy(ObjectContext context) {
-        EJBQLQuery query = new EJBQLQuery(String.join(" ",
-                "SELECT",
-                "MAX(r." + Repository.MODIFY_TIMESTAMP.getName() + ")",
-                "FROM",
-                Repository.class.getSimpleName(),
-                "r WHERE r.active = true"));
-
-        query.setCacheGroup(HaikuDepot.CacheGroup.REPOSITORY.name());
-
-        List<Object> result = context.performQuery(query);
-
-        return switch (result.size()) {
-            case 0 -> new Date(0);
-            case 1 -> DateTimeHelper.secondAccuracyDate((Date) result.get(0));
-            default -> throw new IllegalStateException("more than one row returned for a max aggregate.");
-        };
+        java.sql.Timestamp maxModifyTimestamp = ObjectSelect.query(Repository.class)
+                .where(Repository.ACTIVE.isTrue())
+                .column(Repository.MODIFY_TIMESTAMP.max())
+                .selectOne(context);
+        return DateTimeHelper.secondAccuracyDate(maxModifyTimestamp);
     }
 
     @Override
@@ -87,40 +77,53 @@ public class RepositoryServiceImpl implements RepositoryService {
         Preconditions.checkArgument(null!=context);
         Preconditions.checkArgument(null!=pkg);
 
-        String ejbql = "SELECT DISTINCT r FROM\n" +
-                Repository.class.getSimpleName() +
-                " r WHERE r.active = true AND EXISTS (SELECT pv FROM \n" +
-                PkgVersion.class.getSimpleName() +
-                " pv WHERE pv.repositorySource.repository=r" +
-                " AND pv.pkg=:pkg" +
-                ") ORDER BY r.code";
+        List<String> repositoryCodes = ObjectSelect.query(PkgVersion.class)
+                .where(PkgVersion.PKG.eq(pkg))
+                .and(
+                        PkgVersion.REPOSITORY_SOURCE
+                                .dot(RepositorySource.REPOSITORY)
+                                .dot(Repository.ACTIVE)
+                                .isTrue()
+                )
+                .orderBy(PkgVersion.REPOSITORY_SOURCE
+                        .dot(RepositorySource.REPOSITORY)
+                        .dot(Repository.ACTIVE)
+                        .asc()
+                )
+                .column(PkgVersion.REPOSITORY_SOURCE
+                        .dot(RepositorySource.REPOSITORY)
+                        .dot(Repository.CODE)
+                )
+                .distinct()
+                .select(context);
 
-        EJBQLQuery query = new EJBQLQuery(ejbql);
-        query.setParameter("pkg", pkg);
-
-        return (List<Repository>) context.performQuery(query);
-
+        return ObjectSelect.query(Repository.class).where(
+                        ExpressionFactory.and(
+                                repositoryCodes.stream()
+                                        .map(Repository.CODE::eq)
+                                        .toList()
+                        )
+                )
+                .orderBy(Repository.CODE.asc())
+                .select(context);
     }
 
     // ------------------------------
     // SEARCH
 
-    private String prepareWhereClause(
-            List<Object> parameterAccumulator,
-            ObjectContext context,
+    private ObjectSelect<Repository> prepareWhereClause(
+            ObjectSelect<Repository> objectSelect,
             RepositorySearchSpecification search) {
 
+        Preconditions.checkNotNull(objectSelect);
         Preconditions.checkNotNull(search);
-        Preconditions.checkNotNull(context);
-
-        List<String> whereExpressions = new ArrayList<>();
 
         if (null != search.getExpression()) {
             switch (search.getExpressionType()) {
 
                 case CONTAINS:
-                    parameterAccumulator.add("%" + LikeHelper.ESCAPER.escape(search.getExpression()) + "%");
-                    whereExpressions.add("LOWER(r." + Repository.CODE.getName() + ") LIKE ?" + parameterAccumulator.size() + " ESCAPE '|'");
+                    String likeExpression = "%" + LikeHelper.ESCAPER.escape(search.getExpression()) + "%";
+                    objectSelect = objectSelect.and(Repository.CODE.lower().like(likeExpression, '|'));
                     break;
 
                 default:
@@ -130,10 +133,10 @@ public class RepositoryServiceImpl implements RepositoryService {
         }
 
         if (!search.getIncludeInactive()) {
-            whereExpressions.add("r." + Repository.ACTIVE.getName() + " = true");
+            objectSelect = objectSelect.and(Repository.ACTIVE.isTrue());
         }
 
-        return String.join(" AND ", whereExpressions);
+        return objectSelect;
     }
 
     @Override
@@ -142,67 +145,18 @@ public class RepositoryServiceImpl implements RepositoryService {
         Preconditions.checkNotNull(context);
         Preconditions.checkState(search.getOffset() >= 0);
         Preconditions.checkState(search.getLimit() > 0);
-
-        List<Object> parameterAccumulator = new ArrayList<>();
-
-        StringBuilder ejbql = new StringBuilder();
-        ejbql.append("SELECT r FROM ");
-        ejbql.append(Repository.class.getSimpleName());
-        ejbql.append(" r ");
-
-        String whereClause = prepareWhereClause(parameterAccumulator, context, search);
-
-        if (!Strings.isNullOrEmpty(whereClause)) {
-            ejbql.append(" WHERE ");
-            ejbql.append(whereClause);
-        }
-
-        ejbql.append(" ORDER BY r.");
-        ejbql.append(Repository.CODE.getName());
-        ejbql.append(" ASC");
-
-        EJBQLQuery ejbqlQuery = new EJBQLQuery(ejbql.toString());
-
-        for (int i = 0; i < parameterAccumulator.size(); i++) {
-            ejbqlQuery.setParameter(i+1, parameterAccumulator.get(i));
-        }
-
-        ejbqlQuery.setFetchLimit(search.getLimit());
-        ejbqlQuery.setFetchOffset(search.getOffset());
-
-        //noinspection unchecked
-        return (List<Repository>) context.performQuery(ejbqlQuery);
+        return prepareWhereClause(ObjectSelect.query(Repository.class), search)
+                .orderBy(Repository.CODE.asc())
+                .limit(search.getLimit())
+                .offset(search.getOffset())
+                .select(context);
     }
 
     @Override
     public long total(ObjectContext context, RepositorySearchSpecification search) {
         Preconditions.checkNotNull(search);
         Preconditions.checkNotNull(context);
-
-        List<Object> parameters = new ArrayList<>();
-
-        StringBuilder ejbql = new StringBuilder();
-        ejbql.append("SELECT COUNT(r) FROM Repository AS r");
-
-        String whereClause = prepareWhereClause(parameters, context, search);
-
-        if (!Strings.isNullOrEmpty(whereClause)) {
-            ejbql.append(" WHERE ");
-            ejbql.append(whereClause);
-        }
-
-        EJBQLQuery ejbQuery = new EJBQLQuery(ejbql.toString());
-
-        for (int i = 0; i < parameters.size(); i++) {
-            ejbQuery.setParameter(i + 1, parameters.get(i));
-        }
-
-        @SuppressWarnings("unchecked") List<Number> result = context.performQuery(ejbQuery);
-
-        if (result.size() == 1) {
-            return result.get(0).longValue();
-        }
-        throw new IllegalStateException("expected 1 row from count query, but got " + result.size());
+        return prepareWhereClause(ObjectSelect.query(Repository.class), search).selectCount(context);
     }
 
     public void setPassword(Repository repository, String passwordClear) {
@@ -280,7 +234,7 @@ public class RepositoryServiceImpl implements RepositoryService {
         if (null == pkgVersion) {
             LOGGER.warn("for the repository source [{}] no package versions were found with import timestamps", repositorySource);
         } else {
-            Long hoursAgo = Optional.ofNullable(pkgVersion)
+            Long hoursAgo = Optional.of(pkgVersion)
                     .map(PkgVersion::getImportTimestamp)
                     .map(mt -> TimeUnit.MILLISECONDS.toHours(now.getTime() - mt.getTime()))
                     .orElse(null);

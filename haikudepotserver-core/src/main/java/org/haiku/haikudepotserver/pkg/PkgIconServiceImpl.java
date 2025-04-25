@@ -10,10 +10,12 @@ import com.google.common.hash.Hashing;
 import com.google.common.io.ByteStreams;
 import org.apache.cayenne.DataObject;
 import org.apache.cayenne.ObjectContext;
-import org.apache.cayenne.query.EJBQLQuery;
 import org.apache.cayenne.query.ObjectSelect;
 import org.apache.commons.compress.utils.BoundedInputStream;
-import org.haiku.haikudepotserver.dataobjects.*;
+import org.haiku.haikudepotserver.dataobjects.MediaType;
+import org.haiku.haikudepotserver.dataobjects.PkgIcon;
+import org.haiku.haikudepotserver.dataobjects.PkgIconImage;
+import org.haiku.haikudepotserver.dataobjects.PkgSupplement;
 import org.haiku.haikudepotserver.graphics.ImageHelper;
 import org.haiku.haikudepotserver.graphics.bitmap.PngOptimizationService;
 import org.haiku.haikudepotserver.pkg.model.*;
@@ -183,35 +185,22 @@ public class PkgIconServiceImpl implements PkgIconService {
     }
 
     private List<MediaType> getInUsePkgIconMediaTypes(final ObjectContext context) {
-        EJBQLQuery query = new EJBQLQuery(String.join(" ",
-                "SELECT",
-                "DISTINCT pi." + PkgIcon.MEDIA_TYPE.getName() + "." + MediaType.CODE.getName(),
-                "FROM",
-                PkgIcon.class.getSimpleName(),
-                "pi"));
-
-        final List<String> codes = (List<String>) context.performQuery(query);
-
-        return codes
-                .stream()
-                .map(c -> MediaType.getByCode(context, c))
-                .collect(Collectors.toList());
-
+        return ObjectSelect
+                .query(PkgIcon.class)
+                .column(PkgIcon.MEDIA_TYPE)
+                .distinct()
+                .orderBy(PkgIcon.MEDIA_TYPE.dot(MediaType.CODE).asc())
+                .select(context);
     }
 
     private List<Integer> getInUsePkgIconSizes(ObjectContext context, MediaType mediaType) {
-        EJBQLQuery query = new EJBQLQuery(String.join(" ",
-                "SELECT",
-                "DISTINCT pi." + PkgIcon.SIZE.getName(),
-                "FROM",
-                PkgIcon.class.getSimpleName(),
-                "pi WHERE pi." + PkgIcon.MEDIA_TYPE.getName(),
-                "=",
-                ":mediaType"));
-
-        query.setParameter("mediaType", mediaType);
-
-        return (List<Integer>) context.performQuery(query);
+        return ObjectSelect
+                .query(PkgIcon.class)
+                .where(PkgIcon.MEDIA_TYPE.eq(mediaType))
+                .column(PkgIcon.SIZE)
+                .distinct()
+                .orderBy(PkgIcon.SIZE.asc())
+                .select(context);
     }
 
     @Override

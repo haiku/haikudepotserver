@@ -161,8 +161,7 @@ public class PkgServiceImpl implements PkgService {
             Optional<PkgVersion> pkgVersionOptional = pkgVersions
                     .stream()
                     .filter(PkgVersion::getActive)
-                    .sorted((pv1, pv2) -> comparator.compare(pv2.toVersionCoordinates(), pv1.toVersionCoordinates()))
-                    .findFirst();
+                    .min((pv1, pv2) -> comparator.compare(pv2.toVersionCoordinates(), pv1.toVersionCoordinates()));
 
             pkgVersionOptional.ifPresent(pv -> pv.setIsLatest(true));
 
@@ -295,7 +294,6 @@ public class PkgServiceImpl implements PkgService {
 
         int offset = 0;
 
-        Preconditions.checkArgument(null!=context, "the object context must be provided");
         MappedSelect<DataRow> query = MappedSelect.query(_HaikuDepot.ALL_ACTIVE_PKG_NAMES_QUERYNAME, DataRow.class)
                 .param("isTotal", false)
                 .param("includeDevelopment", includeDevelopment)
@@ -426,7 +424,7 @@ public class PkgServiceImpl implements PkgService {
     }
 
     /**
-     * <p>This method will return all of the package names that have package versions that are related to a
+     * <p>This method will return all the package names that have package versions that are related to a
      * repository.</p>
      */
 
@@ -438,20 +436,11 @@ public class PkgServiceImpl implements PkgService {
         Preconditions.checkArgument(null != context, "the context must be provided");
         Preconditions.checkArgument(null != repositorySource, "the repository soures must be provided");
 
-        String queryBuilder = "SELECT p.name FROM " +
-                Pkg.class.getSimpleName() +
-                " p WHERE EXISTS(SELECT pv FROM " +
-                PkgVersion.class.getSimpleName() +
-                " pv WHERE pv." +
-                PkgVersion.PKG.getName() +
-                "=p AND pv." +
-                PkgVersion.REPOSITORY_SOURCE.getName() +
-                "=:repositorySource)";
-
-        EJBQLQuery query = new EJBQLQuery(queryBuilder);
-        query.setParameter("repositorySource", repositorySource);
-
-        return ImmutableSet.copyOf(context.performQuery(query));
+        return Set.copyOf(ObjectSelect.query(PkgVersion.class)
+                .where(PkgVersion.REPOSITORY_SOURCE.eq(repositorySource))
+                .column(PkgVersion.PKG.dot(Pkg.NAME))
+                .distinct()
+                .select(context));
     }
 
     /**

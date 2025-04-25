@@ -1,5 +1,5 @@
 /*
- * Copyright 2018, Andrew Lindesay
+ * Copyright 2018-2025, Andrew Lindesay
  * Distributed under the terms of the MIT License.
  */
 
@@ -9,14 +9,16 @@ import com.google.common.base.Preconditions;
 import com.google.common.base.Strings;
 import org.apache.cayenne.ObjectContext;
 import org.apache.cayenne.configuration.server.ServerRuntime;
-import org.apache.cayenne.query.EJBQLQuery;
+import org.apache.cayenne.query.MappedExec;
 import org.haiku.haikudepotserver.captcha.model.CaptchaRepository;
 import org.haiku.haikudepotserver.dataobjects.Response;
+import org.haiku.haikudepotserver.dataobjects.auto._Captcha;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.sql.Timestamp;
 import java.util.Date;
+import java.util.Map;
 import java.util.Optional;
 import java.util.concurrent.TimeUnit;
 
@@ -51,13 +53,10 @@ public class DatabaseCaptchaRepository implements CaptchaRepository {
     @Override
     public void purgeExpired() {
         Preconditions.checkNotNull(serverRuntime);
-
-        EJBQLQuery q = new EJBQLQuery(String.format(
-                "DELETE FROM %s r WHERE r.createTimestamp < :expiryTimestamp",
-                Response.class.getSimpleName()));
-
-        q.setParameter("expiryTimestamp", new Timestamp(System.currentTimeMillis() - TimeUnit.SECONDS.toMillis(expirySeconds)));
-        getServerRuntime().newContext().performQuery(q);
+        ObjectContext context = serverRuntime.newContext();
+        Timestamp expiryDate = new Timestamp(System.currentTimeMillis() - TimeUnit.SECONDS.toMillis(expirySeconds));
+        MappedExec query = MappedExec.query(_Captcha.DELETE_EXPIRED_RESPONSES_QUERYNAME).params(Map.of("expiryTimestamp", expiryDate));
+        query.update(context);
     }
 
     @Override

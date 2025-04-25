@@ -17,5 +17,4 @@
 			<login/>
 		</data-source>
 	</node>
-	<xi:include xmlns:xi="http://www.w3.org/2001/XInclude" href="haikudepotserver.graph.xml"/>
 </domain>

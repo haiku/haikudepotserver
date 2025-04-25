@@ -8,7 +8,7 @@ package org.haiku.haikudepotserver.security;
 import com.google.common.base.Preconditions;
 import org.apache.cayenne.ObjectContext;
 import org.apache.cayenne.exp.Expression;
-import org.apache.cayenne.query.EJBQLQuery;
+import org.apache.cayenne.exp.ExpressionFactory;
 import org.apache.cayenne.query.ObjectSelect;
 import org.haiku.haikudepotserver.dataobjects.Permission;
 import org.haiku.haikudepotserver.dataobjects.PermissionUserPkg;
@@ -21,7 +21,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
-import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
@@ -36,56 +35,38 @@ public class AuthorizationPkgRuleServiceImpl implements AuthorizationPkgRuleServ
     private static final Logger LOGGER = LoggerFactory.getLogger(AuthorizationPkgRuleServiceImpl.class);
 
     @SuppressWarnings("UnusedParameters")
-    private String prepareWhereClause(
-            List<Object> parameterAccumulator,
-            ObjectContext context,
+    private ObjectSelect<PermissionUserPkg> prepareWhereClause(
+            ObjectSelect<PermissionUserPkg> objectSelect,
             AuthorizationPkgRuleSearchSpecification specification) {
 
-        List<String> clauses = new ArrayList<>();
-
         if (null != specification.getPermissions()) {
-
-            StringBuilder query = new StringBuilder();
-            query.append('(');
-
-            for (int i = 0; i < specification.getPermissions().size(); i++) {
-                if (0 != i) {
-                    query.append(" OR ");
-                }
-
-                parameterAccumulator.add(specification.getPermissions().get(i));
-                query.append("r.permission=?");
-                query.append(Integer.toString(parameterAccumulator.size()));
+            if (specification.getPermissions().isEmpty()) {
+                throw new IllegalStateException("the permissions list is empty");
             }
 
-            query.append(')');
+            objectSelect = objectSelect.and(
+                    ExpressionFactory.or(
+                            specification.getPermissions().stream()
+                                    .map(PermissionUserPkg.PERMISSION::eq)
+                                    .toList()
 
-            clauses.add(query.toString());
+                    )
+            );
         }
 
         if (null != specification.getUser()) {
-            parameterAccumulator.add(specification.getUser());
-            clauses.add("r.user=?" + parameterAccumulator.size());
-
-            if (!specification.getIncludeInactive()) {
-                clauses.add("r.user." + User.ACTIVE.getName() + "=true");
-            }
+            objectSelect = objectSelect.and(PermissionUserPkg.USER.eq(specification.getUser()));
         }
 
         if (null != specification.getPkg()) {
-            parameterAccumulator.add(specification.getPkg());
-            clauses.add("r.pkg=?" + parameterAccumulator.size());
-
-            if (!specification.getIncludeInactive()) {
-                clauses.add("r.pkg." + Pkg.ACTIVE.getName() + "=true");
-            }
+            objectSelect = objectSelect.and(PermissionUserPkg.PKG.eq(specification.getPkg()));
         }
 
-        return String.join(" AND ", clauses);
+        return objectSelect;
     }
 
     @Override
-    public List<AuthorizationPkgRule> search(
+    public List<? extends AuthorizationPkgRule> search(
             ObjectContext context,
             AuthorizationPkgRuleSearchSpecification specification) {
 
@@ -100,32 +81,11 @@ public class AuthorizationPkgRuleServiceImpl implements AuthorizationPkgRuleServ
             return Collections.emptyList();
         }
 
-        StringBuilder queryBuilder = new StringBuilder();
-        List<Object> parameterAccumulator = new ArrayList<>();
-        String whereClause = prepareWhereClause(parameterAccumulator, context, specification);
-
-        queryBuilder.append("SELECT r FROM ");
-        queryBuilder.append(PermissionUserPkg.class.getSimpleName());
-        queryBuilder.append(" AS r");
-
-        if (!whereClause.isEmpty()) {
-            queryBuilder.append(" WHERE ");
-            queryBuilder.append(whereClause);
-        }
-
-        queryBuilder.append(" ORDER BY r.createTimestamp DESC");
-
-        EJBQLQuery query = new EJBQLQuery(queryBuilder.toString());
-
-        for (int i = 0; i < parameterAccumulator.size(); i++) {
-            query.setParameter(i + 1, parameterAccumulator.get(i));
-        }
-
-        query.setFetchLimit(specification.getLimit());
-        query.setFetchOffset(specification.getOffset());
-
-        //noinspection unchecked
-        return (List<AuthorizationPkgRule>) context.performQuery(query);
+        return prepareWhereClause(ObjectSelect.query(PermissionUserPkg.class), specification)
+                .orderBy(PermissionUserPkg.CREATE_TIMESTAMP.desc())
+                .limit(specification.getLimit())
+                .offset(specification.getOffset())
+                .select(context);
     }
 
     @Override
@@ -140,31 +100,9 @@ public class AuthorizationPkgRuleServiceImpl implements AuthorizationPkgRuleServ
             return 0;
         }
 
-        StringBuilder queryBuilder = new StringBuilder();
-        List<Object> parameterAccumulator = new ArrayList<>();
-        String whereClause = prepareWhereClause(parameterAccumulator, context, specification);
-
-        queryBuilder.append("SELECT COUNT(r) FROM ");
-        queryBuilder.append(PermissionUserPkg.class.getSimpleName());
-        queryBuilder.append(" AS r");
-
-        if (!whereClause.isEmpty()) {
-            queryBuilder.append(" WHERE ");
-            queryBuilder.append(whereClause);
-        }
-
-        EJBQLQuery query = new EJBQLQuery(queryBuilder.toString());
-
-        for (int i = 0; i < parameterAccumulator.size(); i++) {
-            query.setParameter(i + 1, parameterAccumulator.get(i));
-        }
-
-        @SuppressWarnings("unchecked") List<Number> result = context.performQuery(query);
-
-        if (result.size() == 1) {
-            return result.getFirst().longValue();
-        }
-        throw new IllegalStateException("expected 1 row from count query, but got " + result.size());
+        return prepareWhereClause(ObjectSelect.query(PermissionUserPkg.class), specification)
+                .count()
+                .selectOne(context);
     }
 
     @Override

@@ -22,4 +22,8 @@
 		<obj-attribute name="response" type="java.lang.String" lock="true" db-attribute-path="response"/>
 		<obj-attribute name="token" type="java.lang.String" lock="true" db-attribute-path="token"/>
 	</obj-entity>
+	<query name="DeleteExpiredResponses" type="SQLTemplate" root="data-map" root-name="Captcha">
+		<property name="cayenne.GenericSelectQuery.fetchingDataRows" value="true"/>
+		<sql adapter-class="org.apache.cayenne.dba.postgres.PostgresAdapter"><![CDATA[DELETE FROM captcha.response WHERE create_timestamp < #bind($expiryTimestamp)]]></sql>
+	</query>
 </data-map>

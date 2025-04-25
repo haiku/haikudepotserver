@@ -10,7 +10,7 @@ import com.google.common.base.Strings;
 import com.google.common.collect.ComparisonChain;
 import org.apache.cayenne.ObjectContext;
 import org.apache.cayenne.configuration.server.ServerRuntime;
-import org.apache.cayenne.query.EJBQLQuery;
+import org.apache.cayenne.exp.ExpressionFactory;
 import org.apache.cayenne.query.ObjectSelect;
 import org.apache.commons.lang3.StringUtils;
 import org.haiku.haikudepotserver.dataobjects.*;
@@ -174,10 +174,13 @@ public class UserRatingServiceImpl implements UserRatingService {
 
     @Override
     public List<String> pkgNamesEffectedByUserActiveStateChange(ObjectContext context, User user) {
+        Preconditions.checkNotNull(context);
         Preconditions.checkNotNull(user);
-        EJBQLQuery query = new EJBQLQuery("SELECT DISTINCT ur.pkgVersion.pkg.name FROM UserRating ur WHERE ur.user=?1");
-        query.setParameter(1,user);
-        return (List<String>) context.performQuery(query);
+        return ObjectSelect.query(UserRating.class)
+                .where(UserRating.USER.eq(user))
+                .column(UserRating.PKG_VERSION.dot(Pkg.NAME))
+                .distinct()
+                .select(context);
     }
 
     private float averageAsFloat(Collection<Short> ratings) {
@@ -204,31 +207,19 @@ public class UserRatingServiceImpl implements UserRatingService {
         Preconditions.checkNotNull(pkgVersions);
 
         if (pkgVersions.isEmpty()) {
-            return Collections.emptyList();
+            return List.of();
         }
 
-        StringBuilder queryBuilder = new StringBuilder();
-
-        queryBuilder.append("SELECT DISTINCT ur.user.nickname FROM UserRating ur WHERE ur.user.active=true AND ur.active=true");
-        queryBuilder.append(" AND (");
-
-        for (int i = 0; i < pkgVersions.size(); i++) {
-            if (0 != i) {
-                queryBuilder.append(" OR ");
-            }
-
-            queryBuilder.append("ur.pkgVersion=?").append(i + 1);
-        }
-
-        queryBuilder.append(")");
-
-        EJBQLQuery query = new EJBQLQuery(queryBuilder.toString());
-
-        for(int i=0;i<pkgVersions.size();i++) {
-            query.setParameter(i + 1, pkgVersions.get(i));
-        }
-
-        return context.performQuery(query);
+        return ObjectSelect.query(UserRating.class)
+                .where(UserRating.USER.dot(User.ACTIVE).isTrue())
+                .and(UserRating.ACTIVE.isTrue())
+                .and(ExpressionFactory.or(
+                        pkgVersions.stream()
+                                .map(UserRating.PKG_VERSION::eq)
+                                .toList()))
+                .column(UserRating.USER.dot(User.NICKNAME))
+                .distinct()
+                .select(context);
     }
 
     /**
@@ -238,14 +229,11 @@ public class UserRatingServiceImpl implements UserRatingService {
     @Override
     public void updateUserRatingDerivationsForAllPkgs() {
         ObjectContext context = serverRuntime.newContext();
-
-        String builder = "SELECT p.name FROM " +
-                Pkg.class.getSimpleName() +
-                " p" +
-                " WHERE p.active=true" +
-                " ORDER BY p.name DESC";
-
-        List<String> pkgNames = context.performQuery(new EJBQLQuery(builder));
+        List<String> pkgNames = ObjectSelect.query(Pkg.class)
+                .where(Pkg.ACTIVE.isTrue())
+                .orderBy(Pkg.NAME.desc())
+                .column(Pkg.NAME)
+                .select(context);
 
         LOGGER.info("will derive and store user ratings for {} packages", pkgNames.size());
 
@@ -267,18 +255,12 @@ public class UserRatingServiceImpl implements UserRatingService {
 
         ObjectContext context = serverRuntime.newContext();
 
-        String builder = "SELECT r.code FROM\n" +
-                Repository.class.getSimpleName() +
-                " r\n" +
-                "WHERE EXISTS(SELECT pv FROM\n" +
-                PkgVersion.class.getSimpleName() +
-                " pv WHERE pv.pkg.name = :name\n" +
-                " AND pv.repositorySource.repository = r)\n" +
-                "ORDER BY r.code DESC";
-
-        EJBQLQuery query = new EJBQLQuery(builder);
-        query.setParameter("name", pkgName);
-        List<String> repositoryCodes = (List<String>) context.performQuery(query);
+        List<String> repositoryCodes = ObjectSelect.query(PkgVersion.class)
+                .where(PkgVersion.PKG.dot(Pkg.NAME).eq(pkgName))
+                .column(PkgVersion.REPOSITORY_SOURCE.dot(RepositorySource.REPOSITORY).dot(Repository.CODE))
+                .orderBy(PkgVersion.REPOSITORY_SOURCE.dot(RepositorySource.REPOSITORY).dot(Repository.CODE).desc())
+                .distinct()
+                .select(context);
 
         for(String repositoryCode : repositoryCodes) {
             updateUserRatingDerivation(pkgName, repositoryCode);
