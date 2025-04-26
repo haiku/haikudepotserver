@@ -1,14 +1,14 @@
 /*
- * Copyright 2018-2024, Andrew Lindesay
+ * Copyright 2018-2025, Andrew Lindesay
  * Distributed under the terms of the MIT License.
  */
 
 package org.haiku.haikudepotserver.pkg.job;
 
-import com.google.common.base.Charsets;
 import com.google.common.io.ByteSource;
 import com.google.common.io.Resources;
 import com.google.common.net.MediaType;
+import jakarta.annotation.Resource;
 import org.apache.cayenne.ObjectContext;
 import org.apache.cayenne.query.ObjectSelect;
 import org.apache.cayenne.query.SortOrder;
@@ -29,9 +29,9 @@ import org.haiku.haikudepotserver.support.SingleCollector;
 import org.junit.jupiter.api.Test;
 import org.springframework.test.context.ContextConfiguration;
 
-import jakarta.annotation.Resource;
 import java.io.BufferedReader;
 import java.io.InputStream;
+import java.nio.charset.StandardCharsets;
 import java.util.List;
 
 @ContextConfiguration(classes = TestConfig.class)
@@ -162,13 +162,13 @@ public class PkgIconImportArchiveJobRunnerIT extends AbstractIntegrationTest {
 
             // write the report to the console in order to help with diagnosis
 
-            LOGGER.info("actual output;\n{}",jobSource.getByteSource().asCharSource(Charsets.UTF_8).read());
+            LOGGER.info("actual output;\n{}",jobSource.getByteSource().asCharSource(StandardCharsets.UTF_8).read());
 
             // compare actual generated with expected.
 
             try (
-                    BufferedReader jobReader = jobSource.getByteSource().asCharSource(Charsets.UTF_8).openBufferedStream();
-                    BufferedReader sampleReader = expectedByteSource.asCharSource(Charsets.UTF_8).openBufferedStream()
+                    BufferedReader jobReader = jobSource.getByteSource().asCharSource(StandardCharsets.UTF_8).openBufferedStream();
+                    BufferedReader sampleReader = expectedByteSource.asCharSource(StandardCharsets.UTF_8).openBufferedStream()
             ) {
                 assertEqualsLineByLine(sampleReader, jobReader);
             }

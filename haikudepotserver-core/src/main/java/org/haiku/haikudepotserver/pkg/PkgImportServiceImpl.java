@@ -30,7 +30,7 @@ import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.UncheckedIOException;
-import java.net.URL;
+import java.net.URI;
 import java.time.Clock;
 import java.util.Collections;
 import java.util.List;
@@ -46,6 +46,8 @@ public class PkgImportServiceImpl implements PkgImportService {
     private final PkgIconService pkgIconService;
     private final PkgLocalizationService pkgLocalizationService;
     private final URLHelperService urlHelperService;
+
+    private final RandomStringUtils randomStringUtils = RandomStringUtils.insecure();
 
     public PkgImportServiceImpl(
             PkgServiceImpl pkgServiceImpl,
@@ -310,7 +312,7 @@ public class PkgImportServiceImpl implements PkgImportService {
      */
 
     private void populateFromPayload(ObjectContext objectContext, PkgVersion persistedPkgVersion) {
-        persistedPkgVersion.tryGetHpkgURL(ExposureType.INTERNAL_FACING)
+        persistedPkgVersion.tryGetHpkgURI(ExposureType.INTERNAL_FACING)
                 .ifPresentOrElse(
                         u -> populateFromPayload(objectContext, persistedPkgVersion, u),
                         () -> LOGGER.info(
@@ -321,19 +323,20 @@ public class PkgImportServiceImpl implements PkgImportService {
 
     private void populateFromPayload(
             ObjectContext objectContext,
-            PkgVersion persistedPkgVersion, URL url) {
+            PkgVersion persistedPkgVersion,
+            URI uri) {
         File temporaryFile = null;
 
         try {
-            String prefix = persistedPkgVersion.getPkg().getName() + "_" + RandomStringUtils.randomAlphabetic(3) + "_";
+            String prefix = persistedPkgVersion.getPkg().getName() + "_" + randomStringUtils.next(3) + "_";
             // ^ need to ensure minimum length of the prefix
             temporaryFile = File.createTempFile(prefix, ".hpkg");
 
             try {
-                urlHelperService.transferPayloadToFile(url, temporaryFile);
+                urlHelperService.transferPayloadToFile(uri, temporaryFile);
             } catch (IOException ioe) {
                 // if we can't download then don't stop the entire import process - just log and carry on.
-                LOGGER.warn("unable to download from the url [{}] --> [{}]; will ignore", url, temporaryFile);
+                LOGGER.warn("unable to download from the url [{}] --> [{}]; will ignore", uri, temporaryFile);
                 return;
             }
 
@@ -355,7 +358,7 @@ public class PkgImportServiceImpl implements PkgImportService {
                 hpkgFileExtractor = new HpkgFileExtractor(temporaryFile);
             } catch (Throwable th) {
                 // if it is not possible to parse the HPKG then log and carry on.
-                LOGGER.warn("unable to parse the payload from [{}]", url, th);
+                LOGGER.warn("unable to parse the payload from [{}]", uri, th);
                 return;
             }
 

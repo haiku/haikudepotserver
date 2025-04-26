@@ -1,5 +1,5 @@
 /*
- * Copyright 2013-2024, Andrew Lindesay
+ * Copyright 2013-2025, Andrew Lindesay
  * Distributed under the terms of the MIT License.
  */
 
@@ -26,8 +26,7 @@ import org.haiku.haikudepotserver.support.cayenne.ExpressionHelper;
 import org.haiku.haikudepotserver.support.exception.ObjectNotFoundException;
 import org.springframework.web.util.UriComponentsBuilder;
 
-import java.net.MalformedURLException;
-import java.net.URL;
+import java.net.URI;
 import java.util.List;
 import java.util.Optional;
 import java.util.regex.Pattern;
@@ -213,20 +212,13 @@ public class PkgVersion extends _PkgVersion implements MutableCreateAndModifyTim
      * <p>This method will provide a URL to the actual data of the package.</p>
      */
 
-    public Optional<URL> tryGetHpkgURL(ExposureType exposureType) {
-        return getRepositorySource().tryGetPackagesBaseURL(exposureType)
-                .map(u -> {
-                    try {
-                        return new URL(
-                                u.getProtocol(),
-                                u.getHost(),
-                                u.getPort(),
-                                u.getPath() + "/" + getHpkgFilename());
-                    } catch (MalformedURLException mue) {
-                        throw new IllegalStateException(
-                                "unable to create the URL to the hpkg data", mue);
-                    }
-                });
+    public Optional<URI> tryGetHpkgURI(ExposureType exposureType) {
+        return getRepositorySource().tryGetPackagesBaseURI(exposureType)
+                .map(u -> UriComponentsBuilder.fromUri(u)
+                        .pathSegment(getHpkgFilename())
+                        .build()
+                        .toUri()
+                );
     }
 
     /**

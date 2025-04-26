@@ -1,12 +1,12 @@
 /*
- * Copyright 2018-2023, Andrew Lindesay
+ * Copyright 2018-2025, Andrew Lindesay
  * Distributed under the terms of the MIT License.
  */
 
 package org.haiku.haikudepotserver.pkg.job;
 
-import com.google.common.base.Charsets;
 import com.google.common.io.ByteSource;
+import jakarta.annotation.Resource;
 import org.fest.assertions.Assertions;
 import org.haiku.haikudepotserver.AbstractIntegrationTest;
 import org.haiku.haikudepotserver.IntegrationTestSupportService;
@@ -19,9 +19,9 @@ import org.haiku.haikudepotserver.support.SingleCollector;
 import org.junit.jupiter.api.Test;
 import org.springframework.test.context.ContextConfiguration;
 
-import jakarta.annotation.Resource;
 import java.io.BufferedReader;
 import java.io.IOException;
+import java.nio.charset.StandardCharsets;
 import java.util.Optional;
 
 @ContextConfiguration(classes = TestConfig.class)
@@ -63,8 +63,8 @@ public class PkgScreenshotSpreadsheetJobReportRunnerIT extends AbstractIntegrati
         ByteSource expectedByteSource = getResourceByteSource("sample-pkgscreenshotspreadsheet-generated.csv");
 
         try(
-                BufferedReader jobReader = jobSource.getByteSource().asCharSource(Charsets.UTF_8).openBufferedStream();
-                BufferedReader sampleReader = expectedByteSource.asCharSource(Charsets.UTF_8).openBufferedStream()
+                BufferedReader jobReader = jobSource.getByteSource().asCharSource(StandardCharsets.UTF_8).openBufferedStream();
+                BufferedReader sampleReader = expectedByteSource.asCharSource(StandardCharsets.UTF_8).openBufferedStream()
         ) {
             assertEqualsLineByLine(sampleReader, jobReader);
         }

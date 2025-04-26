@@ -1,11 +1,10 @@
 /*
- * Copyright 2018-2024, Andrew Lindesay
+ * Copyright 2018-2025, Andrew Lindesay
  * Distributed under the terms of the MIT License.
  */
 
 package org.haiku.haikudepotserver.repository.job;
 
-import com.google.common.base.Charsets;
 import com.google.common.base.Preconditions;
 import com.google.common.collect.Sets;
 import org.apache.cayenne.ObjectContext;
@@ -33,7 +32,8 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
 import java.io.*;
-import java.net.URL;
+import java.net.URI;
+import java.nio.charset.StandardCharsets;
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
@@ -132,7 +132,7 @@ public class RepositoryHpkrIngressJobRunner extends AbstractJobRunner<Repository
             ObjectContext mainContext,
             RepositorySource repositorySource)
     throws RepositoryHpkrIngressException {
-        URL url = repositorySource.tryGetInternalFacingDownloadRepoInfoURL().orElseThrow(
+        URI uri = repositorySource.tryGetInternalFacingDownloadRepoInfoURI().orElseThrow(
                 () -> new RepositoryHpkrIngressException(
                         "unable to download for [" + repositorySource.getCode()
                         + "] as no download repo info url was available"));
@@ -144,13 +144,13 @@ public class RepositoryHpkrIngressJobRunner extends AbstractJobRunner<Repository
             temporaryFile = File.createTempFile(repositorySource.getCode() + "__import", ".repo-info");
 
             LOGGER.info("will copy data for repository info [{}] ({}) to temporary file",
-                    repositorySource, url.toString());
+                    repositorySource, uri.toString());
 
-            FileHelper.streamUrlDataToFile(url, temporaryFile, TIMEOUT_REPOSITORY_SOURCE_FETCH);
+            FileHelper.streamUrlDataToFile(uri, temporaryFile, TIMEOUT_REPOSITORY_SOURCE_FETCH);
 
             try (
                     InputStream inputStream = new FileInputStream(temporaryFile);
-                    InputStreamReader inputStreamReader = new InputStreamReader(inputStream, Charsets.UTF_8);
+                    InputStreamReader inputStreamReader = new InputStreamReader(inputStream, StandardCharsets.UTF_8);
                     BufferedReader reader = new BufferedReader(inputStreamReader)
                     ) {
                 List<Parameter> parameters = DriverSettings.parse(reader);
@@ -215,7 +215,7 @@ public class RepositoryHpkrIngressJobRunner extends AbstractJobRunner<Repository
     private void runImportHpkrForRepositorySource(
             ObjectContext mainContext,
             RepositorySource repositorySource) {
-        URL url = repositorySource.tryGetInternalFacingDownloadHpkrURL()
+        URI uri = repositorySource.tryGetInternalFacingDownloadHpkrURI()
                 .orElseThrow(() -> new RuntimeException(
                         "unable to import for ["
                                 + repositorySource
@@ -228,12 +228,12 @@ public class RepositoryHpkrIngressJobRunner extends AbstractJobRunner<Repository
             temporaryFile = File.createTempFile(repositorySource.getCode() + "__import", ".hpkr");
 
             LOGGER.info("will copy repository hpkr [{}] ({}) to temporary file",
-                    repositorySource, url.toString());
+                    repositorySource, uri.toString());
 
-            FileHelper.streamUrlDataToFile(url, temporaryFile, TIMEOUT_REPOSITORY_SOURCE_FETCH);
+            FileHelper.streamUrlDataToFile(uri, temporaryFile, TIMEOUT_REPOSITORY_SOURCE_FETCH);
 
             LOGGER.info("did copy {} bytes for repository hpkr [{}] ({}) to temporary file",
-                    temporaryFile.length(), repositorySource, url);
+                    temporaryFile.length(), repositorySource, uri);
 
             Set<String> repositoryImportPkgNames = Sets.newHashSet();
             long startTimeMs = System.currentTimeMillis();
@@ -294,16 +294,19 @@ public class RepositoryHpkrIngressJobRunner extends AbstractJobRunner<Repository
 
                     if (changes > 0) {
                         removalContext.commitChanges();
-                        LOGGER.info("did remove all versions of package {} from repository source {} because this package is no longer in the repository", persistedPkgName, repositorySource);
+                        LOGGER.info("did remove all versions of package {} from repository source {} because this "
+                            + "package is no longer in the repository", persistedPkgName, repositorySource);
                     }
 
                 }
             });
 
-            LOGGER.info("did process data for repository hpkr {} in {}ms", repositorySource, System.currentTimeMillis() - startTimeMs);
+            LOGGER.info("did process data for repository hpkr {} in {}ms", repositorySource,
+                    System.currentTimeMillis() - startTimeMs);
 
         } catch (Throwable th) {
-            throw new RuntimeException("a problem has arisen processing a repository file for repository hpkr " + repositorySource + " from url '" + url.toString() + "'", th);
+            throw new RuntimeException("a problem has arisen processing a repository file for repository hpkr "
+                    + repositorySource + " from url '" + uri.toString() + "'", th);
         } finally {
 
             if (null != temporaryFile && temporaryFile.exists()) {

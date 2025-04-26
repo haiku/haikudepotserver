@@ -1,5 +1,5 @@
 /*
- * Copyright 2018-2024, Andrew Lindesay
+ * Copyright 2018-2025, Andrew Lindesay
  * Distributed under the terms of the MIT License.
  */
 
@@ -11,7 +11,6 @@ import com.google.common.io.ByteStreams;
 import org.apache.cayenne.DataObject;
 import org.apache.cayenne.ObjectContext;
 import org.apache.cayenne.query.ObjectSelect;
-import org.apache.commons.compress.utils.BoundedInputStream;
 import org.haiku.haikudepotserver.dataobjects.MediaType;
 import org.haiku.haikudepotserver.dataobjects.PkgIcon;
 import org.haiku.haikudepotserver.dataobjects.PkgIconImage;
@@ -100,7 +99,12 @@ public class PkgIconServiceImpl implements PkgIconService {
         Preconditions.checkArgument(null != mediaType, "the mediaType must be provided");
         Preconditions.checkArgument(null != pkgSupplement, "the pkgSupplement must be provided");
 
-        byte[] imageData = ByteStreams.toByteArray(new BoundedInputStream(input, ICON_SIZE_LIMIT));
+        InputStream boundedInputStream = new org.apache.commons.io.input.BoundedInputStream.Builder()
+                .setInputStream(input)
+                .setMaxCount(ICON_SIZE_LIMIT)
+                .setPropagateClose(false)
+                .get();
+        byte[] imageData = ByteStreams.toByteArray(boundedInputStream);
 
         Optional<PkgIcon> pkgIconOptional;
         Integer size = null;

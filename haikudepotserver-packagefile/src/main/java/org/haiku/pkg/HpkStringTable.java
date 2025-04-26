@@ -1,14 +1,15 @@
 /*
- * Copyright 2018, Andrew Lindesay
+ * Copyright 2018-2025, Andrew Lindesay
  * Distributed under the terms of the MIT License.
  */
 
 package org.haiku.pkg;
 
-import com.google.common.base.Charsets;
 import com.google.common.base.Preconditions;
 import org.haiku.pkg.heap.HeapCoordinates;
 import org.haiku.pkg.heap.HpkHeapReader;
+
+import java.nio.charset.StandardCharsets;
 
 /**
  * <p>The HPK* file format may contain a table of commonly used strings in a table.  This object will represent
@@ -81,7 +82,7 @@ public class HpkStringTable implements StringTable {
             }
 
             if (offset < stringsDataBuffer.length) {
-                result[stringIndex] = new String(stringsDataBuffer, start, offset-start, Charsets.UTF_8);
+                result[stringIndex] = new String(stringsDataBuffer, start, offset-start, StandardCharsets.UTF_8);
                 stringIndex++;
                 offset++;
             }

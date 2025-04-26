@@ -1,11 +1,10 @@
 /*
- * Copyright 2018-2023, Andrew Lindesay
+ * Copyright 2018-2025, Andrew Lindesay
  * Distributed under the terms of the MIT License.
  */
 
 package org.haiku.haikudepotserver.job;
 
-import com.google.common.base.Charsets;
 import com.google.common.io.CharStreams;
 import jakarta.annotation.Resource;
 import org.fest.assertions.Assertions;
@@ -18,6 +17,7 @@ import org.springframework.test.context.ContextConfiguration;
 import org.testcontainers.shaded.org.awaitility.Awaitility;
 
 import java.io.*;
+import java.nio.charset.StandardCharsets;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
@@ -78,7 +78,7 @@ public class LocalJobServiceIT extends AbstractIntegrationTest {
 
                         try (
                                 InputStream inputStream = jobDataOptional.get().getByteSource().openStream();
-                                Reader reader = new InputStreamReader(inputStream, Charsets.UTF_8);
+                                Reader reader = new InputStreamReader(inputStream, StandardCharsets.UTF_8);
                         ) {
                             Assertions.assertThat(CharStreams.toString(reader)).isEqualTo("0\n1\n2\n");
                         }

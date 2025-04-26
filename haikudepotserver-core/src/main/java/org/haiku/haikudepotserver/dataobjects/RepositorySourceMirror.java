@@ -1,5 +1,5 @@
 /*
- * Copyright 2018-2022, Andrew Lindesay
+ * Copyright 2018-2025, Andrew Lindesay
  * Distributed under the terms of the MIT License.
  */
 
@@ -13,13 +13,13 @@ import org.apache.cayenne.validation.ValidationResult;
 import org.apache.commons.lang3.builder.CompareToBuilder;
 import org.apache.commons.lang3.builder.ToStringBuilder;
 import org.apache.commons.lang3.builder.ToStringStyle;
-import org.haiku.haikudepotserver.support.exception.ObjectNotFoundException;
 import org.haiku.haikudepotserver.dataobjects.auto._RepositorySourceMirror;
 import org.haiku.haikudepotserver.dataobjects.support.MutableCreateAndModifyTimestamped;
+import org.haiku.haikudepotserver.support.exception.ObjectNotFoundException;
 
 import java.io.Serial;
-import java.net.MalformedURLException;
-import java.net.URL;
+import java.net.URI;
+import java.net.URISyntaxException;
 import java.util.List;
 import java.util.Optional;
 
@@ -86,9 +86,9 @@ public class RepositorySourceMirror
 
         if(null != getBaseUrl()) {
             try {
-                new URL(getBaseUrl());
+                new URI(getBaseUrl());
             }
-            catch(MalformedURLException mue) {
+            catch(URISyntaxException mue) {
                 validationResult.addFailure(new BeanValidationFailure(
                         this, BASE_URL.getName(), "malformed"));
             }

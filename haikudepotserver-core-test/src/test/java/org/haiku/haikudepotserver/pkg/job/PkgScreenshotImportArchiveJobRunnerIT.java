@@ -1,13 +1,13 @@
 /*
- * Copyright 2018-2023, Andrew Lindesay
+ * Copyright 2018-2025, Andrew Lindesay
  * Distributed under the terms of the MIT License.
  */
 
 package org.haiku.haikudepotserver.pkg.job;
 
-import com.google.common.base.Charsets;
 import com.google.common.hash.Hashing;
 import com.google.common.net.MediaType;
+import jakarta.annotation.Resource;
 import org.apache.cayenne.ObjectContext;
 import org.fest.assertions.Assertions;
 import org.haiku.haikudepotserver.AbstractIntegrationTest;
@@ -26,8 +26,8 @@ import org.haiku.haikudepotserver.support.SingleCollector;
 import org.junit.jupiter.api.Test;
 import org.springframework.test.context.ContextConfiguration;
 
-import jakarta.annotation.Resource;
 import java.io.IOException;
+import java.nio.charset.StandardCharsets;
 import java.util.List;
 
 /**
@@ -261,8 +261,8 @@ public class PkgScreenshotImportArchiveJobRunnerIT extends AbstractIntegrationTe
 
         // write the report to the console in order to help with diagnosis
 
-        LOGGER.info("actual output;\n{}", jobSource.getByteSource().asCharSource(Charsets.UTF_8).read());
-        return jobSource.getByteSource().asCharSource(Charsets.UTF_8).readLines();
+        LOGGER.info("actual output;\n{}", jobSource.getByteSource().asCharSource(StandardCharsets.UTF_8).read());
+        return jobSource.getByteSource().asCharSource(StandardCharsets.UTF_8).readLines();
     }
 
 }

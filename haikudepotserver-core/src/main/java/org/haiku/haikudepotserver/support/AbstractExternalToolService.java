@@ -1,11 +1,10 @@
 /*
- * Copyright 2018-2023, Andrew Lindesay
+ * Copyright 2018-2025, Andrew Lindesay
  * Distributed under the terms of the MIT License.
  */
 
 package org.haiku.haikudepotserver.support;
 
-import com.google.common.base.Charsets;
 import com.google.common.base.Preconditions;
 import com.google.common.io.ByteSink;
 import com.google.common.io.ByteSource;
@@ -13,13 +12,8 @@ import com.google.common.io.Files;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.io.BufferedReader;
-import java.io.ByteArrayOutputStream;
-import java.io.File;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.InputStreamReader;
-import java.io.OutputStream;
+import java.io.*;
+import java.nio.charset.StandardCharsets;
 import java.util.List;
 import java.util.UUID;
 import java.util.concurrent.TimeUnit;
@@ -38,9 +32,9 @@ public abstract class AbstractExternalToolService<T> {
 
     private File temporaryDirectory = null;
 
-    private synchronized File getTemporaryDirectory() {
+    private synchronized File getTemporaryDirectory() throws IOException {
         if (null == temporaryDirectory) {
-            temporaryDirectory = Files.createTempDir();
+            temporaryDirectory = java.nio.file.Files.createTempDirectory("hds").toFile();
             temporaryDirectory.deleteOnExit();
             LOGGER.info("did create the temporary directory; {}", temporaryDirectory);
         }
@@ -98,11 +92,11 @@ public abstract class AbstractExternalToolService<T> {
             List<String> args = createArguments(context, temporaryInputFile, temporaryOutputFile);
             Process process = new ProcessBuilder(args).start();
 
-            LOGGER.debug("did start " + args.get(0));
+            LOGGER.debug("did start " + args.getFirst());
 
             try (
                     InputStream inputStream = process.getErrorStream();
-                    InputStreamReader inputStreamReader = new InputStreamReader(inputStream, Charsets.UTF_8);
+                    InputStreamReader inputStreamReader = new InputStreamReader(inputStream, StandardCharsets.UTF_8);
                     BufferedReader bufferedReader = new BufferedReader(inputStreamReader)
 
             ) {
@@ -118,23 +112,23 @@ public abstract class AbstractExternalToolService<T> {
             try {
                 if (process.waitFor(TIMEOUT, TimeUnit.MILLISECONDS)) {
                     if (0 != process.exitValue()) {
-                        throw new RuntimeException("unable to execute " + args.get(0));
+                        throw new RuntimeException("unable to execute " + args.getFirst());
                     }
                 }
                 else {
                     process.destroyForcibly();
-                    throw new RuntimeException("unable to run " + args.get(0) + " as it has timed-out");
+                    throw new RuntimeException("unable to run " + args.getFirst() + " as it has timed-out");
                 }
             }
             catch(InterruptedException ie) {
-                throw new RuntimeException("interrupted waiting for the " + args.get(0) + " process to complete", ie);
+                throw new RuntimeException("interrupted waiting for the " + args.getFirst() + " process to complete", ie);
             }
 
             // check the difference between the source and the destination.
 
             LOGGER.debug(
                     "did finish {} ({}ms)",
-                    args.get(0),
+                    args.getFirst(),
                     (System.currentTimeMillis() - startMs));
 
             Files.asByteSource(temporaryOutputFile).copyTo(outputSink);

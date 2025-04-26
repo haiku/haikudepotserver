@@ -1,5 +1,5 @@
 /*
- * Copyright 2018-2024, Andrew Lindesay
+ * Copyright 2018-2025, Andrew Lindesay
  * Distributed under the terms of the MIT License.
  */
 
@@ -10,6 +10,7 @@ import com.google.common.base.Strings;
 import com.google.common.net.HttpHeaders;
 import com.google.common.net.MediaType;
 import freemarker.ext.beans.BeansWrapper;
+import freemarker.ext.beans.BeansWrapperBuilder;
 import freemarker.template.Configuration;
 import freemarker.template.Template;
 import freemarker.template.TemplateException;
@@ -111,7 +112,7 @@ public class PkgSearchController {
                 new Object[] {},
                 naturalLanguageCoordinates.toLocale()));
 
-        BeansWrapper wrapper = BeansWrapper.getDefaultInstance();
+        BeansWrapper wrapper = new BeansWrapperBuilder(Configuration.getVersion()).build();
 
         response.setContentType("application/opensearchdescription+xml");
 
@@ -141,7 +142,7 @@ public class PkgSearchController {
             query = query.trim().toLowerCase();
         }
 
-        UriComponentsBuilder builder = UriComponentsBuilder.fromHttpUrl(baseUrl);
+        UriComponentsBuilder builder = UriComponentsBuilder.fromUriString(baseUrl);
         Optional<PkgVersion> pkgVersionOptional = Optional.empty();
 
         if (!Strings.isNullOrEmpty(query) && Pkg.PATTERN_NAME.matcher(query).matches()) {

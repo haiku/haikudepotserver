@@ -1,5 +1,5 @@
 /*
- * Copyright 2015-2023, Andrew Lindesay
+ * Copyright 2015-2025, Andrew Lindesay
  * Distributed under the terms of the MIT License.
  */
 
@@ -13,8 +13,6 @@ import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.URI;
-import java.net.URISyntaxException;
-import java.net.URL;
 import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
@@ -28,17 +26,11 @@ public class FileHelper {
      * connecting and retrieving data.</p>
      */
 
-    public static void streamUrlDataToFile(URL url, File file, long timeoutMillis) throws IOException {
-        switch (url.getProtocol()) {
-            case "http", "https" -> {
-                try {
-                    streamHttpUriDataToFile(url.toURI(), file, timeoutMillis);
-                } catch (URISyntaxException use) {
-                    throw new IllegalStateException("unable to convert url [" + url + "] to uri", use);
-                }
-            }
-            case "file" -> Files.copy(new File(url.getFile()), file);
-            default -> throw new IllegalStateException("the url scheme of " + url.getProtocol() + " is unsupported.");
+    public static void streamUrlDataToFile(URI uri, File file, long timeoutMillis) throws IOException {
+        switch (uri.getScheme()) {
+            case "http", "https" -> streamHttpUriDataToFile(uri, file, timeoutMillis);
+            case "file" -> Files.copy(new File(uri.getPath()), file);
+            default -> throw new IllegalStateException("the url scheme of " + uri.getScheme() + " is unsupported.");
         }
     }
 

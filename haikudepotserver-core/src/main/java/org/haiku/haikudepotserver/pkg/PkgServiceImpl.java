@@ -1,5 +1,5 @@
 /*
- * Copyright 2018-2024, Andrew Lindesay
+ * Copyright 2018-2025, Andrew Lindesay
  * Distributed under the terms of the MIT License.
  */
 
@@ -33,7 +33,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.web.util.UriComponentsBuilder;
 
-import java.net.URL;
+import java.net.URI;
 import java.util.*;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
@@ -504,9 +504,9 @@ public class PkgServiceImpl implements PkgService {
 
     @Override
     public String createHpkgDownloadUrl(PkgVersion pkgVersion) {
-        return pkgVersion.tryGetHpkgURL(ExposureType.EXTERNAL_FACING)
-                .filter(u -> ImmutableSet.of("http", "https").contains(u.getProtocol()))
-                .map(URL::toString)
+        return pkgVersion.tryGetHpkgURI(ExposureType.EXTERNAL_FACING)
+                .filter(u -> ImmutableSet.of("http", "https").contains(u.getScheme()))
+                .map(URI::toString)
                 .orElseGet(() -> {
                     UriComponentsBuilder builder = UriComponentsBuilder.fromPath(URL_SEGMENT_PKGDOWNLOAD);
                     pkgVersion.appendPathSegments(builder);

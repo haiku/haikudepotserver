@@ -1,16 +1,14 @@
 /*
- * Copyright 2023, Andrew Lindesay
+ * Copyright 2023-2025, Andrew Lindesay
  * Distributed under the terms of the MIT License.
  */
 
 package org.haiku.haikudepotserver.metrics.job;
 
-import com.google.common.base.Charsets;
 import com.google.common.base.Preconditions;
 import com.google.common.net.MediaType;
 import io.micrometer.core.instrument.MeterRegistry;
 import io.micrometer.core.instrument.Timer;
-import org.apache.commons.compress.compressors.gzip.GzipCompressorOutputStream;
 import org.apache.commons.lang3.StringUtils;
 import org.haiku.haikudepotserver.job.AbstractJobRunner;
 import org.haiku.haikudepotserver.job.model.JobDataEncoding;
@@ -23,11 +21,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
-import java.io.IOException;
-import java.io.OutputStream;
-import java.io.OutputStreamWriter;
-import java.io.UncheckedIOException;
-import java.io.Writer;
+import java.io.*;
+import java.nio.charset.StandardCharsets;
 import java.util.Optional;
 import java.util.function.Predicate;
 import java.util.stream.Stream;
@@ -59,7 +54,7 @@ public class MetricsGeneralReportJobRunner extends AbstractJobRunner<MetricsGene
 
         try (
                 final OutputStream outputStream = jobDataWithByteSink.getByteSink().openBufferedStream();
-                final Writer outputStreamWriter = new OutputStreamWriter(outputStream, Charsets.UTF_8)
+                final Writer outputStreamWriter = new OutputStreamWriter(outputStream, StandardCharsets.UTF_8)
         ) {
             write(outputStreamWriter);
         }

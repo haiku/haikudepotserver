@@ -1,5 +1,5 @@
 /*
- * Copyright 2018-2024, Andrew Lindesay
+ * Copyright 2018-2025, Andrew Lindesay
  * Distributed under the terms of the MIT License.
  */
 
@@ -7,26 +7,12 @@ package org.haiku.haikudepotserver.api2;
 
 import com.google.common.base.Splitter;
 import com.nimbusds.jose.util.Pair;
+import jakarta.annotation.Resource;
 import org.apache.cayenne.ObjectContext;
 import org.fest.assertions.Assertions;
 import org.haiku.haikudepotserver.AbstractIntegrationTest;
 import org.haiku.haikudepotserver.IntegrationTestSupportService;
-import org.haiku.haikudepotserver.api2.model.Architecture;
-import org.haiku.haikudepotserver.api2.model.GenerateFeedUrlRequestEnvelope;
-import org.haiku.haikudepotserver.api2.model.GenerateFeedUrlResult;
-import org.haiku.haikudepotserver.api2.model.GenerateFeedUrlSupplierType;
-import org.haiku.haikudepotserver.api2.model.GetAllArchitecturesRequestEnvelope;
-import org.haiku.haikudepotserver.api2.model.GetAllArchitecturesResult;
-import org.haiku.haikudepotserver.api2.model.GetAllMessagesRequestEnvelope;
-import org.haiku.haikudepotserver.api2.model.GetAllMessagesResult;
-import org.haiku.haikudepotserver.api2.model.GetAllNaturalLanguagesRequestEnvelope;
-import org.haiku.haikudepotserver.api2.model.GetAllNaturalLanguagesResult;
-import org.haiku.haikudepotserver.api2.model.GetAllPkgCategoriesRequestEnvelope;
-import org.haiku.haikudepotserver.api2.model.GetAllPkgCategoriesResult;
-import org.haiku.haikudepotserver.api2.model.GetAllUserRatingStabilitiesRequestEnvelope;
-import org.haiku.haikudepotserver.api2.model.GetAllUserRatingStabilitiesResult;
-import org.haiku.haikudepotserver.api2.model.GetRuntimeInformationResult;
-import org.haiku.haikudepotserver.api2.model.Message;
+import org.haiku.haikudepotserver.api2.model.*;
 import org.haiku.haikudepotserver.config.TestConfig;
 import org.haiku.haikudepotserver.dataobjects.NaturalLanguage;
 import org.haiku.haikudepotserver.dataobjects.PkgCategory;
@@ -37,9 +23,8 @@ import org.haiku.haikudepotserver.support.RuntimeInformationService;
 import org.junit.jupiter.api.Test;
 import org.springframework.test.context.ContextConfiguration;
 
-import jakarta.annotation.Resource;
 import java.net.MalformedURLException;
-import java.net.URL;
+import java.net.URI;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -272,12 +257,12 @@ public class MiscelaneousApiServiceIT extends AbstractIntegrationTest {
         GenerateFeedUrlResult result = miscellaneousApiService.generateFeedUrl(request);
         // ------------------------------------
 
-        URL url = new URL(result.getUrl());
+        URI uri = URI.create(result.getUrl());
 
-        Assertions.assertThat(url.getPath()).endsWith("/__feed/pkg.atom");
+        Assertions.assertThat(uri.getPath()).endsWith("/__feed/pkg.atom");
 
         // this is a bit rough, but will do for assertion...
-        Map<String,String> queryParams = Splitter.on('&').trimResults().withKeyValueSeparator('=').split(url.getQuery());
+        Map<String,String> queryParams = Splitter.on('&').trimResults().withKeyValueSeparator('=').split(uri.getQuery());
         Assertions.assertThat(queryParams.get(FeedService.KEY_LIMIT)).isEqualTo("55");
         Assertions.assertThat(queryParams.get(FeedService.KEY_NATURALLANGUAGECODE)).isEqualTo(NaturalLanguageCoordinates.LANGUAGE_CODE_GERMAN);
         Assertions.assertThat(queryParams.get(FeedService.KEY_PKGNAMES)).isEqualTo(String.join("-",data.pkg1.getName(), data.pkg2.getName()));

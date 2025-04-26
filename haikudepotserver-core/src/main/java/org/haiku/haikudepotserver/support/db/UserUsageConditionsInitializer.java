@@ -1,5 +1,5 @@
 /*
- * Copyright 2019, Andrew Lindesay
+ * Copyright 2019-2025, Andrew Lindesay
  * Distributed under the terms of the MIT License.
  */
 
@@ -8,7 +8,6 @@ package org.haiku.haikudepotserver.support.db;
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.google.common.base.Charsets;
 import com.google.common.base.Preconditions;
 import com.google.common.io.Files;
 import org.apache.cayenne.ObjectContext;
@@ -28,6 +27,7 @@ import org.springframework.util.StreamUtils;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.UncheckedIOException;
+import java.nio.charset.StandardCharsets;
 import java.util.Arrays;
 import java.util.Comparator;
 import java.util.List;
@@ -121,7 +121,7 @@ public class UserUsageConditionsInitializer {
                 InputStream metaDataInputStream = metaDataResource.getInputStream();
                 InputStream markdownInputStream = markdownResource.getInputStream()) {
             UserUsageConditionsMetaData metaData = objectMapper.readValue(metaDataInputStream, UserUsageConditionsMetaData.class);
-            String markdownString = StreamUtils.copyToString(markdownInputStream, Charsets.UTF_8);
+            String markdownString = StreamUtils.copyToString(markdownInputStream, StandardCharsets.UTF_8);
             UserUsageConditions userUsageConditions = context.newObject(UserUsageConditions.class);
             userUsageConditions.setCode(Files.getNameWithoutExtension(metaDataResource.getFilename()));
             userUsageConditions.setCopyMarkdown(markdownString);

@@ -1,12 +1,11 @@
 /*
- * Copyright 2018-2022, Andrew Lindesay
+ * Copyright 2018-2025, Andrew Lindesay
  * Distributed under the terms of the MIT License.
  */
 
 package org.haiku.haikudepotserver.dataobjects;
 
 import com.google.common.base.Preconditions;
-import com.google.common.collect.Iterables;
 import org.apache.cayenne.ObjectContext;
 import org.apache.cayenne.ObjectId;
 import org.apache.cayenne.query.ObjectSelect;
@@ -23,8 +22,8 @@ import org.haiku.haikudepotserver.support.SingleCollector;
 import org.haiku.haikudepotserver.support.exception.ObjectNotFoundException;
 import org.springframework.web.util.UriComponentsBuilder;
 
-import java.net.MalformedURLException;
-import java.net.URL;
+import java.net.URI;
+import java.net.URISyntaxException;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
@@ -111,9 +110,9 @@ public class Repository extends _Repository implements MutableCreateAndModifyTim
 
         if(null != getInformationUrl()) {
             try {
-                new URL(getInformationUrl());
+                new URI(getInformationUrl());
             }
-            catch(MalformedURLException mue) {
+            catch(URISyntaxException mue) {
                 validationResult.addFailure(new BeanValidationFailure(this, INFORMATION_URL.getName(), "malformed"));
             }
         }

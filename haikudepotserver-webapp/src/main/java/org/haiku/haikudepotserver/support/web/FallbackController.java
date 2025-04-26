@@ -1,14 +1,15 @@
 /*
- * Copyright 2018-2023, Andrew Lindesay
+ * Copyright 2018-2025, Andrew Lindesay
  * Distributed under the terms of the MIT License.
  */
 
 package org.haiku.haikudepotserver.support.web;
 
 import com.google.common.base.Preconditions;
-import com.google.common.io.ByteStreams;
 import com.google.common.net.HttpHeaders;
 import jakarta.mail.internet.MimeUtility;
+import jakarta.servlet.ServletContext;
+import jakarta.servlet.http.HttpServletResponse;
 import org.apache.cayenne.ObjectContext;
 import org.apache.cayenne.configuration.server.ServerRuntime;
 import org.apache.commons.collections4.ComparatorUtils;
@@ -31,8 +32,6 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.util.UriComponents;
 import org.springframework.web.util.UriComponentsBuilder;
 
-import jakarta.servlet.ServletContext;
-import jakarta.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.PrintWriter;
@@ -105,7 +104,7 @@ public class FallbackController {
         Optional<PkgVersion> pkgVersionOptional = tryGetPkgVersion(context, term);
 
         if (pkgVersionOptional.isPresent()) {
-            UriComponentsBuilder builder = UriComponentsBuilder.fromHttpUrl(baseUrl).pathSegment("#!", "pkg");
+            UriComponentsBuilder builder = UriComponentsBuilder.fromUriString(baseUrl).pathSegment("#!", "pkg");
             pkgVersionOptional.get().appendPathSegments(builder);
             UriComponents uriComponents = builder.build();
 

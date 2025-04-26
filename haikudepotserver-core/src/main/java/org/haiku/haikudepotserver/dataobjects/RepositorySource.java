@@ -1,5 +1,5 @@
 /*
- * Copyright 2015-2022, Andrew Lindesay
+ * Copyright 2015-2025, Andrew Lindesay
  * Distributed under the terms of the MIT License.
  */
 
@@ -24,9 +24,8 @@ import org.haiku.haikudepotserver.support.SingleCollector;
 import org.haiku.haikudepotserver.support.exception.ObjectNotFoundException;
 import org.springframework.web.util.UriComponentsBuilder;
 
-import java.net.MalformedURLException;
+import java.net.URI;
 import java.net.URISyntaxException;
-import java.net.URL;
 import java.time.Clock;
 import java.util.List;
 import java.util.Optional;
@@ -116,52 +115,36 @@ public class RepositorySource extends _RepositorySource {
      * <p>This is the URL at which one might find the packages for this repository.</p>
      */
 
-    public Optional<URL> tryGetPackagesBaseURL(ExposureType exposureType) {
-        return tryGetBaseURL(exposureType)
-                .map(bu -> {
-                    try {
-                        return UriComponentsBuilder.fromUri(bu.toURI())
-                                .pathSegment("packages")
-                                .build()
-                                .toUri()
-                                .toURL();
-                    }
-                    catch(URISyntaxException | MalformedURLException mue) {
-                        throw new IllegalStateException("unable to reform a url for obtaining packages",mue);
-                    }
-                });
+    public Optional<URI> tryGetPackagesBaseURI(ExposureType exposureType) {
+        return tryGetBaseURI(exposureType)
+                .map(uri -> UriComponentsBuilder.fromUri(uri)
+                        .pathSegment("packages")
+                        .build()
+                        .toUri());
     }
 
     /**
      * <p>This URL can be used to access the HPKR data for the repository source.</p>
      */
 
-    public Optional<URL> tryGetInternalFacingDownloadHpkrURL() {
-        return tryGetInternalFacingDownloadLeafURL("repo");
+    public Optional<URI> tryGetInternalFacingDownloadHpkrURI() {
+        return tryGetInternalFacingDownloadLeafURI("repo");
     }
 
     /**
      * <p>This URL can be used to access the "repo.info" file for the repository.</p>
      */
 
-    public Optional<URL> tryGetInternalFacingDownloadRepoInfoURL() {
-        return tryGetInternalFacingDownloadLeafURL("repo.info");
+    public Optional<URI> tryGetInternalFacingDownloadRepoInfoURI() {
+        return tryGetInternalFacingDownloadLeafURI("repo.info");
     }
 
-    private Optional<URL> tryGetInternalFacingDownloadLeafURL(String leaf) {
-        return tryGetBaseURL(ExposureType.INTERNAL_FACING)
-                .map(bu -> {
-                    try {
-                        return UriComponentsBuilder.fromUri(bu.toURI())
-                                .pathSegment(leaf)
-                                .build()
-                                .toUri()
-                                .toURL();
-                    }
-                    catch(URISyntaxException | MalformedURLException mue) {
-                        throw new IllegalStateException("unable to reform a url for obtaining packages",mue);
-                    }
-                });
+    private Optional<URI> tryGetInternalFacingDownloadLeafURI(String leaf) {
+        return tryGetBaseURI(ExposureType.INTERNAL_FACING)
+                .map(uri -> UriComponentsBuilder.fromUri(uri)
+                        .pathSegment(leaf)
+                        .build()
+                        .toUri());
     }
 
     /**
@@ -169,22 +152,22 @@ public class RepositorySource extends _RepositorySource {
      * files.</p>
      */
 
-    private Optional<URL> tryGetBaseURL(ExposureType exposureType) {
-        return tryGetBaseURLString(exposureType)
+    private Optional<URI> tryGetBaseURI(ExposureType exposureType) {
+        return tryGetBaseURIString(exposureType)
                 .map(u -> {
                     try {
-                        return new URL(u);
+                        return new URI(u);
                     }
-                    catch(MalformedURLException mue) {
-                        throw new IllegalStateException("malformed url should not be stored in a repository");
+                    catch(URISyntaxException mue) {
+                        throw new IllegalStateException("malformed url should not be stored in a repository", mue);
                     }
                 });
     }
 
-    private Optional<String> tryGetBaseURLString(ExposureType exposureType) {
+    private Optional<String> tryGetBaseURIString(ExposureType exposureType) {
         return Optional.ofNullable(Optional.ofNullable(getForcedInternalBaseUrl())
                 .filter(u -> exposureType == ExposureType.INTERNAL_FACING)
-                .orElseGet(() -> tryGetPrimaryMirror().map(_RepositorySourceMirror::getBaseUrl).orElse(null)));
+                .orElseGet(() -> tryGetPrimaryMirror().map(RepositorySourceMirror::getBaseUrl).orElse(null)));
     }
 
     public RepositorySourceMirror getPrimaryMirror() {

@@ -1,12 +1,12 @@
 /*
- * Copyright 2018-2024, Andrew Lindesay
+ * Copyright 2018-2025, Andrew Lindesay
  * Distributed under the terms of the MIT License.
  */
 
 package org.haiku.haikudepotserver.config;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.google.common.base.Charsets;
+import freemarker.template.Configuration;
 import org.apache.cayenne.configuration.server.ServerRuntime;
 import org.haiku.haikudepotserver.captcha.CaptchaServiceImpl;
 import org.haiku.haikudepotserver.captcha.DatabaseCaptchaRepository;
@@ -35,6 +35,7 @@ import org.springframework.core.io.ResourceLoader;
 import org.springframework.security.crypto.keygen.KeyGenerators;
 import org.springframework.stereotype.Controller;
 
+import java.nio.charset.StandardCharsets;
 import java.util.List;
 
 @ComponentScan(
@@ -120,8 +121,9 @@ public class BasicConfig {
     private freemarker.template.Configuration createFreemarkerConfiguration(
             ResourceLoader resourceLoader,
             String templateBase) {
-        freemarker.template.Configuration configuration = new freemarker.template.Configuration();
-        configuration.setDefaultEncoding(Charsets.UTF_8.name());
+        freemarker.template.Configuration configuration = new freemarker.template.Configuration(
+                Configuration.getVersion());
+        configuration.setDefaultEncoding(StandardCharsets.UTF_8.name());
         configuration.setLocalizedLookup(false);
         configuration.setTemplateLoader(new LocalizedTemplateLoader(resourceLoader, templateBase));
         return configuration;
@@ -134,7 +136,7 @@ public class BasicConfig {
     public MessageSource messageSource(
             @Qualifier("messageSourceBaseNames") List<String> basenames) {
         ReloadableResourceBundleMessageSource messageSource = new ReloadableResourceBundleMessageSource();
-        messageSource.setDefaultEncoding(Charsets.UTF_8.name());
+        messageSource.setDefaultEncoding(StandardCharsets.UTF_8.name());
         messageSource.setBasenames(basenames.toArray(new String[0]));
         return messageSource;
     }

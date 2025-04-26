@@ -1,11 +1,10 @@
 /*
- * Copyright 2014-2023, Andrew Lindesay
+ * Copyright 2014-2025, Andrew Lindesay
  * Distributed under the terms of the MIT License.
  */
 
 package org.haiku.haikudepotserver.support.web;
 
-import com.google.common.base.Charsets;
 import com.google.common.base.Strings;
 import com.google.common.html.HtmlEscapers;
 import com.google.common.net.MediaType;
@@ -26,6 +25,7 @@ import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.OutputStreamWriter;
 import java.io.Writer;
+import java.nio.charset.StandardCharsets;
 import java.util.Locale;
 import java.util.Optional;
 
@@ -143,7 +143,7 @@ public class ErrorServlet extends HttpServlet {
             Integer jsonRpcErrorCode, Integer httpStatusCode) throws IOException {
         try (
                 ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
-                OutputStreamWriter writer = new OutputStreamWriter(outputStream, Charsets.UTF_8) )
+                OutputStreamWriter writer = new OutputStreamWriter(outputStream, StandardCharsets.UTF_8) )
         {
             renderPage(writer, locale, jsonRpcErrorCode, httpStatusCode);
             writer.flush();

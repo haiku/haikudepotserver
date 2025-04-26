@@ -1,20 +1,20 @@
 /*
- * Copyright 2016-2023, Andrew Lindesay
+ * Copyright 2016-2025, Andrew Lindesay
  * Distributed under the terms of the MIT License.
  */
 
 package org.haiku.haikudepotserver.support;
 
 import com.google.common.annotations.VisibleForTesting;
-import com.google.common.base.Charsets;
 import com.google.common.hash.HashFunction;
 import com.google.common.hash.Hashing;
 import com.google.common.net.HttpHeaders;
+import jakarta.servlet.ServletRequest;
+import jakarta.servlet.http.HttpServletRequest;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 
-import jakarta.servlet.ServletRequest;
-import jakarta.servlet.http.HttpServletRequest;
+import java.nio.charset.StandardCharsets;
 import java.util.Optional;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -49,10 +49,10 @@ public class HttpRequestClientIdentifierSupplier implements ClientIdentifierSupp
         Matcher ipv4Matcher = PATTERN_IPV4_ADDRESS.matcher(str);
 
         if (ipv4Matcher.matches()) {
-            return HASH.hashString(str, Charsets.UTF_8) + "." + ipv4Matcher.group(4);
+            return HASH.hashString(str, StandardCharsets.UTF_8) + "." + ipv4Matcher.group(4);
         }
 
-        return HASH.hashString(str, Charsets.UTF_8).toString();
+        return HASH.hashString(str, StandardCharsets.UTF_8).toString();
     }
 
 }

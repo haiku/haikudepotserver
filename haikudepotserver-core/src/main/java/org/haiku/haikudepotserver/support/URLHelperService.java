@@ -1,12 +1,12 @@
 /*
- * Copyright 2018-2023, Andrew Lindesay
+ * Copyright 2018-2025, Andrew Lindesay
  * Distributed under the terms of the MIT License.
  */
 
 package org.haiku.haikudepotserver.support;
 
 import com.google.common.base.Preconditions;
-import com.google.common.io.*;
+import com.google.common.io.Files;
 import com.google.common.net.HttpHeaders;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
@@ -17,7 +17,6 @@ import java.io.File;
 import java.io.IOException;
 import java.net.URI;
 import java.net.URISyntaxException;
-import java.net.URL;
 import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
@@ -54,51 +53,45 @@ public class URLHelperService {
         return false;
     }
 
-    public void transferPayloadToFile(URL url, File targetFile) throws IOException {
-        LOGGER.info("will transfer [{}] --> [{}]", url, targetFile);
-        String protocol = StringUtils.trimToEmpty(url.getProtocol());
+    public void transferPayloadToFile(URI uri, File targetFile) throws IOException {
+        LOGGER.info("will transfer [{}] --> [{}]", uri, targetFile);
+        String scheme = StringUtils.trimToEmpty(uri.getScheme());
 
-        switch (protocol) {
+        switch (scheme) {
             case "http", "https" -> {
-                FileHelper.streamUrlDataToFile(url, targetFile, PAYLOAD_LENGTH_READ_TIMEOUT);
-                LOGGER.info("copied [{}] to [{}]", url, targetFile);
+                FileHelper.streamUrlDataToFile(uri, targetFile, PAYLOAD_LENGTH_READ_TIMEOUT);
+                LOGGER.info("copied [{}] to [{}]", uri, targetFile);
             }
             case "file" -> {
-                File sourceFile = new File(url.getPath());
+                File sourceFile = new File(uri.getPath());
                 Files.copy(sourceFile, targetFile);
                 LOGGER.info("copied [{}] to [{}]", sourceFile, targetFile);
             }
-            default -> LOGGER.warn("unable to transfer for URL scheme [{}]", protocol);
+            default -> LOGGER.warn("unable to transfer for URL scheme [{}]", scheme);
         }
     }
 
-    public Optional<Long> tryGetPayloadLength(URL url) throws IOException {
-        Preconditions.checkArgument(null != url, "the url must be supplied");
+    public Optional<Long> tryGetPayloadLength(URI uri) throws IOException {
+        Preconditions.checkArgument(null != uri, "the uri must be supplied");
 
         Optional<Long> result = Optional.empty();
-        String protocol = StringUtils.trimToEmpty(url.getProtocol());
+        String scheme = StringUtils.trimToEmpty(uri.getScheme());
 
-        switch (protocol) {
-            case "http", "https" -> {
-                try {
-                    result = tryGetPayloadLengthHttp(url.toURI());
-                } catch (URISyntaxException use) {
-                    throw new IllegalStateException("unable to obtain a uri from [" + url + "]");
-                }
-            }
+        switch (scheme) {
+            case "http", "https" -> result = tryGetPayloadLengthHttp(uri);
             case "file" -> {
-                File file = new File(url.getPath());
+                File file = new File(uri.getPath());
                 if (file.exists() && file.isFile()) {
                     result = Optional.of(file.length())
                             .filter(l -> l > 0L);
                 } else {
-                    LOGGER.warn("unable to find the local file [{}]", url.getPath());
+                    LOGGER.warn("unable to find the local file [{}]", uri.getPath());
                 }
             }
-            default -> LOGGER.warn("unable to get the payload length for URL scheme [{}]", protocol);
+            default -> LOGGER.warn("unable to get the payload length for URL scheme [{}]", scheme);
         }
 
-        result.ifPresent(l -> LOGGER.info("did obtain length [{}b] for url [{}]", l, url));
+        result.ifPresent(l -> LOGGER.info("did obtain length [{}b] for url [{}]", l, uri));
         return result;
     }
 

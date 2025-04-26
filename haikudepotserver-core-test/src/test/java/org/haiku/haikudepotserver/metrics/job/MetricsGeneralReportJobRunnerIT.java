@@ -1,8 +1,12 @@
+/*
+ * Copyright 2025, Andrew Lindesay
+ * Distributed under the terms of the MIT License.
+ */
 package org.haiku.haikudepotserver.metrics.job;
 
-import com.google.common.base.Charsets;
 import io.micrometer.core.instrument.MeterRegistry;
 import io.micrometer.core.instrument.Tag;
+import jakarta.annotation.Resource;
 import org.fest.assertions.Assertions;
 import org.haiku.haikudepotserver.AbstractIntegrationTest;
 import org.haiku.haikudepotserver.config.TestConfig;
@@ -14,8 +18,8 @@ import org.haiku.haikudepotserver.support.SingleCollector;
 import org.junit.jupiter.api.Test;
 import org.springframework.test.context.ContextConfiguration;
 
-import jakarta.annotation.Resource;
 import java.io.IOException;
+import java.nio.charset.StandardCharsets;
 import java.util.Optional;
 import java.util.Set;
 import java.util.concurrent.TimeUnit;
@@ -51,7 +55,7 @@ public class MetricsGeneralReportJobRunnerIT extends AbstractIntegrationTest {
                 .stream()
                 .collect(SingleCollector.single());
         JobDataWithByteSource jobSource = jobService.tryObtainData(dataGuid).get();
-        String[] contentLines = new String(jobSource.getByteSource().read(), Charsets.UTF_8).split("[\\n\\r]+");
+        String[] contentLines = new String(jobSource.getByteSource().read(), StandardCharsets.UTF_8).split("[\\n\\r]+");
 
         Stream.of(
                 "^1\\.2\\.3.+1$",

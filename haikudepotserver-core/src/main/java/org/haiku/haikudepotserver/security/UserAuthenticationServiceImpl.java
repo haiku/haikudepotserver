@@ -1,11 +1,10 @@
 /*
- * Copyright 2018-2023, Andrew Lindesay
+ * Copyright 2018-2025, Andrew Lindesay
  * Distributed under the terms of the MIT License.
  */
 
 package org.haiku.haikudepotserver.security;
 
-import com.google.common.base.Charsets;
 import com.google.common.base.Preconditions;
 import com.google.common.base.Splitter;
 import com.google.common.base.Strings;
@@ -14,6 +13,7 @@ import com.nimbusds.jose.crypto.MACSigner;
 import com.nimbusds.jose.crypto.MACVerifier;
 import com.nimbusds.jwt.JWTClaimsSet;
 import com.nimbusds.jwt.SignedJWT;
+import jakarta.annotation.PostConstruct;
 import org.apache.cayenne.ObjectContext;
 import org.apache.cayenne.ObjectId;
 import org.apache.cayenne.configuration.server.ServerRuntime;
@@ -28,7 +28,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
-import jakarta.annotation.PostConstruct;
+import java.nio.charset.StandardCharsets;
 import java.sql.Timestamp;
 import java.text.ParseException;
 import java.time.Clock;
@@ -110,8 +110,8 @@ public class UserAuthenticationServiceImpl implements UserAuthenticationService 
         }
 
         try {
-            jsonWebTokenSigner = new MACSigner(jsonWebTokenSharedKey.getBytes(Charsets.UTF_8));
-            jsonWebTokenVerifier = new MACVerifier(jsonWebTokenSharedKey.getBytes(Charsets.UTF_8));
+            jsonWebTokenSigner = new MACSigner(jsonWebTokenSharedKey.getBytes(StandardCharsets.UTF_8));
+            jsonWebTokenVerifier = new MACVerifier(jsonWebTokenSharedKey.getBytes(StandardCharsets.UTF_8));
         }
         catch(JOSEException je) {
             throw new RuntimeException("unable to create the signer / verifier for JWT tokens", je);
@@ -384,7 +384,7 @@ public class UserAuthenticationServiceImpl implements UserAuthenticationService 
         return Optional.ofNullable(header)
                 .filter(h -> h.startsWith("Basic "))
                 .map(h -> h.substring(6))
-                .map(s -> new String(Base64.getDecoder().decode(s), Charsets.UTF_8))
+                .map(s -> new String(Base64.getDecoder().decode(s), StandardCharsets.UTF_8))
                 .map(s -> {
                     int colonIndex = s.indexOf(":");
 

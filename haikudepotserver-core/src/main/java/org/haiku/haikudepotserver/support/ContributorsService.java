@@ -1,10 +1,9 @@
 /*
- * Copyright 2023, Andrew Lindesay
+ * Copyright 2023-2025, Andrew Lindesay
  * Distributed under the terms of the MIT License.
  */
 package org.haiku.haikudepotserver.support;
 
-import com.google.common.base.Charsets;
 import com.google.common.base.Preconditions;
 import com.google.common.base.Splitter;
 import com.google.common.collect.ImmutableList;
@@ -15,9 +14,9 @@ import org.springframework.stereotype.Service;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.nio.charset.StandardCharsets;
 import java.util.List;
 import java.util.Properties;
-import java.util.stream.Collectors;
 
 @Service
 public class ContributorsService {
@@ -42,7 +41,7 @@ public class ContributorsService {
                 throw new IllegalStateException("unable to find the contributors file");
             }
             Properties properties = new Properties();
-            properties.load(new InputStreamReader(inputStream, Charsets.UTF_8));
+            properties.load(new InputStreamReader(inputStream, StandardCharsets.UTF_8));
             return loadContributors(properties);
         } catch (IOException ioe) {
             throw new IllegalStateException("unable to check for presence of natural language localization", ioe);

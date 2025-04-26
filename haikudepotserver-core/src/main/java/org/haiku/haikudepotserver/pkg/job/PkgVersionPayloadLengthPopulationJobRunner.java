@@ -1,5 +1,5 @@
 /*
- * Copyright 2018-2023, Andrew Lindesay
+ * Copyright 2018-2025, Andrew Lindesay
  * Distributed under the terms of the MIT License.
  */
 
@@ -21,7 +21,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
 import java.io.IOException;
-import java.net.URL;
+import java.net.URI;
 import java.util.List;
 import java.util.Optional;
 
@@ -72,11 +72,11 @@ public class PkgVersionPayloadLengthPopulationJobRunner
 
         for(int i=0;i<pkgVersions.size();i++) {
             PkgVersion pkgVersion = pkgVersions.get(i);
-            Optional<URL> urlOptional = pkgVersion.tryGetHpkgURL(ExposureType.INTERNAL_FACING);
+            Optional<URI> uriOptional = pkgVersion.tryGetHpkgURI(ExposureType.INTERNAL_FACING);
 
-            if (urlOptional.isPresent()) {
+            if (uriOptional.isPresent()) {
                 try {
-                    urlHelperService.tryGetPayloadLength(urlOptional.get())
+                    urlHelperService.tryGetPayloadLength(uriOptional.get())
                             .filter(l -> l > 0L)
                             .ifPresent(l -> {
                                 pkgVersion.setPayloadLength(l);

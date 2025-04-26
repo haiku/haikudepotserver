@@ -1,17 +1,17 @@
 /*
- * Copyright 2019-2023, Andrew Lindesay
+ * Copyright 2019-2025, Andrew Lindesay
  * Distributed under the terms of the MIT License.
  */
 
 package org.haiku.haikudepotserver.user.controller;
 
-import com.google.common.base.Charsets;
 import com.vladsch.flexmark.ext.tables.TablesExtension;
 import com.vladsch.flexmark.html.HtmlRenderer;
 import com.vladsch.flexmark.parser.Parser;
 import com.vladsch.flexmark.util.ast.Document;
 import com.vladsch.flexmark.util.data.DataHolder;
 import com.vladsch.flexmark.util.data.MutableDataSet;
+import jakarta.servlet.http.HttpServletResponse;
 import org.apache.cayenne.ObjectContext;
 import org.apache.cayenne.configuration.server.ServerRuntime;
 import org.haiku.haikudepotserver.dataobjects.MediaType;
@@ -22,9 +22,9 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 
-import jakarta.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.io.OutputStream;
+import java.nio.charset.StandardCharsets;
 import java.util.List;
 import java.util.Optional;
 
@@ -64,7 +64,7 @@ public class UserController {
             return;
         }
 
-        byte[] payload = markdownOptional.get().getCopyMarkdown().getBytes(Charsets.UTF_8);
+        byte[] payload = markdownOptional.get().getCopyMarkdown().getBytes(StandardCharsets.UTF_8);
         response.setContentType(MediaType.MEDIATYPE_MARKDOWN);
         response.setContentLength(payload.length);
         try (OutputStream outputStream = response.getOutputStream()) {
@@ -87,7 +87,7 @@ public class UserController {
         }
 
         Document markdownDocument = markdownParser.parse(markdownOptional.get().getCopyMarkdown());
-        byte[] payload = htmlRenderer.render(markdownDocument).getBytes(Charsets.UTF_8);
+        byte[] payload = htmlRenderer.render(markdownDocument).getBytes(StandardCharsets.UTF_8);
 
         response.setContentType(com.google.common.net.MediaType.HTML_UTF_8.toString());
         response.setContentLength(payload.length);

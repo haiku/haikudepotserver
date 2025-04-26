@@ -10,7 +10,7 @@ import com.google.common.hash.HashFunction;
 import com.google.common.hash.Hashing;
 import com.google.common.io.ByteStreams;
 import org.apache.cayenne.ObjectContext;
-import org.apache.commons.compress.utils.BoundedInputStream;
+import org.apache.commons.io.input.BoundedInputStream;
 import org.haiku.haikudepotserver.dataobjects.MediaType;
 import org.haiku.haikudepotserver.dataobjects.PkgScreenshot;
 import org.haiku.haikudepotserver.dataobjects.PkgScreenshotImage;
@@ -161,7 +161,12 @@ public class PkgScreenshotServiceImpl implements PkgScreenshotService {
         Preconditions.checkArgument(null != pkgSupplement, "the pkg supplement must be provided");
         Preconditions.checkArgument(null != agent, "the agent must be supplied");
 
-        byte[] pngData = ByteStreams.toByteArray(new BoundedInputStream(input, SCREENSHOT_SIZE_LIMIT));
+        InputStream boundedInputStream = new BoundedInputStream.Builder()
+                .setInputStream(input)
+                .setMaxCount(SCREENSHOT_SIZE_LIMIT)
+                .setPropagateClose(false)
+                .get();
+        byte[] pngData = ByteStreams.toByteArray(boundedInputStream);
         ImageHelper.Size size = imageHelper.derivePngSize(pngData);
         String hashSha256 = HASH_FUNCTION.hashBytes(pngData).toString();
 

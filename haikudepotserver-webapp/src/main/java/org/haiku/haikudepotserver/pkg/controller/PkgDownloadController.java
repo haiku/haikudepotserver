@@ -1,5 +1,5 @@
 /*
- * Copyright 2018-2023, Andrew Lindesay
+ * Copyright 2018-2025, Andrew Lindesay
  * Distributed under the terms of the MIT License.
  */
 
@@ -7,8 +7,6 @@ package org.haiku.haikudepotserver.pkg.controller;
 
 import com.google.common.base.Preconditions;
 import com.google.common.collect.ImmutableSet;
-import com.google.common.escape.Escapers;
-import com.google.common.io.ByteStreams;
 import com.google.common.net.HttpHeaders;
 import com.google.common.net.MediaType;
 import jakarta.mail.internet.MimeUtility;
@@ -34,6 +32,7 @@ import org.springframework.web.bind.annotation.ResponseStatus;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.PrintWriter;
+import java.net.URI;
 import java.net.URL;
 import java.util.Optional;
 
@@ -135,24 +134,24 @@ public class PkgDownloadController {
                     return new RequestObjectNotFound();
                 });
 
-        Optional<URL> urlOptional = pkgVersion.tryGetHpkgURL(ExposureType.EXTERNAL_FACING);
+        Optional<URI> uriOptional = pkgVersion.tryGetHpkgURI(ExposureType.EXTERNAL_FACING);
 
-        if (urlOptional.isEmpty()) {
+        if (uriOptional.isEmpty()) {
             LOGGER.info("unable to allow download of the hpkg data as no url was able to be generated");
             response.setStatus(HttpServletResponse.SC_NOT_FOUND);
         } else {
-            URL url = urlOptional.get();
+            URI uri = uriOptional.get();
 
             // if it is an HTTP URL then it should be possible to redirect the browser to that URL
             // instead of piping it through the application server.
 
-            if (ImmutableSet.of("http", "https").contains(url.getProtocol())) {
+            if (ImmutableSet.of("http", "https").contains(uri.getScheme())) {
                 response.setStatus(HttpServletResponse.SC_MOVED_TEMPORARILY);
-                response.setHeader(HttpHeaders.LOCATION, MimeUtility.encodeText(url.toString()));
+                response.setHeader(HttpHeaders.LOCATION, MimeUtility.encodeText(uri.toString()));
                 response.setContentType(MediaType.PLAIN_TEXT_UTF_8.toString());
 
                 PrintWriter writer = response.getWriter();
-                writer.print(url);
+                writer.print(uri);
                 writer.flush();
             } else {
                 response.setContentType(MediaType.OCTET_STREAM.toString());
@@ -163,6 +162,7 @@ public class PkgDownloadController {
                                 pkgVersion.getHpkgFilename()))
                 );
 
+                URL url = uri.toURL();
                 try (InputStream inputStream = url.openStream()) {
                     LOGGER.info("downloaded package version; {} - {}", pkg.getName(), pkgVersion);
                     inputStream.transferTo(response.getOutputStream());

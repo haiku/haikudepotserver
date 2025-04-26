@@ -1,5 +1,5 @@
 /*
- * Copyright 2018-2023, Andrew Lindesay
+ * Copyright 2018-2025, Andrew Lindesay
  * Distributed under the terms of the MIT License.
  */
 
@@ -107,7 +107,7 @@ public class CreatedPkgVersionSyndEntrySupplier implements SyndEntrySupplier {
                                                 pv.toVersionCoordinates().toString())));
 
                         {
-                            UriComponentsBuilder builder = UriComponentsBuilder.fromHttpUrl(baseUrl).pathSegment("#!", "pkg");
+                            UriComponentsBuilder builder = UriComponentsBuilder.fromUriString(baseUrl).pathSegment("#!", "pkg");
                             pv.appendPathSegments(builder);
                             entry.setLink(builder.build().toUriString());
                         }

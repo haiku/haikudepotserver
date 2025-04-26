@@ -1,11 +1,10 @@
 /*
- * Copyright 2018-2024, Andrew Lindesay
+ * Copyright 2018-2025, Andrew Lindesay
  * Distributed under the terms of the MIT License.
  */
 
 package org.haiku.haikudepotserver.naturallanguage;
 
-import com.google.common.base.Charsets;
 import com.google.common.base.Preconditions;
 import com.google.common.cache.CacheBuilder;
 import com.google.common.cache.CacheLoader;
@@ -19,8 +18,8 @@ import org.apache.cayenne.query.ObjectSelect;
 import org.apache.commons.lang3.StringUtils;
 import org.haiku.haikudepotserver.dataobjects.*;
 import org.haiku.haikudepotserver.naturallanguage.model.NaturalLanguageCoded;
-import org.haiku.haikudepotserver.naturallanguage.model.NaturalLanguageService;
 import org.haiku.haikudepotserver.naturallanguage.model.NaturalLanguageCoordinates;
+import org.haiku.haikudepotserver.naturallanguage.model.NaturalLanguageService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Qualifier;
@@ -30,6 +29,7 @@ import org.springframework.stereotype.Service;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.nio.charset.StandardCharsets;
 import java.util.*;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.locks.Lock;
@@ -152,7 +152,7 @@ public class NaturalLanguageServiceImpl implements NaturalLanguageService {
         try (InputStream inputStream = this.getClass().getResourceAsStream(resourceName)) {
             if(null != inputStream) {
                 Properties properties = new Properties();
-                properties.load(new InputStreamReader(inputStream, Charsets.UTF_8));
+                properties.load(new InputStreamReader(inputStream, StandardCharsets.UTF_8));
                 return properties.isEmpty() ? Optional.empty() : Optional.of(properties);
             }
         } catch (IOException ioe) {

@@ -1,17 +1,17 @@
 /*
- * Copyright 2017-2022, Andrew Lindesay
+ * Copyright 2017-2025, Andrew Lindesay
  * Distributed under the terms of the MIT License.
  */
 
 package org.haiku.driversettings;
 
-import com.google.common.base.Charsets;
 import org.fest.assertions.Assertions;
 import org.junit.jupiter.api.Test;
 
 import java.io.BufferedReader;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.nio.charset.StandardCharsets;
 import java.util.List;
 
 public class DriverSettingsTest {
@@ -24,7 +24,7 @@ public class DriverSettingsTest {
     public void testParseRepoInfo() throws Exception {
         try (
                 InputStream inputStream = getClass().getResourceAsStream("/repo.info");
-                InputStreamReader inputStreamReader = new InputStreamReader(inputStream, Charsets.UTF_8);
+                InputStreamReader inputStreamReader = new InputStreamReader(inputStream, StandardCharsets.UTF_8);
                 BufferedReader reader = new BufferedReader(inputStreamReader)
         ) {
 
@@ -54,7 +54,7 @@ public class DriverSettingsTest {
     public void testParseSample1() throws Exception {
         try (
                 InputStream inputStream = getClass().getResourceAsStream("/sample1.txt");
-                InputStreamReader inputStreamReader = new InputStreamReader(inputStream, Charsets.UTF_8);
+                InputStreamReader inputStreamReader = new InputStreamReader(inputStream, StandardCharsets.UTF_8);
                 BufferedReader reader = new BufferedReader(inputStreamReader)
         ) {
 

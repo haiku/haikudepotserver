@@ -1,11 +1,10 @@
 /*
- * Copyright 2018-2023, Andrew Lindesay
+ * Copyright 2018-2025, Andrew Lindesay
  * Distributed under the terms of the MIT License.
  */
 
 package org.haiku.haikudepotserver.support.freemarker;
 
-import com.google.common.base.Charsets;
 import com.google.common.base.Preconditions;
 import com.google.common.base.Strings;
 import freemarker.cache.TemplateLoader;
@@ -17,6 +16,7 @@ import org.springframework.core.io.ResourceLoader;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.Reader;
+import java.nio.charset.StandardCharsets;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -85,7 +85,7 @@ public class LocalizedTemplateLoader implements TemplateLoader {
         Preconditions.checkState(Resource.class.isAssignableFrom(templateSource.getClass()));
 
         if (Strings.isNullOrEmpty(encoding)) {
-            encoding = Charsets.UTF_8.name();
+            encoding = StandardCharsets.UTF_8.name();
         }
 
         return new InputStreamReader(((Resource)templateSource).getInputStream(), encoding);
