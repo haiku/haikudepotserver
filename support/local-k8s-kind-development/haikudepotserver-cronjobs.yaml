@@ -1,0 +1,60 @@
+---
+# This CronJob runs every hour hitting one of the HDS application server instances
+# to run some maintenance logic.
+apiVersion: batch/v1
+kind: CronJob
+metadata:
+  name: haikudepotserver-webapp-maintenance-hourly
+spec:
+  schedule: "14 * * * *"
+  concurrencyPolicy: Forbid
+  successfulJobsHistoryLimit: 1
+  failedJobsHistoryLimit: 1
+  jobTemplate:
+    spec:
+      backoffLimit: 0
+      template:
+        spec:
+          containers:
+            - name: haikudepotserver-maintenance-hourly
+              image: curlimages/curl:8.13.0
+              args:
+                - curl
+                - -X
+                - POST
+                - -H
+                - Content-Type:application/json
+                - --data
+                - '{"type":"HOURLY"}'
+                - http://haikudepotserver-webapp-svc:8081/actuator/hdsmaintenance
+          restartPolicy: Never
+---
+# This CronJob runs every day hitting one of the HDS application server instances
+# to run some logic.
+apiVersion: batch/v1
+kind: CronJob
+metadata:
+  name: haikudepotserver-webapp-maintenance-daily
+spec:
+  schedule: "47 5 * * *"
+  concurrencyPolicy: Forbid
+  successfulJobsHistoryLimit: 1
+  failedJobsHistoryLimit: 1
+  jobTemplate:
+    spec:
+      backoffLimit: 0
+      template:
+        spec:
+          containers:
+            - name: haikudepotserver-maintenance-daily
+              image: curlimages/curl:8.13.0
+              args:
+                - curl
+                - -X
+                - POST
+                - -H
+                - Content-Type:application/json
+                - --data
+                - '{"type":"DAILY"}'
+                - http://haikudepotserver-webapp-svc:8081/actuator/hdsmaintenance
+          restartPolicy: Never
