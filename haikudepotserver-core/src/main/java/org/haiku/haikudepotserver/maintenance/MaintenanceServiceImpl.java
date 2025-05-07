@@ -17,14 +17,17 @@ import org.haiku.haikudepotserver.repository.model.AlertRepositoryAbsentUpdateJo
 import org.haiku.haikudepotserver.repository.model.RepositoryHpkrIngressJobSpecification;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Value;
-import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 
 /**
  * <p>Note that the exact (second, minute) of the timing of these expressions
  * is slightly 'random' in order that they are less likely to collide with
  * any other timed tasks.</p>
+ *
+ * <p>In the deployed environment, these calls are invoked via the Spring
+ * Actuator system. For example, a Kubernetes CronJob will invoke an
+ * Actuator HTTP endpoint on the application server will ends up triggering
+ * the hourly and daily maintenance tasks here.</p>
  */
 
 @Service
@@ -34,35 +37,12 @@ public class MaintenanceServiceImpl implements MaintenanceService {
 
     private final ServerRuntime serverRuntime;
     private final JobService jobService;
-    private final boolean runMaintenanceOnSchedule;
 
     public MaintenanceServiceImpl(
-            @Value("${hds.maintenance.on-schedule:true}") boolean runMaintenanceOnSchedule,
             ServerRuntime serverRuntime,
             JobService jobService) {
         this.serverRuntime = serverRuntime;
         this.jobService = jobService;
-        this.runMaintenanceOnSchedule = runMaintenanceOnSchedule;
-    }
-
-    // note the hour is GMT0
-    @Scheduled(cron = "12 40 21 * * *")
-    public void dailySchedule() {
-        if (runMaintenanceOnSchedule) {
-            daily();
-        } else {
-           LOGGER.info("daily maintenance on schedule skipped as it is disabled.");
-        }
-    }
-
-    // note the hour is GMT0
-    @Scheduled(cron = "14 27 * * * *")
-    public void hourlySchedule() {
-        if (runMaintenanceOnSchedule) {
-            hourly();
-        } else {
-            LOGGER.info("hourly maintenance on schedule skipped as it is disabled.");
-        }
     }
 
     @Override
