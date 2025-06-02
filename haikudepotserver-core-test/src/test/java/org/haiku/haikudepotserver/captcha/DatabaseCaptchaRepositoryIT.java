@@ -17,6 +17,7 @@ import org.springframework.test.context.ContextConfiguration;
 
 import java.sql.Timestamp;
 import java.time.Clock;
+import java.util.List;
 
 @ContextConfiguration(classes = TestConfig.class)
 public class DatabaseCaptchaRepositoryIT extends AbstractIntegrationTest {
@@ -38,7 +39,7 @@ public class DatabaseCaptchaRepositoryIT extends AbstractIntegrationTest {
         long nowMillis = Clock.systemUTC().millis();
 
         {
-            Timestamp expiredTimestamp = new Timestamp(nowMillis - expirySeconds * 1000);
+            Timestamp expiredTimestamp = new Timestamp(nowMillis - (expirySeconds + 1) * 1000);
             ObjectContext context = serverRuntime.newContext();
             Response response = context.newObject(Response.class);
             response.setCreateTimestamp(expiredTimestamp);
