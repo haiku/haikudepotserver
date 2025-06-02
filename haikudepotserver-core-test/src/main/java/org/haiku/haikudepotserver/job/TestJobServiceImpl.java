@@ -1,5 +1,5 @@
 /*
- * Copyright 2014-2023, Andrew Lindesay
+ * Copyright 2014-2025, Andrew Lindesay
  * Distributed under the terms of the MIT License.
  */
 
@@ -182,6 +182,11 @@ public class TestJobServiceImpl implements JobService {
 
     @Override
     public Optional<? extends JobSnapshot> tryGetJobForData(String jobDataGuid) {
+        return Optional.empty();
+    }
+
+    @Override
+    public Optional<? extends JobSnapshot> tryGetJobForSuppliedData(String suppliedDataGuid) {
         return Optional.empty();
     }
 

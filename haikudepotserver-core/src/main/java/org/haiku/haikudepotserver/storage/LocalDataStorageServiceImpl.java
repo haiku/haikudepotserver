@@ -1,5 +1,5 @@
 /*
- * Copyright 2018-2023, Andrew Lindesay
+ * Copyright 2018-2025, Andrew Lindesay
  * Distributed under the terms of the MIT License.
  */
 
@@ -10,13 +10,19 @@ import com.google.common.base.Strings;
 import com.google.common.io.ByteSink;
 import com.google.common.io.ByteSource;
 import com.google.common.io.Files;
+import org.apache.commons.lang3.StringUtils;
 import org.haiku.haikudepotserver.storage.model.DataStorageService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import jakarta.annotation.PostConstruct;
 import java.io.*;
+import java.time.Clock;
+import java.time.Duration;
+import java.util.Arrays;
 import java.util.Optional;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 /**
  * <p>An implementation of the {@link DataStorageService}
@@ -32,6 +38,8 @@ public class LocalDataStorageServiceImpl implements DataStorageService {
     private File tmpDir;
 
     private final Boolean isProduction;
+
+    private final Clock clock = Clock.systemUTC();
 
     public LocalDataStorageServiceImpl(Boolean isProduction) {
         this.isProduction = isProduction;
@@ -68,6 +76,20 @@ public class LocalDataStorageServiceImpl implements DataStorageService {
 
     private File fileForKey(String key) {
        return new File(tmpDir, key + ".dat");
+    }
+
+    @Override
+    public Set<String> keys(Duration olderThanDuration) {
+        File[] leaves = tmpDir.listFiles();
+
+        if (null == leaves) {
+            return Set.of();
+        }
+
+        return Arrays.stream(leaves)
+                .filter(f -> null == olderThanDuration || f.lastModified() < (clock.millis() - olderThanDuration.toMillis()))
+                .map(f -> StringUtils.stripEnd(f.getName(), ".dat"))
+                .collect(Collectors.toUnmodifiableSet());
     }
 
     @Override

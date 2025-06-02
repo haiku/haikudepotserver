@@ -1,5 +1,5 @@
 /*
- * Copyright 2024, Andrew Lindesay
+ * Copyright 2024-2025, Andrew Lindesay
  * Distributed under the terms of the MIT License.
  */
 
@@ -15,9 +15,12 @@ import org.haiku.haikudepotserver.maintenance.model.MaintenanceService;
 import org.haiku.haikudepotserver.passwordreset.model.PasswordResetMaintenanceJobSpecification;
 import org.haiku.haikudepotserver.repository.model.AlertRepositoryAbsentUpdateJobSpecification;
 import org.haiku.haikudepotserver.repository.model.RepositoryHpkrIngressJobSpecification;
+import org.haiku.haikudepotserver.storage.model.DataStorageGarbageCollectionJobSpecification;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
+
+import java.time.Duration;
 
 /**
  * <p>Note that the exact (second, minute) of the timing of these expressions
@@ -86,6 +89,14 @@ public class MaintenanceServiceImpl implements MaintenanceService {
             else {
                 LOGGER.debug("did not submit task for password reset maintenance as there are no tokens stored");
             }
+        }
+
+        // garbage collect any data storage which is no longer in use.
+
+        {
+            DataStorageGarbageCollectionJobSpecification specification = new DataStorageGarbageCollectionJobSpecification();
+            specification.setOlderThanMillis(Duration.ofHours(1).toMillis());
+            jobService.submit(specification, JobSnapshot.COALESCE_STATUSES_QUEUED_STARTED);
         }
 
         LOGGER.info("did trigger hourly maintenance");

@@ -1,5 +1,5 @@
 /*
- * Copyright 2018, Andrew Lindesay
+ * Copyright 2018-2025, Andrew Lindesay
  * Distributed under the terms of the MIT License.
  */
 
@@ -7,7 +7,8 @@ package org.haiku.haikudepotserver.config;
 
 import org.haiku.haikudepotserver.job.LocalJobServiceImpl;
 import org.haiku.haikudepotserver.job.model.JobService;
-import org.haiku.haikudepotserver.storage.LocalDataStorageServiceImpl;
+import org.haiku.haikudepotserver.storage.PgDataStorageRepository;
+import org.haiku.haikudepotserver.storage.PgDataStorageServiceImpl;
 import org.haiku.haikudepotserver.storage.model.DataStorageService;
 import org.springframework.boot.autoconfigure.flyway.FlywayAutoConfiguration;
 import org.springframework.boot.autoconfigure.jdbc.DataSourceAutoConfiguration;
@@ -30,8 +31,8 @@ public class TestConfig {
     }
 
     @Bean
-    public DataStorageService dataStorageService() {
-        return new LocalDataStorageServiceImpl(false);
+    public DataStorageService dataStorageService(PgDataStorageRepository repository) {
+        return new PgDataStorageServiceImpl(repository, 262144);
     }
 
 }

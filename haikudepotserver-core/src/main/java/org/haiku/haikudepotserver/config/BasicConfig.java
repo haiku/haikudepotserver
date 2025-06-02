@@ -21,10 +21,14 @@ import org.haiku.haikudepotserver.graphics.hvif.HvifRenderingService;
 import org.haiku.haikudepotserver.graphics.hvif.HvifRenderingServiceFactory;
 import org.haiku.haikudepotserver.security.PasswordEncoder;
 import org.haiku.haikudepotserver.support.RuntimeInformationService;
+import org.haiku.haikudepotserver.support.eventing.InterProcessEventPgConfig;
+import org.haiku.haikudepotserver.support.eventing.InterProcessEventPgListenService;
+import org.haiku.haikudepotserver.support.eventing.InterProcessEventPgNotifyService;
 import org.haiku.haikudepotserver.support.freemarker.LocalizedTemplateLoader;
 import org.haiku.haikudepotserver.support.logging.LoggingSetupOrchestration;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.context.MessageSource;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.ComponentScan;
@@ -35,6 +39,7 @@ import org.springframework.core.io.ResourceLoader;
 import org.springframework.security.crypto.keygen.KeyGenerators;
 import org.springframework.stereotype.Controller;
 
+import javax.sql.DataSource;
 import java.nio.charset.StandardCharsets;
 import java.util.List;
 
@@ -144,6 +149,30 @@ public class BasicConfig {
     @Bean
     public PasswordEncoder passwordEncoder() {
         return new PasswordEncoder(KeyGenerators.secureRandom(8));
+    }
+
+    // -------------------------------------
+    // INTER-PROCESS EVENTING
+
+    @Bean
+    public InterProcessEventPgListenService interProcessEventPgListenService(
+            ObjectMapper objectMapper,
+            DataSource dataSource,
+            InterProcessEventPgConfig config,
+            ApplicationEventPublisher applicationEventPublisher
+    ) {
+        return new InterProcessEventPgListenService(
+                objectMapper, dataSource, config,
+                applicationEventPublisher::publishEvent
+        );
+    }
+
+    @Bean
+    public InterProcessEventPgNotifyService interProcessEventPgNotifyService(
+            ObjectMapper objectMapper,
+            DataSource dataSource,
+            InterProcessEventPgConfig config) {
+        return new InterProcessEventPgNotifyService(objectMapper, dataSource, config);
     }
 
 }

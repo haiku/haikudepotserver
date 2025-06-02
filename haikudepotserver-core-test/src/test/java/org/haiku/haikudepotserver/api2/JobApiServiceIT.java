@@ -1,5 +1,5 @@
 /*
- * Copyright 2018-2023, Andrew Lindesay
+ * Copyright 2018-2025, Andrew Lindesay
  * Distributed under the terms of the MIT License.
  */
 
@@ -19,7 +19,9 @@ import org.haiku.haikudepotserver.config.TestBasicConfig;
 import org.haiku.haikudepotserver.dataobjects.User;
 import org.haiku.haikudepotserver.job.TestJobServiceImpl;
 import org.haiku.haikudepotserver.job.model.JobService;
+import org.haiku.haikudepotserver.storage.model.DataStorageService;
 import org.junit.jupiter.api.Test;
+import org.mockito.Mockito;
 import org.springframework.boot.autoconfigure.flyway.FlywayAutoConfiguration;
 import org.springframework.boot.autoconfigure.jdbc.DataSourceAutoConfiguration;
 import org.springframework.boot.autoconfigure.jdbc.DataSourceTransactionManagerAutoConfiguration;
@@ -133,6 +135,10 @@ public class JobApiServiceIT extends AbstractIntegrationTest {
             return new TestJobServiceImpl();
         }
 
+        @Bean
+        DataStorageService dataStorageService() {
+            return Mockito.mock(DataStorageService.class);
+        }
     }
 
 }

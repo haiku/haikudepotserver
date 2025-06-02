@@ -102,11 +102,11 @@ $$;
 
 -- remove any captchas
 
-DELETE FROM captcha.response;
+TRUNCATE captcha.response;
 
 -- remove any password change tokens
 
-DELETE FROM haikudepot.user_password_reset_token;
+TRUNCATE haikudepot.user_password_reset_token;
 
 -- reset all users' passwords to 'zimmer' and emails to some non-routable email
 -- addresses.
@@ -147,6 +147,10 @@ WHERE EXISTS(SELECT ur.id FROM haikudepot.user_rating ur WHERE ur.pkg_version_id
 UPDATE haikudepot.pkg_supplement_modification SET
     user_description = hds_scramble_chars(user_description)
     WHERE user_description IS NOT NULL;
+
+-- remove any stored data
+
+TRUNCATE datastore.object_head, datastore.object_part;
 
 -- clean up
 

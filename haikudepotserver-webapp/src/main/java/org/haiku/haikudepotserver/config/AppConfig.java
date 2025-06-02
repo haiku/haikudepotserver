@@ -1,5 +1,5 @@
 /*
- * Copyright 2018-2024, Andrew Lindesay
+ * Copyright 2018-2025, Andrew Lindesay
  * Distributed under the terms of the MIT License.
  */
 
@@ -12,6 +12,8 @@ import org.haiku.haikudepotserver.job.model.JobRunner;
 import org.haiku.haikudepotserver.job.model.JobService;
 import org.haiku.haikudepotserver.pkg.model.PkgLocalizationLookupService;
 import org.haiku.haikudepotserver.storage.LocalDataStorageServiceImpl;
+import org.haiku.haikudepotserver.storage.PgDataStorageRepository;
+import org.haiku.haikudepotserver.storage.PgDataStorageServiceImpl;
 import org.haiku.haikudepotserver.storage.model.DataStorageService;
 import org.haiku.haikudepotserver.support.ClientIdentifierSupplier;
 import org.haiku.haikudepotserver.support.HttpRequestClientIdentifierSupplier;
@@ -52,8 +54,17 @@ public class AppConfig {
 
     @Bean
     public DataStorageService dataStorageService(
-            @Value("${hds.deployment.is-production:false}") Boolean isProduction) {
-        return new LocalDataStorageServiceImpl(isProduction);
+            @Value("${hds.deployment.is-production:false}") Boolean isProduction,
+            @Value("${hds.storage.type:local}") String type,
+            @Value("${hds.storage.pg.part-size:262144}") Long partSize,
+            PgDataStorageRepository repository
+            ) {
+        // TODO: remove this once database storage is settled.
+        return switch (type) {
+            case "local" -> new LocalDataStorageServiceImpl(isProduction);
+            case "pg" -> new PgDataStorageServiceImpl(repository, partSize);
+            default -> throw new IllegalStateException("unexpected data storage type: " + type);
+        };
     }
 
     @Bean("messageSourceBaseNames")

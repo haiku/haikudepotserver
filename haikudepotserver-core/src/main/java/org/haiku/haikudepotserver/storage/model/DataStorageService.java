@@ -1,5 +1,5 @@
 /*
- * Copyright 2016, Andrew Lindesay
+ * Copyright 2016-2025, Andrew Lindesay
  * Distributed under the terms of the MIT License.
  */
 
@@ -10,7 +10,9 @@ import com.google.common.io.ByteSource;
 import org.haiku.haikudepotserver.job.model.JobService;
 
 import java.io.IOException;
+import java.time.Duration;
 import java.util.Optional;
+import java.util.Set;
 
 /**
  * <p>This interface is only concerned with the immediate binary data storage of the job data.  This service will be
@@ -19,6 +21,17 @@ import java.util.Optional;
  */
 
 public interface DataStorageService {
+
+    /**
+     * <p>Returns a set of all the keys to data in the store.</p>
+     * @param olderThanDuration only data items older than this will be returned.
+     */
+
+    Set<String> keys(Duration olderThanDuration);
+
+    /**
+     * <p>Creates a sink to write data to for the supplied key.</p>
+     */
 
     ByteSink put(String key) throws IOException;
 
@@ -32,7 +45,7 @@ public interface DataStorageService {
     boolean remove(String key);
 
     /**
-     * <p>Removes all of the items from storage.</p>
+     * <p>Removes all the items from storage.</p>
      */
 
     void clear();

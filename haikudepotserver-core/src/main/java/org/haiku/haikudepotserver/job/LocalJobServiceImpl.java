@@ -1,5 +1,5 @@
 /*
- * Copyright 2018-2024, Andrew Lindesay
+ * Copyright 2018-2025, Andrew Lindesay
  * Distributed under the terms of the MIT License.
  */
 
@@ -682,14 +682,24 @@ public class LocalJobServiceImpl
     @Override
     public Optional<? extends JobSnapshot> tryGetJobForData(String jobDataGuid) {
         Preconditions.checkArgument(!Strings.isNullOrEmpty(jobDataGuid));
-        Optional<JobData> jobDataOptional = tryGetData(jobDataGuid);
+        return tryGetData(jobDataGuid).flatMap(this::tryFindInternalJobOwningJobData);
+    }
 
-        if(jobDataOptional.isPresent()) {
-            return tryFindInternalJobOwningJobData(jobDataOptional.get());
+    @Override
+    public Optional<? extends JobSnapshot> tryGetJobForSuppliedData(String suppliedDataGuid) {
+        Preconditions.checkArgument(!Strings.isNullOrEmpty(suppliedDataGuid));
+
+        synchronized(this) {
+            for (Job job : jobs.values()) {
+                if (job.getJobSpecification().getSuppliedDataGuids().contains(suppliedDataGuid)) {
+                    return Optional.of(job);
+                }
+            }
         }
 
         return Optional.empty();
     }
+
 
     @Override
     public String deriveDataFilename(String jobDataGuid) {
