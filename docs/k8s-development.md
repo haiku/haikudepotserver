@@ -119,7 +119,7 @@ Once this build is complete, load the built images into the cluster;
 
 ```
 kind load docker-image haikudepotserver:999.999.999 --name haikudepotserver
-kind load docker-image haikudepotserver-server-graphics:999.999.999 --name haikudepotserver-server-graphics
+kind load docker-image `haikudepotserver-server-graphics:999.999.999` --name haikudepotserver
 ```
 
 Change the image specified in the Kubernetes manifests;
