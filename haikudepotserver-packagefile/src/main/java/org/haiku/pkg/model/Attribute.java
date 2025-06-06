@@ -7,9 +7,9 @@ package org.haiku.pkg.model;
 
 import com.google.common.base.Preconditions;
 import com.google.common.collect.ImmutableList;
+import jakarta.annotation.Nullable;
 import org.haiku.pkg.AttributeContext;
 
-import javax.annotation.Nullable;
 import java.util.Collections;
 import java.util.List;
 import java.util.Optional;

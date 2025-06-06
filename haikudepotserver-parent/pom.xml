@@ -1,6 +1,6 @@
 <?xml version='1.0' encoding='UTF-8'?>
 <!--
-  ~ Copyright 2018-2024, Andrew Lindesay
+  ~ Copyright 2018-2025, Andrew Lindesay
   ~ Distributed under the terms of the MIT License.
   -->
 
@@ -32,39 +32,35 @@
         <maven.compiler.source>21</maven.compiler.source>
         <maven.compiler.parameters>true</maven.compiler.parameters>
 
-        <spring-boot.version>3.4.3</spring-boot.version>
+        <spring-boot.version>3.5.0</spring-boot.version>
         <spring-retry.version>2.0.11</spring-retry.version>
 
-        <postgresql.version>42.7.5</postgresql.version>
-        <cayenne.version>4.2.1</cayenne.version>
+        <postgresql.version>42.7.7</postgresql.version>
+        <cayenne.version>4.2.2</cayenne.version>
 
-        <slf4j.version>2.0.7</slf4j.version>
-        <jackson-databind.version>2.16.1</jackson-databind.version>
+        <guava.version>33.4.8-jre</guava.version>
 
-        <guava.version>33.4.0-jre</guava.version>
-
-        <openapi-generator-maven-plugin.version>7.11.0</openapi-generator-maven-plugin.version>
+        <openapi-generator-maven-plugin.version>7.13.0</openapi-generator-maven-plugin.version>
         <springfox.version>3.0.0</springfox.version>
 
-        <nimbus-jose-jwt.version>9.37.3</nimbus-jose-jwt.version>
+        <nimbus-jose-jwt.version>9.48</nimbus-jose-jwt.version>
 
         <maven-war-plugin.version>3.4.0</maven-war-plugin.version>
-        <maven-failsafe-plugin.version>3.2.3</maven-failsafe-plugin.version>
+        <maven-failsafe-plugin.version>3.5.3</maven-failsafe-plugin.version>
         <jsonschema2pojo-maven-plugin.version>1.2.2</jsonschema2pojo-maven-plugin.version>
 
         <flexmark.version>0.64.8</flexmark.version>
         <freemarker.version>2.3.34</freemarker.version>
-        <hikaricp.version>5.1.0</hikaricp.version>
-        <opencsv.version>5.9</opencsv.version>
+        <opencsv.version>5.11</opencsv.version>
         <aircompressor.version>2.0.2</aircompressor.version>
 
-        <commons-collections4.version>4.4</commons-collections4.version>
+        <commons-collections4.version>4.5.0</commons-collections4.version>
         <commons-lang3.version>3.17.0</commons-lang3.version>
         <commons-compress.version>1.27.1</commons-compress.version>
-        <commons-codec.version>1.17.1</commons-codec.version>
-        <commons-csv.version>1.12.0</commons-csv.version>
+        <commons-codec.version>1.18.0</commons-codec.version>
+        <commons-csv.version>1.14.0</commons-csv.version>
 
-        <testcontainers.version>1.20.4</testcontainers.version>
+        <testcontainers.version>1.21.1</testcontainers.version>
     </properties>
 
     <dependencyManagement>
@@ -79,6 +75,18 @@
             </dependency>
 
             <dependency>
+                <groupId>org.springframework.boot</groupId>
+                <artifactId>spring-boot-starter-json</artifactId>
+                <version>${spring-boot.version}</version>
+            </dependency>
+
+            <dependency>
+                <groupId>org.springframework.boot</groupId>
+                <artifactId>spring-boot-starter-jdbc</artifactId>
+                <version>${spring-boot.version}</version>
+            </dependency>
+
+            <dependency>
                 <groupId>org.springframework.retry</groupId>
                 <artifactId>spring-retry</artifactId>
                 <version>${spring-retry.version}</version>
@@ -90,32 +98,6 @@
                 <version>2.37</version>
             </dependency>
 
-            <dependency>
-                <groupId>org.slf4j</groupId>
-                <artifactId>slf4j-api</artifactId>
-                <version>${slf4j.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>org.slf4j</groupId>
-                <artifactId>jul-to-slf4j</artifactId>
-                <version>${slf4j.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>org.slf4j</groupId>
-                <artifactId>jcl-over-slf4j</artifactId>
-                <version>${slf4j.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>org.slf4j</groupId>
-                <artifactId>log4j-over-slf4j</artifactId>
-                <version>${slf4j.version}</version>
-            </dependency>
-
-            <dependency>
-                <groupId>com.fasterxml.jackson.core</groupId>
-                <artifactId>jackson-databind</artifactId>
-                <version>${jackson-databind.version}</version>
-            </dependency>
             <dependency>
                 <groupId>com.google.guava</groupId>
                 <artifactId>guava</artifactId>
@@ -231,24 +213,12 @@
             </dependency>
 
             <dependency>
-                <groupId>com.zaxxer</groupId>
-                <artifactId>HikariCP</artifactId>
-                <version>${hikaricp.version}</version>
-            </dependency>
-
-            <dependency>
                 <groupId>ar.com.hjg</groupId>
                 <artifactId>pngj</artifactId>
                 <version>2.1.0</version>
             </dependency>
 
-            <dependency>
-                <groupId>org.springframework.boot</groupId>
-                <artifactId>spring-boot-dependencies</artifactId>
-                <version>${spring-boot.version}</version>
-                <type>pom</type>
-                <scope>import</scope>
-            </dependency>
+
 
             <dependency>
                 <groupId>org.springframework.boot</groupId>
@@ -259,7 +229,7 @@
             <dependency>
                 <groupId>org.junit.jupiter</groupId>
                 <artifactId>junit-jupiter</artifactId>
-                <version>5.10.1</version>
+                <version>5.13.0</version>
             </dependency>
             <dependency>
                 <groupId>org.easytesting</groupId>
@@ -298,7 +268,7 @@
             <dependency>
                 <groupId>org.awaitility</groupId>
                 <artifactId>awaitility</artifactId>
-                <version>4.2.0</version>
+                <version>4.3.0</version>
                 <scope>test</scope>
             </dependency>
 

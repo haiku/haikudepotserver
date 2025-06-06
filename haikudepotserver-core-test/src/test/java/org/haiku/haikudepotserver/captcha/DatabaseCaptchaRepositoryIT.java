@@ -17,7 +17,6 @@ import org.springframework.test.context.ContextConfiguration;
 
 import java.sql.Timestamp;
 import java.time.Clock;
-import java.util.List;
 
 @ContextConfiguration(classes = TestConfig.class)
 public class DatabaseCaptchaRepositoryIT extends AbstractIntegrationTest {
