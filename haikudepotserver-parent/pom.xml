@@ -35,7 +35,7 @@
         <spring-boot.version>3.4.3</spring-boot.version>
         <spring-retry.version>2.0.11</spring-retry.version>
 
-        <postgresql.version>42.7.5</postgresql.version>
+        <postgresql.version>42.7.7</postgresql.version>
         <cayenne.version>4.2.1</cayenne.version>
 
         <slf4j.version>2.0.7</slf4j.version>
