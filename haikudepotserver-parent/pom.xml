@@ -43,7 +43,7 @@
         <openapi-generator-maven-plugin.version>7.13.0</openapi-generator-maven-plugin.version>
         <springfox.version>3.0.0</springfox.version>
 
-        <nimbus-jose-jwt.version>9.48</nimbus-jose-jwt.version>
+        <nimbus-jose-jwt.version>10.0.2</nimbus-jose-jwt.version>
 
         <maven-war-plugin.version>3.4.0</maven-war-plugin.version>
         <maven-failsafe-plugin.version>3.5.3</maven-failsafe-plugin.version>
