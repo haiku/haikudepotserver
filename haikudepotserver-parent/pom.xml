@@ -55,7 +55,7 @@
         <aircompressor.version>2.0.2</aircompressor.version>
 
         <commons-collections4.version>4.5.0</commons-collections4.version>
-        <commons-lang3.version>3.17.0</commons-lang3.version>
+        <commons-lang3.version>3.18.0</commons-lang3.version>
         <commons-compress.version>1.27.1</commons-compress.version>
         <commons-codec.version>1.18.0</commons-codec.version>
         <commons-csv.version>1.14.0</commons-csv.version>
