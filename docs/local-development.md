@@ -23,7 +23,6 @@ For local development, say in an IDE system, HDS can be launched as a SpringBoot
   - `hds.deployment.is-production`
   - `hds.base-url`
   - `hds.authentication.jws.issuer`
-  - `hds.hvif2png.path`
   If you don't have an SMTP mail host this can be omitted for a development scenario unless you want to test those functions such as "forgot password".
 
 ## Run from Maven
@@ -34,7 +33,25 @@ Build the applications with;
 ./mvnw clean install
 ```
 
-Run the graphics application server with;
+Run the HDS application server with;
+
+```
+cd haikudepotserver-webapp
+
+SERVER_PORT=8080 \
+HDS_GRAPHICSSERVER_BASE_URI= \
+../mvnw \
+spring-boot:run \
+-Dfile.encoding=UTF-8 \
+-Duser.timezone=GMT0 \
+-Djava.awt.headless=true
+```
+
+The application can be accessed using a web browser on `http://localhost:8080` on the development host. Login as `root` with password `zimmer`.
+
+## Run the graphics application
+
+Without the graphics server running, some icons and screenshots will not display. Run the graphics server with;
 
 ```
 cd haikudepotserver-server-graphics
@@ -50,21 +67,7 @@ spring-boot:run \
 -Djava.awt.headless=true
 ```
 
-Run the application server with;
-
-```
-cd haikudepotserver-webapp
-
-SERVER_PORT=8080 \
-HDS_GRAPHICSSERVER_BASE_URI=http://localhost:8085 \
-../mvnw \
-spring-boot:run \
--Dfile.encoding=UTF-8 \
--Duser.timezone=GMT0 \
--Djava.awt.headless=true
-```
-
-The application can be accessed using a web browser on `http://localhost:8080` on the development host. Login as `root` with password `zimmer`.
+Modify the environment variable `HDS_GRAPHICSSERVER_BASE_URI` set when running the HDS application server to have value `http://localhost:8085`. Re-run the HDS application server.
 
 ## Run from the Intelli-J IDE
 
