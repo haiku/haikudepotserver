@@ -1,5 +1,5 @@
 /*
- * Copyright 2024, Andrew Lindesay
+ * Copyright 2024-2025, Andrew Lindesay
  * Distributed under the terms of the MIT License.
  */
 package org.haiku.haikudepotserver.job.model;
@@ -12,6 +12,10 @@ public enum JobDataEncoding {
 
     NONE,
     GZIP;
+
+    public String lowerName() {
+        return name().toLowerCase();
+    }
 
     public static JobDataEncoding getByHeaderValue(String headerValue) {
 

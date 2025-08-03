@@ -1,5 +1,5 @@
 /*
- * Copyright 2018-2023, Andrew Lindesay
+ * Copyright 2018-2025, Andrew Lindesay
  * Distributed under the terms of the MIT License.
  */
 
@@ -29,7 +29,6 @@ import java.io.OutputStream;
 import java.io.OutputStreamWriter;
 import java.util.List;
 import java.util.Optional;
-import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 /**
@@ -50,6 +49,11 @@ public class PkgProminenceAndUserRatingSpreadsheetJobRunner
             PkgService pkgService) {
         this.serverRuntime = Preconditions.checkNotNull(serverRuntime);
         this.pkgService = Preconditions.checkNotNull(pkgService);
+    }
+
+    @Override
+    public Class<PkgProminenceAndUserRatingSpreadsheetJobSpecification> getSupportedSpecificationClass() {
+        return PkgProminenceAndUserRatingSpreadsheetJobSpecification.class;
     }
 
     @Override

@@ -1,26 +1,40 @@
 /*
- * Copyright 2016, Andrew Lindesay
+ * Copyright 2016-2025, Andrew Lindesay
  * Distributed under the terms of the MIT License.
  */
 
 package org.haiku.haikudepotserver.job.model;
 
-import java.util.concurrent.locks.Lock;
+import java.util.UUID;
 
 public class TestLockableJobSpecification extends AbstractJobSpecification {
 
-    private Lock lock;
+    private String name;
+    private UUID lockId = UUID.randomUUID();
 
     public TestLockableJobSpecification() {
-        this(null);
+        super();
     }
 
-    public TestLockableJobSpecification(Lock lock) {
-        this.lock = lock;
+    public TestLockableJobSpecification(String name) {
+        super();
+        this.name = name;
     }
 
-    public Lock getLock() {
-        return lock;
+    public UUID getLockId() {
+        return lockId;
+    }
+
+    public void setLockId(UUID lockId) {
+        this.lockId = lockId;
+    }
+
+    public String getName() {
+        return name;
+    }
+
+    public void setName(String name) {
+        this.name = name;
     }
 
 }

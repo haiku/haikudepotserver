@@ -23,15 +23,19 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.locks.Lock;
-import java.util.concurrent.locks.ReentrantLock;
 import java.util.stream.IntStream;
 import java.util.stream.Stream;
 
 @ContextConfiguration(classes = TestConfig.class)
-public class LocalJobServiceIT extends AbstractIntegrationTest {
+public class JobServiceIT extends AbstractIntegrationTest {
+
+    private final static int TOLERANCE_SECONDS = 120;
 
     @Resource
     private JobService jobService;
+
+    @Resource
+    private TestLockableJobRunner testLockableJobRunner;
 
     @BeforeEach
     public void setUp() {
@@ -52,7 +56,7 @@ public class LocalJobServiceIT extends AbstractIntegrationTest {
     public void testHappyDays() {
 
         // -------------------------
-        List<String> guids = IntStream.of(1,2,3,4)
+        List<String> guids = IntStream.of(1, 2, 3, 4)
                 .mapToObj((i) -> new TestNumberedLinesJobSpecification(3, 500L))
                 .map((spec) -> jobService.submit(spec, JobSnapshot.COALESCE_STATUSES_NONE))
                 .toList();
@@ -107,11 +111,13 @@ public class LocalJobServiceIT extends AbstractIntegrationTest {
         // -------------------------
         // setup the initial situation
 
-        String job1FinishedGuid = jobService.submit(new TestLockableJobSpecification(), JobSnapshot.COALESCE_STATUSES_NONE);
-        jobService.awaitJobFinishedUninterruptibly(job1FinishedGuid, TimeUnit.SECONDS.toMillis(10));
-        String job2FinishedGuid = jobService.submit(new TestLockableJobSpecification(), JobSnapshot.COALESCE_STATUSES_NONE);
-        jobService.awaitJobFinishedUninterruptibly(job2FinishedGuid, TimeUnit.SECONDS.toMillis(10));
-        Lock job3Lock = new ReentrantLock();
+        String job1FinishedGuid = jobService.submit(new TestLockableJobSpecification("1"), JobSnapshot.COALESCE_STATUSES_NONE);
+        jobService.awaitJobFinishedUninterruptibly(job1FinishedGuid, TimeUnit.SECONDS.toMillis(TOLERANCE_SECONDS));
+        String job2FinishedGuid = jobService.submit(new TestLockableJobSpecification("2"), JobSnapshot.COALESCE_STATUSES_NONE);
+        jobService.awaitJobFinishedUninterruptibly(job2FinishedGuid, TimeUnit.SECONDS.toMillis(TOLERANCE_SECONDS));
+
+        TestLockableJobSpecification jobSpecification3 = new TestLockableJobSpecification("3");
+        Lock job3Lock = testLockableJobRunner.getLock(jobSpecification3.getLockId());
 
         String job3StartedGuid;
         String job4QueuedGuid;
@@ -119,8 +125,8 @@ public class LocalJobServiceIT extends AbstractIntegrationTest {
         job3Lock.lock();
 
         try {
-            job3StartedGuid = jobService.submit(new TestLockableJobSpecification(job3Lock), JobSnapshot.COALESCE_STATUSES_NONE);
-            job4QueuedGuid = jobService.submit(new TestLockableJobSpecification(), JobSnapshot.COALESCE_STATUSES_NONE);
+            job3StartedGuid = jobService.submit(jobSpecification3, JobSnapshot.COALESCE_STATUSES_NONE);
+            job4QueuedGuid = jobService.submit(new TestLockableJobSpecification("4"), JobSnapshot.COALESCE_STATUSES_NONE);
             // -------------------------
 
             assertStatus(job1FinishedGuid, JobSnapshot.Status.FINISHED);
@@ -129,14 +135,15 @@ public class LocalJobServiceIT extends AbstractIntegrationTest {
             assertStatus(job4QueuedGuid, JobSnapshot.Status.QUEUED);
 
             // check some coalescing works.
-            Assertions.assertThat(jobService.submit(new TestLockableJobSpecification(), JobSnapshot.COALESCE_STATUSES_QUEUED))
+            Assertions.assertThat(jobService.submit(new TestLockableJobSpecification("4-b"), JobSnapshot.COALESCE_STATUSES_QUEUED))
                     .isEqualTo(job4QueuedGuid);
 
-            Assertions.assertThat(jobService.submit(new TestLockableJobSpecification(), JobSnapshot.COALESCE_STATUSES_QUEUED_STARTED))
+            Assertions.assertThat(jobService.submit(new TestLockableJobSpecification("3-b"), JobSnapshot.COALESCE_STATUSES_QUEUED_STARTED))
                     .isEqualTo(job3StartedGuid);
 
-            Assertions.assertThat(jobService.submit(new TestLockableJobSpecification(), JobSnapshot.COALESCE_STATUSES_QUEUED_STARTED_FINISHED))
-                    .isEqualTo(job1FinishedGuid);
+            // expected is the latest finished one
+            Assertions.assertThat(jobService.submit(new TestLockableJobSpecification("1-b"), JobSnapshot.COALESCE_STATUSES_QUEUED_STARTED_FINISHED))
+                    .isEqualTo(job2FinishedGuid);
 
             // -------------------------
             // release the last two jobs and watch they come through OK.
@@ -145,8 +152,8 @@ public class LocalJobServiceIT extends AbstractIntegrationTest {
             job3Lock.unlock();
         }
 
-        jobService.awaitJobFinishedUninterruptibly(job3StartedGuid, TimeUnit.SECONDS.toMillis(10));
-        jobService.awaitJobFinishedUninterruptibly(job4QueuedGuid, TimeUnit.SECONDS.toMillis(10));
+        jobService.awaitJobFinishedUninterruptibly(job3StartedGuid, TimeUnit.SECONDS.toMillis(TOLERANCE_SECONDS));
+        jobService.awaitJobFinishedUninterruptibly(job4QueuedGuid, TimeUnit.SECONDS.toMillis(TOLERANCE_SECONDS));
         // -------------------------
 
         assertStatus(job3StartedGuid, JobSnapshot.Status.FINISHED);
@@ -162,8 +169,8 @@ public class LocalJobServiceIT extends AbstractIntegrationTest {
 
     private void assertStatus(String guid, JobSnapshot.Status status) {
         Awaitility.with()
-                .atMost(5, TimeUnit.SECONDS)
-                .pollDelay(1, TimeUnit.SECONDS)
+                .atMost(TOLERANCE_SECONDS, TimeUnit.SECONDS)
+                .pollDelay(2, TimeUnit.SECONDS)
                 .until(() -> checkStatus(guid, status));
     }
 

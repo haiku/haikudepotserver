@@ -10,7 +10,6 @@ import com.google.common.base.Stopwatch;
 import com.google.common.base.Strings;
 import com.google.common.collect.*;
 import com.google.common.io.ByteSource;
-import com.google.common.net.MediaType;
 import com.google.common.util.concurrent.AbstractService;
 import com.google.common.util.concurrent.Uninterruptibles;
 import jakarta.annotation.PostConstruct;
@@ -53,16 +52,14 @@ public class LocalJobServiceImpl
 
     private final static long TTL_DEFAULT = TimeUnit.HOURS.toMillis(2);
 
-    private final static String EXTENSION_DAT = "dat";
-
     private final DataStorageService dataStorageService;
 
     /**
-     * <p>This gets setup through an query into the {@link ApplicationContext}.
+     * <p>This gets setup through a query into the {@link ApplicationContext}.
      * </p>
      */
 
-    private Collection<JobRunner> jobRunners = null;
+    private Collection<JobRunner<?>> jobRunners = null;
 
     private ThreadPoolExecutor executor = null;
 
@@ -89,7 +86,7 @@ public class LocalJobServiceImpl
 
     public LocalJobServiceImpl(
             DataStorageService dataStorageService,
-            Collection<JobRunner> jobRunners) {
+            Collection<JobRunner<?>> jobRunners) {
         this.dataStorageService = dataStorageService;
         this.jobRunners = jobRunners;
     }
@@ -97,7 +94,7 @@ public class LocalJobServiceImpl
     @PostConstruct
     public void init() {
         if (null == jobRunners) {
-            jobRunners = applicationContext.getBeansOfType(JobRunner.class).values();
+            jobRunners = (Collection) applicationContext.getBeansOfType(JobRunner.class).values();
             LOGGER.info("configured {} job runners from the application context",
                     jobRunners.size());
         } else {
@@ -709,43 +706,7 @@ public class LocalJobServiceImpl
                 tryGetJobForData(jobDataGuid).map(JobSnapshot::getJobTypeCode).orElse("jobdata"),
                 DateTimeHelper.create14DigitDateTimeFormat().format(Instant.now()),
                 jobDataGuid.substring(0,4),
-                tryGetData(jobDataGuid).map(LocalJobServiceImpl::deriveExtension).orElse(EXTENSION_DAT));
-    }
-
-    private static String deriveExtensionWithoutEncoding(JobData jobData) {
-        if (!Strings.isNullOrEmpty(jobData.getMediaTypeCode())) {
-            MediaType jobDataMediaTypeNoParams = MediaType.parse(jobData.getMediaTypeCode()).withoutParameters();
-
-            if (jobDataMediaTypeNoParams.equals(MediaType.CSV_UTF_8.withoutParameters())) {
-                return "csv";
-            }
-
-            if(jobDataMediaTypeNoParams.equals(MediaType.ZIP.withoutParameters())) {
-                return "zip";
-            }
-
-            if(jobDataMediaTypeNoParams.equals(MediaType.TAR.withoutParameters())) {
-                return "tar";
-            }
-
-            if(jobDataMediaTypeNoParams.equals(MediaType.PLAIN_TEXT_UTF_8.withoutParameters())) {
-                return "txt";
-            }
-
-            if(jobDataMediaTypeNoParams.equals(MediaType.JSON_UTF_8.withoutParameters())) {
-                return "json";
-            }
-        }
-
-        return EXTENSION_DAT;
-    }
-
-    private static String deriveExtension(JobData jobData) {
-        String extensionWithoutEncoding = deriveExtensionWithoutEncoding(jobData);
-        return switch (jobData.getEncoding()) {
-            case NONE -> extensionWithoutEncoding;
-            case GZIP -> extensionWithoutEncoding + ".gz";
-        };
+                tryGetData(jobDataGuid).map(Jobs::deriveExtension).orElse(Jobs.EXTENSION_DAT));
     }
 
     @Override

@@ -5,9 +5,13 @@
 
 package org.haiku.haikudepotserver.config;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.collect.ImmutableList;
 import org.apache.cayenne.configuration.server.ServerRuntime;
+import org.haiku.haikudepotserver.job.DbDistributedJobServiceImpl;
 import org.haiku.haikudepotserver.job.LocalJobServiceImpl;
+import org.haiku.haikudepotserver.job.NoopJobServiceImpl;
+import org.haiku.haikudepotserver.job.jpa.JpaJobService;
 import org.haiku.haikudepotserver.job.model.JobRunner;
 import org.haiku.haikudepotserver.job.model.JobService;
 import org.haiku.haikudepotserver.pkg.model.PkgLocalizationLookupService;
@@ -18,11 +22,13 @@ import org.haiku.haikudepotserver.support.ClientIdentifierSupplier;
 import org.haiku.haikudepotserver.support.HttpRequestClientIdentifierSupplier;
 import org.haiku.haikudepotserver.thymeleaf.Dialect;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Import;
 import org.springframework.context.annotation.PropertySource;
 import org.springframework.core.io.Resource;
+import org.springframework.transaction.PlatformTransactionManager;
 
 import java.util.Collection;
 import java.util.List;
@@ -46,9 +52,26 @@ public class AppConfig {
 
     @Bean
     public JobService jobService(
+            @Value("${hds.jobservice.type:local}") String type,
             DataStorageService dataStorageService,
-            Collection<JobRunner> jobRunners) {
-        return new LocalJobServiceImpl(dataStorageService, jobRunners);
+            Collection<JobRunner<?>> jobRunners,
+            PlatformTransactionManager transactionManager,
+            ObjectMapper objectMapper,
+            ApplicationEventPublisher applicationEventPublisher,
+            JpaJobService jpaJobService
+    ) {
+        return switch (type) {
+            case "noop" -> new NoopJobServiceImpl();
+            case "local" -> new LocalJobServiceImpl(dataStorageService, jobRunners);
+            case "db" -> new DbDistributedJobServiceImpl(
+                    transactionManager,
+                    objectMapper,
+                    dataStorageService,
+                    jobRunners,
+                    applicationEventPublisher,
+                    jpaJobService);
+            default -> throw new IllegalStateException("unexpected job service type: " + type);
+        };
     }
 
     @Bean

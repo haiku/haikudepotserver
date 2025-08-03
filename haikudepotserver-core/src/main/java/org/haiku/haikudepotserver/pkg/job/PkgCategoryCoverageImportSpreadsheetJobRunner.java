@@ -1,5 +1,5 @@
 /*
- * Copyright 2018-2024, Andrew Lindesay
+ * Copyright 2018-2025, Andrew Lindesay
  * Distributed under the terms of the MIT License.
  */
 
@@ -48,6 +48,11 @@ public class PkgCategoryCoverageImportSpreadsheetJobRunner
             ServerRuntime serverRuntime,
             PkgService pkgService) {
         super(serverRuntime, pkgService);
+    }
+
+    @Override
+    public Class<PkgCategoryCoverageImportSpreadsheetJobSpecification> getSupportedSpecificationClass() {
+        return PkgCategoryCoverageImportSpreadsheetJobSpecification.class;
     }
 
     @Override

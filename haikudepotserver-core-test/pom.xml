@@ -65,6 +65,11 @@
                         </goals>
                     </execution>
                 </executions>
+                <configuration>
+                    <systemPropertyVariables>
+                        <user.timezone>GMT0</user.timezone>
+                    </systemPropertyVariables>
+                </configuration>
             </plugin>
         </plugins>
     </build>

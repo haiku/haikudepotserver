@@ -157,7 +157,7 @@ public class JobController extends AbstractController {
         for (int i = 0; i < 3; i++) {
             String jobGuid = jobService.immediate(jobSpecification, true);
             JobSnapshot jobSnapshot = jobService.tryGetJob(jobGuid)
-                    .orElseThrow(() -> new IllegalStateException("unable to obtain the job snapshot having run it immediate prior."));
+                    .orElseThrow(() -> new IllegalStateException("unable to obtain the job snapshot having run it immediately prior."));
 
             if (jobSnapshot.getStartTimestamp().getTime() >= lastModifyTimestamp.getTime()) {
                 return jobSnapshot;

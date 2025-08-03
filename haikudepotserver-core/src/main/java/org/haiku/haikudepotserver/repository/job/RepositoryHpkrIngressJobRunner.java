@@ -83,6 +83,11 @@ public class RepositoryHpkrIngressJobRunner extends AbstractJobRunner<Repository
     }
 
     @Override
+    public Class<RepositoryHpkrIngressJobSpecification> getSupportedSpecificationClass() {
+        return RepositoryHpkrIngressJobSpecification.class;
+    }
+
+    @Override
     public void run(JobService jobService, RepositoryHpkrIngressJobSpecification specification) {
 
         Preconditions.checkNotNull(specification);

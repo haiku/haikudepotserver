@@ -1,5 +1,5 @@
 /*
- * Copyright 2014-2016, Andrew Lindesay
+ * Copyright 2014-2025, Andrew Lindesay
  * Distributed under the terms of the MIT License.
  */
 
@@ -14,6 +14,8 @@ import java.io.IOException;
  */
 
 public interface JobRunner<T extends JobSpecification> {
+
+    Class<T> getSupportedSpecificationClass();
 
     /**
      * <p>This string defines the type of the job.  It is used to identify a runner to run a job specification

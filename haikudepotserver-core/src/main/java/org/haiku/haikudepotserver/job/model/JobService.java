@@ -27,7 +27,7 @@ public interface JobService {
     boolean awaitAllJobsFinishedUninterruptibly(long timeout);
 
     /**
-     * <p>This method will block until the job is no longer queued or started.  It may be finished, but
+     * <p>This method will block until the job is no longer queued or started. It may be finished, but
      * actually it could have also failed or have been cancelled.</p>
      * @return true if the job had finished in the specified timeout.
      */
@@ -35,7 +35,7 @@ public interface JobService {
     boolean awaitJobFinishedUninterruptibly(String guid, long timeout);
 
     /**
-     * <p>This method will run the specification asynchronously.  If there is an existing job which is
+     * <p>This method will run the specification asynchronously. If there is an existing job which is
      * in the system and that is in one of the states supplied, then that will be returned instead.
      * This is to avoid double-running the job.  See {@link JobSpecification} for some handy constants.
      * </p>

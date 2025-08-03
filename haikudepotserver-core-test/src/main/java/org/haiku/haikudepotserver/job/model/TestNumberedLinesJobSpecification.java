@@ -1,5 +1,5 @@
 /*
- * Copyright 2016, Andrew Lindesay
+ * Copyright 2016-2025, Andrew Lindesay
  * Distributed under the terms of the MIT License.
  */
 
@@ -10,7 +10,12 @@ public class TestNumberedLinesJobSpecification extends AbstractJobSpecification 
     private int lines = 1;
     private long delayPerLineMillis = 0;
 
+    public TestNumberedLinesJobSpecification() {
+        super();
+    }
+
     public TestNumberedLinesJobSpecification(int lines, long delayPerLineMillis) {
+        super();
         this.lines = lines;
         this.delayPerLineMillis = delayPerLineMillis;
     }

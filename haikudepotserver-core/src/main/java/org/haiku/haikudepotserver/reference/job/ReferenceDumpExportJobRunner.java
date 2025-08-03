@@ -1,5 +1,5 @@
 /*
- * Copyright 2018-2024, Andrew Lindesay
+ * Copyright 2018-2025, Andrew Lindesay
  * Distributed under the terms of the MIT License.
  */
 
@@ -20,9 +20,9 @@ import org.haiku.haikudepotserver.job.AbstractJobRunner;
 import org.haiku.haikudepotserver.job.model.JobDataEncoding;
 import org.haiku.haikudepotserver.job.model.JobDataWithByteSink;
 import org.haiku.haikudepotserver.job.model.JobService;
+import org.haiku.haikudepotserver.naturallanguage.model.NaturalLanguageCoordinates;
 import org.haiku.haikudepotserver.naturallanguage.model.NaturalLanguageService;
 import org.haiku.haikudepotserver.pkg.job.PkgDumpExportJobRunner;
-import org.haiku.haikudepotserver.naturallanguage.model.NaturalLanguageCoordinates;
 import org.haiku.haikudepotserver.reference.model.ReferenceDumpExportJobSpecification;
 import org.haiku.haikudepotserver.reference.model.dumpexport.*;
 import org.haiku.haikudepotserver.support.ArchiveInfo;
@@ -69,6 +69,11 @@ public class ReferenceDumpExportJobRunner extends AbstractJobRunner<ReferenceDum
         this.runtimeInformationService = Preconditions.checkNotNull(runtimeInformationService);
         this.naturalLanguageService = Preconditions.checkNotNull(naturalLanguageService);
         this.objectMapper = Preconditions.checkNotNull(objectMapper);
+    }
+
+    @Override
+    public Class<ReferenceDumpExportJobSpecification> getSupportedSpecificationClass() {
+        return ReferenceDumpExportJobSpecification.class;
     }
 
     @Override

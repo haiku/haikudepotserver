@@ -1,5 +1,5 @@
 /*
- * Copyright 2018-2023, Andrew Lindesay
+ * Copyright 2018-2025, Andrew Lindesay
  * Distributed under the terms of the MIT License.
  */
 
@@ -8,10 +8,12 @@ package org.haiku.haikudepotserver.pkg.job;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.base.Preconditions;
 import com.google.common.base.Stopwatch;
+import com.google.common.collect.ImmutableMap;
 import com.google.common.net.MediaType;
 import org.apache.cayenne.DataRow;
 import org.apache.cayenne.ObjectContext;
 import org.apache.cayenne.configuration.server.ServerRuntime;
+import org.apache.cayenne.query.Query;
 import org.apache.cayenne.query.SQLTemplate;
 import org.apache.commons.compress.archivers.tar.TarArchiveEntry;
 import org.apache.commons.compress.archivers.tar.TarArchiveOutputStream;
@@ -78,7 +80,6 @@ abstract class AbstractPkgResourceExportArchiveJobRunner<T extends JobSpecificat
             State state = new State();
             state.tarArchiveOutputStream = tarOutputStream;
             SQLTemplate query = createQuery(specification);
-            query.setFetchLimit(getBatchSize());
             int countLastQuery;
 
             // this coming early means that if a client is trying to find this data
@@ -87,8 +88,14 @@ abstract class AbstractPkgResourceExportArchiveJobRunner<T extends JobSpecificat
             appendArchiveInfo(state, getLatestModifiedTimestamp(specification));
 
             do {
-                query.setFetchOffset(offset);
-                List<DataRow> queryResults = context.performQuery(query);
+                Query pageQuery = query.createQuery(
+                        ImmutableMap.<String, Object>builder()
+                                .put("offset", offset)
+                                .put("limit", getBatchSize())
+                                .putAll(query.getParameters())
+                                .build()
+                );
+                List<DataRow> queryResults = context.performQuery(pageQuery);
                 countLastQuery = queryResults.size();
                 appendFromRawRows(state, queryResults);
                 offset += countLastQuery;

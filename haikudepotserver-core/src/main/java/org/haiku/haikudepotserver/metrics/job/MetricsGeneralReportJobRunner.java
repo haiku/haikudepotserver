@@ -11,10 +11,7 @@ import io.micrometer.core.instrument.MeterRegistry;
 import io.micrometer.core.instrument.Timer;
 import org.apache.commons.lang3.StringUtils;
 import org.haiku.haikudepotserver.job.AbstractJobRunner;
-import org.haiku.haikudepotserver.job.model.JobDataEncoding;
-import org.haiku.haikudepotserver.job.model.JobDataWithByteSink;
-import org.haiku.haikudepotserver.job.model.JobRunnerException;
-import org.haiku.haikudepotserver.job.model.JobService;
+import org.haiku.haikudepotserver.job.model.*;
 import org.haiku.haikudepotserver.metrics.MetricsConstants;
 import org.haiku.haikudepotserver.metrics.model.MetricsGeneralReportJobSpecification;
 import org.slf4j.Logger;
@@ -41,6 +38,11 @@ public class MetricsGeneralReportJobRunner extends AbstractJobRunner<MetricsGene
 
     public MetricsGeneralReportJobRunner(MeterRegistry meterRegistry) {
         this.meterRegistry = Preconditions.checkNotNull(meterRegistry);
+    }
+
+    @Override
+    public Class<MetricsGeneralReportJobSpecification> getSupportedSpecificationClass() {
+        return MetricsGeneralReportJobSpecification.class;
     }
 
     @Override

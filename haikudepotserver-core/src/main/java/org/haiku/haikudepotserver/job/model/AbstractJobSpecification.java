@@ -1,9 +1,11 @@
 /*
- * Copyright 2014-2022, Andrew Lindesay
+ * Copyright 2014-2025, Andrew Lindesay
  * Distributed under the terms of the MIT License.
  */
 
 package org.haiku.haikudepotserver.job.model;
+
+import com.fasterxml.jackson.annotation.JsonIgnore;
 
 import java.util.Collection;
 import java.util.Collections;
@@ -42,6 +44,7 @@ public abstract class AbstractJobSpecification implements JobSpecification {
         this.ownerUserNickname = ownerUserNickname;
     }
 
+    @JsonIgnore
     @Override
     public String getJobTypeCode() {
         String sn = this.getClass().getSimpleName();
@@ -50,19 +53,22 @@ public abstract class AbstractJobSpecification implements JobSpecification {
             throw new IllegalStateException("malformed job specification concrete class; " + sn);
         }
 
-        return sn.substring(0,sn.length() - SUFFIX.length()).toLowerCase();
+        return sn.substring(0, sn.length() - SUFFIX.length()).toLowerCase();
     }
 
+    @JsonIgnore
     @Override
     public Optional<Long> tryGetTimeToLiveMillis() {
         return Optional.empty();
     }
 
+    @JsonIgnore
     @Override
     public Collection<String> getSuppliedDataGuids() {
         return Collections.emptySet();
     }
 
+    @JsonIgnore
     @Override
     public boolean isEquivalent(JobSpecification other) {
         return this.getClass().isAssignableFrom(other.getClass());

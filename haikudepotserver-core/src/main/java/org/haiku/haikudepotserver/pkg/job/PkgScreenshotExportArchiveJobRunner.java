@@ -1,5 +1,5 @@
 /*
- * Copyright 2018-2023, Andrew Lindesay
+ * Copyright 2018-2025, Andrew Lindesay
  * Distributed under the terms of the MIT License.
  */
 
@@ -15,6 +15,7 @@ import org.apache.commons.compress.archivers.tar.TarArchiveEntry;
 import org.apache.commons.lang3.StringUtils;
 import org.haiku.haikudepotserver.dataobjects.Pkg;
 import org.haiku.haikudepotserver.dataobjects.PkgSupplement;
+import org.haiku.haikudepotserver.dataobjects.auto._HaikuDepot;
 import org.haiku.haikudepotserver.pkg.model.PkgScreenshotExportArchiveJobSpecification;
 import org.haiku.haikudepotserver.support.RuntimeInformationService;
 import org.springframework.stereotype.Component;
@@ -45,6 +46,11 @@ public class PkgScreenshotExportArchiveJobRunner
             RuntimeInformationService runtimeInformationService,
             ObjectMapper objectMapper) {
         super(serverRuntime, runtimeInformationService, objectMapper);
+    }
+
+    @Override
+    public Class<PkgScreenshotExportArchiveJobSpecification> getSupportedSpecificationClass() {
+        return PkgScreenshotExportArchiveJobSpecification.class;
     }
 
     int getBatchSize() {
@@ -97,7 +103,7 @@ public class PkgScreenshotExportArchiveJobRunner
     @Override
     SQLTemplate createQuery(PkgScreenshotExportArchiveJobSpecification specification) {
         SQLTemplate query = (SQLTemplate) serverRuntime.newContext().getEntityResolver()
-                .getQueryDescriptor("AllPkgScreenshots").buildQuery();
+                .getQueryDescriptor(_HaikuDepot.ALL_PKG_SCREENSHOTS_QUERYNAME).buildQuery();
         if (!Strings.isNullOrEmpty(specification.getPkgName())) {
             query.setParams(Map.of("pkgName", specification.getPkgName()));
         }

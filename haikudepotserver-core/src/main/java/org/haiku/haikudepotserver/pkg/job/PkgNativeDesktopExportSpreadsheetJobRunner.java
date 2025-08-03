@@ -1,5 +1,5 @@
 /*
- * Copyright 2024, Andrew Lindesay
+ * Copyright 2024-2025, Andrew Lindesay
  * Distributed under the terms of the MIT License.
  */
 
@@ -10,10 +10,7 @@ import com.opencsv.CSVWriter;
 import org.apache.cayenne.ObjectContext;
 import org.apache.cayenne.configuration.server.ServerRuntime;
 import org.haiku.haikudepotserver.job.AbstractJobRunner;
-import org.haiku.haikudepotserver.job.model.JobDataEncoding;
-import org.haiku.haikudepotserver.job.model.JobDataWithByteSink;
-import org.haiku.haikudepotserver.job.model.JobRunnerException;
-import org.haiku.haikudepotserver.job.model.JobService;
+import org.haiku.haikudepotserver.job.model.*;
 import org.haiku.haikudepotserver.pkg.PkgServiceImpl;
 import org.haiku.haikudepotserver.pkg.model.PkgNativeDesktopExportSpreadsheetJobSpecification;
 import org.springframework.stereotype.Component;
@@ -38,6 +35,11 @@ public class PkgNativeDesktopExportSpreadsheetJobRunner
         super();
         this.serverRuntime = serverRuntime;
         this.pkgServiceImpl = pkgServiceImpl;
+    }
+
+    @Override
+    public Class<PkgNativeDesktopExportSpreadsheetJobSpecification> getSupportedSpecificationClass() {
+        return PkgNativeDesktopExportSpreadsheetJobSpecification.class;
     }
 
     @Override

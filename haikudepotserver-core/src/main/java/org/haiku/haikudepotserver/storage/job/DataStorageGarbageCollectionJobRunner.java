@@ -35,6 +35,11 @@ public class DataStorageGarbageCollectionJobRunner extends AbstractJobRunner<Dat
     }
 
     @Override
+    public Class<DataStorageGarbageCollectionJobSpecification> getSupportedSpecificationClass() {
+        return DataStorageGarbageCollectionJobSpecification.class;
+    }
+
+    @Override
     public void run(JobService jobService, DataStorageGarbageCollectionJobSpecification specification) throws IOException, JobRunnerException {
         Preconditions.checkNotNull(specification);
         Preconditions.checkNotNull(specification.getOlderThanMillis());

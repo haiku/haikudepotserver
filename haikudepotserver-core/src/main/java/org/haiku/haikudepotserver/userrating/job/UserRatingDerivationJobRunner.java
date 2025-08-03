@@ -1,5 +1,5 @@
 /*
- * Copyright 2018, Andrew Lindesay
+ * Copyright 2018-2025, Andrew Lindesay
  * Distributed under the terms of the MIT License.
  */
 
@@ -30,6 +30,11 @@ public class UserRatingDerivationJobRunner
 
     public UserRatingDerivationJobRunner(UserRatingService userRatingService) {
         this.userRatingService = Preconditions.checkNotNull(userRatingService);
+    }
+
+    @Override
+    public Class<UserRatingDerivationJobSpecification> getSupportedSpecificationClass() {
+        return UserRatingDerivationJobSpecification.class;
     }
 
     public void run(JobService jobService, UserRatingDerivationJobSpecification job) {

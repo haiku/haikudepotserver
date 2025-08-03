@@ -9,6 +9,7 @@ import org.apache.cayenne.ObjectContext;
 import org.apache.cayenne.configuration.server.ServerRuntime;
 import org.haiku.haikudepotserver.dataobjects.Repository;
 import org.haiku.haikudepotserver.dataobjects.UserPasswordResetToken;
+import org.haiku.haikudepotserver.job.model.JobGarbageCollectionJobSpecification;
 import org.haiku.haikudepotserver.job.model.JobService;
 import org.haiku.haikudepotserver.job.model.JobSnapshot;
 import org.haiku.haikudepotserver.maintenance.model.MaintenanceService;
@@ -76,7 +77,10 @@ public class MaintenanceServiceImpl implements MaintenanceService {
     public void hourly() {
         // remove any jobs which are too old and are no longer required.
 
-        jobService.clearExpiredJobs();
+        {
+            JobGarbageCollectionJobSpecification specification = new JobGarbageCollectionJobSpecification();
+            jobService.submit(specification, JobSnapshot.COALESCE_STATUSES_QUEUED);
+        }
 
         // remove any expired password reset tokens.
 

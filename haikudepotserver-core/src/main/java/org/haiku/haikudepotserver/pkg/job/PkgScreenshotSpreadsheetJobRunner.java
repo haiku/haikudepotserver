@@ -1,5 +1,5 @@
 /*
- * Copyright 2018-2023, Andrew Lindesay
+ * Copyright 2018-2025, Andrew Lindesay
  * Distributed under the terms of the MIT License.
  */
 
@@ -46,6 +46,11 @@ public class PkgScreenshotSpreadsheetJobRunner extends AbstractJobRunner<PkgScre
         this.serverRuntime = Preconditions.checkNotNull(serverRuntime);
         this.repositoryService = Preconditions.checkNotNull(repositoryService);
         this.pkgService = Preconditions.checkNotNull(pkgService);
+    }
+
+    @Override
+    public Class<PkgScreenshotSpreadsheetJobSpecification> getSupportedSpecificationClass() {
+        return PkgScreenshotSpreadsheetJobSpecification.class;
     }
 
     @Override

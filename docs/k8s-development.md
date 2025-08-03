@@ -101,7 +101,7 @@ kubectl --context kind-haikudepotserver logs deployment/haikudepotserver-webapp 
 ```
 
 ## Build locally, deploy to the local cluster
-
+    
 In the sample files...
 
 - `haikudepotserver-webapp.yaml`

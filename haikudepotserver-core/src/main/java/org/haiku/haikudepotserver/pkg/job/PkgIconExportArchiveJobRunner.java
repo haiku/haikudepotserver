@@ -1,5 +1,5 @@
 /*
- * Copyright 2018-2023, Andrew Lindesay
+ * Copyright 2018-2025, Andrew Lindesay
  * Distributed under the terms of the MIT License.
  */
 
@@ -44,6 +44,11 @@ public class PkgIconExportArchiveJobRunner extends AbstractPkgResourceExportArch
             RuntimeInformationService runtimeInformationService,
             ObjectMapper objectMapper) {
         super(serverRuntime, runtimeInformationService, objectMapper);
+    }
+
+    @Override
+    public Class<PkgIconExportArchiveJobSpecification> getSupportedSpecificationClass() {
+        return PkgIconExportArchiveJobSpecification.class;
     }
 
     int getBatchSize() {

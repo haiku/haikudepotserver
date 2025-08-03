@@ -25,6 +25,11 @@ public class TestNumberedLinesJobRunner extends AbstractJobRunner<TestNumberedLi
     protected static Logger LOGGER = LoggerFactory.getLogger(TestNumberedLinesJobRunner.class);
 
     @Override
+    public Class<TestNumberedLinesJobSpecification> getSupportedSpecificationClass() {
+        return TestNumberedLinesJobSpecification.class;
+    }
+
+    @Override
     public void run(JobService jobService, TestNumberedLinesJobSpecification specification) throws IOException, JobRunnerException {
 
         JobDataWithByteSink jobDataWithByteSink = jobService.storeGeneratedData(

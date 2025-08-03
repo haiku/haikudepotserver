@@ -1,5 +1,5 @@
 /*
- * Copyright 2018-2024, Andrew Lindesay
+ * Copyright 2018-2025, Andrew Lindesay
  * Distributed under the terms of the MIT License.
  */
 
@@ -57,6 +57,11 @@ public class UserRatingSpreadsheetJobRunner extends AbstractJobRunner<UserRating
             UserRatingService userRatingService) {
         this.serverRuntime = Preconditions.checkNotNull(serverRuntime);
         this.userRatingService = Preconditions.checkNotNull(userRatingService);
+    }
+
+    @Override
+    public Class<UserRatingSpreadsheetJobSpecification> getSupportedSpecificationClass() {
+        return UserRatingSpreadsheetJobSpecification.class;
     }
 
     @Override

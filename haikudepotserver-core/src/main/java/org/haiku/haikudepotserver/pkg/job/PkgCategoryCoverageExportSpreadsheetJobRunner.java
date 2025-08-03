@@ -1,5 +1,5 @@
 /*
- * Copyright 2018-2023, Andrew Lindesay
+ * Copyright 2018-2025, Andrew Lindesay
  * Distributed under the terms of the MIT License.
  */
 
@@ -49,6 +49,12 @@ public class PkgCategoryCoverageExportSpreadsheetJobRunner extends AbstractPkgCa
             RepositoryService repositoryService) {
         super(serverRuntime, pkgService);
         this.repositoryService = Preconditions.checkNotNull(repositoryService);
+    }
+
+
+    @Override
+    public Class<PkgCategoryCoverageExportSpreadsheetJobSpecification> getSupportedSpecificationClass() {
+        return PkgCategoryCoverageExportSpreadsheetJobSpecification.class;
     }
 
     @Override

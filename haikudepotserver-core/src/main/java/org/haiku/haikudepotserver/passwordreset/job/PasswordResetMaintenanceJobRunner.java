@@ -1,5 +1,5 @@
 /*
- * Copyright 2018-2023, Andrew Lindesay
+ * Copyright 2018-2025, Andrew Lindesay
  * Distributed under the terms of the MIT License.
  */
 
@@ -24,6 +24,11 @@ public class PasswordResetMaintenanceJobRunner extends AbstractJobRunner<Passwor
             PasswordResetServiceImpl passwordResetService
     ) {
         this.passwordResetService = passwordResetService;
+    }
+
+    @Override
+    public Class<PasswordResetMaintenanceJobSpecification> getSupportedSpecificationClass() {
+        return PasswordResetMaintenanceJobSpecification.class;
     }
 
     /**

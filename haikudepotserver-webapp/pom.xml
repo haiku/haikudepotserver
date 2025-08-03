@@ -108,7 +108,7 @@
                 <!-- https://stackoverflow.com/questions/50787704/maven-failsafe-fails-with-java-lang-noclassdeffounderror -->
                 <configuration>
                     <classpathDependencyExcludes>
-                        <classpathDependencyExcludes>${groupId}:${artifactId}</classpathDependencyExcludes>
+                        <classpathDependencyExcludes>${project.groupId}:${project.artifactId}</classpathDependencyExcludes>
                     </classpathDependencyExcludes>
                     <additionalClasspathElements>
                         <additionalClasspathElement>${project.build.outputDirectory}</additionalClasspathElement>

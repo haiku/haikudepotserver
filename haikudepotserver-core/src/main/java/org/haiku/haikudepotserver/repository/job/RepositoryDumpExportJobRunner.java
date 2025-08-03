@@ -1,5 +1,5 @@
 /*
- * Copyright 2018-2022, Andrew Lindesay
+ * Copyright 2018-2025, Andrew Lindesay
  * Distributed under the terms of the MIT License.
  */
 
@@ -17,10 +17,7 @@ import org.haiku.haikudepotserver.dataobjects.auto._Repository;
 import org.haiku.haikudepotserver.dataobjects.auto._RepositorySource;
 import org.haiku.haikudepotserver.dataobjects.auto._RepositorySourceMirror;
 import org.haiku.haikudepotserver.job.AbstractJobRunner;
-import org.haiku.haikudepotserver.job.model.JobDataEncoding;
-import org.haiku.haikudepotserver.job.model.JobDataWithByteSink;
-import org.haiku.haikudepotserver.job.model.JobRunnerException;
-import org.haiku.haikudepotserver.job.model.JobService;
+import org.haiku.haikudepotserver.job.model.*;
 import org.haiku.haikudepotserver.repository.model.RepositoryDumpExportJobSpecification;
 import org.haiku.haikudepotserver.repository.model.dumpexport.DumpExportRepository;
 import org.haiku.haikudepotserver.repository.model.dumpexport.DumpExportRepositorySource;
@@ -59,6 +56,11 @@ public class RepositoryDumpExportJobRunner extends AbstractJobRunner<RepositoryD
         this.serverRuntime = Preconditions.checkNotNull(serverRuntime);
         this.runtimeInformationService = Preconditions.checkNotNull(runtimeInformationService);
         this.objectMapper = Preconditions.checkNotNull(objectMapper);
+    }
+
+    @Override
+    public Class<RepositoryDumpExportJobSpecification> getSupportedSpecificationClass() {
+        return RepositoryDumpExportJobSpecification.class;
     }
 
     @Override

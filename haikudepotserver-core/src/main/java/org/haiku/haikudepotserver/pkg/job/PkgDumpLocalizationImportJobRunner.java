@@ -1,5 +1,5 @@
 /*
- * Copyright 2024, Andrew Lindesay
+ * Copyright 2024-2025, Andrew Lindesay
  * Distributed under the terms of the MIT License.
  */
 package org.haiku.haikudepotserver.pkg.job;
@@ -73,6 +73,11 @@ public class PkgDumpLocalizationImportJobRunner extends AbstractAuthenticatedJob
         this.localizationService = Preconditions.checkNotNull(localizationService);
         this.pkgService = Preconditions.checkNotNull(pkgService);
         this.permissionEvaluator = Preconditions.checkNotNull(permissionEvaluator);
+    }
+
+    @Override
+    public Class<PkgDumpLocalizationImportJobSpecification> getSupportedSpecificationClass() {
+        return PkgDumpLocalizationImportJobSpecification.class;
     }
 
     @Override

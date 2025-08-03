@@ -1,5 +1,5 @@
 /*
- * Copyright 2018-2022, Andrew Lindesay
+ * Copyright 2018-2025, Andrew Lindesay
  * Distributed under the terms of the MIT License.
  */
 
@@ -14,10 +14,7 @@ import org.apache.cayenne.query.ObjectSelect;
 import org.haiku.haikudepotserver.dataobjects.NaturalLanguage;
 import org.haiku.haikudepotserver.dataobjects.PkgSupplement;
 import org.haiku.haikudepotserver.job.AbstractJobRunner;
-import org.haiku.haikudepotserver.job.model.JobDataEncoding;
-import org.haiku.haikudepotserver.job.model.JobDataWithByteSink;
-import org.haiku.haikudepotserver.job.model.JobRunnerException;
-import org.haiku.haikudepotserver.job.model.JobService;
+import org.haiku.haikudepotserver.job.model.*;
 import org.haiku.haikudepotserver.naturallanguage.model.NaturalLanguageService;
 import org.haiku.haikudepotserver.pkg.model.PkgLocalizationCoverageExportSpreadsheetJobSpecification;
 import org.haiku.haikudepotserver.pkg.model.PkgService;
@@ -51,6 +48,11 @@ public class PkgLocalizationCoverageExportSpreadsheetJobRunner
         this.serverRuntime = Preconditions.checkNotNull(serverRuntime);
         this.pkgService = Preconditions.checkNotNull(pkgService);
         this.naturalLanguageService = Preconditions.checkNotNull(naturalLanguageService);
+    }
+
+    @Override
+    public Class<PkgLocalizationCoverageExportSpreadsheetJobSpecification> getSupportedSpecificationClass() {
+        return PkgLocalizationCoverageExportSpreadsheetJobSpecification.class;
     }
 
     /**

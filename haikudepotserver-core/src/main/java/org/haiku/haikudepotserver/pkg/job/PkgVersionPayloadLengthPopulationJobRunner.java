@@ -48,6 +48,11 @@ public class PkgVersionPayloadLengthPopulationJobRunner
     }
 
     @Override
+    public Class<PkgVersionPayloadLengthPopulationJobSpecification> getSupportedSpecificationClass() {
+        return PkgVersionPayloadLengthPopulationJobSpecification.class;
+    }
+
+    @Override
     public void run(
             JobService jobService,
             PkgVersionPayloadLengthPopulationJobSpecification specification)

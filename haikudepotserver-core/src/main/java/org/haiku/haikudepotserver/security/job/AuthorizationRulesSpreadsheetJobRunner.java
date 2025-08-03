@@ -1,5 +1,5 @@
 /*
- * Copyright 2016-2022, Andrew Lindesay
+ * Copyright 2016-2025, Andrew Lindesay
  * Distributed under the terms of the MIT License.
  */
 
@@ -38,6 +38,11 @@ public class AuthorizationRulesSpreadsheetJobRunner
 
     public AuthorizationRulesSpreadsheetJobRunner(ServerRuntime serverRuntime) {
         this.serverRuntime = Preconditions.checkNotNull(serverRuntime);
+    }
+
+    @Override
+    public Class<AuthorizationRulesSpreadsheetJobSpecification> getSupportedSpecificationClass() {
+        return AuthorizationRulesSpreadsheetJobSpecification.class;
     }
 
     @Override

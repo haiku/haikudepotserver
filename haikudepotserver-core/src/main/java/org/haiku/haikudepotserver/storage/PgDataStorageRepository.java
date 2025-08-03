@@ -13,6 +13,7 @@ import org.haiku.haikudepotserver.metrics.MetricsConstants;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.PlatformTransactionManager;
+import org.springframework.transaction.TransactionDefinition;
 import org.springframework.transaction.support.TransactionTemplate;
 import org.springframework.util.StopWatch;
 
@@ -96,6 +97,7 @@ public class PgDataStorageRepository {
     ) {
         jdbcTemplate = new JdbcTemplate(dataSource);
         transactionTemplate = new TransactionTemplate(transactionManager);
+        transactionTemplate.setPropagationBehavior(TransactionDefinition.PROPAGATION_REQUIRES_NEW);
 
         this.mbPerSecondTransfer = new AtomicDouble();
         meterRegistry.gauge(

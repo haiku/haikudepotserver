@@ -1,5 +1,5 @@
 /*
- * Copyright 2018-2023, Andrew Lindesay
+ * Copyright 2018-2025, Andrew Lindesay
  * Distributed under the terms of the MIT License.
  */
 
@@ -67,6 +67,11 @@ public class PkgDumpExportJobRunner extends AbstractJobRunner<PkgDumpExportJobSp
         this.runtimeInformationService = Preconditions.checkNotNull(runtimeInformationService);
         this.objectMapper = Preconditions.checkNotNull(objectMapper);
         this.pkgService = Preconditions.checkNotNull(pkgService);
+    }
+
+    @Override
+    public Class<PkgDumpExportJobSpecification> getSupportedSpecificationClass() {
+        return PkgDumpExportJobSpecification.class;
     }
 
     @Override

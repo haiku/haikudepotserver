@@ -1,3 +1,7 @@
+/*
+ * Copyright 2025, Andrew Lindesay
+ * Distributed under the terms of the MIT License.
+ */
 package org.haiku.haikudepotserver.repository.job;
 
 import com.google.common.base.Preconditions;
@@ -23,6 +27,11 @@ public class AlertRepositoryAbsentUpdateJobRunner extends AbstractJobRunner<Aler
             RepositoryService repositoryService) {
         this.serverRuntime = Preconditions.checkNotNull(serverRuntime);
         this.repositoryService = Preconditions.checkNotNull(repositoryService);
+    }
+
+    @Override
+    public Class<AlertRepositoryAbsentUpdateJobSpecification> getSupportedSpecificationClass() {
+        return AlertRepositoryAbsentUpdateJobSpecification.class;
     }
 
     @Override

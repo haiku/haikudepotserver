@@ -1,5 +1,5 @@
 /*
- * Copyright 2018-2023, Andrew Lindesay
+ * Copyright 2018-2025, Andrew Lindesay
  * Distributed under the terms of the MIT License.
  */
 
@@ -57,6 +57,11 @@ public class PkgIconSpreadsheetJobRunner extends AbstractJobRunner<PkgIconSpread
         this.repositoryService = Preconditions.checkNotNull(repositoryService);
         this.pkgService = Preconditions.checkNotNull(pkgService);
         this.pkgIconService = Preconditions.checkNotNull(pkgIconService);
+    }
+
+    @Override
+    public Class<PkgIconSpreadsheetJobSpecification> getSupportedSpecificationClass() {
+        return PkgIconSpreadsheetJobSpecification.class;
     }
 
     @Override

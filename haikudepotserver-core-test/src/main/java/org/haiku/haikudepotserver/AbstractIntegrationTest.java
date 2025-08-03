@@ -1,5 +1,5 @@
 /*
- * Copyright 2018-2023, Andrew Lindesay
+ * Copyright 2018-2025, Andrew Lindesay
  * Distributed under the terms of the MIT License.
  */
 
@@ -8,6 +8,7 @@ package org.haiku.haikudepotserver;
 import com.google.common.base.Preconditions;
 import com.google.common.io.ByteSource;
 import com.google.common.io.Resources;
+import jakarta.annotation.Resource;
 import org.apache.cayenne.ObjectId;
 import org.apache.cayenne.access.DataNode;
 import org.apache.cayenne.configuration.server.ServerRuntime;
@@ -28,7 +29,6 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.boot.autoconfigure.jdbc.DataSourceProperties;
-import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationContextInitializer;
 import org.springframework.context.ConfigurableApplicationContext;
@@ -38,14 +38,13 @@ import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 import org.springframework.test.context.support.TestPropertySourceUtils;
 
-import jakarta.annotation.Resource;
-
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.time.Duration;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
@@ -54,8 +53,8 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 /**
- * <p>This superclass of all of the tests has a hook to run before each integration test.  The hook will
- * basically delete all of the schema objects and then prompt the database schema migration to again,
+ * <p>This superclass of all the tests has a hook to run before each integration test.  The hook will
+ * basically delete all the schema objects and then prompt the database schema migration to again,
  * repopulate the database afresh.  This ensures that the database is taken from a blank state at the
  * start of each test.  This is important for tests to maintain their independence.  The use a
  * 'transaction' over the test is not possible here as the ORM technology is not bound to a single
@@ -82,6 +81,11 @@ public abstract class AbstractIntegrationTest {
     private final static String DATABASEPRODUCTNAME_POSTGRES = "PostgreSQL";
 
     private final static String SQL_DELETE_TEST_UUC = "DELETE FROM haikudepot.user_usage_conditions WHERE code LIKE 'TEST%'";
+
+    private final static String SQL_TRUNCATE_JOBS = "TRUNCATE " + Stream.of(
+            "job", "job_state", "job_generated_data", "job_supplied_data",
+            "job_data_media_type", "job_specification", "job_type"
+    ).map("job.%s"::formatted).collect(Collectors.joining(", "));
 
     @Resource
     protected ApplicationContext applicationContext;
@@ -163,6 +167,7 @@ public abstract class AbstractIntegrationTest {
         clearJobs();
         clearCaches();
         clearDatabaseTables();
+        clearJobDatabaseTables();
         clearTestUserUsageConditions();
         setUnauthenticated();
         mailSender.clear();
@@ -170,7 +175,7 @@ public abstract class AbstractIntegrationTest {
     }
 
     protected void clearJobs() {
-        if (!jobService.awaitAllJobsFinishedUninterruptibly(30_000L)) {
+        if (!jobService.awaitAllJobsFinishedUninterruptibly(Duration.ofSeconds(30).toMillis())) {
             Assertions.fail("unable to complete all jobs in timeout");
         }
     }
@@ -263,6 +268,23 @@ public abstract class AbstractIntegrationTest {
             }
 
             LOGGER.debug("prep; did clear out data for data node; {}", dataNode.getName());
+        }
+    }
+
+    public void clearJobDatabaseTables() {
+        DataNode dataNode = serverRuntime.getDataDomain().getDataNode("HaikuDepotServer");
+        try (
+                Connection connection = dataNode.getDataSource().getConnection();
+                PreparedStatement preparedStatement = connection.prepareStatement(SQL_TRUNCATE_JOBS)) {
+            int deleted = preparedStatement.executeUpdate();
+
+            if (0 != deleted) {
+                LOGGER.info("did delete [{}] job related objects", deleted);
+            }
+        } catch (SQLException se) {
+            throw new IllegalStateException(
+                    "unable to clear the pg job data from test",
+                    se);
         }
     }
 

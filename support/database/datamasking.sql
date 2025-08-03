@@ -148,6 +148,11 @@ UPDATE haikudepot.pkg_supplement_modification SET
     user_description = hds_scramble_chars(user_description)
     WHERE user_description IS NOT NULL;
 
+-- remove any stored jobs
+
+TRUNCATE job.job, job.job_state, job.job_supplied_data, job.job_generated_data,
+    job.job_specification, job.job_type;
+
 -- remove any stored data
 
 TRUNCATE datastore.object_head, datastore.object_part;
