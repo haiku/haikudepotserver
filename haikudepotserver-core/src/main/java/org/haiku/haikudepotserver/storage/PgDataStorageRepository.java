@@ -208,9 +208,10 @@ public class PgDataStorageRepository {
 
     private void deleteHeadAndPartsByCode(String code) {
         Preconditions.checkArgument(StringUtils.isNoneBlank(code));
-        if (1 != jdbcTemplate.update(SQL_DELETE_PARTS_FOR_HEAD_BY_CODE, code)) {
-            throw new IllegalStateException("unable to delete the object parts");
-        }
+
+        // can't really tell how many body parts there might be; 0 --> ?
+        jdbcTemplate.update(SQL_DELETE_PARTS_FOR_HEAD_BY_CODE, code);
+
         if (1 != jdbcTemplate.update(SQL_DELETE_HEAD_BY_CODE, code)) {
             throw new IllegalStateException("unable to delete the object head");
         }

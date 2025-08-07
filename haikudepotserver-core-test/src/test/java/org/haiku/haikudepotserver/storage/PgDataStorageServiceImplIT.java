@@ -49,6 +49,27 @@ public class PgDataStorageServiceImplIT extends AbstractIntegrationTest {
         this.storageImpl = new PgDataStorageServiceImpl(repository, 32);
     }
 
+    /**
+     * <p>Sets up some storage and then deletes the item.</p>
+     */
+    @Test
+    public void testDelete() throws IOException, SQLException {
+        //GIVEN
+        String code = UUID.randomUUID().toString();
+        ByteSink byteSink = storageImpl.put(code);
+        byte[] buffer = new byte[172]; // will be many body parts
+
+        try (OutputStream outputStream = byteSink.openStream()) {
+            outputStream.write(buffer);
+        }
+
+        // WHEN
+        storageImpl.remove(code);
+
+        // THEN
+        Assertions.assertThat(hasData(code)).isFalse();
+    }
+
     @Test
     public void testStoreData_inFull() throws IOException, SQLException {
         ByteSink byteSink = storageImpl.put("ABC123DEF");
@@ -212,6 +233,25 @@ public class PgDataStorageServiceImplIT extends AbstractIntegrationTest {
         Optional<? extends ByteSource> byteSourceOptional = storageImpl.get("GHI987PQR");
         Assertions.assertThat(byteSourceOptional).isEmpty();
 
+    }
+
+    private boolean hasData(String code) throws SQLException {
+        String sql = "SELECT COUNT(oh.id) FROM datastore.object_head oh WHERE oh.code = ?";
+
+        try (
+                Connection connection = dataSource.getConnection();
+                PreparedStatement preparedStatement = connection.prepareStatement(sql)
+        ) {
+            preparedStatement.setString(1, code);
+
+            try (ResultSet resultSet = preparedStatement.executeQuery()) {
+                if (resultSet.next()) {
+                    return 1 == resultSet.getInt(1);
+                }
+            }
+        }
+
+        throw new IllegalStateException("query should have returned a value.");
     }
 
     private HashCode hashByteSource(ByteSource byteSource) throws IOException {
