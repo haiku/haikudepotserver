@@ -5,12 +5,16 @@
 package org.haiku.haikudepotserver.storage;
 
 import com.google.common.base.Preconditions;
-import com.google.common.io.ByteStreams;
+import com.google.common.io.CountingInputStream;
+import com.google.common.util.concurrent.AtomicDouble;
+import io.micrometer.core.instrument.MeterRegistry;
 import org.apache.commons.lang3.StringUtils;
+import org.haiku.haikudepotserver.metrics.MetricsConstants;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.PlatformTransactionManager;
 import org.springframework.transaction.support.TransactionTemplate;
+import org.springframework.util.StopWatch;
 
 import javax.sql.DataSource;
 import java.io.*;
@@ -69,6 +73,11 @@ public class PgDataStorageRepository {
             "SELECT oh.code FROM datastore.object_head oh WHERE oh.modify_timestamp < ?";
 
     /**
+     * <p>This is used for a metric gauge to show the rate of data transfer.</p>
+     */
+    private final AtomicDouble mbPerSecondTransfer;
+
+    /**
      * <p>This is a lightweight object that couples simple data about the parts of the data.</p>
      */
     public record Part(long id, long length) {
@@ -80,9 +89,19 @@ public class PgDataStorageRepository {
 
     private final Clock clock;
 
-    public PgDataStorageRepository(PlatformTransactionManager transactionManager, DataSource dataSource) {
+    public PgDataStorageRepository(
+            PlatformTransactionManager transactionManager,
+            DataSource dataSource,
+            MeterRegistry meterRegistry
+    ) {
         jdbcTemplate = new JdbcTemplate(dataSource);
         transactionTemplate = new TransactionTemplate(transactionManager);
+
+        this.mbPerSecondTransfer = new AtomicDouble();
+        meterRegistry.gauge(
+                MetricsConstants.GUAGE_PG_DATA_STORAGE_MEGABYTE_PER_SECOND_TRANSFER,
+                this.mbPerSecondTransfer);
+
         this.clock = Clock.systemUTC();
     }
 
@@ -244,6 +263,11 @@ public class PgDataStorageRepository {
         );
     }
 
+    private double megabytePerSecond(long bytes, double seconds) {
+        long kilobytes = bytes / 1024;
+        return ((double) kilobytes / seconds) / 1024.0;
+    }
+
     void writePartDataToFile(long partId, File file) {
         jdbcTemplate.query(SQL_SELECT_PART_DATA,
                 ps -> {
@@ -252,8 +276,16 @@ public class PgDataStorageRepository {
                 rs -> {
                     try (
                             InputStream inputStream = rs.getBinaryStream(1);
+                            CountingInputStream countingInputStream = new CountingInputStream(inputStream);
                             FileOutputStream outputStream = new FileOutputStream(file)) {
-                        ByteStreams.copy(inputStream, outputStream);
+
+                        StopWatch stopWatch = new StopWatch();
+
+                        stopWatch.start();
+                        countingInputStream.transferTo(outputStream);
+                        stopWatch.stop();
+
+                        mbPerSecondTransfer.set(megabytePerSecond(countingInputStream.getCount(), stopWatch.getTotalTimeSeconds()));
                     } catch (IOException ioe) {
                         throw new UncheckedIOException("unable to write part [" + partId + "] to file [" + file + "]", ioe);
                     }

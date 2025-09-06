@@ -1,5 +1,5 @@
 /*
- * Copyright 2018-2023, Andrew Lindesay
+ * Copyright 2018-2025, Andrew Lindesay
  * Distributed under the terms of the MIT License.
  */
 
@@ -11,6 +11,8 @@ import com.google.common.io.ByteSource;
 import com.google.common.net.HttpHeaders;
 import com.google.common.net.MediaType;
 import jakarta.mail.internet.MimeUtility;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
 import org.apache.cayenne.ObjectContext;
 import org.apache.cayenne.configuration.server.ServerRuntime;
 import org.apache.commons.lang3.StringUtils;
@@ -19,7 +21,6 @@ import org.haiku.haikudepotserver.job.model.*;
 import org.haiku.haikudepotserver.security.PermissionEvaluator;
 import org.haiku.haikudepotserver.security.model.Permission;
 import org.haiku.haikudepotserver.support.web.AbstractController;
-import org.haiku.haikudepotserver.support.web.JobDataWriteListener;
 import org.haiku.haikudepotserver.support.web.WebConstants;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -29,12 +30,9 @@ import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.util.UriComponentsBuilder;
 
-import jakarta.servlet.AsyncContext;
-import jakarta.servlet.ServletOutputStream;
-import jakarta.servlet.http.HttpServletRequest;
-import jakarta.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.OutputStream;
 import java.time.Clock;
 import java.time.Instant;
 import java.time.ZoneOffset;
@@ -43,7 +41,6 @@ import java.time.format.DateTimeFormatter;
 import java.time.format.DateTimeParseException;
 import java.util.Date;
 import java.util.Set;
-import java.util.concurrent.TimeUnit;
 import java.util.regex.Pattern;
 
 /**
@@ -65,8 +62,6 @@ public class JobController extends AbstractController {
     private final static String SEGMENT_DOWNLOAD = "download";
 
     private final static long MAX_SUPPLY_DATA_LENGTH = 1024 * 1024; // 1MB
-
-    private final static long TIMEOUT_DOWNLOAD_MILLIS = TimeUnit.MINUTES.toMillis(2);
 
     private final static String HEADER_DATAGUID = "X-HaikuDepotServer-DataGuid";
 
@@ -290,16 +285,10 @@ public class JobController extends AbstractController {
         response.setDateHeader(HttpHeaders.EXPIRES, 0);
         response.setHeader(HttpHeaders.CACHE_CONTROL, "no-cache");
 
-        // now switch to async for the delivery of the data.
-
-        AsyncContext async = request.startAsync();
-        async.setTimeout(TIMEOUT_DOWNLOAD_MILLIS);
-        ServletOutputStream outputStream = response.getOutputStream();
-        outputStream.setWriteListener(new JobDataWriteListener(
-                guid, jobService, async, outputStream));
+        OutputStream outputStream = response.getOutputStream();
+        jobDataWithByteSink.getByteSource().copyTo(outputStream);
 
         LOGGER.info("did start async stream job data; {}", guid);
-
     }
 
     @ResponseStatus(value= HttpStatus.UNAUTHORIZED, reason="access to job data denied")
