@@ -240,7 +240,7 @@ public class MiscelaneousApiServiceIT extends AbstractIntegrationTest {
         // we will just check for a couple that we know to be there.
 
         Set<String> architectureCodes = result.getArchitectures().stream().map(Architecture::getCode).collect(Collectors.toSet());
-        Assertions.assertThat(architectureCodes).containsOnly("x86_64", "x86_gcc2");
+        Assertions.assertThat(architectureCodes).containsOnly("x86_64", "x86_gcc2", "arm64", "riscv64");
     }
 
     @Test
