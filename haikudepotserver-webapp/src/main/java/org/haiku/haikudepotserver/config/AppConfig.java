@@ -11,7 +11,6 @@ import org.haiku.haikudepotserver.job.LocalJobServiceImpl;
 import org.haiku.haikudepotserver.job.model.JobRunner;
 import org.haiku.haikudepotserver.job.model.JobService;
 import org.haiku.haikudepotserver.pkg.model.PkgLocalizationLookupService;
-import org.haiku.haikudepotserver.storage.LocalDataStorageServiceImpl;
 import org.haiku.haikudepotserver.storage.PgDataStorageRepository;
 import org.haiku.haikudepotserver.storage.PgDataStorageServiceImpl;
 import org.haiku.haikudepotserver.storage.model.DataStorageService;
@@ -54,17 +53,10 @@ public class AppConfig {
 
     @Bean
     public DataStorageService dataStorageService(
-            @Value("${hds.deployment.is-production:false}") Boolean isProduction,
-            @Value("${hds.storage.type:local}") String type,
             @Value("${hds.storage.pg.part-size:262144}") Long partSize,
             PgDataStorageRepository repository
             ) {
-        // TODO: remove this once database storage is settled.
-        return switch (type) {
-            case "local" -> new LocalDataStorageServiceImpl(isProduction);
-            case "pg" -> new PgDataStorageServiceImpl(repository, partSize);
-            default -> throw new IllegalStateException("unexpected data storage type: " + type);
-        };
+        return new PgDataStorageServiceImpl(repository, partSize);
     }
 
     @Bean("messageSourceBaseNames")
