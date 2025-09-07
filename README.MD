@@ -38,6 +38,7 @@ This web application is an online tool for working with the software packages of
 - [Data Localization](docs/data-localization.md)
 - [HDS Application Localization](docs/application-localization.md)
 - [Polygot update](docs/polygot-update.md)
+- [Binary Data Storage](docs/storage.md)
 
 ### Development and Deployment
 
