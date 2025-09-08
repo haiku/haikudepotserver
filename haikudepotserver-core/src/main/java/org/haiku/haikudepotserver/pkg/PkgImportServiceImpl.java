@@ -328,7 +328,7 @@ public class PkgImportServiceImpl implements PkgImportService {
         File temporaryFile = null;
 
         try {
-            String prefix = persistedPkgVersion.getPkg().getName() + "_" + randomStringUtils.next(3) + "_";
+            String prefix = persistedPkgVersion.getPkg().getName() + "_" + randomStringUtils.nextAlphanumeric(3) + "_";
             // ^ need to ensure minimum length of the prefix
             temporaryFile = File.createTempFile(prefix, ".hpkg");
 
