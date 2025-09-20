@@ -16,6 +16,7 @@ import org.apache.cayenne.exp.property.StringProperty;
 import org.haiku.haikudepotserver.dataobjects.Architecture;
 import org.haiku.haikudepotserver.dataobjects.Pkg;
 import org.haiku.haikudepotserver.dataobjects.PkgVersionCopyright;
+import org.haiku.haikudepotserver.dataobjects.PkgVersionInteraction;
 import org.haiku.haikudepotserver.dataobjects.PkgVersionLicense;
 import org.haiku.haikudepotserver.dataobjects.PkgVersionLocalization;
 import org.haiku.haikudepotserver.dataobjects.PkgVersionUrl;
@@ -45,10 +46,10 @@ public abstract class _PkgVersion extends AbstractDataObject {
     public static final NumericProperty<Long> PAYLOAD_LENGTH = PropertyFactory.createNumeric("payloadLength", Long.class);
     public static final StringProperty<String> PRE_RELEASE = PropertyFactory.createString("preRelease", String.class);
     public static final NumericProperty<Integer> REVISION = PropertyFactory.createNumeric("revision", Integer.class);
-    public static final NumericProperty<Long> VIEW_COUNTER = PropertyFactory.createNumeric("viewCounter", Long.class);
     public static final EntityProperty<Architecture> ARCHITECTURE = PropertyFactory.createEntity("architecture", Architecture.class);
     public static final EntityProperty<Pkg> PKG = PropertyFactory.createEntity("pkg", Pkg.class);
     public static final ListProperty<PkgVersionCopyright> PKG_VERSION_COPYRIGHTS = PropertyFactory.createList("pkgVersionCopyrights", PkgVersionCopyright.class);
+    public static final EntityProperty<PkgVersionInteraction> PKG_VERSION_INTERACTION = PropertyFactory.createEntity("pkgVersionInteraction", PkgVersionInteraction.class);
     public static final ListProperty<PkgVersionLicense> PKG_VERSION_LICENSES = PropertyFactory.createList("pkgVersionLicenses", PkgVersionLicense.class);
     public static final ListProperty<PkgVersionLocalization> PKG_VERSION_LOCALIZATIONS = PropertyFactory.createList("pkgVersionLocalizations", PkgVersionLocalization.class);
     public static final ListProperty<PkgVersionUrl> PKG_VERSION_URLS = PropertyFactory.createList("pkgVersionUrls", PkgVersionUrl.class);
@@ -65,11 +66,11 @@ public abstract class _PkgVersion extends AbstractDataObject {
     protected Long payloadLength;
     protected String preRelease;
     protected Integer revision;
-    protected Long viewCounter;
 
     protected Object architecture;
     protected Object pkg;
     protected Object pkgVersionCopyrights;
+    protected Object pkgVersionInteraction;
     protected Object pkgVersionLicenses;
     protected Object pkgVersionLocalizations;
     protected Object pkgVersionUrls;
@@ -185,16 +186,6 @@ public abstract class _PkgVersion extends AbstractDataObject {
         return this.revision;
     }
 
-    public void setViewCounter(Long viewCounter) {
-        beforePropertyWrite("viewCounter", this.viewCounter, viewCounter);
-        this.viewCounter = viewCounter;
-    }
-
-    public Long getViewCounter() {
-        beforePropertyRead("viewCounter");
-        return this.viewCounter;
-    }
-
     public void setArchitecture(Architecture architecture) {
         setToOneTarget("architecture", architecture, true);
     }
@@ -222,6 +213,14 @@ public abstract class _PkgVersion extends AbstractDataObject {
     @SuppressWarnings("unchecked")
     public List<PkgVersionCopyright> getPkgVersionCopyrights() {
         return (List<PkgVersionCopyright>)readProperty("pkgVersionCopyrights");
+    }
+
+    public void setPkgVersionInteraction(PkgVersionInteraction pkgVersionInteraction) {
+        setToOneTarget("pkgVersionInteraction", pkgVersionInteraction, true);
+    }
+
+    public PkgVersionInteraction getPkgVersionInteraction() {
+        return (PkgVersionInteraction)readProperty("pkgVersionInteraction");
     }
 
     public void addToPkgVersionLicenses(PkgVersionLicense obj) {
@@ -300,14 +299,14 @@ public abstract class _PkgVersion extends AbstractDataObject {
                 return this.preRelease;
             case "revision":
                 return this.revision;
-            case "viewCounter":
-                return this.viewCounter;
             case "architecture":
                 return this.architecture;
             case "pkg":
                 return this.pkg;
             case "pkgVersionCopyrights":
                 return this.pkgVersionCopyrights;
+            case "pkgVersionInteraction":
+                return this.pkgVersionInteraction;
             case "pkgVersionLicenses":
                 return this.pkgVersionLicenses;
             case "pkgVersionLocalizations":
@@ -361,9 +360,6 @@ public abstract class _PkgVersion extends AbstractDataObject {
             case "revision":
                 this.revision = (Integer)val;
                 break;
-            case "viewCounter":
-                this.viewCounter = (Long)val;
-                break;
             case "architecture":
                 this.architecture = val;
                 break;
@@ -372,6 +368,9 @@ public abstract class _PkgVersion extends AbstractDataObject {
                 break;
             case "pkgVersionCopyrights":
                 this.pkgVersionCopyrights = val;
+                break;
+            case "pkgVersionInteraction":
+                this.pkgVersionInteraction = val;
                 break;
             case "pkgVersionLicenses":
                 this.pkgVersionLicenses = val;
@@ -412,10 +411,10 @@ public abstract class _PkgVersion extends AbstractDataObject {
         out.writeObject(this.payloadLength);
         out.writeObject(this.preRelease);
         out.writeObject(this.revision);
-        out.writeObject(this.viewCounter);
         out.writeObject(this.architecture);
         out.writeObject(this.pkg);
         out.writeObject(this.pkgVersionCopyrights);
+        out.writeObject(this.pkgVersionInteraction);
         out.writeObject(this.pkgVersionLicenses);
         out.writeObject(this.pkgVersionLocalizations);
         out.writeObject(this.pkgVersionUrls);
@@ -436,10 +435,10 @@ public abstract class _PkgVersion extends AbstractDataObject {
         this.payloadLength = (Long)in.readObject();
         this.preRelease = (String)in.readObject();
         this.revision = (Integer)in.readObject();
-        this.viewCounter = (Long)in.readObject();
         this.architecture = in.readObject();
         this.pkg = in.readObject();
         this.pkgVersionCopyrights = in.readObject();
+        this.pkgVersionInteraction = in.readObject();
         this.pkgVersionLicenses = in.readObject();
         this.pkgVersionLocalizations = in.readObject();
         this.pkgVersionUrls = in.readObject();

@@ -606,7 +606,13 @@ public class PkgServiceImpl implements PkgService {
             PkgVersion pkgVersionEdit = ((List<PkgVersion>) contextEdit.performQuery(new ObjectIdQuery(pkgVersionOid)))
                     .stream()
                     .collect(SingleCollector.single());
-            pkgVersionEdit.incrementViewCounter();
+
+            if (null == pkgVersionEdit.getPkgVersionInteraction()) {
+                PkgVersionInteraction pkgVersionInteraction = contextEdit.newObject(PkgVersionInteraction.class);
+                pkgVersionEdit.setPkgVersionInteraction(pkgVersionInteraction);
+            }
+
+            pkgVersionEdit.getPkgVersionInteraction().incrementViewCounter();
 
             try {
                 contextEdit.commitChanges();

@@ -115,10 +115,6 @@ public class PkgVersion extends _PkgVersion implements MutableCreateAndModifyTim
             setActive(true);
         }
 
-        if (null == getViewCounter()) {
-            setViewCounter(0L);
-        }
-
         if (null == getIsLatest()) {
             setIsLatest(false);
         }
@@ -160,14 +156,6 @@ public class PkgVersion extends _PkgVersion implements MutableCreateAndModifyTim
             }
         }
 
-        if (getViewCounter() < 0) {
-            validationResult.addFailure(new BeanValidationFailure(this, VIEW_COUNTER.getName(), "min"));
-        }
-
-    }
-
-    public void incrementViewCounter() {
-        setViewCounter(getViewCounter() + 1);
     }
 
     /**
@@ -181,6 +169,12 @@ public class PkgVersion extends _PkgVersion implements MutableCreateAndModifyTim
                 .stream()
                 .filter(pvl -> 0 == NaturalLanguageCoded.NATURAL_LANGUAGE_CODE_COMPARATOR.compare(pvl.getNaturalLanguage(), naturalLanguage))
                 .collect(SingleCollector.optional());
+    }
+
+    public Long getViewCounter() {
+        return Optional.ofNullable(getPkgVersionInteraction())
+                .map(PkgVersionInteraction::getViewCounter)
+                .orElse(0L);
     }
 
     /**

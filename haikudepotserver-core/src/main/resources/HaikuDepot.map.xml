@@ -265,10 +265,10 @@
 		<db-attribute name="modify_timestamp" type="TIMESTAMP" isMandatory="true"/>
 		<db-attribute name="payload_length" type="BIGINT"/>
 		<db-attribute name="pkg_id" type="BIGINT" isMandatory="true"/>
+		<db-attribute name="pkg_version_interaction_id" type="BIGINT"/>
 		<db-attribute name="pre_release" type="VARCHAR" length="255"/>
 		<db-attribute name="repository_source_id" type="BIGINT" isMandatory="true"/>
 		<db-attribute name="revision" type="INTEGER"/>
-		<db-attribute name="view_counter" type="BIGINT" isMandatory="true"/>
 		<db-key-generator>
 			<db-generator-type>ORACLE</db-generator-type>
 			<db-generator-name>haikudepot.pkg_version_seq</db-generator-name>
@@ -283,6 +283,15 @@
 			<db-generator-type>ORACLE</db-generator-type>
 			<db-generator-name>haikudepot.pkg_version_copyright_seq</db-generator-name>
 			<db-key-cache-size>10</db-key-cache-size>
+		</db-key-generator>
+	</db-entity>
+	<db-entity name="pkg_version_interaction" schema="haikudepot">
+		<db-attribute name="id" type="BIGINT" isPrimaryKey="true" isMandatory="true"/>
+		<db-attribute name="view_counter" type="BIGINT" isMandatory="true"/>
+		<db-key-generator>
+			<db-generator-type>ORACLE</db-generator-type>
+			<db-generator-name>haikudepot.pkg_version_interaction_seq</db-generator-name>
+			<db-key-cache-size>1</db-key-cache-size>
 		</db-key-generator>
 	</db-entity>
 	<db-entity name="pkg_version_license" schema="haikudepot">
@@ -585,10 +594,12 @@
 		<obj-attribute name="payloadLength" type="java.lang.Long" lock="true" db-attribute-path="payload_length"/>
 		<obj-attribute name="preRelease" type="java.lang.String" db-attribute-path="pre_release"/>
 		<obj-attribute name="revision" type="java.lang.Integer" db-attribute-path="revision"/>
-		<obj-attribute name="viewCounter" type="java.lang.Long" lock="true" db-attribute-path="view_counter"/>
 	</obj-entity>
 	<obj-entity name="PkgVersionCopyright" className="org.haiku.haikudepotserver.dataobjects.PkgVersionCopyright" lock-type="optimistic" dbEntityName="pkg_version_copyright" superClassName="org.haiku.haikudepotserver.dataobjects.support.AbstractDataObject">
 		<obj-attribute name="body" type="java.lang.String" lock="true" db-attribute-path="body"/>
+	</obj-entity>
+	<obj-entity name="PkgVersionInteraction" className="org.haiku.haikudepotserver.dataobjects.PkgVersionInteraction" lock-type="optimistic" dbEntityName="pkg_version_interaction" superClassName="org.haiku.haikudepotserver.dataobjects.support.AbstractDataObject">
+		<obj-attribute name="viewCounter" type="java.lang.Long" db-attribute-path="view_counter"/>
 	</obj-entity>
 	<obj-entity name="PkgVersionLicense" className="org.haiku.haikudepotserver.dataobjects.PkgVersionLicense" lock-type="optimistic" dbEntityName="pkg_version_license" superClassName="org.haiku.haikudepotserver.dataobjects.support.AbstractDataObject">
 		<obj-attribute name="body" type="java.lang.String" lock="true" db-attribute-path="body"/>
@@ -819,6 +830,9 @@
 	<db-relationship name="pkg_version_copyrights" source="pkg_version" target="pkg_version_copyright" toMany="true">
 		<db-attribute-pair source="id" target="pkg_version_id"/>
 	</db-relationship>
+	<db-relationship name="pkg_version_interaction" source="pkg_version" target="pkg_version_interaction">
+		<db-attribute-pair source="pkg_version_interaction_id" target="id"/>
+	</db-relationship>
 	<db-relationship name="pkg_version_licenses" source="pkg_version" target="pkg_version_license" toMany="true">
 		<db-attribute-pair source="id" target="pkg_version_id"/>
 	</db-relationship>
@@ -978,6 +992,7 @@
 	<obj-relationship name="architecture" source="PkgVersion" target="Architecture" deleteRule="Nullify" db-relationship-path="architecture"/>
 	<obj-relationship name="pkg" source="PkgVersion" target="Pkg" deleteRule="Nullify" db-relationship-path="pkg"/>
 	<obj-relationship name="pkgVersionCopyrights" source="PkgVersion" target="PkgVersionCopyright" deleteRule="Deny" db-relationship-path="pkg_version_copyrights"/>
+	<obj-relationship name="pkgVersionInteraction" source="PkgVersion" target="PkgVersionInteraction" deleteRule="Nullify" db-relationship-path="pkg_version_interaction"/>
 	<obj-relationship name="pkgVersionLicenses" source="PkgVersion" target="PkgVersionLicense" deleteRule="Deny" db-relationship-path="pkg_version_licenses"/>
 	<obj-relationship name="pkgVersionLocalizations" source="PkgVersion" target="PkgVersionLocalization" deleteRule="Nullify" db-relationship-path="pkg_version_localizations"/>
 	<obj-relationship name="pkgVersionUrls" source="PkgVersion" target="PkgVersionUrl" deleteRule="Deny" db-relationship-path="pkg_version_urls"/>
@@ -1242,7 +1257,7 @@ COUNT(DISTINCT pv.id) AS "total"
     #result('pv.pre_release', 'String', 'pre_release'),
     #result('pv.repository_source_id', 'long', 'repository_source_id'),
     #result('pv.revision', 'Integer', 'revision'),
-    #result('pv.view_counter', 'long', 'view_counter'),
+    #result('pv.pkg_version_interaction_id', 'long', 'pkg_version_interaction_id'),
     #result('pv.is_latest', 'boolean', 'is_latest'),
     #result('pv.payload_length', 'Long', 'payload_length')
 #end
