@@ -8,6 +8,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.base.Preconditions;
 import org.apache.commons.lang3.StringUtils;
 import org.haiku.haikudepotserver.support.eventing.model.InterProcessEvent;
+import org.haiku.haikudepotserver.support.eventing.model.NotifyService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.context.event.EventListener;
@@ -25,7 +26,7 @@ import java.sql.SQLException;
  * of {@link InterProcessEvent}) are sendable to other instances.</p>
  */
 
-public class InterProcessEventPgNotifyService {
+public class InterProcessEventPgNotifyService implements NotifyService {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(InterProcessEventPgNotifyService.class);
 
@@ -57,7 +58,14 @@ public class InterProcessEventPgNotifyService {
         }
     }
 
-    void publishEvent(InterProcessEvent event) {
+    @Override
+    public void publishEvent(InterProcessEvent event) {
+        Preconditions.checkArgument(null != event, "the event is required");
+
+        if (null == event.getSourceIdentifier()) {
+            event.setSourceIdentifier(config.getSourceIdentifier());
+        }
+
         try (
                 Connection connection = dataSource.getConnection();
                 PreparedStatement statement = connection.prepareStatement(NOTIFY_STATEMENT)

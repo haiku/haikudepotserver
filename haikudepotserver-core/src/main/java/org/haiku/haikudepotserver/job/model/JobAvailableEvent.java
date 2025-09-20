@@ -5,6 +5,7 @@
 package org.haiku.haikudepotserver.job.model;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
+import org.haiku.haikudepotserver.support.eventing.model.InterProcessApplicationEvent;
 import org.haiku.haikudepotserver.support.eventing.model.InterProcessEvent;
 
 /**
@@ -12,7 +13,7 @@ import org.haiku.haikudepotserver.support.eventing.model.InterProcessEvent;
  * queue.</p>
  */
 
-public class JobAvailableEvent extends InterProcessEvent {
+public class JobAvailableEvent extends InterProcessApplicationEvent {
 
     @JsonCreator
     public JobAvailableEvent() {

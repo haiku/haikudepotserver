@@ -1,5 +1,5 @@
 /*
- * Copyright 2018-2023, Andrew Lindesay
+ * Copyright 2018-2025, Andrew Lindesay
  * Distributed under the terms of the MIT License.
  */
 
@@ -10,15 +10,16 @@ import com.google.common.collect.ImmutableList;
 import jakarta.persistence.EntityManagerFactory;
 import org.apache.cayenne.DataChannelFilter;
 import org.apache.cayenne.LifecycleListener;
+import org.apache.cayenne.cache.QueryCache;
 import org.apache.cayenne.configuration.Constants;
 import org.apache.cayenne.configuration.server.ServerModule;
 import org.apache.cayenne.configuration.server.ServerRuntime;
 import org.apache.cayenne.di.MapBuilder;
 import org.apache.cayenne.velocity.VelocityModule;
 import org.haiku.haikudepotserver.dataobjects.*;
-import org.haiku.haikudepotserver.support.cayenne.QueryCacheRemoveGroupDataChannelFilter;
-import org.haiku.haikudepotserver.support.cayenne.QueryCacheRemoveGroupListener;
+import org.haiku.haikudepotserver.support.cayenne.*;
 import org.haiku.haikudepotserver.support.db.UserUsageConditionsInitializer;
+import org.haiku.haikudepotserver.support.eventing.model.NotifyService;
 import org.springframework.beans.factory.FactoryBean;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.sql.init.dependency.DependsOnDatabaseInitialization;
@@ -83,13 +84,26 @@ public class PersistenceConfig {
     @DependsOnDatabaseInitialization
     public ServerRuntime serverRuntime(
             DataSource dataSource,
-            @Value("${cayenne.query.cache.size:250}") Integer queryCacheSize
+            @Value("${cayenne.query.cache.size:250}") Integer queryCacheSize,
+            NotifyService notifyService,
+            QueryCacheRemoveEventNotifyControl notifyControl
     ) {
+        // This is the Cayenne-bespoke dependency injection framework interfacing with the Spring one. The
+        // Cayenne one works a little bit like Juice.
         return ServerRuntime.builder()
                 .addConfigs("cayenne-haikudepotserver.xml")
                 .dataSource(dataSource)
                 .addModule(new ServerModule())
                 .addModule(new VelocityModule())
+                .addModule(binder -> binder
+                        .bind(QueryCacheRemoveEventNotifyControl.class)
+                        .toInstance(notifyControl))
+                .addModule(binder -> binder
+                        .bind(NotifyService.class)
+                        .toInstance(notifyService))
+                .addModule(binder -> binder
+                        .decorate(QueryCache.class)
+                        .after(NotifyingQueryCache.class))
                 .addModule(binder -> {
                     MapBuilder<Object> props = binder.bindMap(Object.class, Constants.PROPERTIES_MAP);
                     props.put(Constants.SERVER_OBJECT_RETAIN_STRATEGY_PROPERTY, "weak"); // hard|soft|weak

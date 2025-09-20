@@ -21,9 +21,13 @@ import org.haiku.haikudepotserver.graphics.hvif.HvifRenderingService;
 import org.haiku.haikudepotserver.graphics.hvif.HvifRenderingServiceFactory;
 import org.haiku.haikudepotserver.security.PasswordEncoder;
 import org.haiku.haikudepotserver.support.RuntimeInformationService;
+import org.haiku.haikudepotserver.support.cayenne.QueryCacheRemoveEventConsumer;
+import org.haiku.haikudepotserver.support.cayenne.QueryCacheRemoveEventNotifyControl;
 import org.haiku.haikudepotserver.support.eventing.InterProcessEventPgConfig;
 import org.haiku.haikudepotserver.support.eventing.InterProcessEventPgListenService;
 import org.haiku.haikudepotserver.support.eventing.InterProcessEventPgNotifyService;
+import org.haiku.haikudepotserver.support.eventing.model.InterProcessApplicationEvent;
+import org.haiku.haikudepotserver.support.eventing.model.InterProcessEvent;
 import org.haiku.haikudepotserver.support.freemarker.LocalizedTemplateLoader;
 import org.haiku.haikudepotserver.support.logging.LoggingSetupOrchestration;
 import org.springframework.beans.factory.annotation.Qualifier;
@@ -42,6 +46,7 @@ import org.springframework.stereotype.Controller;
 import javax.sql.DataSource;
 import java.nio.charset.StandardCharsets;
 import java.util.List;
+import java.util.function.Consumer;
 
 @ComponentScan(
         basePackages = "org.haiku.haikudepotserver",
@@ -155,15 +160,29 @@ public class BasicConfig {
     // INTER-PROCESS EVENTING
 
     @Bean
+    public QueryCacheRemoveEventNotifyControl queryCacheRemoveEventNotifyControl() {
+        return new QueryCacheRemoveEventNotifyControl();
+    }
+
+    @Bean
     public InterProcessEventPgListenService interProcessEventPgListenService(
             ObjectMapper objectMapper,
             DataSource dataSource,
             InterProcessEventPgConfig config,
-            ApplicationEventPublisher applicationEventPublisher
+            ApplicationEventPublisher applicationEventPublisher,
+            ServerRuntime serverRuntime,
+            QueryCacheRemoveEventNotifyControl notifyControl
     ) {
+        QueryCacheRemoveEventConsumer queryCacheRemoveEventConsumer = new QueryCacheRemoveEventConsumer(serverRuntime, notifyControl);
+        Consumer<InterProcessEvent>  applicationEventConsumer =  (event) -> {
+            if (event instanceof InterProcessApplicationEvent interProcessApplicationEvent) {
+                applicationEventPublisher.publishEvent(interProcessApplicationEvent);
+            }
+        };
+
         return new InterProcessEventPgListenService(
                 objectMapper, dataSource, config,
-                applicationEventPublisher::publishEvent
+                applicationEventConsumer.andThen(queryCacheRemoveEventConsumer)
         );
     }
 

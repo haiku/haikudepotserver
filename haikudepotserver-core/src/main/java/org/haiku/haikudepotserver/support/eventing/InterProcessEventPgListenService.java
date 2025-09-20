@@ -143,12 +143,12 @@ public class InterProcessEventPgListenService extends AbstractExecutionThreadSer
             org.postgresql.PGNotification[] notifications = pgConnection.getNotifications(LISTEN_TIMEOUT_MILLIS);
 
             for (org.postgresql.PGNotification notification : notifications) {
-                publishApplicationEvent(notification.getParameter());
+                handleInterProcessEvent(notification.getParameter());
             }
         }
     }
 
-    private void publishApplicationEvent(String notificationParameter) throws JsonProcessingException {
+    private void handleInterProcessEvent(String notificationParameter) throws JsonProcessingException {
         InterProcessEvent event = objectMapper.readValue(notificationParameter, InterProcessEvent.class);
 
         if (StringUtils.isEmpty(event.getSourceIdentifier())) {
