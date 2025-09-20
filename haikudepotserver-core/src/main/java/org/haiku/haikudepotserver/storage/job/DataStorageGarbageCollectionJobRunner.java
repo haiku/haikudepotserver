@@ -65,6 +65,7 @@ public class DataStorageGarbageCollectionJobRunner extends AbstractJobRunner<Dat
      * @return true if the key is in use and so the data stored against the key should
      *  be retained.
      */
+    // TODO (andponlin) make this pluggable
     private boolean isInUse(JobService jobService, String key) {
 
         if (jobService.tryGetJobForData(key).isPresent()) {

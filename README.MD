@@ -35,6 +35,7 @@ This web application is an online tool for working with the software packages of
 - [Integration](docs/integration.md)
 - [Repositories](docs/repositories.md)
 - [User Ratings](docs/user-rating.md)
+- [Job](docs/job.md)
 - [Data Localization](docs/data-localization.md)
 - [HDS Application Localization](docs/application-localization.md)
 - [Polygot update](docs/polygot-update.md)

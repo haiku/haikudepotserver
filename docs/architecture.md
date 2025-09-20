@@ -77,6 +77,11 @@ Using the Cayenne listeners such as `PostAddMutableCreateAndModifyTimestampListe
 
 Caching data uses the Cayenne query caches.  These are defined on the `HaikuDepot#CacheGroup` enum and are used in various Cayenne queries.  An example would be on `PkgIconImage#findForPkg(..)`.  The caches are cleared by listening for any change on the entity by using a listener.  These are configured as Spring beans in the `persistence.xml` file.  This is fairly liberal cache eviction, but will work well for the time being.
 
+When the caches are evicted, a message is sent via the database using the Postgres `NOTIFY` / `LISTEN` capability to all other instances of HDS so that they too can flush their caches. See the following classes for details about this;
+
+- `QueryCacheRemoveEventConsumer`
+- `NotifyingQueryCache`
+
 #### Migration
 
 On first-use the application server will populate the database schema-objects (tables, sequences and so on) itself.  It does this with a library called [Flyway](http://flywaydb.org/). Later, as new versions of the application server are deployed, the application server will detect that a database upgrade is required and run the necessary migration scripts.  The migration scripts can be found in the source-code at `/haikudepotserver-webapp/src/main/resources/db/...`.
