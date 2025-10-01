@@ -35,6 +35,7 @@ angular.module('haikudepotserver').controller(
                         $scope.versions.serverProject = result.projectVersion;
                         $scope.versions.serverJava = result.javaVersion;
                         $scope.serverStartTimestamp = result.startTimestamp;
+                        $scope.clientIdentifier = result.clientIdentifier;
                         $log.info('have fetched the runtime information');
                     }
                 );

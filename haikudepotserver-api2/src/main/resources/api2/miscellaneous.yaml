@@ -356,6 +356,8 @@ components:
           format: int64
         isProduction:
           type: boolean
+        clientIdentifier:
+          type: string
         defaults:
           type: object
           properties:
