@@ -474,6 +474,12 @@ SEARCH BAR
     float: right;
 }
 
+#search-criteria-container > div.search-criteria-input-container > label{
+    font-size: 10px;
+    margin-left: 0px;
+    margin-right: 0px;
+}
+
 /*
 Within the search criteria to break-up the sections of the search criteria, this will put a dotted line
 between the sections.

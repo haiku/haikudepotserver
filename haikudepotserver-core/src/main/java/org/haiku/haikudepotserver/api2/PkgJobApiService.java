@@ -1,5 +1,5 @@
 /*
- * Copyright 2022, Andrew Lindesay
+ * Copyright 2022-2025, Andrew Lindesay
  * Distributed under the terms of the MIT License.
  */
 package org.haiku.haikudepotserver.api2;
@@ -213,11 +213,11 @@ public class PkgJobApiService extends AbstractApiService {
                         Permission.BULK_PKGVERSIONLOCALIZATIONCOVERAGEEXPORTSPREADSHEET));
     }
 
-    public QueuePkgVersionPayloadLengthPopulationJobResult queuePkgVersionPayloadLengthPopulationJob() {
-        return new QueuePkgVersionPayloadLengthPopulationJobResult()
+    public QueuePkgVersionPayloadDataPopulationJobResult queuePkgVersionPayloadDataPopulationJob() {
+        return new QueuePkgVersionPayloadDataPopulationJobResult()
                 .guid(queueSimplePkgJob(
-                        PkgVersionPayloadLengthPopulationJobSpecification.class,
-                        Permission.BULK_PKGVERSIONPAYLOADLENGTHPOPULATION));
+                        PkgVersionPayloadDataPopulationJobSpecification.class,
+                        Permission.BULK_PKGVERSIONPAYLOADDATAPOPULATION));
     }
 
     public QueuePkgDumpExportJobResult queuePkgDumpExportJob(QueuePkgDumpExportJobRequestEnvelope request) {

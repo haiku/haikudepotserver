@@ -276,9 +276,10 @@ public class DbDistributedJobServiceImpl extends AbstractExecutionThreadService 
     @Override
     public void setJobProgressPercent(String guid, Integer progressPercent) {
         Preconditions.checkArgument(StringUtils.isNotBlank(guid), "the guid is required");
-        Preconditions.checkArgument(
-                progressPercent == null || (progressPercent >= 0 && progressPercent <= 100),
-                "bad progress percent value");
+
+        if (progressPercent == null || progressPercent < 0 || progressPercent > 100) {
+            throw new IllegalArgumentException("progress percent must be between 0 and 100; [" + progressPercent + "]");
+        }
 
         transactionTemplate.executeWithoutResult((transactionStatus) -> {
             if (jpaJobService.setJobProgressPercent(guid, progressPercent)) {

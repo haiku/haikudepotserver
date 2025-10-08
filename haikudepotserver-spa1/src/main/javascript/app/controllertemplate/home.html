@@ -24,6 +24,10 @@
             <input type="checkbox" ng-model="onlyNativeDesktop">
             <img src="/__img/native.svg" img-downgrade="" alt="Only show native desktop software">
         </div>
+        <div class="search-criteria-input-container">
+            <input type="checkbox" ng-model="onlyDesktop">
+            <label><message key="home.searchOnlyDesktopToggle.title"></message></label>
+        </div>
         <div class="search-criteria-input-container" ng-show="'CATEGORIES'==selectedViewCriteriaTypeOption.code">
             <span ng-show="!pkgCategories">...</span>
             <select

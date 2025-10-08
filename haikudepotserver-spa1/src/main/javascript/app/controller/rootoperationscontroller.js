@@ -38,13 +38,13 @@ angular.module('haikudepotserver').controller(
                 };
             }
 
-            $scope.goQueuePkgVersionPayloadLengthPopulationJob = function() {
-                remoteProcedureCall.call(constants.ENDPOINT_API_V2_PKG_JOB, "queue-pkg-version-payload-length-population-job").then(
+            $scope.goQueuePkgVersionPayloadDataPopulationJob = function() {
+                remoteProcedureCall.call(constants.ENDPOINT_API_V2_PKG_JOB, "queue-pkg-version-payload-data-population-job").then(
                     function() {
-                        showDidAction('queuePkgVersionPayloadLengthPopulationJob');
+                        showDidAction('queuePkgVersionPayloadDataPopulationJob');
                     },
                     function(err) {
-                        $log.error('unable to queue pkg version payload length population job');
+                        $log.error('unable to queue pkg version payload data population job');
                         errorHandling.handleRemoteProcedureCallError(err);
                     }
                 );
