@@ -120,6 +120,7 @@ public class MetricsGeneralReportJobRunner extends AbstractJobRunner<MetricsGene
     private void writeCounter(Writer writer, String name, long count)  {
         try {
             writer.write(StringUtils.rightPad(name, 96, " ."));
+            writer.write(" ");
             writer.write(Long.toString(count));
             writer.write("\n");
         }
