@@ -237,7 +237,6 @@ public class JpaJobService {
 
     public List<Job> findJobs(String userNickname, Set<JobSnapshot.Status> statuses, int offset, int limit) {
         Preconditions.checkArgument(offset >= 0, "illegal offset value");
-        Preconditions.checkArgument(limit > 0, "illegal limit value");
 
         if (limit < 1) {
             throw new IllegalArgumentException("the limit %d must be > 1".formatted(limit));

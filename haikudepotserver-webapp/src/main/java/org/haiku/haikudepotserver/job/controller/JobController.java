@@ -242,12 +242,12 @@ public class JobController extends AbstractController {
         if(!Strings.isNullOrEmpty(job.getOwnerUserNickname())) {
 
             tryObtainAuthenticatedUser(context).orElseThrow(() -> {
-                LOGGER.warn("attempt to obtain job data {} with no authenticated user", guid);
+                LOGGER.warn("attempt to obtain job data [{}] with no authenticated user", guid);
                 return new JobDataAuthorizationFailure();
             });
 
             User ownerUser= User.tryGetByNickname(context, job.getOwnerUserNickname()).orElseThrow(() -> {
-                LOGGER.warn("owner of job does not seem to exist; {}", job.getOwnerUserNickname());
+                LOGGER.warn("owner of job [{}] does not seem to exist", job.getOwnerUserNickname());
                 return new JobDataAuthorizationFailure();
             });
 

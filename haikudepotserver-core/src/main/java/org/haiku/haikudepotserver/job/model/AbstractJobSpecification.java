@@ -9,6 +9,7 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 
 import java.util.Collection;
 import java.util.Collections;
+import java.util.Objects;
 import java.util.Optional;
 
 /**
@@ -71,7 +72,8 @@ public abstract class AbstractJobSpecification implements JobSpecification {
     @JsonIgnore
     @Override
     public boolean isEquivalent(JobSpecification other) {
-        return this.getClass().isAssignableFrom(other.getClass());
+        return this.getClass().isAssignableFrom(other.getClass()) &&
+                Objects.equals(other.getOwnerUserNickname(), getOwnerUserNickname());
     }
 
     @Override
