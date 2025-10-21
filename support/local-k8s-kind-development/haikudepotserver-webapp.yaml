@@ -18,13 +18,27 @@ spec:
     spec:
       containers:
         - name: haikudepotserver-webapp
-          image: ghcr.io/haiku/haikudepotserver:1.0.169
+          image: ghcr.io/haiku/haikudepotserver:1.0.177
           env:
             # Don't test the SMTP server to see if the POD is healthy.
             - name: MANAGEMENT_HEALTH_MAIL_ENABLED
               value: "false"
             - name: SPRING_MAIL_HOST
               value: "smtp"
+              # This is the base URL used to formulate URLs to be sent out
+              # that can be used to return back to the system.
+              # For example; this might be used to create the URL used to
+              # manage the password reset process.  The URL base is included
+              # in the email body to users who have requested a password-reset.
+              # This has to be configured because the application itself does
+              # not know the path by which the HTTP request had reached it.
+              #
+              # In the case of a development environment, this base URL might
+              # be something like "http://localhost:8080".
+              #
+              # Note that this value should have no trailing slash.
+            - name: HDS_BASE_URL
+              value: "http://localhost:30080"
             - name: HDS_AUTHENTICATION_JWS_ISSUER
               value: "dev.hds"
             - name: SPRING_DATASOURCE_URL
@@ -35,7 +49,7 @@ spec:
               value: haikudepotserver
             - name: HDS_GRAPHICS_SERVER_BASE_URI
               value: http://haikudepotserver-server-graphics-svc:8085
-            - name: HDS_REPOSITORY_IMPORT_ALLOWEDPKGNAMEPATTERN
+            - name: HDS_REPOSITORY_IMPORT_ALLOWED_PKG_NAME_PATTERN
               value: "^.[Aa].+$"
           resources:
             limits:

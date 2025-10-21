@@ -1,5 +1,5 @@
 # =====================================
-# Copyright 2022-2024, Andrew Lindesay
+# Copyright 2022-2025, Andrew Lindesay
 # Distributed under the terms of the MIT License.
 # =====================================
 
@@ -26,7 +26,7 @@ ENV LANG='en_US.UTF-8' LANGUAGE='en_US:en' LC_ALL='en_US.UTF-8'
 FROM java_base AS java_maven_build
 
 RUN apt-get update && \
-    apt-get -y install temurin-21-jdk && \
+    apt-get -y install temurin-25-jdk && \
     apt-get -y install wget python3 fontconfig fonts-dejavu-core lsb-release gnupg2 && \
     apt-get -y install postgresql postgresql-contrib
 
@@ -78,7 +78,7 @@ RUN rm -f /hds-src/haikudepotserver-webapp/src/main/resources/local.properties
 
 # This will cause the integration tests to be run against a child process
 # of maven.
-ENV TEST_DATABASE_TYPE "START_LOCAL_DATABASE"
+ENV TEST_DATABASE_TYPE="START_LOCAL_DATABASE"
 
 # The build is now performed for the projects that are required
 # in the respective "last-mile" build phase.

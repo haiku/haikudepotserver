@@ -22,7 +22,7 @@ Reference data means data in the application that is generally invariant. Exampl
 
 ### Date and time data
 
-The system has only a concept of a &quot;moment in time&quot; which is called a timestamp.  The timestamp is typically communicated as the number of milliseconds elapsed since the epoc represented as a 64bit integer.  The timestamp communicated via the API is always relative to UTC.
+The system has only a concept of a "moment in time" which is called a timestamp.  The timestamp is typically communicated as the number of milliseconds elapsed since the epoc represented as a 64bit integer.  The timestamp communicated via the API is always relative to UTC.
 
 ### Invocations and transport
 

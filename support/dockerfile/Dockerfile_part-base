@@ -3,4 +3,4 @@
 # Distributed under the terms of the MIT License.
 # =====================================
 
-FROM debian:12.11-slim AS base
+FROM debian:13.1-slim AS base

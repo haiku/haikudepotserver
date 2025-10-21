@@ -24,15 +24,33 @@ logging:
     console: "%d{HH:mm:ss.SSS} [%thread] %-5level %logger{36} - %msg%n"
 
 spring:
+  mail:
+    host: stmp
+#    port: 25
+#    username: xxx
+#    password: xxx
+#    properties:
+#      mail:
+#        smtp:
+#          auth: false
+#          starttls:
+#            enable: false
   datasource:
     hikari:
       maximum-pool-size: 8
       minimum-idle: 1
     driver-class-name: org.postgresql.Driver
+    # url
+    # username
+    # password
   flyway:
     enabled: true
 
 management:
+  health:
+    mail:
+      # don't include SMTP connectivity as part of a health check.
+      enabled: false
   server:
     port: 8081
   endpoints:
@@ -42,3 +60,105 @@ management:
           - health
           - metrics
           - hdsmaintenance
+
+cayenne:
+  query:
+    cache:
+      size: 250
+
+hds:
+  alerts:
+    repository-absent-updates:
+      # It is possible to configure on a Repository Source, a tolerance in hours,
+      # after which, if no packages have been updated, an alert will be sent. This
+      # property controls who the alerts will go to. If not then no alerts will be
+      # sent.
+      # to: somebody@example.com
+  email:
+    # This is the email address from which emails outbound from the system
+    # will be sent. Typically, this might be a "no-reply" email address
+    # such as "noreply@haiku-os.org".
+    from: noreply@haiku-os.org
+
+  authentication:
+    jws:
+
+      # This value is used in the production and consumption of the tokens
+      # between the client and the server.  It is intended that this is
+      # consistent for a given deployment.  Sample values that may be
+      # appropriate;
+      #
+      #   dev.hds
+      #   prod.hds
+      #   test.hds
+      #
+      issuer: dev.hds
+
+      # This configuration value defines how many seconds a token will be
+      # able to be used before it expires. This value is optional and a
+      # sensible default will be employed in its absence.
+      # expiry-seconds: 123
+
+      # This secret is used to sign the tokens used to communicate between
+      # the client and the server.  This value should be very hard to guess.
+      # The output of the command "uuidgen" would be appropriate.  This
+      # value must be kept secret and not disclosed in public.
+      # commented out to force the value to be considered
+      shared-key: 93f8a7b1-c887-46a0-b189-88ec4a791ac9
+  passwordreset:
+    # When a password reset is sent, it has a time-to-live
+    # (TTL). This value configures that duration.
+    # ttlhours: 1
+  captcha:
+    # When the system must check that a human is present in
+    # some action such as creating a user, it uses a
+    # "captcha".  Each captcha generated is valid for a
+    # specific period of time; this configuration property
+    # defines the duration.
+    expiry-seconds: 240
+  deployment:
+    # This configuration setting can have a value of "true" or
+    # "false".  When false, the system will display a warning
+    # message on the user interface to indicate that the deployment
+    # is non-production.
+    is-production: true
+  architecture:
+    default:
+      # This configuration setting defines the code of the default
+      # architecture that should be shown.  Example values might be
+      # "x86_gcc2" or "ppc".
+      code: x86_64
+  repository:
+    default:
+      code: haikuports
+    import:
+      # When configured, only packages with names that match the supplied regex
+      # will be imported. This is useful when testing imports into a "cold"
+      # database because otherwise the import can take a long time.
+      # allowed-pkg-name-pattern: ^.[Aa].+$
+
+      # When set (either "true" or "false"), the repository import process will
+      # obtain the data for the package and will thereby figure out the size of
+      # the package.
+      populate-from-payload: true
+  desktop:
+    application:
+      version:
+        # This optional value can be configured to specify a minimum version
+        # value for the HaikuDepot desktop application.  If a version of the
+        # desktop application attempts to communicate with the server with a
+        # version lower than this value then the server will return a 412
+        # (precondition failed) HTTP status and a header that describes the
+        # minimum version required.
+        min: 0.0.2
+  request:
+    # This is a development level property that controls an across-the-board
+    # delay that can be applied to traffic to the HDS application server.
+    delay-millis: 0
+  user-rating:
+    aggregation:
+      pkg:
+        min-ratings: 1
+        # How many versions to go back from the latest version in order
+        # to find user ratings to aggregate.
+        versions-back: 2

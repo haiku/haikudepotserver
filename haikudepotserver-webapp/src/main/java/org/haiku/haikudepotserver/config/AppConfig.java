@@ -26,7 +26,6 @@ import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Import;
-import org.springframework.context.annotation.PropertySource;
 import org.springframework.core.io.Resource;
 import org.springframework.transaction.PlatformTransactionManager;
 
@@ -34,14 +33,6 @@ import java.util.Collection;
 import java.util.List;
 
 @Import({BasicConfig.class, ScheduleConfig.class})
-@PropertySource(
-        value = {
-                "classpath:application.yml",
-                "classpath:local.properties",
-                "${config.properties:file-not-found.properties}"
-        },
-        ignoreResourceNotFound = true
-)
 @Configuration
 public class AppConfig {
 
@@ -52,7 +43,7 @@ public class AppConfig {
 
     @Bean
     public JobService jobService(
-            @Value("${hds.jobservice.type:local}") String type,
+            @Value("${hds.jobservice.type:db}") String type,
             DataStorageService dataStorageService,
             Collection<JobRunner<?>> jobRunners,
             PlatformTransactionManager transactionManager,

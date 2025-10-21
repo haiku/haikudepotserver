@@ -1,31 +1,13 @@
 apiVersion: v1
-kind: PersistentVolume
-metadata:
-  name: haikudepotserver-pg-volume
-  labels:
-    type: local
-    app: haikudepotserver-pg
-spec:
-  storageClassName: manual
-  capacity:
-    storage: 10Gi
-  accessModes:
-    - ReadWriteMany
-  hostPath:
-    path: /data/haikudepotserver-pg
-    type: Directory
----
-apiVersion: v1
 kind: PersistentVolumeClaim
 metadata:
   name: haikudepotserver-pg-volume-claim
   labels:
     app: postgres-pg
 spec:
-  storageClassName: manual
-  volumeName: haikudepotserver-pg-volume
+  storageClassName: local-path
   accessModes:
-    - ReadWriteMany
+    - ReadWriteOnce
   resources:
     requests:
       storage: 10Gi

@@ -5,3 +5,12 @@ server:
 logging:
   pattern:
     console: "%d{HH:mm:ss.SSS} [%thread] %-5level %logger{36} - %msg%n"
+
+hds:
+  gfx:
+#    quantize: false
+  tool:
+    oxipng:
+#      path: /x/y/z/oxipng
+    hvif2png:
+#      path: /w/u/v/hvifpng

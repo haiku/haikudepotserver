@@ -7,15 +7,16 @@ For local development, say in an IDE system, HDS can be launched as a SpringBoot
 ## Preparation
 
 1. Install the necessary software for HDS
-  - Java 21+
+  - Java 25+
   - Postgres Database Server and Client 14+
   - Python 3
-  - Docker
+  - Podman
 1. Setup the database server
   - Listening on a TCP/IP socket
   - Empty database
   - User with password to access the database
-1. Copy the file `support/deployment/config.properties` to `haikudepotserver-webapp/src/main/resources/local.properties`. Modify at least the following configuration items to suit your environment;
+1. Create a `.yaml` file somewhere on the local storage and configure the following keys in that file as appropriate. See the `application.yaml` file in the source code for documentation.
+
   - `spring.datasource.url`
   - `spring.datasource.username`
   - `spring.datasource.password`
@@ -23,6 +24,9 @@ For local development, say in an IDE system, HDS can be launched as a SpringBoot
   - `hds.deployment.is-production`
   - `hds.base-url`
   - `hds.authentication.jws.issuer`
+  - `server.port`
+  - `hds.graphics-server.base-uri`
+
   If you don't have an SMTP mail host this can be omitted for a development scenario unless you want to test those functions such as "forgot password".
 
 ## Run from Maven
@@ -38,16 +42,15 @@ Run the HDS application server with;
 ```
 cd haikudepotserver-webapp
 
-SERVER_PORT=8080 \
-HDS_GRAPHICSSERVER_BASE_URI= \
 ../mvnw \
 spring-boot:run \
 -Dfile.encoding=UTF-8 \
 -Duser.timezone=GMT0 \
 -Djava.awt.headless=true
+-Drun.arguments=--spring.config.additional-location=file:///path/to/config.yaml
 ```
 
-The application can be accessed using a web browser on `http://localhost:8080` on the development host. Login as `root` with password `zimmer`.
+The application can be accessed using a web browser on `http://localhost:8080` on the development host; assuming `8080` is the configured value for `server.port`. Login as `root` with password `zimmer`.
 
 ## Run the graphics application
 
@@ -67,11 +70,15 @@ spring-boot:run \
 -Djava.awt.headless=true
 ```
 
-Modify the environment variable `HDS_GRAPHICSSERVER_BASE_URI` set when running the HDS application server to have value `http://localhost:8085`. Re-run the HDS application server.
+Modify the configuration property `hds.graphics-server.base-uri` set when running the HDS application server to have value `http://localhost:8085`. Re-run the HDS application server.
 
 ## Run from the Intelli-J IDE
 
-The [Intelli-J](https://www.jetbrains.com/idea/) IDE can be used to run the HDS SpringBoot application. Locate the file `src/main/java/org/haiku/haikudepotserver/Application.java` and choose the _Debug_ option on the context menu for this file.
+The [Intelli-J](https://www.jetbrains.com/idea/) IDE can be used to run the HDS SpringBoot application. Locate the file `src/main/java/org/haiku/haikudepotserver/Application.java` and choose the _Debug_ option on the context menu for this file. You will need to add the `-Drun.arguments=--spring.config.additional-location=file:///path/to/config.yaml` program arguments and the following JVM arguments;
+
+- `-Dfile.encoding=UTF-8`
+- `-Duser.timezone=GMT0`
+- `-Djava.awt.headless=true`
 
 The application can be accessed using a web browser on `http://localhost:8080` on the development host. Login as `root` with password `zimmer`.
 

@@ -30,7 +30,7 @@ public class ToolService {
             @Value("${hds.tool.pngquant.path:/usr/bin/pngquant}") File pngquantTool,
             @Value("${hds.tool.convert.path:/usr/bin/convert}") File convertTool,
             @Value("${hds.tool.oxipng.path}") File oxipngTool,
-            @Value("${hds.gfx.quantize:true}") boolean quantize) {
+            @Value("${hds.gfx.quantize:false}") boolean quantize) {
 
         List<String> missingFilenames = Stream.of(hvif2pngTool, pngquantTool, convertTool, oxipngTool)
                 .filter(f -> !f.isFile())

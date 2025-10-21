@@ -4,9 +4,13 @@
 
 The application server is configured using a standard java properties or YAML file using SpringBoot's typical configuration patterns.
 
-There are a number of possible keys which are described in a file `support/deployment/config.properties`.  Keys which are for HDS specifically are prefixed with `hds.`.  Keys which are for Spring Boot are prefixed with `spring.`.
+There are a number of possible keys which are described in a file `src/main/resources/application.yml`.  Keys which are for HDS specifically are prefixed with `hds.`.  Keys which are for Spring Boot are prefixed with `spring.`.
 
 To avoid the HDS application server from failing to health check connectivity to a mail service you may wish to configure the configuration property `management.health.mail.enabled` to `false`.
+
+## Graphics Server
+
+See the file `src/main/resources/application.yml` for configuation options for this supporting Application.
 
 ## Logging
 

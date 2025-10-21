@@ -6,7 +6,6 @@ target
 node_modules
 venv
 haikudepotserver-webapp/src/main/webapp/js/lib/**
-haikudepotserver-webapp/src/main/resources/local.properties
 haikudepotserver-spa1/node
 
 Dockerfile_server_graphics
