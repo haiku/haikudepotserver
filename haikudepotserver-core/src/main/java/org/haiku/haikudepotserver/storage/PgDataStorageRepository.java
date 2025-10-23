@@ -73,6 +73,12 @@ public class PgDataStorageRepository {
     private final static String SQL_HEAD_CODES =
             "SELECT oh.code FROM datastore.object_head oh WHERE oh.modify_timestamp < ?";
 
+    private final static String SQL_HEAD_COUNT =
+            "SELECT COUNT(oh.code) FROM datastore.object_head oh";
+
+    private final static String SQL_HEAD_LENGTH_SUM =
+            "SELECT SUM(oh.length) FROM datastore.object_head oh";
+
     /**
      * <p>This is used for a metric gauge to show the rate of data transfer.</p>
      */
@@ -105,6 +111,14 @@ public class PgDataStorageRepository {
                 this.mbPerSecondTransfer);
 
         this.clock = Clock.systemUTC();
+    }
+
+    long getHeadCount() {
+        return Optional.ofNullable(jdbcTemplate.queryForObject(SQL_HEAD_COUNT, Long.class)).orElse(0L);
+    }
+
+    long getHeadLengthSum() {
+        return Optional.ofNullable(jdbcTemplate.queryForObject(SQL_HEAD_LENGTH_SUM, Long.class)).orElse(0L);
     }
 
     /**
@@ -180,7 +194,7 @@ public class PgDataStorageRepository {
                     preparedStatement.setTimestamp(1, new java.sql.Timestamp(clock.millis() - olderThanDuration.toMillis()));
                     return preparedStatement;
                 },
-                (ResultSet rs, int rowNum) -> rs.getString(1)
+                (ResultSet rs, int _) -> rs.getString(1)
         ));
     }
 

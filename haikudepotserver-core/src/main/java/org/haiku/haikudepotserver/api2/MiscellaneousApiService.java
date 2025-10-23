@@ -1,5 +1,5 @@
 /*
- * Copyright 2022-2024, Andrew Lindesay
+ * Copyright 2022-2025, Andrew Lindesay
  * Distributed under the terms of the MIT License.
  */
 package org.haiku.haikudepotserver.api2;
@@ -8,28 +8,7 @@ import com.google.common.base.Preconditions;
 import org.apache.cayenne.ObjectContext;
 import org.apache.cayenne.configuration.server.ServerRuntime;
 import org.apache.commons.lang3.StringUtils;
-import org.haiku.haikudepotserver.api2.model.Contributor;
-import org.haiku.haikudepotserver.api2.model.ContributorType;
-import org.haiku.haikudepotserver.api2.model.GenerateFeedUrlRequestEnvelope;
-import org.haiku.haikudepotserver.api2.model.GenerateFeedUrlResult;
-import org.haiku.haikudepotserver.api2.model.GetAllArchitecturesRequestEnvelope;
-import org.haiku.haikudepotserver.api2.model.GetAllArchitecturesResult;
-import org.haiku.haikudepotserver.api2.model.GetAllContributorsResult;
-import org.haiku.haikudepotserver.api2.model.GetAllCountriesRequestEnvelope;
-import org.haiku.haikudepotserver.api2.model.GetAllCountriesResult;
-import org.haiku.haikudepotserver.api2.model.GetAllMessagesRequestEnvelope;
-import org.haiku.haikudepotserver.api2.model.GetAllMessagesResult;
-import org.haiku.haikudepotserver.api2.model.GetAllNaturalLanguagesRequestEnvelope;
-import org.haiku.haikudepotserver.api2.model.GetAllNaturalLanguagesResult;
-import org.haiku.haikudepotserver.api2.model.GetAllPkgCategoriesRequestEnvelope;
-import org.haiku.haikudepotserver.api2.model.GetAllPkgCategoriesResult;
-import org.haiku.haikudepotserver.api2.model.GetAllProminencesRequestEnvelope;
-import org.haiku.haikudepotserver.api2.model.GetAllProminencesResult;
-import org.haiku.haikudepotserver.api2.model.GetAllUserRatingStabilitiesRequestEnvelope;
-import org.haiku.haikudepotserver.api2.model.GetAllUserRatingStabilitiesResult;
-import org.haiku.haikudepotserver.api2.model.GetRuntimeInformationResult;
-import org.haiku.haikudepotserver.api2.model.GetRuntimeInformationResultDefaults;
-import org.haiku.haikudepotserver.api2.model.Message;
+import org.haiku.haikudepotserver.api2.model.*;
 import org.haiku.haikudepotserver.dataobjects.Architecture;
 import org.haiku.haikudepotserver.dataobjects.Country;
 import org.haiku.haikudepotserver.dataobjects.NaturalLanguage;
@@ -43,6 +22,7 @@ import org.haiku.haikudepotserver.feed.model.FeedService;
 import org.haiku.haikudepotserver.feed.model.FeedSpecification;
 import org.haiku.haikudepotserver.naturallanguage.model.NaturalLanguageService;
 import org.haiku.haikudepotserver.naturallanguage.model.NaturalLanguageCoordinates;
+import org.haiku.haikudepotserver.storage.model.DataStorageService;
 import org.haiku.haikudepotserver.support.ClientIdentifierSupplier;
 import org.haiku.haikudepotserver.support.ContributorsService;
 import org.haiku.haikudepotserver.support.RuntimeInformationService;
@@ -53,6 +33,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.MessageSource;
 import org.springframework.stereotype.Component;
 
+import java.lang.Error;
 import java.time.Clock;
 import java.util.Optional;
 import java.util.Properties;
@@ -75,6 +56,7 @@ public class MiscellaneousApiService extends AbstractApiService {
     private final String repositoryDefaultCode;
     private final Clock clock = Clock.systemUTC();
     private final ClientIdentifierSupplier clientIdentifierSupplier;
+    private final DataStorageService dataStorageService;
 
     @Autowired
     public MiscellaneousApiService(
@@ -85,6 +67,7 @@ public class MiscellaneousApiService extends AbstractApiService {
             ContributorsService contributorsService,
             MessageSource messageSource,
             NaturalLanguageService naturalLanguageService,
+            DataStorageService dataStorageService,
             @Value("${hds.deployment.is-production:false}") Boolean isProduction,
             @Value("${hds.architecture.default.code}") String architectureDefaultCode,
             @Value("${hds.repository.default.code}") String repositoryDefaultCode) {
@@ -95,6 +78,7 @@ public class MiscellaneousApiService extends AbstractApiService {
         this.contributorsService = Preconditions.checkNotNull(contributorsService);
         this.messageSource = Preconditions.checkNotNull(messageSource);
         this.naturalLanguageService = Preconditions.checkNotNull(naturalLanguageService);
+        this.dataStorageService = Preconditions.checkNotNull(dataStorageService);
         this.isProduction = Preconditions.checkNotNull(isProduction);
         this.architectureDefaultCode = Preconditions.checkNotNull(architectureDefaultCode);
         this.repositoryDefaultCode = Preconditions.checkNotNull(repositoryDefaultCode);
@@ -293,6 +277,11 @@ public class MiscellaneousApiService extends AbstractApiService {
 
         if(authUserOptional.isPresent() && authUserOptional.get().getIsRoot()) {
             result = result
+                    .storage(new GetRuntimeInformationResultStorage()
+                            .size(dataStorageService.size())
+                            .totalBytes(dataStorageService.totalBytes())
+                    )
+                    .operatingSystemVersion(runtimeInformationService.getOperatingSystemVersion())
                     .javaVersion(runtimeInformationService.getJavaVersion())
                     .startTimestamp(runtimeInformationService.getStartTimestamp());
         }

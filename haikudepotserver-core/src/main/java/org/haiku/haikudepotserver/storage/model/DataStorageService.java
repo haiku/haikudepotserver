@@ -45,6 +45,16 @@ public interface DataStorageService {
     boolean remove(String key);
 
     /**
+     * @return the total number of objects stored.
+     */
+    long size();
+
+    /**
+     * @return the size of all storage in bytes.
+     */
+    long totalBytes();
+
+    /**
      * <p>Removes all the items from storage.</p>
      */
 

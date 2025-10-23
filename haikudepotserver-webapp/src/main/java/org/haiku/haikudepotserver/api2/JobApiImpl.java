@@ -1,14 +1,11 @@
 /*
- * Copyright 2022, Andrew Lindesay
+ * Copyright 2022-2025, Andrew Lindesay
  * Distributed under the terms of the MIT License.
  */
 package org.haiku.haikudepotserver.api2;
 
 import com.google.common.base.Preconditions;
-import org.haiku.haikudepotserver.api2.model.GetJobRequestEnvelope;
-import org.haiku.haikudepotserver.api2.model.GetJobResponseEnvelope;
-import org.haiku.haikudepotserver.api2.model.SearchJobsRequestEnvelope;
-import org.haiku.haikudepotserver.api2.model.SearchJobsResponseEnvelope;
+import org.haiku.haikudepotserver.api2.model.*;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 
@@ -35,4 +32,10 @@ public class JobApiImpl extends AbstractApiImpl implements JobApi {
                         .result(jobApiService.searchJobs(searchJobsRequestEnvelope)));
     }
 
+    @Override
+    public ResponseEntity<JobStatusCountsResponseEnvelope> jobStatusCounts(Object body) {
+        return ResponseEntity.ok(
+                new JobStatusCountsResponseEnvelope()
+                        .result(jobApiService.jobStatusCounts()));
+    }
 }

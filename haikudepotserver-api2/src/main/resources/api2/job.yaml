@@ -8,6 +8,25 @@ info:
 tags:
   - name: job
 paths:
+  /__api/v2/job/job-status-counts:
+    post:
+      tags:
+        - job
+      operationId: jobStatusCounts
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/jobStatusCountsRequestEnvelope"
+      responses:
+        200:
+          description: >
+            The results of the job status counts query.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/jobStatusCountsResponseEnvelope"
   /__api/v2/job/search-jobs:
     post:
       tags:
@@ -160,3 +179,28 @@ components:
           type: string
         filename:
           type: string
+    jobStatusCountsRequestEnvelope:
+      type: object
+    jobStatusCountsResponseEnvelope:
+      type: object
+      properties:
+        result:
+          $ref: "#/components/schemas/jobStatusCountsResult"
+        error:
+          $ref: "./error.yaml#/components/schemas/error"
+    jobStatusCountsResult:
+      type: object
+      properties:
+        jobStatusCounts:
+          type: array
+          items:
+            $ref: "#/components/schemas/jobStatusCountsResultItem"
+    jobStatusCountsResultItem:
+      type: object
+      properties:
+        jobStatus:
+          $ref: "./common.yaml#/components/schemas/jobStatus"
+        count:
+          type: integer
+          format: int64
+

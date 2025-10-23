@@ -1,5 +1,5 @@
 /*
- * Copyright 2018-2020, Andrew Lindesay
+ * Copyright 2018-2025, Andrew Lindesay
  * Distributed under the terms of the MIT License.
  */
 
@@ -65,6 +65,10 @@ public class RuntimeInformationService {
 
     public String getJavaVersion() {
         return versionOrPlaceholder(System.getProperty("java.version"));
+    }
+
+    public String getOperatingSystemVersion() {
+        return versionOrPlaceholder(System.getProperty("os.version"));
     }
 
     public long getStartTimestamp() {

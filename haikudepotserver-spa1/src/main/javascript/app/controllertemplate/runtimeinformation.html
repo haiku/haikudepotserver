@@ -14,6 +14,13 @@
         Your client identifier is <code>{{clientIdentifier}}</code>.
     </p>
 
+    <h1>Non-relational Storage</h1>
+    <p ng-show="storage">
+        The server is persisting <b>{{storage.size}}</b> objects at a total size
+        of <b>{{storage.totalBytes|dataLength}}</b>.
+    </p>
+    <p ng-show="!storage">...</p>
+
     <h1>Versions</h1>
 
     <table class="table-general">
@@ -27,8 +34,12 @@
             <td><code>{{versions.serverProject}}</code></td>
         </tr>
         <tr>
-            <td>Java (on Server)</td>
+            <td>Java</td>
             <td><code>{{versions.serverJava}}</code></td>
+        </tr>
+        <tr>
+            <td>Host Operating System</td>
+            <td><code>{{versions.serverOperatingSystem}}</code></td>
         </tr>
         <tr>
             <td>AngularJS</td>
@@ -37,5 +48,21 @@
         </tbody>
     </table>
 
+    <h1>Jobs</h1>
+
+    <p>This table shows the count of jobs that are in various statuses.</p>
+
+    <table class="table-general">
+        <thead>
+        <th>Status</th>
+        <th>Count</th>
+        </thead>
+        <tbody>
+        <tr ng-repeat="jobStatusCount in jobStatusCounts">
+            <td><code>{{jobStatusCount.jobStatus}}</code></td>
+            <td>{{jobStatusCount.count}}</td>
+        </tr>
+        </tbody>
+    </table>
 
 </div>

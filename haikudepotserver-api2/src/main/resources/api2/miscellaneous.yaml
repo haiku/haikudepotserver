@@ -347,6 +347,12 @@ components:
           type: string
         javaVersion:
           type: string
+          description: >
+            The version of the Java virtual machine that the system is running on.
+        operatingSystemVersion:
+          type: string
+          description: >
+            A string that describes the operating system that the service is running on; example `6.12.48+deb13-amd64`.
         currentTimestamp:
           description: Current millisecond timestamp relative to UTC.
           type: integer
@@ -365,6 +371,17 @@ components:
               type: string
             repositoryCode:
               type: string
+        storage:
+          type: object
+          properties:
+            size:
+              type: integer
+              format: int64
+              description: The quantity of stored objects.
+            totalBytes:
+              type: integer
+              format: int64
+              description: The total quantity of data stored for all objects.
 
     getAllMessagesRequestEnvelope:
       type: object

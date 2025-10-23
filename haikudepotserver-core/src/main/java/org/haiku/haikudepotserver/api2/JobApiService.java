@@ -1,5 +1,5 @@
 /*
- * Copyright 2022, Andrew Lindesay
+ * Copyright 2022-2025, Andrew Lindesay
  * Distributed under the terms of the MIT License.
  */
 package org.haiku.haikudepotserver.api2;
@@ -9,17 +9,12 @@ import com.google.common.base.Strings;
 import org.apache.cayenne.ObjectContext;
 import org.apache.cayenne.configuration.server.ServerRuntime;
 import org.apache.commons.collections4.CollectionUtils;
-import org.haiku.haikudepotserver.api2.model.GetJobRequestEnvelope;
-import org.haiku.haikudepotserver.api2.model.GetJobResult;
-import org.haiku.haikudepotserver.api2.model.JobStatus;
-import org.haiku.haikudepotserver.api2.model.SearchJobsRequestEnvelope;
-import org.haiku.haikudepotserver.api2.model.SearchJobsResult;
-import org.haiku.haikudepotserver.api2.model.SearchJobsResultItem;
-import org.haiku.haikudepotserver.support.exception.ObjectNotFoundException;
+import org.haiku.haikudepotserver.api2.model.*;
 import org.haiku.haikudepotserver.dataobjects.User;
 import org.haiku.haikudepotserver.job.model.JobService;
 import org.haiku.haikudepotserver.job.model.JobSnapshot;
 import org.haiku.haikudepotserver.security.model.Permission;
+import org.haiku.haikudepotserver.support.exception.ObjectNotFoundException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.security.access.AccessDeniedException;
@@ -27,10 +22,7 @@ import org.springframework.security.access.PermissionEvaluator;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Component;
 
-import java.util.Date;
-import java.util.List;
-import java.util.Optional;
-import java.util.Set;
+import java.util.*;
 import java.util.stream.Collectors;
 
 @Component("jobApiServiceV2")
@@ -177,6 +169,26 @@ public class JobApiService extends AbstractApiService {
         return new SearchJobsResult()
                 .total(total)
                 .items(items);
+    }
+
+    public JobStatusCountsResult jobStatusCounts() {
+        if (!permissionEvaluator.hasPermission(
+                SecurityContextHolder.getContext().getAuthentication(),
+                null,
+                Permission.JOBS_VIEW)) {
+            throw new AccessDeniedException("attempt to access jobs view");
+        }
+
+        return new JobStatusCountsResult()
+                .jobStatusCounts(
+                        Arrays.stream(JobSnapshot.Status.values())
+                                .filter(s -> s != JobSnapshot.Status.INDETERMINATE)
+                                .map(s -> new JobStatusCountsResultItem()
+                                        .count(Integer.valueOf(jobService.totalJobs(null, Set.of(s))).longValue())
+                                        .jobStatus(JobStatus.valueOf(s.name()))
+                                )
+                                .toList()
+                );
     }
 
 }

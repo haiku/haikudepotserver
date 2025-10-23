@@ -63,6 +63,16 @@ public class PgDataStorageServiceImpl implements DataStorageService {
     }
 
     @Override
+    public long size() {
+        return respository.getHeadCount();
+    }
+
+    @Override
+    public long totalBytes() {
+        return respository.getHeadLengthSum();
+    }
+
+    @Override
     public void clear() {
         respository.deleteHeadsAndPartsTransactionally();
     }
