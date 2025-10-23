@@ -1,4 +1,4 @@
-# Copyright 2022, Andrew Lindesay
+# Copyright 2022-2025, Andrew Lindesay
 # Distributed under the terms of the MIT License.
 
 openapi: 3.0.3
@@ -251,19 +251,19 @@ paths:
               schema:
                 $ref: "#/components/schemas/queuePkgIconArchiveImportJobResponseEnvelope"
 
-  /__api/v2/pkg-job/queue-pkg-version-payload-length-population-job:
+  /__api/v2/pkg-job/queue-pkg-version-payload-data-population-job:
     description: >
       Enqueues a job to cause all PkgVersion objects with no payload length to get those populated if possible.
     post:
       tags:
         - pkg-job
-      operationId: queuePkgVersionPayloadLengthPopulationJob
+      operationId: queuePkgVersionPayloadDataPopulationJob
       requestBody:
         required: true
         content:
           application/json:
             schema:
-              $ref: "#/components/schemas/queuePkgVersionPayloadLengthPopulationJobRequestEnvelope"
+              $ref: "#/components/schemas/queuePkgVersionPayloadDataPopulationJobRequestEnvelope"
       responses:
         200:
           description: >
@@ -271,7 +271,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/queuePkgVersionPayloadLengthPopulationJobResponseEnvelope"
+                $ref: "#/components/schemas/queuePkgVersionPayloadDataPopulationJobResponseEnvelope"
 
   /__api/v2/pkg-job/queue-pkg-version-localization-coverage-export-spreadsheet-job:
     description: >
@@ -498,16 +498,16 @@ components:
         guid:
           type: string
 
-    queuePkgVersionPayloadLengthPopulationJobRequestEnvelope:
+    queuePkgVersionPayloadDataPopulationJobRequestEnvelope:
       type: object
-    queuePkgVersionPayloadLengthPopulationJobResponseEnvelope:
+    queuePkgVersionPayloadDataPopulationJobResponseEnvelope:
       type: object
       properties:
         result:
-          $ref: "#/components/schemas/queuePkgVersionPayloadLengthPopulationJobResult"
+          $ref: "#/components/schemas/queuePkgVersionPayloadDataPopulationJobResult"
         error:
           $ref: "./error.yaml#/components/schemas/error"
-    queuePkgVersionPayloadLengthPopulationJobResult:
+    queuePkgVersionPayloadDataPopulationJobResult:
       type: object
       properties:
         guid:

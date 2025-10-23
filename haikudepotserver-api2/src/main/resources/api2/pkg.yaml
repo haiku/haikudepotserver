@@ -1,4 +1,4 @@
-# Copyright 2021-2022, Andrew Lindesay
+# Copyright 2021-2025, Andrew Lindesay
 # Distributed under the terms of the MIT License.
 
 openapi: 3.0.3
@@ -538,6 +538,11 @@ components:
                 sources and debug-info. By providing this as false, these
                 packages will be excluded from the results. It will default
                 to true.
+            onlyDesktop:
+              type: boolean
+              description: >
+                Only show those packages which are marked as providing a
+                desktop application.
             onlyNativeDesktop:
               type: boolean
               description: >
@@ -614,6 +619,9 @@ components:
       properties:
         name:
           type: string
+        isDesktop:
+          type: boolean
+          description: "True if the package provides a desktop application."
         isNativeDesktop:
           type: boolean
           description: "True if the package provides a native desktop application."
@@ -692,6 +700,9 @@ components:
       properties:
         name:
           type: string
+        isDesktop:
+          type: boolean
+          description: "True if the package delivers a desktop application"
         isNativeDesktop:
           type: boolean
           description: "True if the package delivers a native desktop application"

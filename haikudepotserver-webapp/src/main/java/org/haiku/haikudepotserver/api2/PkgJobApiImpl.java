@@ -1,5 +1,5 @@
 /*
- * Copyright 2022, Andrew Lindesay
+ * Copyright 2022-2025, Andrew Lindesay
  * Distributed under the terms of the MIT License.
  */
 package org.haiku.haikudepotserver.api2;
@@ -96,10 +96,10 @@ public class PkgJobApiImpl extends AbstractApiImpl implements PkgJobApi {
     }
 
     @Override
-    public ResponseEntity<QueuePkgVersionPayloadLengthPopulationJobResponseEnvelope> queuePkgVersionPayloadLengthPopulationJob(Object body) {
+    public ResponseEntity<QueuePkgVersionPayloadDataPopulationJobResponseEnvelope> queuePkgVersionPayloadDataPopulationJob(Object body) {
         return ResponseEntity.ok(
-                new QueuePkgVersionPayloadLengthPopulationJobResponseEnvelope()
-                        .result(pkgJobApiService.queuePkgVersionPayloadLengthPopulationJob()));
+                new QueuePkgVersionPayloadDataPopulationJobResponseEnvelope()
+                        .result(pkgJobApiService.queuePkgVersionPayloadDataPopulationJob()));
     }
 
     @Override

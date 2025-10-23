@@ -217,6 +217,8 @@ public class PkgImportServiceImplIT extends AbstractIntegrationTest {
             {
                 ObjectContext context = serverRuntime.newContext();
                 org.haiku.haikudepotserver.dataobjects.Pkg pkg = org.haiku.haikudepotserver.dataobjects.Pkg.getByName(context, "testpkg");
+                Assertions.assertThat(pkg.getIsDesktop()).isTrue();
+
                 RepositorySource repositorySource = RepositorySource.getByCode(context, "testreposrc_xyz");
                 org.haiku.haikudepotserver.dataobjects.PkgVersion pkgVersion = pkgService.getLatestPkgVersionForPkg(
                         context,

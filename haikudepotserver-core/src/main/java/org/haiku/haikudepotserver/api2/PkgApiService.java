@@ -1,5 +1,5 @@
 /*
- * Copyright 2022-2024, Andrew Lindesay
+ * Copyright 2022-2025, Andrew Lindesay
  * Distributed under the terms of the MIT License.
  */
 package org.haiku.haikudepotserver.api2;
@@ -223,6 +223,7 @@ public class PkgApiService extends AbstractApiService {
 
         GetPkgResult result = new GetPkgResult()
                 .name(pkg.getName())
+                .isDesktop(pkg.getIsDesktop())
                 .isNativeDesktop(pkg.getIsNativeDesktop())
                 .modifyTimestamp(pkg.getModifyTimestamp().getTime())
                 .vanityLinkUrl(pkgService.createVanityLinkUrl(pkg))
@@ -332,6 +333,9 @@ public class PkgApiService extends AbstractApiService {
             Pkg pkg,
             Architecture architecture,
             RepositorySource repositorySource) {
+
+        Preconditions.checkNotNull(context);
+        Preconditions.checkNotNull(request);
 
         switch (request.getVersionType()) {
 
@@ -680,6 +684,7 @@ public class PkgApiService extends AbstractApiService {
         specification.setRepositories(transformCodesToRepositories(context, request.getRepositoryCodes()));
         specification.setIncludeDevelopment(BooleanUtils.isTrue(request.getIncludeDevelopment()));
         specification.setOnlyNativeDesktop(BooleanUtils.isTrue(request.getOnlyNativeDesktop()));
+        specification.setOnlyDesktop(BooleanUtils.isTrue(request.getOnlyDesktop()));
         specification.setLimit(request.getLimit());
         specification.setOffset(request.getOffset());
 
@@ -727,6 +732,7 @@ public class PkgApiService extends AbstractApiService {
 
         return new SearchPkgsPkg()
                 .name(pkgVersion.getPkg().getName())
+                .isDesktop(pkgVersion.getPkg().getIsDesktop())
                 .isNativeDesktop(pkgVersion.getPkg().getIsNativeDesktop())
                 .modifyTimestamp(pkgVersion.getPkg().getModifyTimestamp().getTime())
                 .derivedRating(pkgUserRatingAggregateOptional

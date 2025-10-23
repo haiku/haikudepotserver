@@ -1,5 +1,5 @@
 /*
- * Copyright 2021-2022, Andrew Lindesay
+ * Copyright 2021-2025, Andrew Lindesay
  * Distributed under the terms of the MIT License.
  */
 package org.haiku.haikudepotserver.support;
@@ -32,24 +32,41 @@ public class HpkgHelperTest {
     File temporaryFolder;
 
     @Test
+    public void testHasDesktopLink() throws Exception {
+        // GIVEN
+        File file = prepareTestFile(RESOURCE_TEST);
+
+        try (HpkgFileExtractor fileExtractor = new HpkgFileExtractor(file)) {
+            AttributeContext tocContext = fileExtractor.getTocContext();
+
+            // WHEN
+            boolean hasDesktopLink = HpkgHelper.hasDesktopLink(tocContext, fileExtractor.getToc());
+
+            // THEN
+            Assertions.assertThat(hasDesktopLink).isTrue();
+        }
+    }
+
+    @Test
     public void testFindIconAttributesFromAppExecutableDirEntries() throws Exception {
         // GIVEN
         File file = prepareTestFile(RESOURCE_TEST);
-        HpkgFileExtractor fileExtractor = new HpkgFileExtractor(file);
-        AttributeContext tocContext = fileExtractor.getTocContext();
+        try (HpkgFileExtractor fileExtractor = new HpkgFileExtractor(file)) {
+            AttributeContext tocContext = fileExtractor.getTocContext();
 
-        // WHEN
-        List<Attribute> attributes = HpkgHelper.findIconAttributesFromExecutableDirEntries(
-                tocContext, fileExtractor.getToc());
+            // WHEN
+            List<Attribute> attributes = HpkgHelper.findIconAttributesFromExecutableDirEntries(
+                    tocContext, fileExtractor.getToc());
 
-        // THEN
-        Assertions.assertThat(attributes).hasSize(1);
-        Attribute iconA = Iterables.getOnlyElement(attributes);
-        Attribute iconDataA = iconA.getChildAttribute(AttributeId.DATA);
-        ByteSource byteSource = (ByteSource) iconDataA.getValue(tocContext);
-        byte[] data = byteSource.read();
-        Assertions.assertThat(data).hasSize(544);
-        assertIsHvif(data);
+            // THEN
+            Assertions.assertThat(attributes).hasSize(1);
+            Attribute iconA = Iterables.getOnlyElement(attributes);
+            Attribute iconDataA = iconA.getChildAttribute(AttributeId.DATA);
+            ByteSource byteSource = (ByteSource) iconDataA.getValue(tocContext);
+            byte[] data = byteSource.read();
+            Assertions.assertThat(data).hasSize(544);
+            assertIsHvif(data);
+        }
     }
 
     File prepareTestFile(String resource) throws IOException {

@@ -1,5 +1,5 @@
 /*
- * Copyright 2014-2019, Andrew Lindesay
+ * Copyright 2014-2025, Andrew Lindesay
  * Distributed under the terms of the MIT License.
  */
 
@@ -51,7 +51,7 @@ public enum Permission {
     BULK_USERRATINGSPREADSHEETREPORT_PKG(TargetType.PKG),
     BULK_USERRATINGSPREADSHEETREPORT_ALL(null),
     BULK_USERRATINGSPREADSHEETREPORT_USER(TargetType.USER),
-    BULK_PKGVERSIONPAYLOADLENGTHPOPULATION(null),
+    BULK_PKGVERSIONPAYLOADDATAPOPULATION(null),
 
     JOBS_VIEW(null);
 

@@ -32,6 +32,7 @@ public abstract class _Pkg extends AbstractDataObject {
 
     public static final BaseProperty<Boolean> ACTIVE = PropertyFactory.createBase("active", Boolean.class);
     public static final DateProperty<Timestamp> CREATE_TIMESTAMP = PropertyFactory.createDate("createTimestamp", Timestamp.class);
+    public static final BaseProperty<Boolean> IS_DESKTOP = PropertyFactory.createBase("isDesktop", Boolean.class);
     public static final BaseProperty<Boolean> IS_NATIVE_DESKTOP = PropertyFactory.createBase("isNativeDesktop", Boolean.class);
     public static final DateProperty<Timestamp> MODIFY_TIMESTAMP = PropertyFactory.createDate("modifyTimestamp", Timestamp.class);
     public static final StringProperty<String> NAME = PropertyFactory.createString("name", String.class);
@@ -42,6 +43,7 @@ public abstract class _Pkg extends AbstractDataObject {
 
     protected Boolean active;
     protected Timestamp createTimestamp;
+    protected Boolean isDesktop;
     protected Boolean isNativeDesktop;
     protected Timestamp modifyTimestamp;
     protected String name;
@@ -69,6 +71,16 @@ public abstract class _Pkg extends AbstractDataObject {
     public Timestamp getCreateTimestamp() {
         beforePropertyRead("createTimestamp");
         return this.createTimestamp;
+    }
+
+    public void setIsDesktop(Boolean isDesktop) {
+        beforePropertyWrite("isDesktop", this.isDesktop, isDesktop);
+        this.isDesktop = isDesktop;
+    }
+
+    public Boolean getIsDesktop() {
+        beforePropertyRead("isDesktop");
+        return this.isDesktop;
     }
 
     public void setIsNativeDesktop(Boolean isNativeDesktop) {
@@ -159,6 +171,8 @@ public abstract class _Pkg extends AbstractDataObject {
                 return this.active;
             case "createTimestamp":
                 return this.createTimestamp;
+            case "isDesktop":
+                return this.isDesktop;
             case "isNativeDesktop":
                 return this.isNativeDesktop;
             case "modifyTimestamp":
@@ -190,6 +204,9 @@ public abstract class _Pkg extends AbstractDataObject {
                 break;
             case "createTimestamp":
                 this.createTimestamp = (Timestamp)val;
+                break;
+            case "isDesktop":
+                this.isDesktop = (Boolean)val;
                 break;
             case "isNativeDesktop":
                 this.isNativeDesktop = (Boolean)val;
@@ -230,6 +247,7 @@ public abstract class _Pkg extends AbstractDataObject {
         super.writeState(out);
         out.writeObject(this.active);
         out.writeObject(this.createTimestamp);
+        out.writeObject(this.isDesktop);
         out.writeObject(this.isNativeDesktop);
         out.writeObject(this.modifyTimestamp);
         out.writeObject(this.name);
@@ -244,6 +262,7 @@ public abstract class _Pkg extends AbstractDataObject {
         super.readState(in);
         this.active = (Boolean)in.readObject();
         this.createTimestamp = (Timestamp)in.readObject();
+        this.isDesktop = (Boolean)in.readObject();
         this.isNativeDesktop = (Boolean)in.readObject();
         this.modifyTimestamp = (Timestamp)in.readObject();
         this.name = (String)in.readObject();

@@ -1,5 +1,5 @@
 /*
- * Copyright 2021, Andrew Lindesay
+ * Copyright 2021-2025, Andrew Lindesay
  * Distributed under the terms of the MIT License.
  */
 
@@ -7,6 +7,7 @@ package org.haiku.haikudepotserver.pkg.model;
 
 import org.apache.cayenne.ObjectContext;
 import org.apache.cayenne.ObjectId;
+import org.haiku.haikudepotserver.dataobjects.PkgVersion;
 
 public interface PkgImportService {
 
@@ -25,5 +26,15 @@ public interface PkgImportService {
             ObjectId repositorySourceObjectId,
             org.haiku.pkg.model.Pkg pkg,
             boolean populateFromPayload);
+
+    boolean shouldPopulateFromPayload(PkgVersion persistedPkgVersion);
+
+    /**
+     * <p>This will read in the payload into a temporary file.  From there it will parse it
+     * and take up any data from it such as the icon and the length of the download in
+     * bytes.</p>
+     */
+
+    void populateFromPayload(ObjectContext objectContext, PkgVersion persistedPkgVersion);
 
 }

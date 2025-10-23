@@ -12,6 +12,7 @@ import com.google.common.collect.Iterables;
 import com.google.common.io.ByteSource;
 import org.apache.cayenne.ObjectContext;
 import org.apache.cayenne.ObjectId;
+import org.apache.commons.lang3.BooleanUtils;
 import org.apache.commons.lang3.RandomStringUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.haiku.haikudepotserver.dataobjects.*;
@@ -189,7 +190,6 @@ public class PkgImportServiceImpl implements PkgImportService {
         Pkg pkg = objectContext.newObject(Pkg.class);
         pkg.setName(name);
         pkg.setActive(Boolean.TRUE);
-        pkg.setIsNativeDesktop(false);
 
         String basePkgName = pkgServiceImpl
                 .tryGetMainPkgNameForSubordinatePkg(name)
@@ -297,21 +297,18 @@ public class PkgImportServiceImpl implements PkgImportService {
         }
     }
 
-    private boolean shouldPopulateFromPayload(PkgVersion persistedPkgVersion) {
+    @Override
+    public boolean shouldPopulateFromPayload(PkgVersion persistedPkgVersion) {
+        String pkgName = persistedPkgVersion.getPkg().getName();
         return null == persistedPkgVersion.getPayloadLength()
-                && Stream.of(
+                || Stream.of(
                 PkgService.SUFFIX_PKG_DEBUGINFO,
                 PkgService.SUFFIX_PKG_DEVELOPMENT,
-                PkgService.SUFFIX_PKG_SOURCE).noneMatch(suffix -> persistedPkgVersion.getPkg().getName().endsWith(suffix));
+                PkgService.SUFFIX_PKG_SOURCE).noneMatch(pkgName::endsWith);
     }
 
-    /**
-     * <p>This will read in the payload into a temporary file.  From there it will parse it
-     * and take up any data from it such as the icon and the length of the download in
-     * bytes.</p>
-     */
-
-    private void populateFromPayload(ObjectContext objectContext, PkgVersion persistedPkgVersion) {
+    @Override
+    public void populateFromPayload(ObjectContext objectContext, PkgVersion persistedPkgVersion) {
         persistedPkgVersion.tryGetHpkgURI(ExposureType.INTERNAL_FACING)
                 .ifPresentOrElse(
                         u -> populateFromPayload(objectContext, persistedPkgVersion, u),
@@ -320,6 +317,10 @@ public class PkgImportServiceImpl implements PkgImportService {
                                         + "hpkg url for pkg [{}] version [{}]",
                                 persistedPkgVersion.getPkg(), persistedPkgVersion));
     }
+
+    /**
+     * <p>Populates various elements of data from the package itself.</p>
+     */
 
     private void populateFromPayload(
             ObjectContext objectContext,
@@ -336,7 +337,7 @@ public class PkgImportServiceImpl implements PkgImportService {
                 urlHelperService.transferPayloadToFile(uri, temporaryFile);
             } catch (IOException ioe) {
                 // if we can't download then don't stop the entire import process - just log and carry on.
-                LOGGER.warn("unable to download from the url [{}] --> [{}]; will ignore", uri, temporaryFile);
+                LOGGER.warn("unable to download from the url [{}] --> [{}]; will ignore", uri, temporaryFile, ioe);
                 return;
             }
 
@@ -363,6 +364,8 @@ public class PkgImportServiceImpl implements PkgImportService {
             }
 
             populateIconFromPayload(objectContext, persistedPkgVersion, hpkgFileExtractor);
+            populateIsDesktop(persistedPkgVersion, hpkgFileExtractor);
+
         } catch (IOException ioe) {
             throw new UncheckedIOException(ioe);
         } finally {
@@ -376,18 +379,36 @@ public class PkgImportServiceImpl implements PkgImportService {
         }
     }
 
+    private void populateIsDesktop(
+            PkgVersion persistedPkgVersion,
+            HpkgFileExtractor hpkgFileExtractor
+    ) {
+        AttributeContext tocContext = hpkgFileExtractor.getTocContext();
+        boolean isDesktop = HpkgHelper.hasDesktopLink(tocContext, hpkgFileExtractor.getToc());
+        boolean currentIsDesktop = BooleanUtils.isTrue(persistedPkgVersion.getPkg().getIsDesktop());
+
+        if (currentIsDesktop != isDesktop) {
+            LOGGER.info("setting pkg [{}] is desktop to [{}]", persistedPkgVersion.getPkg().getName(), isDesktop);
+            persistedPkgVersion.getPkg().setIsDesktop(isDesktop);
+        }
+    }
+
     private void populateIconFromPayload(
-            ObjectContext objectContext, PkgVersion persistedPkgVersion,
+            ObjectContext objectContext,
+            PkgVersion persistedPkgVersion,
             HpkgFileExtractor hpkgFileExtractor) {
-        AttributeContext context = hpkgFileExtractor.getTocContext();
+        AttributeContext tocContext = hpkgFileExtractor.getTocContext();
         List<Attribute> iconAttrs = HpkgHelper.findIconAttributesFromExecutableDirEntries(
-                context, hpkgFileExtractor.getToc());
+                tocContext, hpkgFileExtractor.getToc());
         switch (iconAttrs.size()) {
             case 0 -> LOGGER.info("package [{}] version [{}] has no icons",
                     persistedPkgVersion.getPkg(), persistedPkgVersion);
             case 1 -> populateIconFromPayload(
-                    objectContext, persistedPkgVersion, context,
-                    Iterables.getFirst(iconAttrs, null));
+                    objectContext,
+                    persistedPkgVersion,
+                    tocContext,
+                    Iterables.getFirst(iconAttrs, null)
+            );
             default -> LOGGER.info("package [{}] version [{}] has {} icons --> ambiguous so will not load any",
                     persistedPkgVersion.getPkg(), persistedPkgVersion, iconAttrs.size());
         }

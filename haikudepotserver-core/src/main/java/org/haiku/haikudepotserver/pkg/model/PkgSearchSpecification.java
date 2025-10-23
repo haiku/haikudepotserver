@@ -1,5 +1,5 @@
 /*
- * Copyright 2013-2022, Andrew Lindesay
+ * Copyright 2013-2025, Andrew Lindesay
  * Distributed under the terms of the MIT License.
  */
 
@@ -50,6 +50,8 @@ public class PkgSearchSpecification extends AbstractSearchSpecification {
     private NaturalLanguage naturalLanguage;
 
     private Boolean includeDevelopment;
+
+    private Boolean onlyDesktop;
 
     private Boolean onlyNativeDesktop;
 
@@ -115,5 +117,13 @@ public class PkgSearchSpecification extends AbstractSearchSpecification {
 
     public void setOnlyNativeDesktop(Boolean onlyNativeDesktop) {
         this.onlyNativeDesktop = onlyNativeDesktop;
+    }
+
+    public Boolean getOnlyDesktop() {
+        return onlyDesktop;
+    }
+
+    public void setOnlyDesktop(Boolean onlyDesktop) {
+        this.onlyDesktop = onlyDesktop;
     }
 }

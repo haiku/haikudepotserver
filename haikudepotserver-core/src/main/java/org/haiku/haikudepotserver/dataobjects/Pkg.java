@@ -1,5 +1,5 @@
 /*
- * Copyright 2013-2022, Andrew Lindesay
+ * Copyright 2013-2025, Andrew Lindesay
  * Distributed under the terms of the MIT License.
  */
 
@@ -51,6 +51,14 @@ public class Pkg extends _Pkg implements MutableCreateAndModifyTimestamped {
 
         if(null==getActive()) {
             setActive(true);
+        }
+
+        if (null == getIsNativeDesktop()) {
+            setIsNativeDesktop(false);
+        }
+
+        if (null == getIsDesktop()) {
+            setIsDesktop(false);
         }
 
         super.validateForInsert(validationResult);
