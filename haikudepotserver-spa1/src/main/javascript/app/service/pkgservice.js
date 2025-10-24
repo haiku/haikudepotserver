@@ -1,5 +1,5 @@
 /*
- * Copyright 2014-2022, Andrew Lindesay
+ * Copyright 2014-2025, Andrew Lindesay
  * Distributed under the terms of the MIT License.
  */
 
@@ -18,6 +18,11 @@ angular.module('haikudepotserver').factory('pkg',
             var SUFFIX_DEVEL = "_devel";
 
             var SUFFIX_X86 = "_x86";
+
+            /**
+             * Maintains a list of those package names for which the counter has been incremented already.
+             */
+            var incrementCounterPkgNames = []
 
             /**
              * <p>This function will say if the package is a development package.</p>
@@ -57,6 +62,15 @@ angular.module('haikudepotserver').factory('pkg',
 
                 if (!architectureCode) {
                     throw Error('architecture code must be supplied');
+                }
+
+                if (incrementCounter) {
+                    if (incrementCounterPkgNames.includes(pkgName)) {
+                        incrementCounter = false
+                        $log.info("won't increment counter on [" + pkgName + "]; have already done so")
+                    } else {
+                        incrementCounterPkgNames.push(pkgName);
+                    }
                 }
 
                 return remoteProcedureCall.call(
