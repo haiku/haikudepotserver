@@ -5,25 +5,7 @@
 package org.haiku.haikudepotserver.api2;
 
 import com.google.common.base.Preconditions;
-import org.haiku.haikudepotserver.api2.model.GenerateFeedUrlRequestEnvelope;
-import org.haiku.haikudepotserver.api2.model.GenerateFeedUrlResponseEnvelope;
-import org.haiku.haikudepotserver.api2.model.GetAllArchitecturesRequestEnvelope;
-import org.haiku.haikudepotserver.api2.model.GetAllArchitecturesResponseEnvelope;
-import org.haiku.haikudepotserver.api2.model.GetAllContributorsResponseEnvelope;
-import org.haiku.haikudepotserver.api2.model.GetAllCountriesRequestEnvelope;
-import org.haiku.haikudepotserver.api2.model.GetAllCountriesResponseEnvelope;
-import org.haiku.haikudepotserver.api2.model.GetAllMessagesRequestEnvelope;
-import org.haiku.haikudepotserver.api2.model.GetAllMessagesResponseEnvelope;
-import org.haiku.haikudepotserver.api2.model.GetAllNaturalLanguagesRequestEnvelope;
-import org.haiku.haikudepotserver.api2.model.GetAllNaturalLanguagesResponseEnvelope;
-import org.haiku.haikudepotserver.api2.model.GetAllPkgCategoriesRequestEnvelope;
-import org.haiku.haikudepotserver.api2.model.GetAllPkgCategoriesResponseEnvelope;
-import org.haiku.haikudepotserver.api2.model.GetAllProminencesRequestEnvelope;
-import org.haiku.haikudepotserver.api2.model.GetAllProminencesResponseEnvelope;
-import org.haiku.haikudepotserver.api2.model.GetAllUserRatingStabilitiesRequestEnvelope;
-import org.haiku.haikudepotserver.api2.model.GetAllUserRatingStabilitiesResponseEnvelope;
-import org.haiku.haikudepotserver.api2.model.GetRuntimeInformationResponseEnvelope;
-import org.haiku.haikudepotserver.api2.model.RaiseExceptionResponseEnvelope;
+import org.haiku.haikudepotserver.api2.model.*;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 
@@ -99,6 +81,13 @@ public class MiscellaneousApiImpl extends AbstractApiImpl implements Miscellaneo
         return ResponseEntity.ok(
                 new GetAllUserRatingStabilitiesResponseEnvelope()
                         .result(miscellaneousApiService.getAllUserRatingStabilities(getAllUserRatingStabilitiesRequestEnvelope)));
+    }
+
+    @Override
+    public ResponseEntity<GetStorageSummaryResponseEnvelope> getStorageSummary(Object body) {
+        return ResponseEntity.ok(
+                new GetStorageSummaryResponseEnvelope()
+                        .result(miscellaneousApiService.getStorageSummary()));
     }
 
     @Override

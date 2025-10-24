@@ -74,6 +74,27 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/raiseExceptionResponseEnvelope"
+  /__api/v2/miscellaneous/storage-summary:
+    post:
+      description: >
+        This method will return summary information about the storage system.
+      tags:
+        - miscellaneous
+      operationId: getStorageSummary
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/getStorageSummaryRequestEnvelope"
+      responses:
+        200:
+          description: >
+            Response containing the storage summary information.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/getStorageSummaryResponseEnvelope"
   /__api/v2/miscellaneous/get-runtime-information:
     post:
       description: >
@@ -369,17 +390,6 @@ components:
               type: string
             repositoryCode:
               type: string
-        storage:
-          type: object
-          properties:
-            size:
-              type: integer
-              format: int64
-              description: The quantity of stored objects.
-            totalBytes:
-              type: integer
-              format: int64
-              description: The total quantity of data stored for all objects.
 
     getAllMessagesRequestEnvelope:
       type: object
@@ -594,3 +604,24 @@ components:
       enum:
         - ENGINEERING
         - LOCALIZATION
+
+    getStorageSummaryRequestEnvelope:
+      type: object
+    getStorageSummaryResponseEnvelope:
+      type: object
+      properties:
+        result:
+          $ref: "#/components/schemas/getStorageSummaryResult"
+        error:
+          $ref: "./error.yaml#/components/schemas/error"
+    getStorageSummaryResult:
+      type: object
+      properties:
+        size:
+          type: integer
+          format: int64
+          description: The quantity of stored objects.
+        totalBytes:
+          type: integer
+          format: int64
+          description: The total quantity of data stored for all objects.

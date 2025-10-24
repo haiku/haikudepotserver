@@ -40,8 +40,18 @@ angular.module('haikudepotserver').controller(
                         $scope.versions.serverOperatingSystem = result.operatingSystemVersion;
                         $scope.serverStartTimestamp = result.startTimestamp;
                         $scope.storage = result.storage;
-                        $log.info('have fetched the runtime information');
+                        $log.info("have fetched the runtime information");
                     }
+                );
+
+                remoteProcedureCall.call(
+                    constants.ENDPOINT_API_V2_MISCELLANEOUS, "storage-summary", {}
+                ).then(
+                    function (result) {
+                        $scope.storage = result;
+                        $log.info("have fetched the storage summary");
+                    },
+                    errorHandling.handleRemoteProcedureCallError
                 );
 
                 remoteProcedureCall.call(
@@ -49,6 +59,7 @@ angular.module('haikudepotserver').controller(
                 ).then(
                     function (result) {
                         $scope.jobStatusCounts = result.jobStatusCounts
+                        $log.info("have fetched the job counts");
                     },
                     errorHandling.handleRemoteProcedureCallError
                 );

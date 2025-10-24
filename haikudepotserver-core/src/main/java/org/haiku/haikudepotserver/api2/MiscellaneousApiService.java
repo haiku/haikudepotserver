@@ -272,10 +272,6 @@ public class MiscellaneousApiService extends AbstractApiService {
 
         if(authUserOptional.isPresent() && authUserOptional.get().getIsRoot()) {
             result = result
-                    .storage(new GetRuntimeInformationResultStorage()
-                            .size(dataStorageService.size())
-                            .totalBytes(dataStorageService.totalBytes())
-                    )
                     .operatingSystemVersion(runtimeInformationService.getOperatingSystemVersion())
                     .javaVersion(runtimeInformationService.getJavaVersion())
                     .startTimestamp(runtimeInformationService.getStartTimestamp());
@@ -284,6 +280,11 @@ public class MiscellaneousApiService extends AbstractApiService {
         return result;
     }
 
+    public GetStorageSummaryResult getStorageSummary() {
+        return new GetStorageSummaryResult()
+                .size(dataStorageService.size())
+                .totalBytes(dataStorageService.totalBytes());
+    }
 
     public void  raiseException() {
         final ObjectContext context = serverRuntime.newContext();
