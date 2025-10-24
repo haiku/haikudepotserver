@@ -18,8 +18,6 @@ import org.haiku.haikudepotserver.pkg.model.PkgLocalizationLookupService;
 import org.haiku.haikudepotserver.storage.PgDataStorageRepository;
 import org.haiku.haikudepotserver.storage.PgDataStorageServiceImpl;
 import org.haiku.haikudepotserver.storage.model.DataStorageService;
-import org.haiku.haikudepotserver.support.ClientIdentifierSupplier;
-import org.haiku.haikudepotserver.support.HttpRequestClientIdentifierSupplier;
 import org.haiku.haikudepotserver.thymeleaf.Dialect;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.ApplicationEventPublisher;
@@ -35,11 +33,6 @@ import java.util.List;
 @Import({BasicConfig.class, ScheduleConfig.class})
 @Configuration
 public class AppConfig {
-
-    @Bean
-    public ClientIdentifierSupplier clientIdentifierSupplier() {
-        return new HttpRequestClientIdentifierSupplier();
-    }
 
     @Bean
     public JobService jobService(

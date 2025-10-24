@@ -6,8 +6,6 @@ package org.haiku.haikudepotserver.api2;
 
 import com.google.common.base.Preconditions;
 import com.google.common.base.Strings;
-import com.google.common.cache.Cache;
-import com.google.common.cache.CacheBuilder;
 import com.google.common.collect.ComparisonChain;
 import org.apache.cayenne.ObjectContext;
 import org.apache.cayenne.configuration.server.ServerRuntime;
@@ -28,7 +26,6 @@ import org.haiku.haikudepotserver.pkg.FixedPkgLocalizationLookupServiceImpl;
 import org.haiku.haikudepotserver.pkg.model.*;
 import org.haiku.haikudepotserver.security.PermissionEvaluator;
 import org.haiku.haikudepotserver.security.model.Permission;
-import org.haiku.haikudepotserver.support.ClientIdentifierSupplier;
 import org.haiku.haikudepotserver.support.StringHelper;
 import org.haiku.haikudepotserver.support.VersionCoordinates;
 import org.haiku.haikudepotserver.support.VersionCoordinatesComparator;
@@ -45,7 +42,6 @@ import java.io.IOException;
 import java.io.UncheckedIOException;
 import java.math.BigDecimal;
 import java.util.*;
-import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -64,20 +60,6 @@ public class PkgApiService extends AbstractApiService {
     private final PkgScreenshotService pkgScreenshotService;
     private final PkgService pkgService;
     private final PkgLocalizationService pkgLocalizationService;
-    private final ClientIdentifierSupplier clientIdentifierSupplier;
-
-    private final Boolean shouldProtectPkgVersionViewCounterFromRecurringIncrementFromSameClient = true;
-
-    /**
-     * <p>This cache is used to keep track (in memory) of who has viewed a package so that repeat increments of the
-     * viewing of the package counter can be avoided.</p>
-     */
-
-    private final Cache<String,Boolean> remoteIdentifierToPkgView = CacheBuilder
-            .newBuilder()
-            .maximumSize(2048)
-            .expireAfterAccess(2, TimeUnit.DAYS)
-            .build();
 
     public PkgApiService(
             ServerRuntime serverRuntime,
@@ -85,15 +67,13 @@ public class PkgApiService extends AbstractApiService {
             PkgIconService pkgIconService,
             PkgScreenshotService pkgScreenshotService,
             PkgService pkgService,
-            PkgLocalizationService pkgLocalizationService,
-            ClientIdentifierSupplier clientIdentifierSupplier) {
+            PkgLocalizationService pkgLocalizationService) {
         this.serverRuntime = Preconditions.checkNotNull(serverRuntime);
         this.permissionEvaluator = Preconditions.checkNotNull(permissionEvaluator);
         this.pkgIconService = Preconditions.checkNotNull(pkgIconService);
         this.pkgScreenshotService = Preconditions.checkNotNull(pkgScreenshotService);
         this.pkgService = Preconditions.checkNotNull(pkgService);
         this.pkgLocalizationService = Preconditions.checkNotNull(pkgLocalizationService);
-        this.clientIdentifierSupplier = Preconditions.checkNotNull(clientIdentifierSupplier);
     }
 
     public void configurePkgIcon(ConfigurePkgIconRequestEnvelope request) {
@@ -968,44 +948,11 @@ public class PkgApiService extends AbstractApiService {
     }
 
     /**
-     * <p>This method will bump the view counter for the package version.  It will also try to prevent
-     * a user from the same client (IP) from doing this more than once within a reasonable stand-down
-     * time.  This is prone to optimistic locking failure because lots of people can look at the same
-     * package at the same time.  For this reason, it will try to load the data into a different
-     * {@link org.apache.cayenne.ObjectContext} to edit.</p>
+     * <p>This method will bump the view counter for the package version.</p>
      */
 
     private void incrementCounter(PkgVersion pkgVersion) {
-        String cacheKey = null;
-        String remoteIdentifier = clientIdentifierSupplier.get().orElse("???");
-        boolean shouldIncrement;
-
-        if (shouldProtectPkgVersionViewCounterFromRecurringIncrementFromSameClient && !Strings.isNullOrEmpty(remoteIdentifier)) {
-            Long pkgVersionId = (Long) pkgVersion.getObjectId().getIdSnapshot().get(PkgVersion.ID_PK_COLUMN);
-            cacheKey = pkgVersionId + "@" + remoteIdentifier;
-        }
-
-        if (null == cacheKey) {
-            shouldIncrement = true;
-        } else {
-            Boolean previouslyIncremented = remoteIdentifierToPkgView.getIfPresent(cacheKey);
-            shouldIncrement = null == previouslyIncremented;
-
-            if(!shouldIncrement) {
-                LOGGER.info(
-                        "would have incremented the view counter for '{}', but the client '{}' already did this recently",
-                        pkgVersion.getPkg().toString(),
-                        remoteIdentifier);
-            }
-        }
-
-        if (shouldIncrement) {
-            pkgService.incrementViewCounter(serverRuntime, pkgVersion.getObjectId());
-        }
-
-        if (null != cacheKey) {
-            remoteIdentifierToPkgView.put(cacheKey, Boolean.TRUE);
-        }
+        pkgService.incrementViewCounter(serverRuntime, pkgVersion.getObjectId());
     }
 
 }

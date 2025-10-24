@@ -23,7 +23,6 @@ import org.haiku.haikudepotserver.feed.model.FeedSpecification;
 import org.haiku.haikudepotserver.naturallanguage.model.NaturalLanguageService;
 import org.haiku.haikudepotserver.naturallanguage.model.NaturalLanguageCoordinates;
 import org.haiku.haikudepotserver.storage.model.DataStorageService;
-import org.haiku.haikudepotserver.support.ClientIdentifierSupplier;
 import org.haiku.haikudepotserver.support.ContributorsService;
 import org.haiku.haikudepotserver.support.RuntimeInformationService;
 import org.slf4j.Logger;
@@ -55,14 +54,12 @@ public class MiscellaneousApiService extends AbstractApiService {
     private final String architectureDefaultCode;
     private final String repositoryDefaultCode;
     private final Clock clock = Clock.systemUTC();
-    private final ClientIdentifierSupplier clientIdentifierSupplier;
     private final DataStorageService dataStorageService;
 
     @Autowired
     public MiscellaneousApiService(
             ServerRuntime serverRuntime,
             RuntimeInformationService runtimeInformationService,
-            ClientIdentifierSupplier clientIdentifierSupplier,
             FeedService feedService,
             ContributorsService contributorsService,
             MessageSource messageSource,
@@ -73,7 +70,6 @@ public class MiscellaneousApiService extends AbstractApiService {
             @Value("${hds.repository.default.code}") String repositoryDefaultCode) {
         this.serverRuntime = Preconditions.checkNotNull(serverRuntime);
         this.runtimeInformationService = Preconditions.checkNotNull(runtimeInformationService);
-        this.clientIdentifierSupplier = Preconditions.checkNotNull(clientIdentifierSupplier);
         this.feedService = Preconditions.checkNotNull(feedService);
         this.contributorsService = Preconditions.checkNotNull(contributorsService);
         this.messageSource = Preconditions.checkNotNull(messageSource);
@@ -270,7 +266,6 @@ public class MiscellaneousApiService extends AbstractApiService {
                 .projectVersion(runtimeInformationService.getProjectVersion())
                 .isProduction(isProduction)
                 .currentTimestamp(clock.millis())
-                .clientIdentifier(clientIdentifierSupplier.get().orElse("???"))
                 .defaults(new GetRuntimeInformationResultDefaults()
                         .architectureCode(architectureDefaultCode)
                         .repositoryCode(repositoryDefaultCode));

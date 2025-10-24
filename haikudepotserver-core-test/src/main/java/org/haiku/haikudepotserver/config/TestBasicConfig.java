@@ -1,5 +1,5 @@
 /*
- * Copyright 2018-2024, Andrew Lindesay
+ * Copyright 2018-2025, Andrew Lindesay
  * Distributed under the terms of the MIT License.
  */
 
@@ -9,8 +9,6 @@ import com.google.common.collect.ImmutableList;
 import io.micrometer.core.instrument.MeterRegistry;
 import io.micrometer.core.instrument.simple.SimpleMeterRegistry;
 import org.haiku.haikudepotserver.CapturingMailSender;
-import org.haiku.haikudepotserver.support.ClientIdentifierSupplier;
-import org.haiku.haikudepotserver.support.NoopClientIdentifierSupplier;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.PropertySource;
 import org.springframework.mail.MailSender;
@@ -32,11 +30,6 @@ public class TestBasicConfig {
                 "classpath:webmessages",
                 "classpath:naturallanguagemessages"
         );
-    }
-
-    @Bean
-    public ClientIdentifierSupplier clientIdentifierSupplier() {
-        return new NoopClientIdentifierSupplier();
     }
 
     @Bean

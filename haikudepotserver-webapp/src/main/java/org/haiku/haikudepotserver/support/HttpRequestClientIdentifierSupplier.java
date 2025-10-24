@@ -16,11 +16,12 @@ import org.springframework.beans.factory.annotation.Autowired;
 
 import java.nio.charset.StandardCharsets;
 import java.util.Optional;
+import java.util.function.Supplier;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Stream;
 
-public class HttpRequestClientIdentifierSupplier implements ClientIdentifierSupplier {
+public class HttpRequestClientIdentifierSupplier implements Supplier<Optional<String>> {
 
     private static final Pattern PATTERN_IPV4_ADDRESS = Pattern.compile("^([0-9]+)\\.([0-9]+)\\.([0-9]+)\\.([0-9]+)$");
 
