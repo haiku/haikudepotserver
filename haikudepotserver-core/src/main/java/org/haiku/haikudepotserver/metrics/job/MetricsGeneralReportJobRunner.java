@@ -14,12 +14,15 @@ import org.haiku.haikudepotserver.job.AbstractJobRunner;
 import org.haiku.haikudepotserver.job.model.*;
 import org.haiku.haikudepotserver.metrics.MetricsConstants;
 import org.haiku.haikudepotserver.metrics.model.MetricsGeneralReportJobSpecification;
+import org.haiku.haikudepotserver.support.IntArrayVersionComparator;
+import org.haiku.haikudepotserver.support.desktopapplication.DesktopApplicationHelper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
 import java.io.*;
 import java.nio.charset.StandardCharsets;
+import java.util.Comparator;
 import java.util.Optional;
 import java.util.function.Predicate;
 import java.util.stream.Stream;
@@ -64,9 +67,21 @@ public class MetricsGeneralReportJobRunner extends AbstractJobRunner<MetricsGene
 
     private void write(Writer writer) throws IOException {
 
+        Comparator<int[]> intArrayVersionComparator = new IntArrayVersionComparator();
+
         writer.write("Desktop Versions Traffic\n");
         meterRegistry.find(MetricsConstants.COUNTER_NAME_DESKTOP_REQUESTS)
                 .counters()
+                .stream()
+                .sorted((c1, c2) -> {
+                    int[] v1 = DesktopApplicationHelper.deriveVersion(
+                            Optional.ofNullable(c1.getId().getTag(MetricsConstants.TAG_NAME_VERSION))
+                                    .orElse("0.0.0"));
+                    int[] v2 = DesktopApplicationHelper.deriveVersion(
+                            Optional.ofNullable(c2.getId().getTag(MetricsConstants.TAG_NAME_VERSION))
+                                    .orElse("0.0.0"));
+                    return intArrayVersionComparator.compare(v1, v2);
+                })
                 .forEach(c -> writeCounter(
                         writer,
                         c.getId().getTag(MetricsConstants.TAG_NAME_VERSION),
