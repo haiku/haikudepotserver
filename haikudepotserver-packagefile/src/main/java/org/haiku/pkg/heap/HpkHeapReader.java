@@ -9,8 +9,8 @@ import com.google.common.base.Preconditions;
 import com.google.common.cache.CacheBuilder;
 import com.google.common.cache.CacheLoader;
 import com.google.common.cache.LoadingCache;
-import io.airlift.compress.Decompressor;
-import io.airlift.compress.zstd.ZstdDecompressor;
+import io.airlift.compress.v3.Decompressor;
+import io.airlift.compress.v3.zstd.ZstdJavaDecompressor;
 import org.haiku.pkg.HpkException;
 import org.haiku.pkg.FileHelper;
 
@@ -292,7 +292,7 @@ public class HpkHeapReader implements Closeable, HeapReader {
     private void readHeapChunkZstdAtFileOffset(int index, byte[] buffer, int chunkCompressedLength, int chunkUncompressedLength) throws IOException {
         byte[] compressedBuffer = new byte[chunkCompressedLength];
         readFully(compressedBuffer);
-        Decompressor decompressor = new ZstdDecompressor();
+        Decompressor decompressor = new ZstdJavaDecompressor();
         decompressor.decompress(compressedBuffer, 0, chunkCompressedLength, buffer, 0, chunkUncompressedLength);
     }
 
