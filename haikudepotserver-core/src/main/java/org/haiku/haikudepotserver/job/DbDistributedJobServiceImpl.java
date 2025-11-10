@@ -192,7 +192,7 @@ public class DbDistributedJobServiceImpl extends AbstractExecutionThreadService 
 
         Instant now = clock.instant();
 
-        while (timeout < 0 || Duration.between(now, clock.instant()).toMillis() < timeout) {
+        while (Duration.between(now, clock.instant()).toMillis() < timeout) {
             if (!jpaJobService.isFinished(guid)) {
                 Uninterruptibles.sleepUninterruptibly(
                         DELAY_CHECK_AWAIT_FINISHED_SECONDS,

@@ -12,6 +12,8 @@ import org.apache.cayenne.query.ObjectSelect;
 import org.apache.commons.lang3.StringUtils;
 import org.haiku.haikudepotserver.dataobjects.Pkg;
 import org.haiku.haikudepotserver.dataobjects.PkgVersion;
+import org.haiku.haikudepotserver.dataobjects.Repository;
+import org.haiku.haikudepotserver.dataobjects.RepositorySource;
 import org.haiku.haikudepotserver.job.AbstractJobRunner;
 import org.haiku.haikudepotserver.job.model.JobService;
 import org.haiku.haikudepotserver.pkg.model.PkgImportService;
@@ -127,6 +129,8 @@ public class PkgVersionPayloadDataPopulationJobRunner
         return ObjectSelect.query(PkgVersion.class)
                 .where(PkgVersion.ACTIVE.isTrue())
                 .and(PkgVersion.PKG.dot(Pkg.ACTIVE).isTrue())
+                .and(PkgVersion.REPOSITORY_SOURCE.dot(RepositorySource.ACTIVE).isTrue())
+                .and(PkgVersion.REPOSITORY_SOURCE.dot(RepositorySource.REPOSITORY).dot(Repository.ACTIVE).isTrue())
                 .and(PkgVersion.IS_LATEST.isTrue());
     }
 
