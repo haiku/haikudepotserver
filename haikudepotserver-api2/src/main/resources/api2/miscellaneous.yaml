@@ -1,4 +1,4 @@
-# Copyright 2022, Andrew Lindesay
+# Copyright 2022-2025, Andrew Lindesay
 # Distributed under the terms of the MIT License.
 
 openapi: 3.0.3
@@ -8,6 +8,27 @@ info:
 tags:
   - name: miscellaneous
 paths:
+  /__api/v2/miscellaneous/shutdown-all-instances:
+    post:
+      description: >
+        Shuts down all instances of the running application.
+      tags:
+        - miscellaneous
+      operationId: shutdownAllInstances
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/shutdownAllInstancesRequestEnvelope"
+      responses:
+        200:
+          description: >
+            Empty response
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/shutdownAllInstancesResponseEnvelope"
   /__api/v2/miscellaneous/get-all-pkg-categories:
     post:
       description: >
@@ -625,3 +646,15 @@ components:
           type: integer
           format: int64
           description: The total quantity of data stored for all objects.
+
+    shutdownAllInstancesRequestEnvelope:
+      type: object
+    shutdownAllInstancesResponseEnvelope:
+      type: object
+      properties:
+        result:
+          $ref: "#/components/schemas/shutdownAllInstancesResult"
+        error:
+          $ref: "./error.yaml#/components/schemas/error"
+    shutdownAllInstancesResult:
+      type: object

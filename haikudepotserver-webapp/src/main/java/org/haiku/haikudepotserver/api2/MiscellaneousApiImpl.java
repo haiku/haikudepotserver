@@ -1,5 +1,5 @@
 /*
- * Copyright 2022, Andrew Lindesay
+ * Copyright 2022-2025, Andrew Lindesay
  * Distributed under the terms of the MIT License.
  */
 package org.haiku.haikudepotserver.api2;
@@ -101,5 +101,11 @@ public class MiscellaneousApiImpl extends AbstractApiImpl implements Miscellaneo
     public ResponseEntity<RaiseExceptionResponseEnvelope> raiseException(Object body) {
         miscellaneousApiService.raiseException();
         return ResponseEntity.ok(new RaiseExceptionResponseEnvelope().result(Map.of()));
+    }
+
+    @Override
+    public ResponseEntity<ShutdownAllInstancesResponseEnvelope> shutdownAllInstances(Object body) {
+        miscellaneousApiService.shutdownAllInstances();
+        return ResponseEntity.ok(new ShutdownAllInstancesResponseEnvelope().result(Map.of()));
     }
 }

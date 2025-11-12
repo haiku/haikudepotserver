@@ -73,4 +73,19 @@
         </li>
     </ul>
 
+    <hr/>
+
+    <h1>Dangerous Actions</h1>
+
+    <ul>
+        <li>
+            <a href="" ng-click="goShutdownAllInstances()">
+                Shutdown all instances
+                <span ng-show="!!didActions['shutdownAllInstances']">
+                <em>&mdash; did shutdown all instances</em>
+            </span>
+            </a>
+        </li>
+    </ul>
+
 </div>

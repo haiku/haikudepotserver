@@ -294,20 +294,26 @@ public class DbDistributedJobServiceImpl extends AbstractExecutionThreadService 
             // some started jobs may have been forcefully stopped (eg; JVM stopped) and the started job would be left
             // dangling. This will ensure that those jobs are marked as failed.
 
-            LOGGER.info("will correct dangling started jobs");
-            correctDanglingStartedJobs();
-            LOGGER.info("did correct dangling started jobs");
+            {
+                LOGGER.info("will correct dangling started jobs");
+                correctDanglingStartedJobs();
+                LOGGER.info("did correct dangling started jobs");
+            }
 
             // clear any jobs which are completed and have naturally expired.
-            LOGGER.info("will clear completed expired jobs");
-            long clearedCompletedExpiredJobs = jpaJobService.clearCompletedExpiredJobs(clock.instant());
-            LOGGER.info("did clear {} completed expired jobs", clearedCompletedExpiredJobs);
+            {
+                LOGGER.info("will clear completed expired jobs");
+                long clearedCompletedExpiredJobs = jpaJobService.clearCompletedExpiredJobs(clock.instant());
+                LOGGER.info("did clear {} completed expired jobs", clearedCompletedExpiredJobs);
+            }
 
             // Some jobs may be still in the database but have failed owing to system reasons. This will clean those
             // up as well.
-            LOGGER.info("will clear expired jobs");
-            long clearedExpiredJobs = jpaJobService.clearExpiredJobs(clock.instant().minus(TTL_MAX, ChronoUnit.MILLIS));
-            LOGGER.info("did clear {} expired jobs", clearedCompletedExpiredJobs);
+            {
+                LOGGER.info("will clear expired jobs");
+                long clearedExpiredJobs = jpaJobService.clearExpiredJobs(clock.instant().minus(TTL_MAX, ChronoUnit.MILLIS));
+                LOGGER.info("did clear {} expired jobs", clearedExpiredJobs);
+            }
         });
     }
 

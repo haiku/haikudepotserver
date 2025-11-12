@@ -280,6 +280,9 @@ public class UserAuthorizationServiceImpl implements UserAuthorizationService {
             case JOBS_VIEW -> {
                 return authenticatedUserIsRoot;
             }
+            case SHUTDOWN_ALL_INSTANCES -> {
+                return authenticatedUserIsRoot;
+            }
             default -> throw new IllegalStateException("unhandled permission; " + permission.name());
         }
 

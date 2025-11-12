@@ -10,6 +10,7 @@ import com.fasterxml.jackson.annotation.JsonSubTypes;
 import com.fasterxml.jackson.annotation.JsonTypeInfo;
 import com.google.common.base.Preconditions;
 import org.apache.commons.lang3.StringUtils;
+import org.haiku.haikudepotserver.deployment.model.ShutdownAllInstancesEvent;
 import org.haiku.haikudepotserver.job.model.JobAvailableEvent;
 import org.haiku.haikudepotserver.support.cayenne.QueryCacheRemoveEvent;
 
@@ -21,6 +22,7 @@ import org.haiku.haikudepotserver.support.cayenne.QueryCacheRemoveEvent;
         include = JsonTypeInfo.As.PROPERTY,
         property = "type")
 @JsonSubTypes({
+        @JsonSubTypes.Type(value = ShutdownAllInstancesEvent.class, name = "ShutdownAllInstancesEvent"),
         @JsonSubTypes.Type(value = JobAvailableEvent.class, name = "JobAvailableEvent"),
         @JsonSubTypes.Type(value = QueryCacheRemoveEvent.class, name = "QueryCacheDropEvent")
 })

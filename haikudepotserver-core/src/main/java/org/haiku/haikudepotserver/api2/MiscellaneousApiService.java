@@ -18,10 +18,13 @@ import org.haiku.haikudepotserver.dataobjects.Prominence;
 import org.haiku.haikudepotserver.dataobjects.User;
 import org.haiku.haikudepotserver.dataobjects.UserRatingStability;
 import org.haiku.haikudepotserver.dataobjects.auto._User;
+import org.haiku.haikudepotserver.deployment.DeploymentManagementService;
 import org.haiku.haikudepotserver.feed.model.FeedService;
 import org.haiku.haikudepotserver.feed.model.FeedSpecification;
 import org.haiku.haikudepotserver.naturallanguage.model.NaturalLanguageService;
 import org.haiku.haikudepotserver.naturallanguage.model.NaturalLanguageCoordinates;
+import org.haiku.haikudepotserver.security.PermissionEvaluator;
+import org.haiku.haikudepotserver.security.model.Permission;
 import org.haiku.haikudepotserver.storage.model.DataStorageService;
 import org.haiku.haikudepotserver.support.ContributorsService;
 import org.haiku.haikudepotserver.support.RuntimeInformationService;
@@ -30,6 +33,9 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.MessageSource;
+import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.AccessDeniedException;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Component;
 
 import java.lang.Error;
@@ -45,6 +51,7 @@ public class MiscellaneousApiService extends AbstractApiService {
     protected final static Logger LOGGER = LoggerFactory.getLogger(MiscellaneousApiService.class);
 
     private final ServerRuntime serverRuntime;
+    private final PermissionEvaluator permissionEvaluator;
     private final RuntimeInformationService runtimeInformationService;
     private final FeedService feedService;
     private final ContributorsService contributorsService;
@@ -55,20 +62,24 @@ public class MiscellaneousApiService extends AbstractApiService {
     private final String repositoryDefaultCode;
     private final Clock clock = Clock.systemUTC();
     private final DataStorageService dataStorageService;
+    private final DeploymentManagementService deploymentManagementService;
 
     @Autowired
     public MiscellaneousApiService(
             ServerRuntime serverRuntime,
+            PermissionEvaluator permissionEvaluator,
             RuntimeInformationService runtimeInformationService,
             FeedService feedService,
             ContributorsService contributorsService,
             MessageSource messageSource,
             NaturalLanguageService naturalLanguageService,
             DataStorageService dataStorageService,
+            DeploymentManagementService deploymentManagementService,
             @Value("${hds.deployment.is-production:false}") Boolean isProduction,
             @Value("${hds.architecture.default.code}") String architectureDefaultCode,
             @Value("${hds.repository.default.code}") String repositoryDefaultCode) {
         this.serverRuntime = Preconditions.checkNotNull(serverRuntime);
+        this.permissionEvaluator = Preconditions.checkNotNull(permissionEvaluator);
         this.runtimeInformationService = Preconditions.checkNotNull(runtimeInformationService);
         this.feedService = Preconditions.checkNotNull(feedService);
         this.contributorsService = Preconditions.checkNotNull(contributorsService);
@@ -78,6 +89,7 @@ public class MiscellaneousApiService extends AbstractApiService {
         this.isProduction = Preconditions.checkNotNull(isProduction);
         this.architectureDefaultCode = Preconditions.checkNotNull(architectureDefaultCode);
         this.repositoryDefaultCode = Preconditions.checkNotNull(repositoryDefaultCode);
+        this.deploymentManagementService = Preconditions.checkNotNull(deploymentManagementService);
     }
 
     public GenerateFeedUrlResult generateFeedUrl(GenerateFeedUrlRequestEnvelope request) {
@@ -295,6 +307,21 @@ public class MiscellaneousApiService extends AbstractApiService {
         }
 
         LOGGER.warn("attempt to raise a test exception without being authenticated as root");
+    }
+
+    public void shutdownAllInstances() {
+        final ObjectContext context = serverRuntime.newContext();
+
+        obtainAuthenticatedUser(context);
+
+        if (!permissionEvaluator.hasPermission(
+                SecurityContextHolder.getContext().getAuthentication(),
+                null,
+                Permission.SHUTDOWN_ALL_INSTANCES)) {
+            throw new AccessDeniedException("attempt to shutdown all instances");
+        }
+
+        deploymentManagementService.initiateShutdownAllInstances();
     }
 
 }

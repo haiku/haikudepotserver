@@ -62,6 +62,18 @@ angular.module('haikudepotserver').controller(
                 );
             };
 
+            $scope.goShutdownAllInstances = function() {
+                remoteProcedureCall.call(constants.ENDPOINT_API_V2_MISCELLANEOUS, "shutdown-all-instances").then(
+                    function() {
+                        showDidAction('shutdownAllInstances');
+                    },
+                    function(err) {
+                        $log.error('unable to shutdown all instances');
+                        errorHandling.handleRemoteProcedureCallError(err);
+                    }
+                );
+            };
+
             /**
              * <p>This is outside of the normal breadcrumb navigation system because it is a
              * developers' feature.</p>

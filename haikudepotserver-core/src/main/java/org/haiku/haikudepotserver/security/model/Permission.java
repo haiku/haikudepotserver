@@ -53,7 +53,9 @@ public enum Permission {
     BULK_USERRATINGSPREADSHEETREPORT_USER(TargetType.USER),
     BULK_PKGVERSIONPAYLOADDATAPOPULATION(null),
 
-    JOBS_VIEW(null);
+    JOBS_VIEW(null),
+
+    SHUTDOWN_ALL_INSTANCES(null);
 
     private TargetType requiredTargetType;
 
