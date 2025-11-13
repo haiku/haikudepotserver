@@ -548,13 +548,12 @@ public class DbDistributedJobServiceImpl extends AbstractExecutionThreadService 
         return Optional.empty();
     }
 
-    private Class<? extends JobSpecification> getConcreteSpecificationClassForJobTypeCode(String jobTypeCode) {
+    private Optional<Class<? extends JobSpecification>> tryGetConcreteSpecificationClassForJobTypeCode(String jobTypeCode) {
         Preconditions.checkArgument(jobTypeCode != null, "the job type code is required");
         return jobRunners.stream()
                 .filter(jr -> jr.getJobTypeCode().equals(jobTypeCode))
                 .findFirst()
-                .map(JobRunner::getSupportedSpecificationClass)
-                .orElseThrow(() -> new IllegalStateException("unable to find a runner for [" + jobTypeCode + "]"));
+                .map(JobRunner::getSupportedSpecificationClass);
     }
 
     /**
@@ -646,22 +645,37 @@ public class DbDistributedJobServiceImpl extends AbstractExecutionThreadService 
             // query for a job and skip lock any which are already being processed
             Optional<org.haiku.haikudepotserver.job.jpa.model.Job> jpaJobOptional = jpaJobService.tryGetNextAvailableJob();
 
-            if (jpaJobOptional.isPresent()) {
-                org.haiku.haikudepotserver.job.jpa.model.Job jpaJob = jpaJobOptional.get();
-                try {
-                    JobSpecification jobSpecification = objectMapper.treeToValue(
-                            jpaJob.getSpecification().getData(),
-                            getConcreteSpecificationClassForJobTypeCode(jpaJob.getType().getCode())
-                    );
-                    runSpecificationInCurrentThread(jobSpecification);
-                } catch (JsonProcessingException jpe) {
-                    throw new JobServiceException(
-                            "unable to parse job specification for [%s]".formatted(jpaJob.getCode()),
-                            jpe);
-                }
+            if (jpaJobOptional.isEmpty()) {
+                return false;
             }
 
-            return jpaJobOptional.isPresent();
+            org.haiku.haikudepotserver.job.jpa.model.Job jpaJob = jpaJobOptional.get();
+            String jobTypeCode = jpaJob.getType().getCode();
+
+            Optional<Class<? extends JobSpecification>> jobSpecificationClassOptional
+                    = tryGetConcreteSpecificationClassForJobTypeCode(jobTypeCode);
+
+            if (jobSpecificationClassOptional.isEmpty()) {
+                LOGGER.error("unable to find the job specification of type [{}] for job [{}] - will fail", jobTypeCode, jpaJob.getCode());
+                setJobFailTimestamp(jpaJob.getCode());
+                return true; // effectively the logic did do something.
+            }
+
+            JobSpecification jobSpecification;
+
+            try {
+                jobSpecification = objectMapper.treeToValue(
+                        jpaJob.getSpecification().getData(),
+                        jobSpecificationClassOptional.get()
+                );
+            } catch (JsonProcessingException jpe) {
+                LOGGER.error("unable to parse the job specification of type [{}] for job [{}] - will fail", jobTypeCode, jpaJob.getCode(), jpe);
+                setJobFailTimestamp(jpaJob.getCode());
+                return true; // effectively the logic did do something.
+            }
+
+            runSpecificationInCurrentThread(jobSpecification);
+            return true;
         });
 
         return BooleanUtils.isTrue(result);
@@ -827,10 +841,22 @@ public class DbDistributedJobServiceImpl extends AbstractExecutionThreadService 
         JsonNode jobSpecificationNode = jpaJob.getSpecification().getData();
 
         try {
-            result.setJobSpecification(objectMapper.treeToValue(
-                    jobSpecificationNode,
-                    getConcreteSpecificationClassForJobTypeCode(jpaJob.getType().getCode())
-            ));
+            String jobTypeCode = jpaJob.getType().getCode();
+            Class<? extends JobSpecification> specificationClass = tryGetConcreteSpecificationClassForJobTypeCode(jobTypeCode).orElse(null);
+
+            if (null == specificationClass) {
+                LOGGER.error("unable to find a specification class for job type code [{}}] on job [{}]", jobTypeCode, jpaJob.getCode());
+
+                // add a fake job specification just so that the job can be seen in the API / GUI
+                PlaceboJobSpecification placeboJobSpecification = new PlaceboJobSpecification();
+                placeboJobSpecification.setGuid(jpaJob.getCode());
+                result.setJobSpecification(placeboJobSpecification);
+            } else {
+                result.setJobSpecification(objectMapper.treeToValue(
+                        jobSpecificationNode,
+                        specificationClass)
+                );
+            }
         } catch (JsonProcessingException jpe) {
             throw new JobServiceException("unable to process the job specification for job [" + jpaJob.getCode() + "]", jpe);
         }
@@ -840,6 +866,12 @@ public class DbDistributedJobServiceImpl extends AbstractExecutionThreadService 
                 .forEach(result::addGeneratedDataGuid);
 
         return result;
+    }
+
+    /**
+     * <p>This is used in rare situations where the job specification is broken or is missing.</p>
+     */
+    private final static class PlaceboJobSpecification extends AbstractJobSpecification {
     }
 
 }
