@@ -75,6 +75,11 @@ public class InterProcessEventPgListenService extends AbstractExecutionThreadSer
         awaitTerminated();
     }
 
+    @Override
+    protected String serviceName() {
+        return this.getClass().getSimpleName();
+    }
+
     private RetryTemplate createRetryTemplate() {
         RetryTemplate retryTemplate = new RetryTemplate();
 

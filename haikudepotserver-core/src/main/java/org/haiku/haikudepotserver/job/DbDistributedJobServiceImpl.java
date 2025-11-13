@@ -132,6 +132,11 @@ public class DbDistributedJobServiceImpl extends AbstractExecutionThreadService 
         awaitTerminated();
     }
 
+    @Override
+    protected String serviceName() {
+        return this.getClass().getSimpleName();
+    }
+
     /**
      * <p>Runs continuously checking for new work. Should a failure occur, it will
      * retry with a backoff.</p>
