@@ -15,13 +15,19 @@ import org.haiku.haikudepotserver.job.jpa.model.*;
 import org.haiku.haikudepotserver.job.model.JobServiceException;
 import org.haiku.haikudepotserver.job.model.JobServiceStateTransitionException;
 import org.haiku.haikudepotserver.job.model.JobSnapshot;
+import org.haiku.haikudepotserver.support.db.PgAdvisoryLockHelper;
 import org.haiku.haikudepotserver.support.exception.ObjectNotFoundException;
 import org.haiku.haikudepotserver.support.jpa.OffsetBasedPageRequest;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.jdbc.core.JdbcTemplate;
+import org.springframework.jdbc.datasource.DataSourceUtils;
 import org.springframework.stereotype.Service;
 
+import javax.sql.DataSource;
+import java.sql.Connection;
+import java.sql.SQLException;
+import java.time.Duration;
 import java.time.Instant;
 import java.time.temporal.ChronoUnit;
 import java.util.*;
@@ -37,6 +43,8 @@ import java.util.stream.Stream;
 public class JpaJobService {
 
     private final static Sort.Order ORDER_ID = Sort.Order.desc(String.join(".", Job_.STATE, JobState_.ID));
+
+    private final static long PG_ADVISORY_LOCK_KEY = 2513234852114897L;
 
     private final static String SQL_NEXT_AVAILABLE_JOB_ID = """
               WITH jids AS (SELECT j2.id FROM job.job j2
@@ -114,6 +122,30 @@ public class JpaJobService {
         this.jobDataEncodingRepository = jobDataEncodingRepository;
         this.jobSpecificationRepository = jobSpecificationRepository;
         this.jobGeneratedDataRepository = jobGeneratedDataRepository;
+    }
+
+    /**
+     * <p>Takes out a transcational advisory lock on the database.</p>
+     * @return true if the lock was aquired within the duration specified.
+     */
+    public boolean tryTransactionalAdvisoryLock(boolean shared, Duration timeout) {
+        DataSource dataSource = jdbcTemplate.getDataSource();
+
+        if (null == dataSource) {
+            throw new IllegalStateException(("the `DataSource` is not available"));
+        }
+
+        Connection connection = DataSourceUtils.getConnection(dataSource);
+
+        try {
+            if (connection.getAutoCommit()) {
+                throw new IllegalStateException("trying to acquire an advisory lock for job system outside transaction");
+            }
+
+            return PgAdvisoryLockHelper.tryTransactionalAdvisoryLock(connection, PG_ADVISORY_LOCK_KEY, shared, timeout);
+        } catch (SQLException se) {
+            throw new JobServiceException("unable to acquire an advisory lock for job system", se);
+        }
     }
 
     public Optional<Job> tryGetNextAvailableJob() {

@@ -77,6 +77,10 @@ public class DbDistributedJobServiceImpl extends AbstractExecutionThreadService 
 
     private final static long DELAY_CHECK_AWAIT_FINISHED_SECONDS = 2;
 
+    private final static long DELAY_AWAIT_ADVISORY_LOCK_SECONDS = 60;
+
+    private final static long DELAY_CHECK_JOBS_SECONDS = 60 * 5;
+
     private final TransactionTemplate transactionTemplate;
 
     private final ObjectMapper objectMapper;
@@ -89,7 +93,7 @@ public class DbDistributedJobServiceImpl extends AbstractExecutionThreadService 
 
     private final Clock clock;
 
-    private Collection<JobRunner<?>> jobRunners = null;
+    private Collection<JobRunner<?>> jobRunners;
 
     private final ReentrantLock workLock = new ReentrantLock();
     private final Condition hasWork = workLock.newCondition();
@@ -291,6 +295,14 @@ public class DbDistributedJobServiceImpl extends AbstractExecutionThreadService 
     @Override
     public void clearExpiredJobs() {
         transactionTemplate.executeWithoutResult((transactionStatus) -> {
+
+            if (!jpaJobService.tryTransactionalAdvisoryLock(
+                    false,
+                    Duration.ofSeconds(DELAY_AWAIT_ADVISORY_LOCK_SECONDS))) {
+                LOGGER.warn("was unable to acquire exclusive advisory lock for jobs during clear expire jobs process - abandoning");
+                return;
+            }
+
             // some started jobs may have been forcefully stopped (eg; JVM stopped) and the started job would be left
             // dangling. This will ensure that those jobs are marked as failed.
 
@@ -594,8 +606,8 @@ public class DbDistributedJobServiceImpl extends AbstractExecutionThreadService 
                     return;
                 }
 
-                if (!runAvailableJobs()) {
-                    if (!hasWork.await(15, TimeUnit.MINUTES)) {
+                if (!runNextAvailableJob()) {
+                    if (!hasWork.await(DELAY_CHECK_JOBS_SECONDS, TimeUnit.SECONDS)) {
                         LOGGER.debug("no jobs available");
                     }
                 }
@@ -609,25 +621,34 @@ public class DbDistributedJobServiceImpl extends AbstractExecutionThreadService 
     }
 
     /**
-     * <p>Loops, obtaining work from the queue. Run the jobs until there are no more available and then
-     * return.</p>
+     * <p>Obtains work from the queue and runs it.</p>
      * @return true if there was a job processed.
      */
-    private boolean runAvailableJobs() {
+    private boolean runNextAvailableJob() {
         var result = transactionTemplate.execute((status) -> {
 
-            // query for a job and skip lock any which are already being processed
-            org.haiku.haikudepotserver.job.jpa.model.Job jpaJob;
-            boolean didProcessAJob = false;
+            // Try take a shared lock for the job execution. If this is not possible then log it and return. It will
+            // try again after some delay or if a new job comes in. This arrangement coordinates with the job garbage
+            // collection system which has to take out an exclusive lock to clean the database.
 
-            while (null != (jpaJob = jpaJobService.tryGetNextAvailableJob().orElse(null))) {
+            if (!jpaJobService.tryTransactionalAdvisoryLock(
+                    true,
+                    Duration.ofSeconds(DELAY_AWAIT_ADVISORY_LOCK_SECONDS))) {
+                LOGGER.warn("was unable to acquire shared advisory lock for jobs during run next available job");
+                return false;
+            }
+
+            // query for a job and skip lock any which are already being processed
+            Optional<org.haiku.haikudepotserver.job.jpa.model.Job> jpaJobOptional = jpaJobService.tryGetNextAvailableJob();
+
+            if (jpaJobOptional.isPresent()) {
+                org.haiku.haikudepotserver.job.jpa.model.Job jpaJob = jpaJobOptional.get();
                 try {
                     JobSpecification jobSpecification = objectMapper.treeToValue(
                             jpaJob.getSpecification().getData(),
                             getConcreteSpecificationClassForJobTypeCode(jpaJob.getType().getCode())
                     );
                     runSpecificationInCurrentThread(jobSpecification);
-                    didProcessAJob = true;
                 } catch (JsonProcessingException jpe) {
                     throw new JobServiceException(
                             "unable to parse job specification for [%s]".formatted(jpaJob.getCode()),
@@ -635,7 +656,7 @@ public class DbDistributedJobServiceImpl extends AbstractExecutionThreadService 
                 }
             }
 
-            return didProcessAJob;
+            return jpaJobOptional.isPresent();
         });
 
         return BooleanUtils.isTrue(result);

@@ -9,7 +9,6 @@ import org.apache.cayenne.ObjectContext;
 import org.apache.cayenne.configuration.server.ServerRuntime;
 import org.haiku.haikudepotserver.dataobjects.Repository;
 import org.haiku.haikudepotserver.dataobjects.UserPasswordResetToken;
-import org.haiku.haikudepotserver.job.model.JobGarbageCollectionJobSpecification;
 import org.haiku.haikudepotserver.job.model.JobService;
 import org.haiku.haikudepotserver.job.model.JobSnapshot;
 import org.haiku.haikudepotserver.maintenance.model.MaintenanceService;
@@ -22,6 +21,9 @@ import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
 import java.time.Duration;
+import java.util.concurrent.Executor;
+import java.util.concurrent.Executors;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 /**
  * <p>Note that the exact (second, minute) of the timing of these expressions
@@ -38,6 +40,10 @@ import java.time.Duration;
 public class MaintenanceServiceImpl implements MaintenanceService {
 
     protected static Logger LOGGER = LoggerFactory.getLogger(MaintenanceServiceImpl.class);
+
+    private final Executor executor = Executors.newSingleThreadExecutor(Thread.ofVirtual().factory());
+
+    private final AtomicBoolean amClearingExpiredJobs = new AtomicBoolean(false);
 
     private final ServerRuntime serverRuntime;
     private final JobService jobService;
@@ -75,11 +81,30 @@ public class MaintenanceServiceImpl implements MaintenanceService {
 
     @Override
     public void hourly() {
-        // remove any jobs which are too old and are no longer required.
 
-        {
-            JobGarbageCollectionJobSpecification specification = new JobGarbageCollectionJobSpecification();
-            jobService.submit(specification, JobSnapshot.COALESCE_STATUSES_QUEUED);
+        LOGGER.info("will trigger hourly maintenance");
+
+        // Remove any jobs which are too old and are no longer required. This will not run as a job because
+        // it has been quite difficult to get the job clean up running as a job and at the sametime to not
+        // end up in tricky edge cases where the clean-up is mutating the job clean up job's data. For this
+        // reason this logic happens in a separate executor.
+
+        if (amClearingExpiredJobs.get()) {
+            LOGGER.warn("am already clearing expired jobs --> will skip");
+        } else {
+            executor.execute(() -> {
+                String threadNamePrior = Thread.currentThread().getName();
+                try {
+                    Thread.currentThread().setName("clear-expired-jobs");
+                    LOGGER.warn("will clear expired jobs");
+                    amClearingExpiredJobs.set(true);
+                    jobService.clearExpiredJobs();
+                    LOGGER.warn("did clear expired jobs");
+                } finally {
+                    amClearingExpiredJobs.set(false);
+                    Thread.currentThread().setName(threadNamePrior);
+                }
+            });
         }
 
         // remove any expired password reset tokens.
