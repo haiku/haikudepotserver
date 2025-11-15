@@ -292,7 +292,7 @@ public class DbDistributedJobServiceImpl extends AbstractExecutionThreadService 
 
         transactionTemplate.executeWithoutResult((transactionStatus) -> {
             if (jpaJobService.setJobProgressPercent(guid, progressPercent)) {
-                LOGGER.info("job [{}] progress to {}%%", guid, progressPercent);
+                LOGGER.info("job [{}] progress to {}%", guid, progressPercent);
             }
         });
     }

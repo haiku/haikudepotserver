@@ -103,7 +103,7 @@ public class RepositoryHpkrIngressJobRunner extends AbstractJobRunner<Repository
                 .forEach(rs ->
                         serverRuntime.performInTransaction(() -> {
                             try {
-                                runForRepositorySource(mainContext, rs);
+                                runForRepositorySource(mainContext, jobService, specification, rs);
                             } catch (Throwable e) {
                                 LOGGER.error(
                                         "a problem has arisen processing a repository file for repository source [{}]",
@@ -117,12 +117,14 @@ public class RepositoryHpkrIngressJobRunner extends AbstractJobRunner<Repository
 
     private void runForRepositorySource(
             ObjectContext mainContext,
+            JobService jobService,
+            RepositoryHpkrIngressJobSpecification specification,
             RepositorySource repositorySource)
             throws RepositoryHpkrIngressException {
         LOGGER.info("will import for repository source [{}]", repositorySource);
 
         runImportInfoForRepositorySource(mainContext, repositorySource);
-        runImportHpkrForRepositorySource(mainContext, repositorySource);
+        runImportHpkrForRepositorySource(mainContext, jobService, specification, repositorySource);
 
         repositorySource.setLastImportTimestamp();
         mainContext.commitChanges();
@@ -219,6 +221,8 @@ public class RepositoryHpkrIngressJobRunner extends AbstractJobRunner<Repository
 
     private void runImportHpkrForRepositorySource(
             ObjectContext mainContext,
+            JobService jobService,
+            RepositoryHpkrIngressJobSpecification specification,
             RepositorySource repositorySource) {
         URI uri = repositorySource.tryGetInternalFacingDownloadHpkrURI()
                 .orElseThrow(() -> new RuntimeException(
@@ -245,7 +249,23 @@ public class RepositoryHpkrIngressJobRunner extends AbstractJobRunner<Repository
 
             try (HpkrFileExtractor fileExtractor = new HpkrFileExtractor(temporaryFile)) {
 
-                LOGGER.info("will process data for repository hpkr {}", repositorySource.getCode());
+                LOGGER.info("find out how many packages are in the hpkr {}", repositorySource.getCode());
+
+                int total = 0;
+
+                {
+                    PkgIterator pkgIterator = new PkgIterator(fileExtractor.getPackageAttributesIterator());
+
+                    while (pkgIterator.hasNext()) {
+                        pkgIterator.next();
+                        total++;
+                    }
+                }
+
+                LOGGER.info("will process {} packages from for repository [{}] hpkr", total, repositorySource.getCode());
+
+                int upto = 0;
+                int lastPercentage = 0;
 
                 // import any packages that are in the repository.
 
@@ -253,6 +273,7 @@ public class RepositoryHpkrIngressJobRunner extends AbstractJobRunner<Repository
 
                 while (pkgIterator.hasNext()) {
                     Pkg pkg = pkgIterator.next();
+                    upto++;
 
                     repositoryImportPkgNames.add(pkg.getName());
 
@@ -272,6 +293,12 @@ public class RepositoryHpkrIngressJobRunner extends AbstractJobRunner<Repository
                         }
                     } else {
                         LOGGER.info("skipping pkg [{}] because it is not in the allowed pkg name pattern", pkg.getName());
+                    }
+
+                    int currentPercentage = (upto * 100) / total;
+                    if (currentPercentage > lastPercentage) {
+                        jobService.setJobProgressPercent(specification.getGuid(), currentPercentage);
+                        lastPercentage = currentPercentage;
                     }
                 }
             }

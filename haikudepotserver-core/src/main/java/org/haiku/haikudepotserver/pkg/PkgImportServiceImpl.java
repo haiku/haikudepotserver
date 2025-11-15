@@ -165,12 +165,15 @@ public class PkgImportServiceImpl implements PkgImportService {
                 persistedPkgVersion);
 
         // [apl]
-        // If this fails, we will let it go and it can be tried again a bit later on.  The system can try to back-fill
+        // If this fails, we will let it go, and it can be tried again a bit later on.  The system can try to back-fill
         // those at some later date if any of the latest versions for packages are missing.  This is better than
         // failing the import at this stage since this is "just" meta-data.  The length of the payload is being used as
         // a signal that the payload was downloaded and processed at some point.
 
-        if (populateFromPayload && shouldPopulateFromPayload(persistedPkgVersion)) {
+        if (populateFromPayload
+                && (null == persistedPkgVersion.getPayloadLength()
+                || objectContext.hasChanges())
+        ) {
             populateFromPayload(objectContext, persistedPkgVersion);
         }
 
@@ -295,16 +298,6 @@ public class PkgImportServiceImpl implements PkgImportService {
                 objectContext.deleteObjects(pkgVersionCopyright);
             }
         }
-    }
-
-    @Override
-    public boolean shouldPopulateFromPayload(PkgVersion persistedPkgVersion) {
-        String pkgName = persistedPkgVersion.getPkg().getName();
-        return null == persistedPkgVersion.getPayloadLength()
-                || Stream.of(
-                PkgService.SUFFIX_PKG_DEBUGINFO,
-                PkgService.SUFFIX_PKG_DEVELOPMENT,
-                PkgService.SUFFIX_PKG_SOURCE).noneMatch(pkgName::endsWith);
     }
 
     @Override

@@ -27,13 +27,11 @@ public interface PkgImportService {
             org.haiku.pkg.model.Pkg pkg,
             boolean populateFromPayload);
 
-    boolean shouldPopulateFromPayload(PkgVersion persistedPkgVersion);
-
-    /**
-     * <p>This will read in the payload into a temporary file.  From there it will parse it
-     * and take up any data from it such as the icon and the length of the download in
-     * bytes.</p>
-     */
+        /**
+         * <p>This will read in the payload into a temporary file.  From there it will parse it
+         * and take up any data from it such as the icon and the length of the download in
+         * bytes.</p>
+         */
 
     void populateFromPayload(ObjectContext objectContext, PkgVersion persistedPkgVersion);
 

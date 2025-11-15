@@ -224,4 +224,8 @@ public interface PkgService {
 
     String createVanityLinkUrl(Pkg pkg);
 
+    /**
+     * <p>Returns true if the package name is source, development or source.</p>
+     */
+    boolean isDebugOrDevelopmentOrSourcePkgName(String pkgName);
 }

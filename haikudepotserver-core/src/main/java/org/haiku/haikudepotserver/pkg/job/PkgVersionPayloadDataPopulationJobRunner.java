@@ -16,6 +16,7 @@ import org.haiku.haikudepotserver.dataobjects.Repository;
 import org.haiku.haikudepotserver.dataobjects.RepositorySource;
 import org.haiku.haikudepotserver.job.AbstractJobRunner;
 import org.haiku.haikudepotserver.job.model.JobService;
+import org.haiku.haikudepotserver.pkg.PkgServiceImpl;
 import org.haiku.haikudepotserver.pkg.model.PkgImportService;
 import org.haiku.haikudepotserver.pkg.model.PkgVersionPayloadDataPopulationJobSpecification;
 import org.slf4j.Logger;
@@ -43,17 +44,19 @@ public class PkgVersionPayloadDataPopulationJobRunner
     private final ServerRuntime serverRuntime;
     private final PkgImportService pkgImportService;
     private final Pattern allowedPkgNamePattern;
+    private final PkgServiceImpl pkgServiceImpl;
 
     public PkgVersionPayloadDataPopulationJobRunner(
             ServerRuntime serverRuntime,
             PkgImportService pkgImportService,
-            @Value("${hds.repository.import.allowed-pkg-name-pattern:}") String allowedPkgNamePattern) {
+            @Value("${hds.repository.import.allowed-pkg-name-pattern:}") String allowedPkgNamePattern, PkgServiceImpl pkgServiceImpl) {
         this.serverRuntime = Preconditions.checkNotNull(serverRuntime);
         this.pkgImportService = Preconditions.checkNotNull(pkgImportService);
         this.allowedPkgNamePattern = Optional.ofNullable(allowedPkgNamePattern)
                 .filter(StringUtils::isNotEmpty)
                 .map(Pattern::compile)
                 .orElse(null);
+        this.pkgServiceImpl = pkgServiceImpl;
     }
 
     @Override
@@ -95,7 +98,8 @@ public class PkgVersionPayloadDataPopulationJobRunner
                 ObjectContext pkgVersionContext = serverRuntime.newContext();
                 PkgVersion pkgVersion = pkgVersionContext.localObject(pkgVersions.get(i));
 
-                if (pkgImportService.shouldPopulateFromPayload(pkgVersion)) {
+                if (null == pkgVersion.getPayloadLength()
+                        || !pkgServiceImpl.isDebugOrDevelopmentOrSourcePkgName(pkgVersion.getPkg().getName())) {
                     LOGGER.debug("will process package [{}] from payload", pkgName);
                     pkgImportService.populateFromPayload(pkgVersionContext, pkgVersion);
                     pkgVersionContext.commitChanges();

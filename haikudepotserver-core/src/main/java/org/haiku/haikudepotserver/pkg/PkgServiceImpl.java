@@ -37,6 +37,7 @@ import java.net.URI;
 import java.util.*;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 /**
  * <p>This service undertakes non-trivial operations on packages.</p>
@@ -684,5 +685,11 @@ public class PkgServiceImpl implements PkgService {
         return "/" + pkg.getName();
     }
 
+    public boolean isDebugOrDevelopmentOrSourcePkgName(String pkgName) {
+        return Stream.of(
+                PkgService.SUFFIX_PKG_DEBUGINFO,
+                PkgService.SUFFIX_PKG_DEVELOPMENT,
+                PkgService.SUFFIX_PKG_SOURCE).anyMatch(pkgName::endsWith);
+    }
 
 }
