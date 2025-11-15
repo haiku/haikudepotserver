@@ -161,6 +161,24 @@ public class JobServiceIT extends AbstractIntegrationTest {
 
     }
 
+    /**
+     * <p>Tests what happens if a job is submitted but there's no runner for it.</p>
+     */
+    @Test
+    public void testJobWithoutRunner() {
+        Assertions.assertThat(
+                jobService.awaitAllJobsFinishedUninterruptibly(TimeUnit.MILLISECONDS.convert(3, TimeUnit.SECONDS))
+        ).isTrue();
+
+        // -------------------------
+        String jobGuid = jobService.submit(new WithoutRunnerJobSpecification(), JobSnapshot.COALESCE_STATUSES_NONE);
+        // -------------------------
+
+        jobService.awaitJobFinishedUninterruptibly(jobGuid, TimeUnit.SECONDS.toMillis(TOLERANCE_SECONDS));
+
+        assertStatus(jobGuid, JobSnapshot.Status.FAILED);
+    }
+
     private boolean checkStatus(String guid, JobSnapshot.Status status) {
         return jobService.tryGetJob(guid)
                 .filter(js -> js.getStatus() == status)
@@ -172,6 +190,13 @@ public class JobServiceIT extends AbstractIntegrationTest {
                 .atMost(TOLERANCE_SECONDS, TimeUnit.SECONDS)
                 .pollDelay(2, TimeUnit.SECONDS)
                 .until(() -> checkStatus(guid, status));
+    }
+
+    /**
+     * <p>This job specification type has no runner; if we submit this one then it should
+     * fail.</p>
+     */
+    private final static class WithoutRunnerJobSpecification extends AbstractJobSpecification {
     }
 
 
