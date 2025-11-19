@@ -1,10 +1,14 @@
 /*
- * Copyright 2024, Andrew Lindesay
+ * Copyright 2024-2025, Andrew Lindesay
  * Distributed under the terms of the MIT License.
  */
 package org.haiku.haikudepotserver.graphics;
 
 public class Constants {
+
+    public final static long TIMEOUT_TOOL_EXEC_SECONDS = 10;
+
+    public final static long TIMEOUT_ACQUIRE_PERMIT_SECONDS = 10;
 
     public final static String SEGMENT_GRAPHICS = "__gfx";
 

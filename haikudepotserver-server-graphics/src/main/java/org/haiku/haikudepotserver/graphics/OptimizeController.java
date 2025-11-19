@@ -1,7 +1,10 @@
+/*
+ * Copyright 2025, Andrew Lindesay
+ * Distributed under the terms of the MIT License.
+ */
 package org.haiku.haikudepotserver.graphics;
 
 import org.haiku.haikudepotserver.graphics.support.ToolHelper;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.validation.annotation.Validated;
@@ -26,12 +29,12 @@ public class OptimizeController {
 
     @PostMapping("/" + Constants.SEGMENT_GRAPHICS + "/optimize")
     public ResponseEntity<StreamingResponseBody> optimize(InputStream stream) {
-
-        StreamingResponseBody responseBody = (out) -> ToolHelper.runToolsPipeline(
+        return ToolHelper.runToolsPipelineWithPermitsForController(
+                null,
                 toolService.getOptimizeToolsPipeline(),
-                stream, out);
-
-        return new ResponseEntity<>(responseBody, ToolHelper.pngHttpHeaders(), HttpStatus.OK);
+                stream,
+                ToolHelper.pngHttpHeaders()
+        );
     }
 
 

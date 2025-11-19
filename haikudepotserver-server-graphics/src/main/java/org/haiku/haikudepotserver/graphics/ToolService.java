@@ -1,5 +1,5 @@
 /*
- * Copyright 2024, Andrew Lindesay
+ * Copyright 2024-2025, Andrew Lindesay
  * Distributed under the terms of the MIT License.
  */
 package org.haiku.haikudepotserver.graphics;
@@ -20,6 +20,8 @@ public class ToolService {
     private final File pngquantTool;
 
     private final File convertTool;
+    private final String convertLimitMemory;
+    private final String convertLimitDisk;
 
     private final File oxipngTool;
 
@@ -29,6 +31,8 @@ public class ToolService {
             @Value("${hds.tool.hvif2png.path}") File hvif2pngTool,
             @Value("${hds.tool.pngquant.path:/usr/bin/pngquant}") File pngquantTool,
             @Value("${hds.tool.convert.path:/usr/bin/convert}") File convertTool,
+            @Value("${hds.tool.convert.limit-memory}") String convertLimitMemory,
+            @Value("${hds.tool.convert.limit-disk}") String convertLimitDisk,
             @Value("${hds.tool.oxipng.path}") File oxipngTool,
             @Value("${hds.gfx.quantize:false}") boolean quantize) {
 
@@ -45,6 +49,8 @@ public class ToolService {
         this.hvif2pngTool = hvif2pngTool;
         this.pngquantTool = pngquantTool;
         this.convertTool = convertTool;
+        this.convertLimitMemory = convertLimitMemory;
+        this.convertLimitDisk = convertLimitDisk;
         this.oxipngTool = oxipngTool;
         this.quantize = quantize;
     }
@@ -62,6 +68,8 @@ public class ToolService {
                 new String[]{
                         convertTool.getAbsolutePath(),
                         "-",
+                        "-limit", "memory", convertLimitMemory,
+                        "-limit", "disk", convertLimitDisk,
                         "-thumbnail",
                         String.format("%dx%d>", width, height),
                         "png:-"

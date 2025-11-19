@@ -6,10 +6,23 @@ logging:
   pattern:
     console: "%d{HH:mm:ss.SSS} [%thread] %-5level %logger{36} - %msg%n"
 
+  level:
+    org:
+      haiku: INFO
+
 hds:
   gfx:
+    controller:
+      thumbnail:
+        permits: 2
+      hvif2png:
+        permits: 16
+# Quantize the image; false by default
 #    quantize: false
   tool:
+    convert:
+      limit-memory: 32MB
+      limit-disk: 32MB
     oxipng:
 #      path: /x/y/z/oxipng
     hvif2png:
