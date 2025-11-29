@@ -7,17 +7,12 @@ package org.haiku.haikudepotserver.graphics.support;
 import com.google.common.base.Preconditions;
 import com.google.common.io.CountingOutputStream;
 import com.google.common.util.concurrent.Uninterruptibles;
+import io.avaje.http.api.StreamingOutput;
 import jakarta.annotation.Nullable;
 import org.haiku.haikudepotserver.graphics.Constants;
 import org.haiku.haikudepotserver.graphics.model.Tool;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.http.HttpHeaders;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.MediaType;
-import org.springframework.http.ResponseEntity;
-import org.springframework.util.MultiValueMap;
-import org.springframework.web.servlet.mvc.method.annotation.StreamingResponseBody;
 
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
@@ -36,28 +31,18 @@ public class ToolHelper {
 
     protected static final Logger LOGGER = LoggerFactory.getLogger(ToolHelper.class);
 
-    public static MultiValueMap<String, String> pngHttpHeaders() {
-        MultiValueMap<String, String> headers = new HttpHeaders();
-        headers.add(HttpHeaders.CONTENT_TYPE, MediaType.IMAGE_PNG_VALUE);
-        return headers;
-    }
-
     /**
-     * <p>Runs a tool or pipeline of tools on behalf of a controller. If a semaphore is supplied then
-     * it will run if a permit can be obtained from the {@link Semaphore} in a reasonable timeframe.
+     * <p>Runs a tool or pipeline of tools. If a semaphore is supplied then it will run if a
+     * permit can be obtained from the {@link Semaphore} in a reasonable timeframe.
      * </p>
-     *
-     * @return response suitable to be provided back as a controller output.
      */
 
-    public static ResponseEntity<StreamingResponseBody> runToolsPipelineWithPermitsForController(
+    public static StreamingOutput runToolsPipelineWithPermitsAsStreamingOutput(
             @Nullable Semaphore semaphore,
             Tool[] tools,
-            InputStream dataFromRequest,
-            MultiValueMap<String, String> responseHeaders
-    ) {
-        StreamingResponseBody responseBody = (out) -> {
-
+            InputStream dataFromRequest
+    ) throws IOException {
+        return (dataForResponse) -> {
             if (null != semaphore) {
                 try {
                     if (!semaphore.tryAcquire(Constants.TIMEOUT_ACQUIRE_PERMIT_SECONDS, TimeUnit.SECONDS)) {
@@ -73,7 +58,7 @@ public class ToolHelper {
             }
 
             try {
-                runToolsPipeline(tools, dataFromRequest, out);
+                runToolsPipeline(tools, dataFromRequest, dataForResponse);
             } finally {
                 if (null != semaphore) {
                     semaphore.release();
@@ -81,8 +66,6 @@ public class ToolHelper {
                 }
             }
         };
-
-        return new ResponseEntity<>(responseBody, responseHeaders, HttpStatus.OK);
     }
 
     public static void runToolsPipeline(
@@ -143,6 +126,7 @@ public class ToolHelper {
                     CountingOutputStream countingOutputStream = new CountingOutputStream(processOutputStream)
             ) {
                 dataFromRequest.transferTo(countingOutputStream);
+                countingOutputStream.flush();
                 LOGGER.debug("sent {} bytes to the tool", countingOutputStream.getCount());
             } catch (IOException e) {
                 LOGGER.error("unable to write to the tools input stream for pipeline on thread", e);
@@ -157,6 +141,7 @@ public class ToolHelper {
                     CountingOutputStream countingOutputStream = new CountingOutputStream(dataForResponse)
             ) {
                 processInputStream.transferTo(countingOutputStream);
+                countingOutputStream.flush();
                 LOGGER.debug("received {} bytes from the tool", countingOutputStream.getCount());
             }
 
@@ -227,6 +212,7 @@ public class ToolHelper {
         return toolProcess.tool.args()[0];
     }
 
-    private record ToolProcess(Tool tool, Process process, Thread stdErrReadThread) {}
+    private record ToolProcess(Tool tool, Process process, Thread stdErrReadThread) {
+    }
 
 }

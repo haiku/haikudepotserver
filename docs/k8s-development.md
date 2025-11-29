@@ -124,9 +124,9 @@ docker build -f Dockerfile_server_graphics --load --tag haikudepotserver-server-
 Once this build is complete, export the images to tar files;
 
 ```bash
-podman save --output /tmp/haikudepotserver-server-graphics-9.tar haikudepotserver-server-graphics:999.999.999
 podman save --output /tmp/haikudepotserver-9.tar haikudepotserver:999.999.999
-````
+podman save --output /tmp/haikudepotserver-server-graphics-9.tar haikudepotserver-server-graphics:999.999.999
+```
 
 Now transport them to the k3s Kubernetes node's host disk system at `/var/lib/rancher/k3s/agent/images`.
 

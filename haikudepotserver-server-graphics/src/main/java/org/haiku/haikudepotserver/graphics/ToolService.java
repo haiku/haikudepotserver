@@ -4,15 +4,15 @@
  */
 package org.haiku.haikudepotserver.graphics;
 
+import io.avaje.config.Config;
+import io.avaje.inject.Component;
 import org.haiku.haikudepotserver.graphics.model.Tool;
-import org.springframework.beans.factory.annotation.Value;
-import org.springframework.stereotype.Service;
 
 import java.io.File;
 import java.util.List;
 import java.util.stream.Stream;
 
-@Service
+@Component
 public class ToolService {
 
     private final File hvif2pngTool;
@@ -27,14 +27,15 @@ public class ToolService {
 
     private final boolean quantize;
 
-    public ToolService(
-            @Value("${hds.tool.hvif2png.path}") File hvif2pngTool,
-            @Value("${hds.tool.pngquant.path:/usr/bin/pngquant}") File pngquantTool,
-            @Value("${hds.tool.convert.path:/usr/bin/convert}") File convertTool,
-            @Value("${hds.tool.convert.limit-memory}") String convertLimitMemory,
-            @Value("${hds.tool.convert.limit-disk}") String convertLimitDisk,
-            @Value("${hds.tool.oxipng.path}") File oxipngTool,
-            @Value("${hds.gfx.quantize:false}") boolean quantize) {
+    public ToolService() {
+
+        hvif2pngTool = new File(Config.get(Constants.KEY_CONFIG_HVIF2PNG_PATH));
+        pngquantTool = new File(Config.get(Constants.KEY_CONFIG_PNGQUANT_PATH, "/usr/bin/pngquant"));
+        convertTool = new File(Config.get(Constants.KEY_CONFIG_CONVERT_PATH, "/usr/bin/convert"));
+        convertLimitMemory = Config.get(Constants.KEY_CONFIG_CONVERT_LIMIT_MEMORY);
+        convertLimitDisk = Config.get(Constants.KEY_CONFIG_CONVERT_LIMIT_DISK);
+        oxipngTool = new File(Config.get(Constants.KEY_CONFIG_OXIPNG_PATH));
+        quantize = Config.getBool(Constants.KEY_CONFIG_QUANTIZE, false);
 
         List<String> missingFilenames = Stream.of(hvif2pngTool, pngquantTool, convertTool, oxipngTool)
                 .filter(f -> !f.isFile())
@@ -45,14 +46,6 @@ public class ToolService {
             throw new IllegalStateException("the tools [" + String.join(",", missingFilenames)
                     + "] do not exist");
         }
-
-        this.hvif2pngTool = hvif2pngTool;
-        this.pngquantTool = pngquantTool;
-        this.convertTool = convertTool;
-        this.convertLimitMemory = convertLimitMemory;
-        this.convertLimitDisk = convertLimitDisk;
-        this.oxipngTool = oxipngTool;
-        this.quantize = quantize;
     }
 
     private Tool getHvif2pngTool(int size) {
