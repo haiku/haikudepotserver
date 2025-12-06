@@ -36,7 +36,7 @@
         <spring-retry.version>2.0.11</spring-retry.version>
 
         <postgresql.version>42.7.8</postgresql.version>
-        <cayenne.version>4.2.2</cayenne.version>
+        <cayenne.version>4.2.3</cayenne.version>
 
         <guava.version>33.4.8-jre</guava.version>
 
