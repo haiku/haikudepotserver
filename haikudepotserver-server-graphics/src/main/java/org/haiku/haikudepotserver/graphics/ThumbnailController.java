@@ -4,22 +4,18 @@
  */
 package org.haiku.haikudepotserver.graphics;
 
+import io.avaje.config.Config;
+import io.avaje.http.api.*;
 import jakarta.validation.constraints.Max;
 import jakarta.validation.constraints.Min;
 import org.haiku.haikudepotserver.graphics.support.ToolHelper;
-import org.springframework.beans.factory.annotation.Value;
-import org.springframework.http.ResponseEntity;
-import org.springframework.stereotype.Controller;
-import org.springframework.validation.annotation.Validated;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.servlet.mvc.method.annotation.StreamingResponseBody;
 
+import java.io.IOException;
 import java.io.InputStream;
 import java.util.concurrent.Semaphore;
 
-@Validated
-@Controller
+//@Validated
+@Controller("/" + Constants.SEGMENT_GRAPHICS)
 public class ThumbnailController {
 
     private final ToolService toolService;
@@ -27,11 +23,10 @@ public class ThumbnailController {
     private final Semaphore semaphore;
 
     public ThumbnailController(
-            ToolService toolService,
-            @Value("${hds.gfx.controller.thumbnail.permits}") int permits
+            ToolService toolService
     ) {
         this.toolService = toolService;
-        this.semaphore = new Semaphore(permits);
+        this.semaphore = new Semaphore(Config.getInt(Constants.KEY_CONFIG_THUMBNAIL_PERMITS));
     }
 
     /**
@@ -39,17 +34,17 @@ public class ThumbnailController {
      * only argument is the dimensions of the thumbnail.</p>
      */
 
-    @PostMapping("/" + Constants.SEGMENT_GRAPHICS + "/thumbnail")
-    public ResponseEntity<StreamingResponseBody> thumbnail(
-            InputStream stream,
-            @RequestParam(value = Constants.KEY_WIDTH) @Min(1) @Max(Constants.MAX_SIZE) Integer width,
-            @RequestParam(value = Constants.KEY_HEIGHT) @Min(1) @Max(Constants.MAX_SIZE) Integer height) {
-
-        return ToolHelper.runToolsPipelineWithPermitsForController(
+    @Post("thumbnail")
+    @Produces(value = Constants.MEDIA_TYPE_PNG, statusCode = 200)
+    public StreamingOutput thumbnail(
+            InputStream inputStream,
+            @QueryParam(Constants.KEY_WIDTH) @Min(1) @Max(Constants.MAX_SIZE) Integer width,
+            @QueryParam(Constants.KEY_HEIGHT) @Min(1) @Max(Constants.MAX_SIZE) Integer height
+    ) throws IOException {
+        return ToolHelper.runToolsPipelineWithPermitsAsStreamingOutput(
                 semaphore,
                 toolService.getThumbnailToolsPipeline(width, height),
-                stream,
-                ToolHelper.pngHttpHeaders()
+                inputStream
         );
     }
 

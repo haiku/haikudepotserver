@@ -1,29 +1,21 @@
 server:
-  tomcat:
-    max-swallow-size: 10MB
-
-logging:
-  pattern:
-    console: "%d{HH:mm:ss.SSS} [%thread] %-5level %logger{36} - %msg%n"
-
-  level:
-    org:
-      haiku: INFO
-
+  port: 8080
 hds:
   gfx:
     controller:
       thumbnail:
-        permits: 2
+        permits: 1
       hvif2png:
         permits: 16
 # Quantize the image; false by default
 #    quantize: false
   tool:
     convert:
-      limit-memory: 32MB
-      limit-disk: 32MB
+      limit-memory: 60MB
+      limit-disk: 0MB
     oxipng:
-#      path: /x/y/z/oxipng
+# TODO; remove this placeholder once the config systems supports this.
+      path: /x/y/z/oxipng
     hvif2png:
-#      path: /w/u/v/hvifpng
+# TODO; remove this placeholder once the config systems supports this.
+      path: /w/u/v/hvifpng

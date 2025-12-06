@@ -4,33 +4,27 @@
  */
 package org.haiku.haikudepotserver.graphics;
 
+import io.avaje.config.Config;
+import io.avaje.http.api.*;
 import jakarta.validation.constraints.Max;
 import jakarta.validation.constraints.Min;
 import org.haiku.haikudepotserver.graphics.support.ToolHelper;
-import org.springframework.beans.factory.annotation.Value;
-import org.springframework.http.ResponseEntity;
-import org.springframework.stereotype.Controller;
-import org.springframework.validation.annotation.Validated;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.servlet.mvc.method.annotation.StreamingResponseBody;
 
+import java.io.IOException;
 import java.io.InputStream;
 import java.util.concurrent.Semaphore;
 
-@Validated
-@Controller
+//@Validated
+@Controller("/" + Constants.SEGMENT_GRAPHICS)
 public class Hvif2pngController {
 
     private final ToolService toolService;
 
     private final Semaphore semaphore;
 
-    public Hvif2pngController(
-            ToolService toolService,
-            @Value("${hds.gfx.controller.hvif2png.permits}") int permits) {
+    public Hvif2pngController(ToolService toolService) {
         this.toolService = toolService;
-        this.semaphore = new Semaphore(permits);
+        this.semaphore = new Semaphore(Config.getInt(Constants.KEY_CONFIG_HVIF2PNG_PERMITS));
     }
 
     /**
@@ -38,15 +32,16 @@ public class Hvif2pngController {
      * streams out the resultant PNG file.</p>
      */
 
-    @PostMapping("/" + Constants.SEGMENT_GRAPHICS + "/hvif2png")
-    public ResponseEntity<StreamingResponseBody> thumbnail(
-            InputStream stream,
-            @RequestParam(value = Constants.KEY_SIZE) @Min(1) @Max(Constants.MAX_SIZE) Integer size) {
-        return ToolHelper.runToolsPipelineWithPermitsForController(
+    @Post("hvif2png")
+    @Produces(value = Constants.MEDIA_TYPE_PNG, statusCode = 200)
+    public StreamingOutput thumbnail(
+            InputStream inputStream,
+            @QueryParam(Constants.KEY_SIZE) @Min(1) @Max(Constants.MAX_SIZE) Integer size
+    ) throws IOException {
+        return ToolHelper.runToolsPipelineWithPermitsAsStreamingOutput(
                 semaphore,
                 toolService.getHvif2pngToolsPipeline(size),
-                stream,
-                ToolHelper.pngHttpHeaders()
+                inputStream
         );
     }
 

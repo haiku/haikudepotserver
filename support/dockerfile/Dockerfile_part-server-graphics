@@ -19,9 +19,8 @@ ENV X_HDS_OXIPNG_HOME=/opt/oxipng
 ENV X_HDS_HVIF2PNG_HOME=/opt/hvif2png
 ENV X_HDS_SERVER_GRAPHICS_APP_HOME="/opt/haikudepotserver-server-graphics"
 
-# These are picked up by Spring Boot
+# These are picked up by Avaje HTTP / JEX
 ENV SERVER_PORT=8085
-ENV MANAGEMENT_SERVER_PORT=8086
 ENV HDS_TOOL_OXIPNG_PATH=${X_HDS_OXIPNG_HOME}/bin/oxipng
 ENV HDS_TOOL_HVIF2PNG_PATH=${X_HDS_HVIF2PNG_HOME}/bin/hvif2png.sh
 
@@ -47,8 +46,8 @@ COPY --from=java_maven_build_server_graphics /hds-src/haikudepotserver-server-gr
     ${X_HDS_SERVER_GRAPHICS_APP_HOME}/app.jar
 
 CMD [ "java", \
-    "-Xms128m", \
-    "-Xmx128m", \
+    "-Xms32m", \
+    "-Xmx32m", \
     "-Dfile.encoding=UTF-8", \
     "-Duser.timezone=GMT0", \
     "-Djava.net.preferIPv4Stack=true", \
