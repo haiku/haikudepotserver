@@ -1265,6 +1265,9 @@ COUNT(DISTINCT pv.id) AS "total"
 #end
 FROM
 haikudepot.pkg_version pv
+#if($search.sortOrdering.name() == "VERSIONVIEWCOUNTER")
+LEFT JOIN haikudepot.pkg_version_interaction pva ON pva.id = pv.pkg_version_interaction_id
+#end
 JOIN haikudepot.pkg p ON p.id = pv.pkg_id
 JOIN haikudepot.pkg_supplement ps ON ps.id = p.pkg_supplement_id
 #if($search.repositories || $search.sortOrdering.name() == "PROMINENCE" || $search.architecture)
@@ -1364,7 +1367,7 @@ ORDER BY
         #if($search.sortOrdering.name() == "PROMINENCE")
         pr.ordering ASC,
         #elseif($search.sortOrdering.name() == "VERSIONVIEWCOUNTER")
-        pv.view_counter DESC,
+        COALESCE(pva.view_counter, 0) DESC,
         #elseif($search.sortOrdering.name() == "VERSIONCREATETIMESTAMP")
         pv.create_timestamp DESC,
         #end
