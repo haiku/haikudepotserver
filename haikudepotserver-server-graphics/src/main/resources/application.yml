@@ -14,8 +14,6 @@ hds:
       limit-memory: 60MB
       limit-disk: 0MB
     oxipng:
-# TODO; remove this placeholder once the config systems supports this.
-      path: /x/y/z/oxipng
+#      path: /x/y/z/oxipng
     hvif2png:
-# TODO; remove this placeholder once the config systems supports this.
-      path: /w/u/v/hvifpng
+#      path: /w/u/v/hvifpng

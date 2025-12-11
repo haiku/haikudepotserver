@@ -65,7 +65,7 @@
         <avaje-http.version>3.6-RC2</avaje-http.version>
         <avaje-inject.version>12.1-RC1</avaje-inject.version>
         <avaje-http-inject-plugin.version>3.6-RC3</avaje-http-inject-plugin.version>
-        <avaje-config.version>4.2</avaje-config.version>
+        <avaje-config.version>5.0-RC1</avaje-config.version>
         <avaje-simple-logger.version>1.1-RC1</avaje-simple-logger.version>
         <avaje-jex.version>3.4-RC2</avaje-jex.version>
         <avaje-applog-slf4j.version>1.0</avaje-applog-slf4j.version>
