@@ -52,7 +52,7 @@
         <flexmark.version>0.64.8</flexmark.version>
         <freemarker.version>2.3.34</freemarker.version>
         <opencsv.version>5.11</opencsv.version>
-        <aircompressor.version>3.3</aircompressor.version>
+        <aircompressor.version>3.4</aircompressor.version>
 
         <commons-collections4.version>4.5.0</commons-collections4.version>
         <commons-lang3.version>3.18.0</commons-lang3.version>
