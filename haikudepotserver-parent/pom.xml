@@ -47,6 +47,7 @@
 
         <maven-war-plugin.version>3.5.1</maven-war-plugin.version>
         <maven-failsafe-plugin.version>3.5.4</maven-failsafe-plugin.version>
+        <maven-resources-plugin.version>3.4.0</maven-resources-plugin.version>
         <jsonschema2pojo-maven-plugin.version>1.2.2</jsonschema2pojo-maven-plugin.version>
 
         <flexmark.version>0.64.8</flexmark.version>
@@ -69,6 +70,15 @@
         <avaje-simple-logger.version>1.1-RC1</avaje-simple-logger.version>
         <avaje-jex.version>3.4-RC2</avaje-jex.version>
         <avaje-applog-slf4j.version>1.0</avaje-applog-slf4j.version>
+
+        <!--
+        This is required to configure the agent in the test plugin. The actual version is
+        coming from `org.springframework.boot:spring-boot-starter-test:jar` so may unfortunately
+        require manual synchronization.
+        -->
+        <mockito.version>5.17.0</mockito.version>
+        <bytebuddy.version>1.17.8</bytebuddy.version>
+
     </properties>
 
     <dependencyManagement>
@@ -330,6 +340,24 @@
 
                 <plugin>
                     <groupId>org.apache.maven.plugins</groupId>
+                    <artifactId>maven-compiler-plugin</artifactId>
+                    <version>3.14.1</version>
+                </plugin>
+
+                <plugin>
+                    <groupId>org.apache.maven.plugins</groupId>
+                    <artifactId>maven-resources-plugin</artifactId>
+                    <version>3.4.0</version>
+                </plugin>
+
+                <plugin>
+                    <groupId>org.apache.maven.plugins</groupId>
+                    <artifactId>maven-failsafe-plugin</artifactId>
+                    <version>3.5.4</version>
+                </plugin>
+
+                <plugin>
+                    <groupId>org.apache.maven.plugins</groupId>
                     <artifactId>maven-surefire-plugin</artifactId>
                     <version>3.2.5</version>
                 </plugin>
@@ -341,9 +369,9 @@
                 </plugin>
 
                 <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-shade-plugin</artifactId>
-                <version>3.6.1</version>
+                    <groupId>org.apache.maven.plugins</groupId>
+                    <artifactId>maven-shade-plugin</artifactId>
+                    <version>3.6.1</version>
                 </plugin>
 
             </plugins>
@@ -353,11 +381,38 @@
 
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-resources-plugin</artifactId>
+                <configuration>
+                    <propertiesEncoding>UTF-8</propertiesEncoding>
+                </configuration>
+            </plugin>
+
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-surefire-plugin</artifactId>
                 <configuration>
+                    <!-- otherwise there's a warning from Java 21 onward -->
+                    <argLine>
+                        -javaagent:${settings.localRepository}/org/mockito/mockito-core/${mockito.version}/mockito-core-${mockito.version}.jar
+                        -javaagent:${settings.localRepository}/net/bytebuddy/byte-buddy-agent/${bytebuddy.version}/byte-buddy-agent-${bytebuddy.version}.jar
+                        -Xshare:off
+                    </argLine>
                     <systemPropertyVariables>
                         <user.timezone>GMT0</user.timezone>
                     </systemPropertyVariables>
+                </configuration>
+            </plugin>
+
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-failsafe-plugin</artifactId>
+                <configuration>
+                    <!-- otherwise there's a warning from Java 21 onward -->
+                    <argLine>
+                        -javaagent:${settings.localRepository}/org/mockito/mockito-core/${mockito.version}/mockito-core-${mockito.version}.jar
+                        -javaagent:${settings.localRepository}/net/bytebuddy/byte-buddy-agent/${bytebuddy.version}/byte-buddy-agent-${bytebuddy.version}.jar
+                        -Xshare:off
+                    </argLine>
                 </configuration>
             </plugin>
 

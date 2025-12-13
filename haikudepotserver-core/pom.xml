@@ -226,7 +226,7 @@
                 <configuration>
                     <sourceDirectory>${basedir}/src/main/resources/schema</sourceDirectory>
                     <useLongIntegers>true</useLongIntegers>
-                    <useCommonsLang3>true</useCommonsLang3>
+<!--                    <useCommonsLang3>true</useCommonsLang3>-->
                     <useJakartaValidation>true</useJakartaValidation>
                 </configuration>
                 <executions>
@@ -241,7 +241,6 @@
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-compiler-plugin</artifactId>
-                <version>3.14.0</version>
                 <configuration>
                     <annotationProcessorPaths>
                         <path>

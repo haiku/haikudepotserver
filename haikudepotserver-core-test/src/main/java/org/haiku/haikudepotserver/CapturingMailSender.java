@@ -27,7 +27,7 @@ public class CapturingMailSender implements MailSender {
 
     @Override
     public void send(SimpleMailMessage simpleMessage) throws MailException {
-         LOGGER.info("noop; send mail to {}", simpleMessage.getTo());
+         LOGGER.info("noop; send mail to {}", String.join(",", simpleMessage.getTo()));
         sentMessages.add(simpleMessage);
     }
 
