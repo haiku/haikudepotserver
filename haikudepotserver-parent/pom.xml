@@ -32,33 +32,33 @@
         <maven.compiler.source>25</maven.compiler.source>
         <maven.compiler.parameters>true</maven.compiler.parameters>
 
-        <spring-boot.version>3.5.6</spring-boot.version>
-        <spring-retry.version>2.0.11</spring-retry.version>
+        <spring-boot.version>3.5.8</spring-boot.version>
+        <spring-retry.version>2.0.12</spring-retry.version>
 
         <postgresql.version>42.7.8</postgresql.version>
         <cayenne.version>4.2.3</cayenne.version>
 
         <guava.version>33.4.8-jre</guava.version>
 
-        <openapi-generator-maven-plugin.version>7.13.0</openapi-generator-maven-plugin.version>
+        <openapi-generator-maven-plugin.version>7.17.0</openapi-generator-maven-plugin.version>
         <springfox.version>3.0.0</springfox.version>
 
-        <nimbus-jose-jwt.version>10.0.2</nimbus-jose-jwt.version>
+        <nimbus-jose-jwt.version>10.6</nimbus-jose-jwt.version>
 
-        <maven-war-plugin.version>3.4.0</maven-war-plugin.version>
-        <maven-failsafe-plugin.version>3.5.3</maven-failsafe-plugin.version>
+        <maven-war-plugin.version>3.5.1</maven-war-plugin.version>
+        <maven-failsafe-plugin.version>3.5.4</maven-failsafe-plugin.version>
         <jsonschema2pojo-maven-plugin.version>1.2.2</jsonschema2pojo-maven-plugin.version>
 
         <flexmark.version>0.64.8</flexmark.version>
         <freemarker.version>2.3.34</freemarker.version>
-        <opencsv.version>5.11</opencsv.version>
+        <opencsv.version>5.12.0</opencsv.version>
         <aircompressor.version>3.4</aircompressor.version>
 
         <commons-collections4.version>4.5.0</commons-collections4.version>
-        <commons-lang3.version>3.18.0</commons-lang3.version>
-        <commons-compress.version>1.27.1</commons-compress.version>
-        <commons-codec.version>1.18.0</commons-codec.version>
-        <commons-csv.version>1.14.0</commons-csv.version>
+        <commons-lang3.version>3.20.0</commons-lang3.version>
+        <commons-compress.version>1.28.0</commons-compress.version>
+        <commons-codec.version>1.20.0</commons-codec.version>
+        <commons-csv.version>1.14.1</commons-csv.version>
 
         <testcontainers.version>1.21.3</testcontainers.version>
 
