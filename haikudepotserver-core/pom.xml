@@ -226,7 +226,6 @@
                 <configuration>
                     <sourceDirectory>${basedir}/src/main/resources/schema</sourceDirectory>
                     <useLongIntegers>true</useLongIntegers>
-<!--                    <useCommonsLang3>true</useCommonsLang3>-->
                     <useJakartaValidation>true</useJakartaValidation>
                 </configuration>
                 <executions>
