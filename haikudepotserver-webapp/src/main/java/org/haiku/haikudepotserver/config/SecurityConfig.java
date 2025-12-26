@@ -7,19 +7,14 @@ package org.haiku.haikudepotserver.config;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.apache.cayenne.configuration.server.ServerRuntime;
 import org.haiku.haikudepotserver.repository.model.RepositoryService;
-import org.haiku.haikudepotserver.security.AccessDeniedHandler;
-import org.haiku.haikudepotserver.security.AuthenticationEntryPoint;
-import org.haiku.haikudepotserver.security.BearerTokenAuthenticationFilter;
-import org.haiku.haikudepotserver.security.NoOpAuthenticationManager;
-import org.haiku.haikudepotserver.security.QueryParamAuthenticationFilter;
-import org.haiku.haikudepotserver.security.RepositoryAuthenticationDetailsSource;
-import org.haiku.haikudepotserver.security.RepositoryAuthenticationProvider;
-import org.haiku.haikudepotserver.security.UserAuthenticationProvider;
+import org.haiku.haikudepotserver.security.*;
 import org.haiku.haikudepotserver.security.model.UserAuthenticationService;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
+import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
+import org.springframework.security.config.annotation.web.configurers.HeadersConfigurer;
 import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.www.BasicAuthenticationFilter;
@@ -64,23 +59,25 @@ public class SecurityConfig {
         AuthenticationEntryPoint authenticationEntryPoint = new AuthenticationEntryPoint(objectMapper);
         AccessDeniedHandler accessDeniedHandler = new AccessDeniedHandler(objectMapper);
 
-        http.exceptionHandling()
-                .accessDeniedHandler(accessDeniedHandler)
-                .authenticationEntryPoint(authenticationEntryPoint);
+        http.exceptionHandling(eh -> {
+            eh.accessDeniedHandler(accessDeniedHandler);
+            eh.authenticationEntryPoint(authenticationEntryPoint);
+        });
 
-        http.csrf().disable();
-        http.headers().frameOptions().sameOrigin();
-        http.sessionManagement().sessionCreationPolicy(SessionCreationPolicy.STATELESS);
+        http.csrf(AbstractHttpConfigurer::disable);
+        http.headers(h -> h.frameOptions(HeadersConfigurer.FrameOptionsConfig::sameOrigin));
+        http.sessionManagement(sm -> sm.sessionCreationPolicy(SessionCreationPolicy.STATELESS));
 
         // basic authentication; note that this covers both the regular user authentication
-        // as well as a special authentication case for the repository security.
+        // and the special authentication case for the repository security.
 
         http
                 .authenticationProvider(new UserAuthenticationProvider(userAuthenticationService))
                 .authenticationProvider(new RepositoryAuthenticationProvider(serverRuntime, repositoryService))
-                .httpBasic()
-                .authenticationEntryPoint(authenticationEntryPoint)
-                .authenticationDetailsSource(new RepositoryAuthenticationDetailsSource());
+                .httpBasic(hb -> {
+                    hb.authenticationEntryPoint(authenticationEntryPoint);
+                    hb.authenticationDetailsSource(new RepositoryAuthenticationDetailsSource());
+                });
 
         // this covers authentication by supplying a JWT bearer token as well as an occasional need
         // for the JWT to be supplied as a query parameter (needs to be phased out).
@@ -96,7 +93,7 @@ public class SecurityConfig {
 
         // checks are done in code logic so allow everything through.
 
-        http.authorizeRequests().anyRequest().permitAll();
+        http.authorizeHttpRequests(ar -> ar.anyRequest().permitAll());
 
         return http.build();
     }
