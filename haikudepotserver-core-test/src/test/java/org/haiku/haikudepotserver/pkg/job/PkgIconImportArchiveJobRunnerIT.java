@@ -1,5 +1,5 @@
 /*
- * Copyright 2018-2025, Andrew Lindesay
+ * Copyright 2018-2026, Andrew Lindesay
  * Distributed under the terms of the MIT License.
  */
 
@@ -89,7 +89,7 @@ public class PkgIconImportArchiveJobRunnerIT extends AbstractIntegrationTest {
         PkgIconImportArchiveJobSpecification spec = new PkgIconImportArchiveJobSpecification();
         spec.setOwnerUserNickname("sebastian");
         spec.setInputDataGuid(jobService.storeSuppliedData(
-                "sample-pkgiconimportarchive-supplied.tgz",
+                "sample-pkgiconimportarchive-supplied",
                 MediaType.TAR.toString(),
                 JobDataEncoding.GZIP,
                 getResourceByteSource("sample-pkgiconimportarchive-supplied.tgz")

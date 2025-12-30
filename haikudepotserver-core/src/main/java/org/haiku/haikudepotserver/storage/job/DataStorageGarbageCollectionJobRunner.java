@@ -1,5 +1,5 @@
 /*
- * Copyright 2025, Andrew Lindesay
+ * Copyright 2025-2026, Andrew Lindesay
  * Distributed under the terms of the MIT License.
  */
 package org.haiku.haikudepotserver.storage.job;
@@ -72,6 +72,7 @@ public class DataStorageGarbageCollectionJobRunner extends AbstractJobRunner<Dat
             return true;
         }
 
+        // TODO (andponlin); can this be removed and just use the one above?
         if (jobService.tryGetJobForSuppliedData(key).isPresent()) {
             return true;
         }

@@ -1,5 +1,5 @@
 --
--- Copyright 2018, Andrew Lindesay
+-- Copyright 2018-2026, Andrew Lindesay
 -- Distributed under the terms of the MIT License.
 --
 -- -------------
@@ -152,6 +152,8 @@ UPDATE haikudepot.pkg_supplement_modification SET
 
 TRUNCATE job.job, job.job_state, job.job_supplied_data, job.job_generated_data,
     job.job_specification, job.job_type;
+
+TRUNCATE job2.job, job2.job_assignment, job2.job_data, job2.job_type;
 
 -- remove any stored data
 

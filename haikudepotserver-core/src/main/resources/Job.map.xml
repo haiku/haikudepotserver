@@ -1,0 +1,172 @@
+<?xml version="1.0" encoding="utf-8"?>
+<data-map xmlns="http://cayenne.apache.org/schema/10/modelMap"
+	 xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	 xsi:schemaLocation="http://cayenne.apache.org/schema/10/modelMap https://cayenne.apache.org/schema/10/modelMap.xsd"
+	 project-version="10">
+	<property name="defaultPackage" value="org.haiku.haikudepotserver.dataobjects"/>
+	<property name="defaultSchema" value="job2"/>
+	<property name="defaultSuperclass" value="org.haiku.haikudepotserver.dataobjects.support.AbstractDataObject"/>
+	<db-entity name="job" schema="job2">
+		<db-attribute name="cancel_timestamp" type="TIMESTAMP"/>
+		<db-attribute name="code" type="VARCHAR" length="36"/>
+		<db-attribute name="create_timestamp" type="TIMESTAMP" isMandatory="true"/>
+		<db-attribute name="expiry_timestamp" type="TIMESTAMP" isMandatory="true"/>
+		<db-attribute name="fail_timestamp" type="TIMESTAMP"/>
+		<db-attribute name="finish_timestamp" type="TIMESTAMP"/>
+		<db-attribute name="id" type="BIGINT" isPrimaryKey="true" isMandatory="true"/>
+		<db-attribute name="job_assignment_id" type="BIGINT" isMandatory="true"/>
+		<db-attribute name="job_type_id" type="BIGINT" isMandatory="true"/>
+		<db-attribute name="modify_timestamp" type="TIMESTAMP" isMandatory="true"/>
+		<db-attribute name="owner_user_nickname" type="VARCHAR" length="255"/>
+		<db-attribute name="progress_percent" type="INTEGER"/>
+		<db-attribute name="queue_timestamp" type="TIMESTAMP"/>
+		<db-attribute name="specification" type="VARCHAR" isMandatory="true" length="8192"/>
+		<db-attribute name="start_timestamp" type="TIMESTAMP"/>
+		<db-key-generator>
+			<db-generator-type>ORACLE</db-generator-type>
+			<db-generator-name>job2.job_seq</db-generator-name>
+			<db-key-cache-size>1</db-key-cache-size>
+		</db-key-generator>
+	</db-entity>
+	<db-entity name="job_assignment" schema="job2">
+		<db-attribute name="code" type="VARCHAR" isMandatory="true" length="36"/>
+		<db-attribute name="id" type="BIGINT" isPrimaryKey="true" isMandatory="true"/>
+		<db-key-generator>
+			<db-generator-type>ORACLE</db-generator-type>
+			<db-generator-name>job2.job_assignment_seq</db-generator-name>
+			<db-key-cache-size>1</db-key-cache-size>
+		</db-key-generator>
+	</db-entity>
+	<db-entity name="job_data" schema="job2">
+		<db-attribute name="code" type="VARCHAR" isMandatory="true" length="48"/>
+		<db-attribute name="create_timestamp" type="TIMESTAMP" isMandatory="true"/>
+		<db-attribute name="id" type="BIGINT" isPrimaryKey="true" isMandatory="true"/>
+		<db-attribute name="job_data_encoding_id" type="BIGINT" isMandatory="true"/>
+		<db-attribute name="job_data_media_type_id" type="BIGINT" isMandatory="true"/>
+		<db-attribute name="job_data_type_id" type="BIGINT" isMandatory="true"/>
+		<db-attribute name="job_id" type="BIGINT"/>
+		<db-attribute name="modify_timestamp" type="TIMESTAMP" isMandatory="true"/>
+		<db-attribute name="storage_code" type="VARCHAR" isMandatory="true" length="255"/>
+		<db-attribute name="use_code" type="VARCHAR" isMandatory="true" length="255"/>
+		<db-key-generator>
+			<db-generator-type>ORACLE</db-generator-type>
+			<db-generator-name>job2.job_data_seq</db-generator-name>
+			<db-key-cache-size>1</db-key-cache-size>
+		</db-key-generator>
+	</db-entity>
+	<db-entity name="job_data_encoding" schema="job2">
+		<db-attribute name="code" type="VARCHAR" isMandatory="true" length="255"/>
+		<db-attribute name="id" type="BIGINT" isPrimaryKey="true" isMandatory="true"/>
+		<db-key-generator>
+			<db-generator-type>ORACLE</db-generator-type>
+			<db-generator-name>job2.job_data_encoding_seq</db-generator-name>
+			<db-key-cache-size>1</db-key-cache-size>
+		</db-key-generator>
+	</db-entity>
+	<db-entity name="job_data_media_type" schema="job2">
+		<db-attribute name="code" type="VARCHAR" isMandatory="true" length="255"/>
+		<db-attribute name="id" type="BIGINT" isPrimaryKey="true" isMandatory="true"/>
+		<db-key-generator>
+			<db-generator-type>ORACLE</db-generator-type>
+			<db-generator-name>job2.job_data_media_type_seq</db-generator-name>
+			<db-key-cache-size>1</db-key-cache-size>
+		</db-key-generator>
+	</db-entity>
+	<db-entity name="job_data_type" schema="job2">
+		<db-attribute name="code" type="VARCHAR" isMandatory="true" length="255"/>
+		<db-attribute name="id" type="BIGINT" isPrimaryKey="true" isMandatory="true"/>
+		<db-key-generator>
+			<db-generator-type>ORACLE</db-generator-type>
+			<db-generator-name>job2.job_data_type_seq</db-generator-name>
+			<db-key-cache-size>1</db-key-cache-size>
+		</db-key-generator>
+	</db-entity>
+	<db-entity name="job_type" schema="job2">
+		<db-attribute name="code" type="VARCHAR" isMandatory="true" length="48"/>
+		<db-attribute name="id" type="BIGINT" isPrimaryKey="true" isMandatory="true"/>
+		<db-key-generator>
+			<db-generator-type>ORACLE</db-generator-type>
+			<db-generator-name>job2.job_type_seq</db-generator-name>
+			<db-key-cache-size>1</db-key-cache-size>
+		</db-key-generator>
+	</db-entity>
+	<obj-entity name="Job" className="org.haiku.haikudepotserver.dataobjects.Job" lock-type="optimistic" dbEntityName="job" superClassName="org.haiku.haikudepotserver.dataobjects.support.AbstractDataObject">
+		<obj-attribute name="cancelTimestamp" type="java.sql.Timestamp" db-attribute-path="cancel_timestamp"/>
+		<obj-attribute name="code" type="java.lang.String" lock="true" db-attribute-path="code"/>
+		<obj-attribute name="createTimestamp" type="java.sql.Timestamp" db-attribute-path="create_timestamp"/>
+		<obj-attribute name="expiryTimestamp" type="java.sql.Timestamp" db-attribute-path="expiry_timestamp"/>
+		<obj-attribute name="failTimestamp" type="java.sql.Timestamp" db-attribute-path="fail_timestamp"/>
+		<obj-attribute name="finishTimestamp" type="java.sql.Timestamp" db-attribute-path="finish_timestamp"/>
+		<obj-attribute name="modifyTimestamp" type="java.sql.Timestamp" db-attribute-path="modify_timestamp"/>
+		<obj-attribute name="ownerUserNickname" type="java.lang.String" lock="true" db-attribute-path="owner_user_nickname"/>
+		<obj-attribute name="progressPercent" type="java.lang.Integer" lock="true" db-attribute-path="progress_percent"/>
+		<obj-attribute name="queueTimestamp" type="java.sql.Timestamp" db-attribute-path="queue_timestamp"/>
+		<obj-attribute name="specification" type="java.lang.String" db-attribute-path="specification"/>
+		<obj-attribute name="startTimestamp" type="java.sql.Timestamp" db-attribute-path="start_timestamp"/>
+	</obj-entity>
+	<obj-entity name="JobAssignment" className="org.haiku.haikudepotserver.dataobjects.JobAssignment" dbEntityName="job_assignment" superClassName="org.haiku.haikudepotserver.dataobjects.support.AbstractDataObject">
+		<obj-attribute name="code" type="java.lang.String" db-attribute-path="code"/>
+	</obj-entity>
+	<obj-entity name="JobData" className="org.haiku.haikudepotserver.dataobjects.JobData" lock-type="optimistic" dbEntityName="job_data" superClassName="org.haiku.haikudepotserver.dataobjects.support.AbstractDataObject">
+		<obj-attribute name="code" type="java.lang.String" lock="true" db-attribute-path="code"/>
+		<obj-attribute name="createTimestamp" type="java.sql.Timestamp" db-attribute-path="create_timestamp"/>
+		<obj-attribute name="modifyTimestamp" type="java.sql.Timestamp" db-attribute-path="modify_timestamp"/>
+		<obj-attribute name="storageCode" type="java.lang.String" lock="true" db-attribute-path="storage_code"/>
+		<obj-attribute name="useCode" type="java.lang.String" lock="true" db-attribute-path="use_code"/>
+	</obj-entity>
+	<obj-entity name="JobDataEncoding" className="org.haiku.haikudepotserver.dataobjects.JobDataEncoding" readOnly="true" dbEntityName="job_data_encoding" superClassName="org.haiku.haikudepotserver.dataobjects.support.AbstractDataObject">
+		<obj-attribute name="code" type="java.lang.String" db-attribute-path="code"/>
+	</obj-entity>
+	<obj-entity name="JobDataMediaType" className="org.haiku.haikudepotserver.dataobjects.JobDataMediaType" dbEntityName="job_data_media_type" superClassName="org.haiku.haikudepotserver.dataobjects.support.AbstractDataObject">
+		<obj-attribute name="code" type="java.lang.String" db-attribute-path="code"/>
+	</obj-entity>
+	<obj-entity name="JobDataType" className="org.haiku.haikudepotserver.dataobjects.JobDataType" readOnly="true" dbEntityName="job_data_type" superClassName="org.haiku.haikudepotserver.dataobjects.support.AbstractDataObject">
+		<obj-attribute name="code" type="java.lang.String" db-attribute-path="code"/>
+	</obj-entity>
+	<obj-entity name="JobType" className="org.haiku.haikudepotserver.dataobjects.JobType" dbEntityName="job_type" superClassName="org.haiku.haikudepotserver.dataobjects.support.AbstractDataObject">
+		<obj-attribute name="code" type="java.lang.String" db-attribute-path="code"/>
+	</obj-entity>
+	<db-relationship name="job_assignment" source="job" target="job_assignment">
+		<db-attribute-pair source="job_assignment_id" target="id"/>
+	</db-relationship>
+	<db-relationship name="job_datas" source="job" target="job_data" toMany="true">
+		<db-attribute-pair source="id" target="job_id"/>
+	</db-relationship>
+	<db-relationship name="job_type" source="job" target="job_type">
+		<db-attribute-pair source="job_type_id" target="id"/>
+	</db-relationship>
+	<db-relationship name="jobs" source="job_assignment" target="job" toMany="true">
+		<db-attribute-pair source="id" target="job_assignment_id"/>
+	</db-relationship>
+	<db-relationship name="job" source="job_data" target="job">
+		<db-attribute-pair source="job_id" target="id"/>
+	</db-relationship>
+	<db-relationship name="job_data_encoding" source="job_data" target="job_data_encoding">
+		<db-attribute-pair source="job_data_encoding_id" target="id"/>
+	</db-relationship>
+	<db-relationship name="job_data_media_type" source="job_data" target="job_data_media_type">
+		<db-attribute-pair source="job_data_media_type_id" target="id"/>
+	</db-relationship>
+	<db-relationship name="job_data_type" source="job_data" target="job_data_type">
+		<db-attribute-pair source="job_data_type_id" target="id"/>
+	</db-relationship>
+	<db-relationship name="job_datas" source="job_data_encoding" target="job_data" toMany="true">
+		<db-attribute-pair source="id" target="job_data_encoding_id"/>
+	</db-relationship>
+	<db-relationship name="job_datas" source="job_data_media_type" target="job_data" toMany="true">
+		<db-attribute-pair source="id" target="job_data_media_type_id"/>
+	</db-relationship>
+	<db-relationship name="untitledRel" source="job_data_type" target="job_data" toMany="true">
+		<db-attribute-pair source="id" target="job_data_type_id"/>
+	</db-relationship>
+	<db-relationship name="job" source="job_type" target="job" toMany="true">
+		<db-attribute-pair source="id" target="job_type_id"/>
+	</db-relationship>
+	<obj-relationship name="jobAssignment" source="Job" target="JobAssignment" deleteRule="Nullify" db-relationship-path="job_assignment"/>
+	<obj-relationship name="jobDatas" source="Job" target="JobData" deleteRule="Deny" db-relationship-path="job_datas"/>
+	<obj-relationship name="jobType" source="Job" target="JobType" deleteRule="Nullify" db-relationship-path="job_type"/>
+	<obj-relationship name="job" source="JobData" target="Job" deleteRule="Nullify" db-relationship-path="job"/>
+	<obj-relationship name="jobDataEncoding" source="JobData" target="JobDataEncoding" deleteRule="Nullify" db-relationship-path="job_data_encoding"/>
+	<obj-relationship name="jobDataMediaType" source="JobData" target="JobDataMediaType" deleteRule="Nullify" db-relationship-path="job_data_media_type"/>
+	<obj-relationship name="jobDataType" source="JobData" target="JobDataType" deleteRule="Nullify" db-relationship-path="job_data_type"/>
+</data-map>

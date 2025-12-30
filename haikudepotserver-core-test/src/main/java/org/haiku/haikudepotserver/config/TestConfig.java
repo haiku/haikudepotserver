@@ -1,11 +1,13 @@
 /*
- * Copyright 2018-2025, Andrew Lindesay
+ * Copyright 2018-2026, Andrew Lindesay
  * Distributed under the terms of the MIT License.
  */
 
 package org.haiku.haikudepotserver.config;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import org.apache.cayenne.configuration.server.ServerRuntime;
+import org.haiku.haikudepotserver.job.DbDistributedJob2ServiceImpl;
 import org.haiku.haikudepotserver.job.DbDistributedJobServiceImpl;
 import org.haiku.haikudepotserver.job.NoopJobServiceImpl;
 import org.haiku.haikudepotserver.job.jpa.JpaJobService;
@@ -36,7 +38,8 @@ public class TestConfig {
 
     @Bean
     public JobService jobService(
-            @Value("${hds.jobservice.type:db}") String type,
+            @Value("${hds.jobservice.type:db2}") String type,
+            ServerRuntime serverRuntime,
             DataStorageService dataStorageService,
             Collection<JobRunner<?>> jobRunners,
             PlatformTransactionManager transactionManager,
@@ -53,6 +56,12 @@ public class TestConfig {
                     applicationEventPublisher,
                     jpaJobService
             );
+            case "db2" -> new DbDistributedJob2ServiceImpl(
+                    serverRuntime,
+                    objectMapper,
+                    dataStorageService,
+                    jobRunners,
+                    applicationEventPublisher);
             case "noop" -> new NoopJobServiceImpl();
             default -> throw new IllegalStateException("unknown job service type [%s]".formatted(type));
         };

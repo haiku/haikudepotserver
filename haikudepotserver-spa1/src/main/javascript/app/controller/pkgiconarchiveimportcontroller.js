@@ -1,5 +1,5 @@
 /*
- * Copyright 2016-2022, Andrew Lindesay
+ * Copyright 2016-2026, Andrew Lindesay
  * Distributed under the terms of the MIT License.
  */
 
@@ -78,7 +78,7 @@ angular.module('haikudepotserver').controller(
 
                         remoteProcedureCall.call(
                             constants.ENDPOINT_API_V2_PKG_JOB,
-                            "queue-pkg-icon-archive-import-job",
+                            "queue-pkg-icon-import-archive-job",
                             { inputDataGuid: guid }
                         ).then(
                             function (result) {

@@ -1,5 +1,5 @@
 /*
- * Copyright 2018-2025, Andrew Lindesay
+ * Copyright 2018-2026, Andrew Lindesay
  * Distributed under the terms of the MIT License.
  */
 
@@ -82,11 +82,17 @@ public abstract class AbstractIntegrationTest {
 
     private final static String SQL_DELETE_TEST_UUC = "DELETE FROM haikudepot.user_usage_conditions WHERE code LIKE 'TEST%'";
 
-    private final static String SQL_TRUNCATE_JOBS = "TRUNCATE " + Stream.of(
+    private final static String SQL_TRUNCATE_JOBS = "TRUNCATE "
+            + Stream.of(
             "job", "job_state", "job_generated_data", "job_supplied_data",
             "job_data_media_type", "job_specification", "job_type"
-    ).map("job.%s"::formatted).collect(Collectors.joining(", "));
-
+    ).map("job.%s"::formatted).collect(Collectors.joining(", "))
+//            + ", "
+//            // TODO; these tables will also be purged as part of the model-based purge, but will miss
+//            //  the table `job_assignment` because it does not appear in the model.
+//            + Stream.of("job", "job_data", "job_assignment", "job_data_media_type", "job_type")
+//    .map("job2.%s"::formatted).collect(Collectors.joining(", "));
+;
     @Resource
     protected ApplicationContext applicationContext;
 

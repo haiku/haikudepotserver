@@ -1,5 +1,5 @@
 /*
- * Copyright 2018-2025, Andrew Lindesay
+ * Copyright 2018-2026, Andrew Lindesay
  * Distributed under the terms of the MIT License.
  */
 
@@ -182,7 +182,7 @@ public class JobController extends AbstractController {
             final HttpServletResponse response,
             @RequestHeader(value = HttpHeaders.CONTENT_TYPE, required = false) String contentType,
             @RequestHeader(value = HttpHeaders.CONTENT_ENCODING, required = false) String contentEncoding,
-            @RequestParam(value = KEY_USECODE, required = false) String useCode)
+            @RequestParam(value = KEY_USECODE, required = false, defaultValue = "supplied") String useCode)
     throws IOException {
 
         Preconditions.checkArgument(null!=request, "the request must be provided");

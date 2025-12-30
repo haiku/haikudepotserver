@@ -5,11 +5,13 @@
 	 project-version="10">
 	<map name="Captcha"/>
 	<map name="HaikuDepot"/>
+	<map name="Job"/>
 	<node name="HaikuDepotServer"
 		 factory="org.apache.cayenne.configuration.server.XMLPoolingDataSourceFactory"
 		 schema-update-strategy="org.apache.cayenne.access.dbsync.SkipSchemaUpdateStrategy">
 		<map-ref name="Captcha"/>
 		<map-ref name="HaikuDepot"/>
+		<map-ref name="Job"/>
 		<data-source>
 			<driver/>
 			<url/>

@@ -1,5 +1,5 @@
 /*
- * Copyright 2018-2025, Andrew Lindesay
+ * Copyright 2018-2026, Andrew Lindesay
  * Distributed under the terms of the MIT License.
  */
 
@@ -14,6 +14,7 @@ import org.apache.cayenne.query.ObjectSelect;
 import org.haiku.haikudepotserver.dataobjects.*;
 import org.haiku.haikudepotserver.job.AbstractJobRunner;
 import org.haiku.haikudepotserver.job.model.*;
+import org.haiku.haikudepotserver.job.model.JobDataEncoding;
 import org.haiku.haikudepotserver.naturallanguage.model.NaturalLanguageService;
 import org.haiku.haikudepotserver.pkg.model.PkgService;
 import org.haiku.haikudepotserver.pkg.model.PkgVersionLocalizationCoverageExportSpreadsheetJobSpecification;

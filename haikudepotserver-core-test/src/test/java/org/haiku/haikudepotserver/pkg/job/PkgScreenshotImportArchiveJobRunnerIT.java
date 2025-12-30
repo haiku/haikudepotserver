@@ -1,5 +1,5 @@
 /*
- * Copyright 2018-2025, Andrew Lindesay
+ * Copyright 2018-2026, Andrew Lindesay
  * Distributed under the terms of the MIT License.
  */
 
@@ -89,7 +89,7 @@ public class PkgScreenshotImportArchiveJobRunnerIT extends AbstractIntegrationTe
         PkgScreenshotImportArchiveJobSpecification spec = new PkgScreenshotImportArchiveJobSpecification();
         spec.setOwnerUserNickname("hazel");
         spec.setInputDataGuid(jobService.storeSuppliedData(
-                "sample-pkgscreenshotimportarchive-supplied.tgz",
+                "sample-pkgscreenshotimportarchive-supplied",
                 MediaType.TAR.toString(),
                 JobDataEncoding.GZIP,
                 getResourceByteSource("sample-pkgscreenshotimportarchive-supplied.tgz")
@@ -168,7 +168,7 @@ public class PkgScreenshotImportArchiveJobRunnerIT extends AbstractIntegrationTe
         PkgScreenshotImportArchiveJobSpecification spec = new PkgScreenshotImportArchiveJobSpecification();
         spec.setOwnerUserNickname("samuel");
         spec.setInputDataGuid(jobService.storeSuppliedData(
-                "sample-pkgscreenshotimportarchive-supplied.tgz",
+                "sample-pkgscreenshotimportarchive-supplied",
                 MediaType.TAR.toString(),
                 JobDataEncoding.GZIP,
                 getResourceByteSource("sample-pkgscreenshotimportarchive-supplied.tgz")

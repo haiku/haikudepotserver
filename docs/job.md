@@ -14,15 +14,11 @@ The jobs are stored in the database in the following schema;
 
 ![Data model](images/img-datamodel-job.svg)
 
-`job` is the master table for the job and `job_state` contains the state of the execution of the job.
+`job` is the master table for the job. The `job_data` can be either supplied or generated data for the job; the two situations can be differentiated via the `job_data_type` table.
 
-The table `job_supplied_data` captures data that the user supplied for the job to use. The table `job_generated_data` captures data that the job produced. In both cases these tables use the [data store](./storage.md) system to actually persist the data.
+Each entry in the `job` table has a `specification` column entry; this contains a JSON-serialized copy of the object that specified the job to run.
 
-Each entry in the `job` table has a `job_specification` table entry; this contains a JSON-serialized copy of the object that specified the job to run.
-
-## Hibernate
-
-Unlike most of the rest of the system, the job system uses the [Hibernate](https://hibernate.org/orm/) ORM and JPA to interact with the job database tables. See the class `JpaJobService` for implementation.
+Each `job` table row has a `job_assignment` row as well. The `job_assignment` is the means by which the job can be locked for running. Using this locking mechanism, two instances of HDS are not able to run the same Job at the same time. The Postgres "skip lock" system is used to avoid an instance of HDS picking up a Job that another HDS is running.
 
 ## Architecture
 
