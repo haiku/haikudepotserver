@@ -1,5 +1,5 @@
 /*
- * Copyright 2025, Andrew Lindesay
+ * Copyright 2025-2026, Andrew Lindesay
  * Distributed under the terms of the MIT License.
  */
 package org.haiku.haikudepotserver.support.eventing;
@@ -16,6 +16,7 @@ import org.junit.jupiter.api.parallel.Execution;
 import org.junit.jupiter.api.parallel.ExecutionMode;
 import org.springframework.context.event.EventListener;
 import org.springframework.stereotype.Component;
+import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.ContextConfiguration;
 
 import java.util.ArrayList;
@@ -30,6 +31,12 @@ import java.util.concurrent.locks.ReentrantLock;
 
 @Execution(ExecutionMode.SAME_THREAD)
 @ContextConfiguration(classes = { TestConfig.class, InterProcessEventPgIT.TestEventListener.class })
+// Because of the addition of the `TestEventListener`, a new context is started for this test. By default,
+// the context is not torn down until the whole test process has completed which causes a problem because
+// then there may be two of some beans working off the same database. To avoid this, we mark the class
+// as being one that dirties the context and then the context is shutdown which will tear down any
+// spurious instances.
+@DirtiesContext
 public class InterProcessEventPgIT extends AbstractIntegrationTest {
 
     @Resource

@@ -23,6 +23,7 @@ import org.apache.cayenne.tx.TransactionDescriptor;
 import org.apache.cayenne.tx.TransactionPropagation;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.text.RandomStringGenerator;
 import org.haiku.haikudepotserver.dataobjects.User;
 import org.haiku.haikudepotserver.dataobjects.auto._JobData;
 import org.haiku.haikudepotserver.job.model.*;
@@ -104,6 +105,8 @@ public class DbDistributedJob2ServiceImpl extends AbstractExecutionThreadService
 
     private final ServerRuntime serverRuntime;
 
+    private final String name;
+
     public DbDistributedJob2ServiceImpl(
             ServerRuntime serverRuntime,
             ObjectMapper objectMapper,
@@ -117,20 +120,39 @@ public class DbDistributedJob2ServiceImpl extends AbstractExecutionThreadService
         this.dataStorageService = dataStorageService;
         this.jobRunners = jobRunners;
         this.applicationEventPublisher = applicationEventPublisher;
+        this.name = createServiceName();
+    }
+
+    private static String createServiceName() {
+        RandomStringGenerator generator = new RandomStringGenerator.Builder()
+                .withinRange(new char[][] {{'a','z'}, {'0','9'}}).get();
+        return String.format("%s-%s",
+                DbDistributedJob2ServiceImpl.class.getSimpleName(),
+                generator.generate(4)
+        );
+    }
+
+    @Override
+    protected String serviceName() {
+        return this.name;
     }
 
     @PostConstruct
     public void init() {
+        LOGGER.info("will start and await running [{}]", name);
         startAsync();
         awaitRunning();
+        LOGGER.info("did start and await running [{}]", name);
         signalHasWork();
     }
 
     @PreDestroy
     public void tearDown() {
+        LOGGER.info("will stop and await terminated [{}]", name);
         stopAsync();
         signalHasWork();
         awaitTerminated();
+        LOGGER.info("did stop and await terminated [{}]", name);
     }
 
     /**

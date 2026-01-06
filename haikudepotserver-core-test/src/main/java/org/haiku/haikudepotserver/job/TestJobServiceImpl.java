@@ -1,5 +1,5 @@
 /*
- * Copyright 2014-2025, Andrew Lindesay
+ * Copyright 2014-2026, Andrew Lindesay
  * Distributed under the terms of the MIT License.
  */
 
@@ -116,7 +116,7 @@ public class TestJobServiceImpl implements JobService {
 
     @Override
     public void clearExpiredJobs() {
-        throw new UnsupportedOperationException();
+        // do nothing.
     }
 
     private boolean matches(JobSnapshot job, User user, Set<JobSnapshot.Status> statuses) {

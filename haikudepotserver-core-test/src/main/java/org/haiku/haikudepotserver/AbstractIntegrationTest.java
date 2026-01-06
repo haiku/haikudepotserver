@@ -181,6 +181,8 @@ public abstract class AbstractIntegrationTest {
     }
 
     protected void clearJobs() {
+        jobService.clearExpiredJobs();
+
         if (!jobService.awaitAllJobsFinishedUninterruptibly(Duration.ofSeconds(30).toMillis())) {
             Assertions.fail("unable to complete all jobs in timeout");
         }
