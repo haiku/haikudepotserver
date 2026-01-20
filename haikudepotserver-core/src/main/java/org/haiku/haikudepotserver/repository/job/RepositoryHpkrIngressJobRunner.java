@@ -23,6 +23,10 @@ import org.haiku.haikudepotserver.pkg.model.PkgService;
 import org.haiku.haikudepotserver.repository.model.RepositoryHpkrIngressException;
 import org.haiku.haikudepotserver.repository.model.RepositoryHpkrIngressJobSpecification;
 import org.haiku.haikudepotserver.support.FileHelper;
+import org.haiku.haikudepotserver.support.progress.CompositeProgressImpl;
+import org.haiku.haikudepotserver.support.progress.Progress;
+import org.haiku.haikudepotserver.support.progress.SimpleProgressImpl;
+import org.haiku.haikudepotserver.support.progress.WeightedProgressImpl;
 import org.haiku.pkg.HpkrFileExtractor;
 import org.haiku.pkg.PkgIterator;
 import org.haiku.pkg.model.Pkg;
@@ -95,38 +99,60 @@ public class RepositoryHpkrIngressJobRunner extends AbstractJobRunner<Repository
         ObjectContext mainContext = serverRuntime.newContext();
         Set<String> allowedRepositorySourceCodes = specification.getRepositorySourceCodes();
 
-        RepositorySource.findActiveByRepository(
+        List<RepositorySourceAndProgresses> repositorySourcesAndProgresses = RepositorySource.findActiveByRepository(
                 mainContext,
                 Repository.getByCode(mainContext, specification.getRepositoryCode()))
                 .stream()
                 .filter(rs -> null == allowedRepositorySourceCodes || allowedRepositorySourceCodes.contains(rs.getCode()))
-                .forEach(rs ->
-                        serverRuntime.performInTransaction(() -> {
-                            try {
-                                runForRepositorySource(mainContext, jobService, specification, rs);
-                            } catch (Throwable e) {
-                                LOGGER.error(
-                                        "a problem has arisen processing a repository file for repository source [{}]",
-                                        rs.getCode(), e);
-                            }
+                .map(rs -> new RepositorySourceAndProgresses(
+                        rs,
+                        new SimpleProgressImpl(),
+                        new SimpleProgressImpl()
+                ))
+                .toList();
 
-                            return null;
-                        })
-                );
+        CompositeProgressImpl compositeProgress = new CompositeProgressImpl(
+                repositorySourcesAndProgresses.stream()
+                        .map(rsap -> new WeightedProgressImpl(
+                                10,
+                                new CompositeProgressImpl(List.of(
+                                        new WeightedProgressImpl(5, rsap.progressInfo),
+                                        new WeightedProgressImpl(95, rsap.progressHpkr)
+                                )))
+                        )
+                        .toList()
+        );
+
+        for (int i = 0; i < repositorySourcesAndProgresses.size(); i++) {
+            RepositorySourceAndProgresses repositorySourceAndProgresses = repositorySourcesAndProgresses.get(i);
+
+            serverRuntime.performInTransaction(() -> {
+                try {
+                    runForRepositorySource(mainContext, jobService, specification, repositorySourceAndProgresses, compositeProgress);
+                } catch (Throwable e) {
+                    LOGGER.error(
+                            "a problem has arisen processing a repository file for repository source [{}]",
+                            repositorySourceAndProgresses.repositorySource().getCode(), e);
+                }
+
+                return null;
+            });
+        }
     }
 
     private void runForRepositorySource(
             ObjectContext mainContext,
             JobService jobService,
             RepositoryHpkrIngressJobSpecification specification,
-            RepositorySource repositorySource)
+            RepositorySourceAndProgresses repositorySourceAndProgresses,
+            Progress overallProgress)
             throws RepositoryHpkrIngressException {
-        LOGGER.info("will import for repository source [{}]", repositorySource);
+        LOGGER.info("will import for repository source [{}]", repositorySourceAndProgresses.repositorySource());
 
-        runImportInfoForRepositorySource(mainContext, repositorySource);
-        runImportHpkrForRepositorySource(mainContext, jobService, specification, repositorySource);
+        runImportInfoForRepositorySource(mainContext, repositorySourceAndProgresses, overallProgress);
+        runImportHpkrForRepositorySource(mainContext, jobService, specification, repositorySourceAndProgresses, overallProgress);
 
-        repositorySource.setLastImportTimestamp();
+        repositorySourceAndProgresses.repositorySource().setLastImportTimestamp();
         mainContext.commitChanges();
     }
 
@@ -137,8 +163,12 @@ public class RepositoryHpkrIngressJobRunner extends AbstractJobRunner<Repository
 
     private void runImportInfoForRepositorySource(
             ObjectContext mainContext,
-            RepositorySource repositorySource)
+            RepositorySourceAndProgresses repositorySourceAndProgresses,
+            Progress overallProgress)
     throws RepositoryHpkrIngressException {
+
+        RepositorySource repositorySource = repositorySourceAndProgresses.repositorySource();
+
         URI uri = repositorySource.tryGetInternalFacingDownloadRepoInfoURI().orElseThrow(
                 () -> new RepositoryHpkrIngressException(
                         "unable to download for [" + repositorySource.getCode()
@@ -202,6 +232,8 @@ public class RepositoryHpkrIngressJobRunner extends AbstractJobRunner<Repository
                 }
             }
         }
+
+        repositorySourceAndProgresses.progressInfo().setValue(100);
     }
 
     private Optional<String> tryGetParameterValue(List<Parameter> parameters, String parameterName) {
@@ -223,7 +255,12 @@ public class RepositoryHpkrIngressJobRunner extends AbstractJobRunner<Repository
             ObjectContext mainContext,
             JobService jobService,
             RepositoryHpkrIngressJobSpecification specification,
-            RepositorySource repositorySource) {
+            RepositorySourceAndProgresses repositorySourceAndProgresses,
+            Progress overallProgress) {
+
+        RepositorySource repositorySource = repositorySourceAndProgresses.repositorySource();
+        SimpleProgressImpl simpleProgress = repositorySourceAndProgresses.progressHpkr;
+
         URI uri = repositorySource.tryGetInternalFacingDownloadHpkrURI()
                 .orElseThrow(() -> new RuntimeException(
                         "unable to import for ["
@@ -295,10 +332,11 @@ public class RepositoryHpkrIngressJobRunner extends AbstractJobRunner<Repository
                         LOGGER.info("skipping pkg [{}] because it is not in the allowed pkg name pattern", pkg.getName());
                     }
 
-                    int currentPercentage = (upto * 100) / total;
-                    if (currentPercentage > lastPercentage) {
-                        jobService.setJobProgressPercent(specification.getGuid(), currentPercentage);
-                        lastPercentage = currentPercentage;
+                    simpleProgress.setItemsCompleted(upto, total);
+
+                    if (simpleProgress.percentage() > lastPercentage) {
+                        jobService.setJobProgressPercent(specification.getGuid(), overallProgress.percentage());
+                        lastPercentage = simpleProgress.percentage();
                     }
                 }
             }
@@ -350,4 +388,9 @@ public class RepositoryHpkrIngressJobRunner extends AbstractJobRunner<Repository
         }
     }
 
+    private record RepositorySourceAndProgresses (
+            RepositorySource repositorySource,
+            SimpleProgressImpl progressInfo,
+            SimpleProgressImpl progressHpkr
+    ) {}
 }
