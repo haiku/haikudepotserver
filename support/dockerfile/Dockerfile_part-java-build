@@ -1,5 +1,5 @@
 # =====================================
-# Copyright 2022-2025, Andrew Lindesay
+# Copyright 2022-2026, Andrew Lindesay
 # Distributed under the terms of the MIT License.
 # =====================================
 
@@ -51,7 +51,7 @@ COPY ./haikudepotserver-core/pom.xml /hds-src/haikudepotserver-core/pom.xml
 
 WORKDIR /hds-src
 
-RUN ./mvnw clean org.apache.maven.plugins:maven-dependency-plugin:3.6.1:go-offline
+RUN ./mvnw clean org.apache.maven.plugins:maven-dependency-plugin:3.9.0:go-offline
 
 COPY ./haikudepotserver-spa1/package.json /hds-src/haikudepotserver-spa1/package.json
 

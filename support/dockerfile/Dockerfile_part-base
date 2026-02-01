@@ -1,6 +1,6 @@
 # =====================================
-# Copyright 2024-2025, Andrew Lindesay
+# Copyright 2024-2026, Andrew Lindesay
 # Distributed under the terms of the MIT License.
 # =====================================
 
-FROM debian:13.1-slim AS base
+FROM debian:13.3-slim AS base

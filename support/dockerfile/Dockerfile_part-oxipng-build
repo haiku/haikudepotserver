@@ -8,7 +8,7 @@
 
 FROM base AS oxipng-build
 
-ARG OXIPNG_VERSION=9.1.3
+ARG OXIPNG_VERSION=10.1.0
 ARG OXIPNG_ROOT=/opt/oxipng
 
 RUN apt-get update && \

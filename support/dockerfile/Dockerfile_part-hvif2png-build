@@ -1,5 +1,5 @@
 # =====================================
-# Copyright 2024-2025, Andrew Lindesay
+# Copyright 2024-2026, Andrew Lindesay
 # Distributed under the terms of the MIT License.
 # =====================================
 
@@ -8,8 +8,8 @@
 FROM base AS hvif2png-build
 
 # 2025-10-17
-ENV HAIKU_HASH=b1a1645de42b9b3a76ab0d8df0dafa58414a13b6
-ENV BUILDTOOLS_HASH=7ab022f6e65571ab9e1054f62976a358652f3af8
+ENV HAIKU_HASH=f357ddbe8e4a96026cfc1a27fed5e75ef1af0837
+ENV BUILDTOOLS_HASH=13c7a4265a1024903b120f3bf11cd89ff9f4477a
 
 RUN apt-get update && \
     apt-get -y install git nasm bc autoconf automake texinfo flex bison gawk build-essential unzip wget \
