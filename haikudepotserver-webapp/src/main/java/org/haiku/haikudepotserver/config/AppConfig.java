@@ -10,7 +10,6 @@ import com.google.common.collect.ImmutableList;
 import io.micrometer.core.instrument.MeterRegistry;
 import org.apache.cayenne.configuration.server.ServerRuntime;
 import org.haiku.haikudepotserver.job.DbDistributedJob2ServiceImpl;
-import org.haiku.haikudepotserver.job.LocalJobServiceImpl;
 import org.haiku.haikudepotserver.job.NoopJobServiceImpl;
 import org.haiku.haikudepotserver.job.model.JobRunner;
 import org.haiku.haikudepotserver.job.model.JobService;
@@ -44,7 +43,6 @@ public class AppConfig {
     ) {
         return switch (type) {
             case "noop" -> new NoopJobServiceImpl();
-            case "local" -> new LocalJobServiceImpl(dataStorageService, jobRunners);
             case "db2" -> new DbDistributedJob2ServiceImpl(
                     serverRuntime,
                     objectMapper,
