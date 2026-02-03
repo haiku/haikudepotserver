@@ -1,5 +1,5 @@
 /*
- * Copyright 2018-2025, Andrew Lindesay
+ * Copyright 2018-2026, Andrew Lindesay
  * Distributed under the terms of the MIT License.
  */
 
@@ -7,7 +7,6 @@ package org.haiku.haikudepotserver.config;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.collect.ImmutableList;
-import jakarta.persistence.EntityManagerFactory;
 import org.apache.cayenne.DataChannelFilter;
 import org.apache.cayenne.LifecycleListener;
 import org.apache.cayenne.cache.QueryCache;
@@ -17,28 +16,19 @@ import org.apache.cayenne.configuration.server.ServerRuntime;
 import org.apache.cayenne.di.MapBuilder;
 import org.apache.cayenne.velocity.VelocityModule;
 import org.haiku.haikudepotserver.dataobjects.*;
-import org.haiku.haikudepotserver.support.cayenne.*;
+import org.haiku.haikudepotserver.support.cayenne.NotifyingQueryCache;
+import org.haiku.haikudepotserver.support.cayenne.QueryCacheRemoveEventNotifyControl;
+import org.haiku.haikudepotserver.support.cayenne.QueryCacheRemoveGroupDataChannelFilter;
+import org.haiku.haikudepotserver.support.cayenne.QueryCacheRemoveGroupListener;
 import org.haiku.haikudepotserver.support.db.UserUsageConditionsInitializer;
 import org.haiku.haikudepotserver.support.eventing.model.NotifyService;
-import org.springframework.beans.factory.FactoryBean;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.sql.init.dependency.DependsOnDatabaseInitialization;
 import org.springframework.context.annotation.Bean;
-import org.springframework.data.jpa.repository.config.EnableJpaRepositories;
-import org.springframework.jdbc.core.JdbcTemplate;
-import org.springframework.orm.jpa.JpaTransactionManager;
-import org.springframework.orm.jpa.JpaVendorAdapter;
-import org.springframework.orm.jpa.LocalContainerEntityManagerFactoryBean;
-import org.springframework.orm.jpa.vendor.HibernateJpaVendorAdapter;
-import org.springframework.transaction.PlatformTransactionManager;
 
 import javax.sql.DataSource;
 import java.util.Collections;
 
-@EnableJpaRepositories(basePackages = {
-        "org.haiku.haikudepotserver.job.jpa",
-        "org.haiku.haikudepotserver.support.jpa"
-})
 public class PersistenceConfig {
 
     @Bean(initMethod = "init")
@@ -47,34 +37,6 @@ public class PersistenceConfig {
             ObjectMapper objectMapper
     ) {
         return new UserUsageConditionsInitializer(serverRuntime, objectMapper);
-    }
-
-    // -------------------------------------
-    // JDBC
-
-    @Bean
-    public JdbcTemplate jdbcTemplate(DataSource dataSource) {
-        return new JdbcTemplate(dataSource);
-    }
-
-    // -------------------------------------
-    // HIBERNATE
-
-    @Bean
-    public PlatformTransactionManager transactionManager(EntityManagerFactory entityManagerFactory) {
-        return new JpaTransactionManager(entityManagerFactory);
-    }
-
-    @Bean
-    public FactoryBean<EntityManagerFactory> entityManagerFactory(DataSource dataSource) {
-        LocalContainerEntityManagerFactoryBean factory = new LocalContainerEntityManagerFactoryBean();
-        factory.setDataSource(dataSource);
-        factory.setPackagesToScan("org.haiku.haikudepotserver.job.jpa.model");
-
-        JpaVendorAdapter vendorAdapter = new HibernateJpaVendorAdapter();
-        factory.setJpaVendorAdapter(vendorAdapter);
-
-        return factory;
     }
 
     // -------------------------------------

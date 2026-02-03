@@ -15,10 +15,6 @@
     <logger name="org.apache.cayenne" level="warn"/>
     <logger name="com.googlecode.flyway" level="info"/>
 
-<!--    <logger name="org.hibernate.SQL" level="debug"/>-->
-<!--    <logger name="org.hibernate" level="debug"/>-->
-<!--    <logger name="org.hibernate.type.descriptor.sql.BasicBinder" level="trace"/>-->
-
     <root level="info">
         <appender-ref ref="STDOUT" />
     </root>

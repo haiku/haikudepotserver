@@ -1,15 +1,15 @@
 /*
- * Copyright 2025, Andrew Lindesay
+ * Copyright 2025-2026, Andrew Lindesay
  * Distributed under the terms of the MIT License.
  */
 package org.haiku.haikudepotserver.storage;
 
-import com.google.common.base.Preconditions;
 import com.google.common.hash.HashCode;
 import com.google.common.hash.Hasher;
 import com.google.common.hash.Hashing;
 import com.google.common.io.ByteSink;
 import com.google.common.io.ByteSource;
+import io.micrometer.core.instrument.MeterRegistry;
 import jakarta.annotation.PostConstruct;
 import jakarta.annotation.Resource;
 import org.assertj.core.api.Assertions;
@@ -17,6 +17,7 @@ import org.haiku.haikudepotserver.AbstractIntegrationTest;
 import org.haiku.haikudepotserver.config.TestConfig;
 import org.haiku.haikudepotserver.support.PgDataStorageTestHelper;
 import org.junit.jupiter.api.Test;
+import org.mockito.Mockito;
 import org.springframework.test.context.ContextConfiguration;
 
 import javax.sql.DataSource;
@@ -34,9 +35,6 @@ import java.util.*;
 public class PgDataStorageServiceImplIT extends AbstractIntegrationTest {
 
     @Resource
-    private PgDataStorageRepository repository;
-
-    @Resource
     private DataSource dataSource;
 
     private PgDataStorageServiceImpl storageImpl;
@@ -45,8 +43,7 @@ public class PgDataStorageServiceImplIT extends AbstractIntegrationTest {
 
     @PostConstruct
     public void init() {
-        Preconditions.checkNotNull(repository);
-        this.storageImpl = new PgDataStorageServiceImpl(repository, 32);
+        this.storageImpl = new PgDataStorageServiceImpl(dataSource, Mockito.mock(MeterRegistry.class), 32);
     }
 
     /**

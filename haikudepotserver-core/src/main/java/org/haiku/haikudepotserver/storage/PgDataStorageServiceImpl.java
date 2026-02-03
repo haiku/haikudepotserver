@@ -1,5 +1,5 @@
 /*
- * Copyright 2025, Andrew Lindesay
+ * Copyright 2025-2026, Andrew Lindesay
  * Distributed under the terms of the MIT License.
  */
 package org.haiku.haikudepotserver.storage;
@@ -9,11 +9,19 @@ import com.google.common.io.ByteSink;
 import com.google.common.io.ByteSource;
 import com.google.common.io.CountingInputStream;
 import com.google.common.io.CountingOutputStream;
+import com.google.common.util.concurrent.AtomicDouble;
+import io.micrometer.core.instrument.MeterRegistry;
+import org.haiku.haikudepotserver.metrics.MetricsConstants;
+import org.haiku.haikudepotserver.storage.model.DataStorageException;
 import org.haiku.haikudepotserver.storage.model.DataStorageService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import javax.sql.DataSource;
 import java.io.*;
+import java.sql.Connection;
+import java.sql.SQLException;
+import java.time.Clock;
 import java.time.Duration;
 import java.util.List;
 import java.util.Optional;
@@ -29,52 +37,96 @@ public class PgDataStorageServiceImpl implements DataStorageService {
 
     protected static final Logger LOGGER = LoggerFactory.getLogger(PgDataStorageServiceImpl.class);
 
-    private final PgDataStorageRepository respository;
+    private final DataSource dataSource;
+
+    private final Clock clock;
 
     private final long partSize;
 
-    public PgDataStorageServiceImpl(PgDataStorageRepository respository, long partSize) {
-        Preconditions.checkNotNull(respository);
+    /**
+     * <p>This is used for a metric gauge to show the rate of data transfer.</p>
+     */
+    private final AtomicDouble mbPerSecondTransfer;
+
+    public PgDataStorageServiceImpl(DataSource dataSource, MeterRegistry meterRegistry, long partSize) {
+        Preconditions.checkNotNull(meterRegistry);
+        Preconditions.checkNotNull(dataSource);
         Preconditions.checkArgument(partSize > 0);
-        this.respository = respository;
+
+        this.dataSource = dataSource;
         this.partSize = partSize;
+
+        this.mbPerSecondTransfer = new AtomicDouble();
+        meterRegistry.gauge(
+                MetricsConstants.GUAGE_PG_DATA_STORAGE_MEGABYTE_PER_SECOND_TRANSFER,
+                this.mbPerSecondTransfer);
+
+        this.clock = Clock.systemUTC();
     }
 
     @Override
     public Set<String> keys(Duration olderThanDuration) {
-        return respository.findHeadCodesTransactionally(olderThanDuration);
+        try (Connection connection = dataSource.getConnection()) {
+            return PgDataStorageHelper.findHeadCodes(connection, clock, olderThanDuration);
+        } catch (SQLException se) {
+            throw new DataStorageException("unable to get the data storage keys", se);
+        }
     }
 
     @Override
     public ByteSink put(String key) throws IOException {
-        return new PgDataStorageByteSink(respository.createHeadTransactionally(key));
+        try (Connection connection = dataSource.getConnection()) {
+            return new PgDataStorageByteSink(PgDataStorageHelper.createHead(connection, clock, key));
+        } catch (SQLException se) {
+            throw new DataStorageException("unable to put the data storage key [%s]".formatted(key), se);
+        }
     }
 
     @Override
     public Optional<? extends ByteSource> get(String key) throws IOException {
-        return respository.tryGetHeadIdByCodeTransactionally(key)
-                .map(PgDataStorageByteSource::new);
+        try (Connection connection = dataSource.getConnection()) {
+            return PgDataStorageHelper.tryGetHeadIdByCode(connection, key)
+                    .map(PgDataStorageByteSource::new);
+        } catch (SQLException se) {
+            throw new DataStorageException("unable to put the data storage key [%s]".formatted(key), se);
+        }
     }
 
     @Override
     public boolean remove(String key) {
-        respository.deleteHeadAndPartsByCodeTransactionally(key);
+        try (Connection connection = dataSource.getConnection()) {
+            PgDataStorageHelper.deleteHeadAndPartsByCode(connection, key);
+        } catch (SQLException se) {
+            throw new DataStorageException("unable to remove the data storage key [%s]".formatted(key), se);
+        }
         return true;
     }
 
     @Override
     public long size() {
-        return respository.getHeadCount();
+        try (Connection connection = dataSource.getConnection()) {
+            return PgDataStorageHelper.getHeadCount(connection);
+        } catch (SQLException se) {
+            throw new DataStorageException("unable to get the size", se);
+        }
     }
 
     @Override
     public long totalBytes() {
-        return respository.getHeadLengthSum();
+        try (Connection connection = dataSource.getConnection()) {
+            return PgDataStorageHelper.getHeadLengthSum(connection);
+        } catch (SQLException se) {
+            throw new DataStorageException("unable to get total bytes", se);
+        }
     }
 
     @Override
     public void clear() {
-        respository.deleteHeadsAndPartsTransactionally();
+        try (Connection connection = dataSource.getConnection()) {
+            PgDataStorageHelper.deleteHeadsAndParts(connection);
+        } catch (SQLException se) {
+            throw new DataStorageException("unable to clear", se);
+        }
     }
 
     final class PgDataStorageByteSink extends ByteSink {
@@ -138,7 +190,12 @@ public class PgDataStorageServiceImpl implements DataStorageService {
             if (null != countingOutputStream && countingOutputStream.getCount() > 0) {
                 countingOutputStream.close();
                 countingOutputStream = null;
-                respository.createPartTransactionally(headId, bufferFile);
+
+                try (Connection connection = dataSource.getConnection()) {
+                    PgDataStorageHelper.createPart(connection, clock, headId, bufferFile);
+                } catch (SQLException se) {
+                    throw new IOException("unable to write the part for head [%d]".formatted(headId), se);
+                }
             }
 
             super.flush();
@@ -210,7 +267,7 @@ public class PgDataStorageServiceImpl implements DataStorageService {
         /**
          * <p>These are all the parts that need to be read in to fulfill the stream.</p>
          */
-        private final List<PgDataStorageRepository.Part> parts;
+        private final List<PgDataStorageHelper.Part> parts;
 
         private int partIndex = 0;
 
@@ -220,7 +277,12 @@ public class PgDataStorageServiceImpl implements DataStorageService {
 
         public PgDataStorageInputStream(long headId) throws IOException {
             bufferFile = File.createTempFile("pg-datastore-in-", ".dat");
-            this.parts = respository.findOrderedPartsByHeadIdTransactionally(headId);
+
+            try (Connection connection = dataSource.getConnection()) {
+                this.parts = PgDataStorageHelper.findOrderedPartsByHeadId(connection, headId);
+            } catch (SQLException se) {
+                throw new IOException("unable to find the ordered parts by head id [%d]".formatted(headId), se);
+            }
         }
 
         @Override
@@ -303,8 +365,15 @@ public class PgDataStorageServiceImpl implements DataStorageService {
             }
 
             if (null == countingInputStream) {
-                PgDataStorageRepository.Part part = parts.get(partIndex);
-                respository.writePartDataToFileTransactionally(part.id(), bufferFile);
+                PgDataStorageHelper.Part part = parts.get(partIndex);
+
+                try (Connection connection = dataSource.getConnection()) {
+                    PgDataStorageHelper.WriteDataPartStats stats = PgDataStorageHelper.writePartDataToFile(
+                            connection, part.id(), bufferFile);
+                    mbPerSecondTransfer.set(stats.megabytesPerSecond());
+                } catch (SQLException se) {
+                    throw new IOException("unable to write the part [%d] to file".formatted(part.id()), se);
+                }
 
                 if (part.length() != bufferFile.length()) {
                     throw new IllegalStateException(String.format(

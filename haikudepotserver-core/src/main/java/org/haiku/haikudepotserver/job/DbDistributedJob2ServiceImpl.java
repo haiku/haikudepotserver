@@ -16,6 +16,7 @@ import com.google.common.util.concurrent.Uninterruptibles;
 import jakarta.annotation.Nullable;
 import jakarta.annotation.PostConstruct;
 import jakarta.annotation.PreDestroy;
+import org.apache.cayenne.CayenneRuntimeException;
 import org.apache.cayenne.ObjectContext;
 import org.apache.cayenne.access.DataNode;
 import org.apache.cayenne.configuration.server.ServerRuntime;
@@ -34,7 +35,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.context.event.EventListener;
-import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.retry.RetryCallback;
 import org.springframework.retry.RetryContext;
 import org.springframework.retry.RetryListener;
@@ -465,11 +465,11 @@ public class DbDistributedJob2ServiceImpl extends AbstractExecutionThreadService
 
         // make sure tha the media type is already persisted.
 
-        contentedDataRetryTemplate.execute((RetryCallback<Object, DataIntegrityViolationException>) context -> {
+        contentedDataRetryTemplate.execute((RetryCallback<Object, CayenneRuntimeException>) context -> {
             ObjectContext objectContext = serverRuntime.newContext();
             DbDistributedJob2Helper.ensureJobDataMediaType(objectContext, simplifiedMediaTypeCode);
             objectContext.commitChanges();
-            return Boolean.TRUE;
+            return true;
         });
 
         serverRuntime.performInTransaction(
