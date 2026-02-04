@@ -11,4 +11,6 @@ public interface MaintenanceService {
 
     void hourly();
 
+    void fiveMinutely();
+
 }

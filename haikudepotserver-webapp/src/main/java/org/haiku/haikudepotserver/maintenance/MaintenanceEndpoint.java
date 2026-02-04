@@ -15,7 +15,8 @@ public class MaintenanceEndpoint {
 
     public enum Type {
         DAILY,
-        HOURLY
+        HOURLY,
+        FIVE_MINUTELY,
     }
 
     private final MaintenanceService maintenanceService;
@@ -33,6 +34,10 @@ public class MaintenanceEndpoint {
             }
             case HOURLY -> {
                 maintenanceService.hourly();
+                yield "ok";
+            }
+            case FIVE_MINUTELY -> {
+                maintenanceService.fiveMinutely();
                 yield "ok";
             }
         };

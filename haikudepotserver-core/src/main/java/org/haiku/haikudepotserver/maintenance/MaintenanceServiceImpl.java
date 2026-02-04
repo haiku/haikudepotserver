@@ -130,4 +130,9 @@ public class MaintenanceServiceImpl implements MaintenanceService {
 
         LOGGER.info("did trigger hourly maintenance");
     }
+
+    @Override
+    public void fiveMinutely() {
+        LOGGER.info("did trigger five minutely maintenance");
+    }
 }
