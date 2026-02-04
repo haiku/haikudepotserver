@@ -131,8 +131,10 @@ public class BasicConfig {
     private freemarker.template.Configuration createFreemarkerConfiguration(
             ResourceLoader resourceLoader,
             String templateBase) {
-        freemarker.template.Configuration configuration = new freemarker.template.Configuration(
-                Configuration.getVersion());
+        // The idea with the version here is that the version of the Freemarker behavior is pinned. I'd prefer that
+        // we just use the latest and manage failure and upgrades through automated testing, but this is not the way
+        // that it works. This was previously floating, but Freemarker deprecated this.
+        freemarker.template.Configuration configuration = new freemarker.template.Configuration(Configuration.VERSION_2_3_34);
         configuration.setDefaultEncoding(StandardCharsets.UTF_8.name());
         configuration.setLocalizedLookup(false);
         configuration.setTemplateLoader(new LocalizedTemplateLoader(resourceLoader, templateBase));
