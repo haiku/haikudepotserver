@@ -5,8 +5,10 @@
 
 package org.haiku.haikudepotserver.storage.model;
 
+import com.google.common.base.Preconditions;
 import com.google.common.io.ByteSink;
 import com.google.common.io.ByteSource;
+import org.apache.commons.lang3.StringUtils;
 import org.haiku.haikudepotserver.job.model.JobService;
 
 import java.io.IOException;
@@ -42,7 +44,15 @@ public interface DataStorageService {
 
     Optional<? extends ByteSource> get(String key) throws IOException;
 
-    boolean remove(String key);
+    default boolean remove(String key) {
+        Preconditions.checkArgument(StringUtils.isNotBlank(key));
+        return remove(Set.of(key)) > 0;
+    }
+
+    /**
+     * Remove for all the supplied keys.
+     */
+    long remove(Set<String> keys);
 
     /**
      * @return the total number of objects stored.

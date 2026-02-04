@@ -14,11 +14,7 @@ import java.io.IOException;
 import java.time.Instant;
 import java.time.LocalDateTime;
 import java.time.ZoneOffset;
-import java.util.Collections;
-import java.util.Date;
-import java.util.List;
-import java.util.Optional;
-import java.util.Set;
+import java.util.*;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -182,11 +178,6 @@ public class TestJobServiceImpl implements JobService {
 
     @Override
     public Optional<? extends JobSnapshot> tryGetJobForData(String jobDataGuid) {
-        return Optional.empty();
-    }
-
-    @Override
-    public Optional<? extends JobSnapshot> tryGetJobForSuppliedData(String suppliedDataGuid) {
         return Optional.empty();
     }
 

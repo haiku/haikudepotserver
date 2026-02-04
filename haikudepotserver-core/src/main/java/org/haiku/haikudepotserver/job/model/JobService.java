@@ -1,5 +1,5 @@
 /*
- * Copyright 2016-2025, Andrew Lindesay
+ * Copyright 2016-2026, Andrew Lindesay
  * Distributed under the terms of the MIT License.
  */
 
@@ -99,12 +99,6 @@ public interface JobService {
      */
 
     Optional<? extends JobSnapshot> tryGetJobForData(String jobDataGuid);
-
-    /**
-     * <p>Tries to identify a job which is associated with the job data guid supplied.</p>
-     */
-
-    Optional<? extends JobSnapshot> tryGetJobForSuppliedData(String suppliedDataGuid);
 
     /**
      * <p>This method will return a suggested filename for the download of the job data associated

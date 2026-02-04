@@ -20,6 +20,7 @@ import org.apache.cayenne.CayenneRuntimeException;
 import org.apache.cayenne.ObjectContext;
 import org.apache.cayenne.access.DataNode;
 import org.apache.cayenne.configuration.server.ServerRuntime;
+import org.apache.cayenne.query.ObjectSelect;
 import org.apache.cayenne.tx.TransactionDescriptor;
 import org.apache.cayenne.tx.TransactionPropagation;
 import org.apache.commons.collections4.CollectionUtils;
@@ -54,6 +55,7 @@ import java.util.*;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.locks.Condition;
 import java.util.concurrent.locks.ReentrantLock;
+import java.util.stream.Collectors;
 
 /**
  * <p>An instance of the {@link org.haiku.haikudepotserver.job.model.JobService} which
@@ -404,17 +406,6 @@ public class DbDistributedJob2ServiceImpl extends AbstractExecutionThreadService
         Preconditions.checkArgument(StringUtils.isNotBlank(jobDataGuid), "the data guid is required");
         ObjectContext context = serverRuntime.newContext();
         return org.haiku.haikudepotserver.dataobjects.JobData.tryGetByCode(context, jobDataGuid)
-                .map(_JobData::getJob)
-                .map(this::mapPersistedJobToJob);
-    }
-
-    @Override
-    public Optional<? extends JobSnapshot> tryGetJobForSuppliedData(String suppliedDataGuid) {
-        Preconditions.checkArgument(StringUtils.isNotBlank(suppliedDataGuid), "the supplied data guid is required");
-        ObjectContext context = serverRuntime.newContext();
-        String suppliedCode = org.haiku.haikudepotserver.dataobjects.JobDataType.CODE_SUPPLIED;
-        return org.haiku.haikudepotserver.dataobjects.JobData.tryGetByCode(context, suppliedDataGuid)
-                .filter(jd -> jd.getJobDataType().getCode().equals(suppliedCode))
                 .map(_JobData::getJob)
                 .map(this::mapPersistedJobToJob);
     }

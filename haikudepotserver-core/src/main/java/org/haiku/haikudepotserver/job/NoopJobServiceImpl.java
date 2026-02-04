@@ -1,5 +1,5 @@
 /*
- * Copyright 2025, Andrew Lindesay
+ * Copyright 2025-2026, Andrew Lindesay
  * Distributed under the terms of the MIT License.
  */
 package org.haiku.haikudepotserver.job;
@@ -9,10 +9,7 @@ import org.haiku.haikudepotserver.dataobjects.User;
 import org.haiku.haikudepotserver.job.model.*;
 
 import java.io.IOException;
-import java.util.List;
-import java.util.Optional;
-import java.util.Set;
-import java.util.UUID;
+import java.util.*;
 
 /**
  * <p>This is a special instance of {@link JobService} which does not actually run any jobs.</p>
@@ -49,11 +46,6 @@ public class NoopJobServiceImpl implements JobService {
 
     @Override
     public Optional<? extends JobSnapshot> tryGetJobForData(String jobDataGuid) {
-        return Optional.empty();
-    }
-
-    @Override
-    public Optional<? extends JobSnapshot> tryGetJobForSuppliedData(String suppliedDataGuid) {
         return Optional.empty();
     }
 

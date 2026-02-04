@@ -5,10 +5,12 @@
 package org.haiku.haikudepotserver.storage.job;
 
 import com.google.common.base.Preconditions;
+import com.google.common.collect.Sets;
 import org.haiku.haikudepotserver.job.AbstractJobRunner;
 import org.haiku.haikudepotserver.job.model.JobRunnerException;
 import org.haiku.haikudepotserver.job.model.JobService;
 import org.haiku.haikudepotserver.storage.model.DataStorageGarbageCollectionJobSpecification;
+import org.haiku.haikudepotserver.storage.model.DataStorageInUseChecker;
 import org.haiku.haikudepotserver.storage.model.DataStorageService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -16,8 +18,8 @@ import org.springframework.stereotype.Component;
 
 import java.io.IOException;
 import java.time.Duration;
+import java.util.List;
 import java.util.Set;
-import java.util.stream.Collectors;
 
 /**
  * <p>This job will ensure that the stored data is actually used; if not then the
@@ -30,8 +32,14 @@ public class DataStorageGarbageCollectionJobRunner extends AbstractJobRunner<Dat
 
     private final DataStorageService dataStorageService;
 
-    public DataStorageGarbageCollectionJobRunner(DataStorageService dataStorageService) {
+    private final List<DataStorageInUseChecker> dataStorageInUseCheckers;
+
+    public DataStorageGarbageCollectionJobRunner(
+            DataStorageService dataStorageService,
+            List<DataStorageInUseChecker> dataStorageInUseCheckers
+    ) {
         this.dataStorageService = dataStorageService;
+        this.dataStorageInUseCheckers = dataStorageInUseCheckers;
     }
 
     @Override
@@ -45,39 +53,22 @@ public class DataStorageGarbageCollectionJobRunner extends AbstractJobRunner<Dat
         Preconditions.checkNotNull(specification.getOlderThanMillis());
         Preconditions.checkNotNull(jobService);
 
-        Set<String> keys = dataStorageService.keys(Duration.ofMillis(specification.getOlderThanMillis()));
+        Set<String> allCandidateKeysToDelete = dataStorageService.keys(Duration.ofMillis(specification.getOlderThanMillis()));
 
-        LOGGER.info("garbage collection started for {} keys", keys.size());
+        LOGGER.info("garbage collection started for {} keys", allCandidateKeysToDelete.size());
 
-        Set<String> keysToDelete = keys
-                .stream()
-                .filter(k -> !isInUse(jobService, k))
-                .collect(Collectors.toSet());
+        Set<String> filteredKeysToDelete = dataStorageInUseCheckers.stream().reduce(
+                allCandidateKeysToDelete,
+                (candidateKeysToDelete, dataStorageInUseChecker) -> {
+                    Set<String> inUse = dataStorageInUseChecker.inUse(candidateKeysToDelete);
+                    return Sets.difference(candidateKeysToDelete, inUse);
+                },
+                Sets::union
+        );
 
-        for (String keyToDelete : keysToDelete) {
-            dataStorageService.remove(keyToDelete);
-        }
+        long deleted = dataStorageService.remove(filteredKeysToDelete);
 
-        LOGGER.info("did delete {} keys", keysToDelete.size());
-    }
-
-    /**
-     * @return true if the key is in use and so the data stored against the key should
-     *  be retained.
-     */
-    // TODO (andponlin) make this pluggable
-    private boolean isInUse(JobService jobService, String key) {
-
-        if (jobService.tryGetJobForData(key).isPresent()) {
-            return true;
-        }
-
-        // TODO (andponlin); can this be removed and just use the one above?
-        if (jobService.tryGetJobForSuppliedData(key).isPresent()) {
-            return true;
-        }
-
-        return false;
+        LOGGER.info("did delete {} keys out of {}", deleted, allCandidateKeysToDelete.size());
     }
 
 }

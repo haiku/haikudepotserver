@@ -9,6 +9,7 @@ import com.google.common.io.CountingInputStream;
 import org.apache.commons.lang3.StringUtils;
 import org.haiku.haikudepotserver.storage.model.DataStorageException;
 import org.springframework.stereotype.Component;
+import org.springframework.util.CollectionUtils;
 import org.springframework.util.StopWatch;
 
 import java.io.*;
@@ -19,6 +20,8 @@ import java.sql.SQLException;
 import java.time.Clock;
 import java.time.Duration;
 import java.util.*;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 /**
  * <p>Class for performing operations on the data store. Note that each operation here is a transaction; usually
@@ -27,6 +30,8 @@ import java.util.*;
  */
 @Component
 public class PgDataStorageHelper {
+
+    private final static String PLACEHOLDER_HEAD_CODES = "%%HEAD_CODES%%";
 
     private final static String SQL_SELECT_HEAD_NEXTVAL = "SELECT NEXTVAL('datastore.object_head_seq')";
 
@@ -45,11 +50,11 @@ public class PgDataStorageHelper {
             UPDATE datastore.object_head SET length = length + ?, modify_timestamp = ? WHERE id = ?
             """;
 
-    private final static String SQL_DELETE_PARTS_FOR_HEAD_BY_CODE =
-            "DELETE FROM datastore.object_part WHERE object_head_id = (SELECT id FROM datastore.object_head WHERE code = ?)";
+    private final static String SQL_DELETE_PARTS_FOR_HEAD_BY_CODES =
+            "DELETE FROM datastore.object_part WHERE object_head_id = (SELECT id FROM datastore.object_head WHERE code IN %%HEAD_CODES%%)";
 
-    private final static String SQL_DELETE_HEAD_BY_CODE =
-            "DELETE FROM datastore.object_head WHERE code = ?";
+    private final static String SQL_DELETE_HEAD_BY_CODES =
+            "DELETE FROM datastore.object_head WHERE code IN %%HEAD_CODES%%";
 
     private final static String SQL_TRUNCATE_PARTS_AND_HEAD =
             "TRUNCATE datastore.object_part, datastore.object_head";
@@ -177,22 +182,30 @@ public class PgDataStorageHelper {
         }
     }
 
-    static void deleteHeadAndPartsByCode(Connection connection, String code) throws SQLException {
-        Preconditions.checkArgument(StringUtils.isNoneBlank(code));
+    static int deleteHeadAndPartsByCodes(Connection connection, Set<String> codes) throws SQLException {
+        if (CollectionUtils.isEmpty(codes)) {
+            return 0;
+        }
+
+        List<String> codesSorted = codes.stream().sorted().toList(); // deterministic
+        String headCodePlaceholders = "(" + Stream.generate(() -> "?").limit(codes.size()).collect(Collectors.joining(",")) + ")";
+        String sqlDeletePartsForHeadByCodes = SQL_DELETE_PARTS_FOR_HEAD_BY_CODES.replace(PLACEHOLDER_HEAD_CODES, headCodePlaceholders);
+        String sqlDeleteHeadByCodes = SQL_DELETE_HEAD_BY_CODES.replace(PLACEHOLDER_HEAD_CODES, headCodePlaceholders);
 
         // can't really tell how many body parts there might be; 0 --> ?
 
-        try (PreparedStatement preparedStatement = connection.prepareStatement(SQL_DELETE_PARTS_FOR_HEAD_BY_CODE)) {
-            preparedStatement.setString(1, code);
+        try (PreparedStatement preparedStatement = connection.prepareStatement(sqlDeletePartsForHeadByCodes)) {
+            for (int i = 0; i < codesSorted.size(); i++) {
+                preparedStatement.setString(i + 1, codesSorted.get(i));
+            }
             preparedStatement.executeUpdate();
         }
 
-        try (PreparedStatement preparedStatement = connection.prepareStatement(SQL_DELETE_HEAD_BY_CODE)) {
-            preparedStatement.setString(1, code);
-
-            if (1 != preparedStatement.executeUpdate()) {
-                throw new IllegalStateException("unable to delete the object head");
+        try (PreparedStatement preparedStatement = connection.prepareStatement(sqlDeleteHeadByCodes)) {
+            for (int i = 0; i < codesSorted.size(); i++) {
+                preparedStatement.setString(i + 1, codesSorted.get(i));
             }
+            return preparedStatement.executeUpdate();
         }
     }
 

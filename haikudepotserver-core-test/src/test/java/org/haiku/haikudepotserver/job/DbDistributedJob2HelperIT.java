@@ -91,7 +91,7 @@ class DbDistributedJob2HelperIT extends AbstractIntegrationTest {
                 job_data_type_id
             ) VALUES (
                 ?,
-                (SELECT j2.id FROM job.job j2 WHERE j2.code = ?),
+                (SELECT j2.id FROM job2.job j2 WHERE j2.code = ?),
                 ?,
                 ?,
                 ?,

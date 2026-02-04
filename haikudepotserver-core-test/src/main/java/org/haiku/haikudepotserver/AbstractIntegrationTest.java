@@ -81,17 +81,6 @@ public abstract class AbstractIntegrationTest {
     private final static String DATABASEPRODUCTNAME_POSTGRES = "PostgreSQL";
 
     private final static String SQL_DELETE_TEST_UUC = "DELETE FROM haikudepot.user_usage_conditions WHERE code LIKE 'TEST%'";
-
-    private final static String SQL_TRUNCATE_JOBS = "TRUNCATE "
-            + Stream.of(
-            "job", "job_state", "job_generated_data", "job_supplied_data",
-            "job_data_media_type", "job_specification", "job_type"
-    ).map("job.%s"::formatted).collect(Collectors.joining(", "))
-//            + ", "
-//            // TODO; these tables will also be purged as part of the model-based purge, but will miss
-//            //  the table `job_assignment` because it does not appear in the model.
-//            + Stream.of("job", "job_data", "job_assignment", "job_data_media_type", "job_type")
-//    .map("job2.%s"::formatted).collect(Collectors.joining(", "));
 ;
     @Resource
     protected ApplicationContext applicationContext;
@@ -173,7 +162,6 @@ public abstract class AbstractIntegrationTest {
         clearJobs();
         clearCaches();
         clearDatabaseTables();
-        clearJobDatabaseTables();
         clearTestUserUsageConditions();
         setUnauthenticated();
         mailSender.clear();
@@ -240,11 +228,9 @@ public abstract class AbstractIntegrationTest {
                     List<String> truncationNames = new ArrayList<>();
 
                     for (ObjEntity objEntity : dataMap.getObjEntities()) {
-
                         if (!objEntity.isReadOnly() && !CDO_NAMES_RETAINED.contains(objEntity.getName())) {
                             truncationNames.add(objEntity.getDbEntity().getSchema() + "." + objEntity.getDbEntity().getName());
                         }
-
                     }
 
                     if (!truncationNames.isEmpty()) {
@@ -276,23 +262,6 @@ public abstract class AbstractIntegrationTest {
             }
 
             LOGGER.debug("prep; did clear out data for data node; {}", dataNode.getName());
-        }
-    }
-
-    public void clearJobDatabaseTables() {
-        DataNode dataNode = serverRuntime.getDataDomain().getDataNode("HaikuDepotServer");
-        try (
-                Connection connection = dataNode.getDataSource().getConnection();
-                PreparedStatement preparedStatement = connection.prepareStatement(SQL_TRUNCATE_JOBS)) {
-            int deleted = preparedStatement.executeUpdate();
-
-            if (0 != deleted) {
-                LOGGER.info("did delete [{}] job related objects", deleted);
-            }
-        } catch (SQLException se) {
-            throw new IllegalStateException(
-                    "unable to clear the pg job data from test",
-                    se);
         }
     }
 

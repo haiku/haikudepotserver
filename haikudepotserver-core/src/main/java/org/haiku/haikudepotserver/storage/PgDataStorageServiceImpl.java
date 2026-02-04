@@ -93,13 +93,12 @@ public class PgDataStorageServiceImpl implements DataStorageService {
     }
 
     @Override
-    public boolean remove(String key) {
+    public long remove(Set<String> keys) {
         try (Connection connection = dataSource.getConnection()) {
-            PgDataStorageHelper.deleteHeadAndPartsByCode(connection, key);
+            return PgDataStorageHelper.deleteHeadAndPartsByCodes(connection, keys);
         } catch (SQLException se) {
-            throw new DataStorageException("unable to remove the data storage key [%s]".formatted(key), se);
+            throw new DataStorageException("unable to remove the data storage keys", se);
         }
-        return true;
     }
 
     @Override
