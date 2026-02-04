@@ -51,7 +51,7 @@ public class PgDataStorageHelper {
             """;
 
     private final static String SQL_DELETE_PARTS_FOR_HEAD_BY_CODES =
-            "DELETE FROM datastore.object_part WHERE object_head_id = (SELECT id FROM datastore.object_head WHERE code IN %%HEAD_CODES%%)";
+            "DELETE FROM datastore.object_part WHERE object_head_id IN (SELECT id FROM datastore.object_head WHERE code IN %%HEAD_CODES%%)";
 
     private final static String SQL_DELETE_HEAD_BY_CODES =
             "DELETE FROM datastore.object_head WHERE code IN %%HEAD_CODES%%";
