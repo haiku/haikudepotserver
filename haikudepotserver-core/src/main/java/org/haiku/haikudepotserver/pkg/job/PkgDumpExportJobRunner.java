@@ -8,7 +8,6 @@ package org.haiku.haikudepotserver.pkg.job;
 import com.fasterxml.jackson.core.JsonGenerator;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.base.Preconditions;
-import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Lists;
 import com.google.common.net.MediaType;
 import org.apache.cayenne.DataRow;
@@ -16,10 +15,8 @@ import org.apache.cayenne.ObjectContext;
 import org.apache.cayenne.configuration.server.ServerRuntime;
 import org.apache.cayenne.query.ObjectSelect;
 import org.apache.cayenne.query.PrefetchTreeNode;
-import org.apache.cayenne.query.SQLTemplate;
 import org.apache.commons.lang3.StringUtils;
 import org.haiku.haikudepotserver.dataobjects.*;
-import org.haiku.haikudepotserver.dataobjects.auto._HaikuDepot;
 import org.haiku.haikudepotserver.job.AbstractJobRunner;
 import org.haiku.haikudepotserver.job.model.JobDataEncoding;
 import org.haiku.haikudepotserver.job.model.JobDataWithByteSink;
@@ -173,13 +170,9 @@ public class PkgDumpExportJobRunner extends AbstractJobRunner<PkgDumpExportJobSp
 
     private List<String> getPkgNames(ObjectContext context, RepositorySource repositorySource) {
 
-        SQLTemplate sqlTemplate = (SQLTemplate) context.getEntityResolver()
-                .getQueryDescriptor(_HaikuDepot.PKG_NAMES_FOR_REPOSITORY_SOURCE_QUERYNAME).buildQuery();
-        SQLTemplate query = (SQLTemplate) sqlTemplate.createQuery(ImmutableMap.of(
-                "repositorySourceCode", repositorySource.getCode()));
-        query.setFetchingDataRows(true);
-
-        List<DataRow> dataRows = (List<DataRow>) context.performQuery(query);
+        List<DataRow> dataRows = (List<DataRow>) HaikuDepot.getInstance()
+                .performPkgNamesForRepositorySource(context, Map.of("repositorySourceCode", repositorySource.getCode()))
+                .firstList();
 
         return dataRows
                 .stream()

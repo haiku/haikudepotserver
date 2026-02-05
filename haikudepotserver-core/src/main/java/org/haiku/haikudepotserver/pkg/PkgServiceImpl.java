@@ -16,7 +16,10 @@ import org.apache.cayenne.ObjectContext;
 import org.apache.cayenne.ObjectId;
 import org.apache.cayenne.access.OptimisticLockException;
 import org.apache.cayenne.configuration.server.ServerRuntime;
-import org.apache.cayenne.query.*;
+import org.apache.cayenne.query.MappedSelect;
+import org.apache.cayenne.query.ObjectIdQuery;
+import org.apache.cayenne.query.ObjectSelect;
+import org.apache.cayenne.query.SQLTemplate;
 import org.apache.commons.lang3.ObjectUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.haiku.haikudepotserver.dataobjects.*;
@@ -220,16 +223,15 @@ public class PkgServiceImpl implements PkgService {
         Preconditions.checkState(search.getOffset() >= 0);
         Preconditions.checkState(search.getLimit() > 0);
 
-        SQLTemplate sqlTemplate = (SQLTemplate) context.getEntityResolver()
-                .getQueryDescriptor(_HaikuDepot.SEARCH_PKG_VERSIONS_QUERYNAME).buildQuery();
-        Query query = sqlTemplate.createQuery(ImmutableMap.of(
-                "search", search,
-                "isTotal", false,
-                "isNotTotal", true,
-                "englishNaturalLanguage", NaturalLanguage.getEnglish(context)
-        ));
-
-        return (List<PkgVersion>) context.performQuery(query);
+        return (List<PkgVersion>) HaikuDepot.getInstance().performSearchPkgVersions(
+                context,
+                ImmutableMap.of(
+                        "search", search,
+                        "isTotal", false,
+                        "isNotTotal", true,
+                        "englishNaturalLanguage", NaturalLanguage.getEnglish(context)
+                )
+        ).firstList();
     }
 
     /**

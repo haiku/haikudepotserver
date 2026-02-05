@@ -1108,8 +1108,8 @@ ORDER BY
 OFFSET #bind($offset)
 LIMIT #bind($limit)]]></sql>
 	</query>
-	<query name="PkgNamesForRepositorySource" type="SQLTemplate" root="obj-entity" root-name="PkgVersion">
-		<property name="cayenne.GenericSelectQuery.fetchingDataRows" value="false"/>
+	<query name="PkgNamesForRepositorySource" type="SQLTemplate" root="data-map" root-name="HaikuDepot">
+		<property name="cayenne.GenericSelectQuery.fetchingDataRows" value="true"/>
 		<sql adapter-class="org.apache.cayenne.dba.postgres.PostgresAdapter"><![CDATA[SELECT
   #result('p.name' 'String' 'name')
 FROM

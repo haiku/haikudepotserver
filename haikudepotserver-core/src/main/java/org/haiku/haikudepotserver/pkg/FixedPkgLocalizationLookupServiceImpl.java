@@ -11,6 +11,7 @@ import org.apache.cayenne.DataRow;
 import org.apache.cayenne.ObjectContext;
 import org.apache.cayenne.ObjectId;
 import org.apache.cayenne.query.SQLTemplate;
+import org.haiku.haikudepotserver.dataobjects.HaikuDepot;
 import org.haiku.haikudepotserver.dataobjects.NaturalLanguage;
 import org.haiku.haikudepotserver.dataobjects.PkgVersion;
 import org.haiku.haikudepotserver.dataobjects.auto._HaikuDepot;
@@ -48,15 +49,14 @@ public class FixedPkgLocalizationLookupServiceImpl implements PkgLocalizationLoo
                     .map((pv) -> (Long) pv.getObjectId().getIdSnapshot().get(PkgVersion.ID_PK_COLUMN))
                     .collect(Collectors.toSet());
 
-            SQLTemplate sqlTemplate = (SQLTemplate) context.getEntityResolver()
-                    .getQueryDescriptor(_HaikuDepot.PKG_VERSION_LOCALIZATION_RESOLUTION_QUERYNAME).buildQuery();
-            SQLTemplate query = (SQLTemplate) sqlTemplate.createQuery(ImmutableMap.of(
-                    "naturalLanguageId", naturalLanguage.getObjectId().getIdSnapshot().get(NaturalLanguage.ID_PK_COLUMN),
-                    "englishNaturalLanguageId", NaturalLanguage.getEnglish(context).getObjectId().getIdSnapshot().get(NaturalLanguage.ID_PK_COLUMN),
-                    "pkgVersionIds", pkgVersionIds));
-            query.setFetchingDataRows(true);
-
-            List<DataRow> dataRows = (List<DataRow>) context.performQuery(query);
+            List<DataRow> dataRows = (List<DataRow>) HaikuDepot.getInstance().performPkgVersionLocalizationResolution(
+                    context,
+                    Map.of(
+                            "naturalLanguageId", naturalLanguage.getObjectId().getIdSnapshot().get(NaturalLanguage.ID_PK_COLUMN),
+                            "englishNaturalLanguageId", NaturalLanguage.getEnglish(context).getObjectId().getIdSnapshot().get(NaturalLanguage.ID_PK_COLUMN),
+                            "pkgVersionIds", pkgVersionIds
+                    )
+            ).firstList();
 
             dataRows.forEach((dr) -> {
                 Long pkgVersionId = (Long) dr.get("pv_id");
