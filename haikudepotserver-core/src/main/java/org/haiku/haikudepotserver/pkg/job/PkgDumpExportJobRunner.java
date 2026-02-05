@@ -19,6 +19,7 @@ import org.apache.cayenne.query.PrefetchTreeNode;
 import org.apache.cayenne.query.SQLTemplate;
 import org.apache.commons.lang3.StringUtils;
 import org.haiku.haikudepotserver.dataobjects.*;
+import org.haiku.haikudepotserver.dataobjects.auto._HaikuDepot;
 import org.haiku.haikudepotserver.job.AbstractJobRunner;
 import org.haiku.haikudepotserver.job.model.JobDataEncoding;
 import org.haiku.haikudepotserver.job.model.JobDataWithByteSink;
@@ -173,7 +174,7 @@ public class PkgDumpExportJobRunner extends AbstractJobRunner<PkgDumpExportJobSp
     private List<String> getPkgNames(ObjectContext context, RepositorySource repositorySource) {
 
         SQLTemplate sqlTemplate = (SQLTemplate) context.getEntityResolver()
-                .getQueryDescriptor("PkgNamesForRepositorySource").buildQuery();
+                .getQueryDescriptor(_HaikuDepot.PKG_NAMES_FOR_REPOSITORY_SOURCE_QUERYNAME).buildQuery();
         SQLTemplate query = (SQLTemplate) sqlTemplate.createQuery(ImmutableMap.of(
                 "repositorySourceCode", repositorySource.getCode()));
         query.setFetchingDataRows(true);

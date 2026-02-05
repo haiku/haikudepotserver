@@ -225,6 +225,7 @@ public class PkgServiceImpl implements PkgService {
         Query query = sqlTemplate.createQuery(ImmutableMap.of(
                 "search", search,
                 "isTotal", false,
+                "isNotTotal", true,
                 "englishNaturalLanguage", NaturalLanguage.getEnglish(context)
         ));
 
@@ -246,6 +247,7 @@ public class PkgServiceImpl implements PkgService {
         SQLTemplate query = (SQLTemplate) sqlTemplate.createQuery(ImmutableMap.of(
                 "search", search,
                 "isTotal", true,
+                "isNotTotal", false,
                 "englishNaturalLanguage", NaturalLanguage.getEnglish(context)
         ));
         query.setFetchingDataRows(true);
@@ -268,9 +270,11 @@ public class PkgServiceImpl implements PkgService {
             ObjectContext context,
             boolean includeDevelopment) {
         Preconditions.checkArgument(null!=context, "the object context must be provided");
+
+        AllActivePkgNamesSpecification specification = new AllActivePkgNamesSpecification(true, includeDevelopment);
+
         List<DataRow> dataRows = MappedSelect.query(_HaikuDepot.ALL_ACTIVE_PKG_NAMES_QUERYNAME, DataRow.class)
-                .param("isTotal", true)
-                .param("includeDevelopment", includeDevelopment)
+                .param("specification", specification)
                 .select(context);
         return dataRows.stream()
                 .map(dr -> (Long) dr.get("total"))
@@ -435,7 +439,7 @@ public class PkgServiceImpl implements PkgService {
             RepositorySource repositorySource) {
 
         Preconditions.checkArgument(null != context, "the context must be provided");
-        Preconditions.checkArgument(null != repositorySource, "the repository soures must be provided");
+        Preconditions.checkArgument(null != repositorySource, "the repository sources must be provided");
 
         return Set.copyOf(ObjectSelect.query(PkgVersion.class)
                 .where(PkgVersion.REPOSITORY_SOURCE.eq(repositorySource))
@@ -690,6 +694,19 @@ public class PkgServiceImpl implements PkgService {
                 PkgService.SUFFIX_PKG_DEBUGINFO,
                 PkgService.SUFFIX_PKG_DEVELOPMENT,
                 PkgService.SUFFIX_PKG_SOURCE).anyMatch(pkgName::endsWith);
+    }
+
+    /**
+     * Data structure to support the inputs to the query `AllActivePkgNames`.
+     */
+    public record AllActivePkgNamesSpecification(
+            boolean isTotal,
+            boolean includeDevelopment
+    ) {
+        public boolean notIncludeDevelopment() {
+            return !includeDevelopment;
+        }
+
     }
 
 }

@@ -218,11 +218,6 @@
                 <artifactId>cayenne-server</artifactId>
                 <version>${cayenne.version}</version>
             </dependency>
-            <dependency>
-                <groupId>org.apache.cayenne</groupId>
-                <artifactId>cayenne-velocity</artifactId>
-                <version>${cayenne.version}</version>
-            </dependency>
 
             <dependency>
                 <groupId>ar.com.hjg</groupId>

@@ -14,6 +14,7 @@ import org.apache.commons.compress.archivers.tar.TarArchiveEntry;
 import org.apache.commons.lang3.StringUtils;
 import org.haiku.haikudepotserver.dataobjects.PkgIcon;
 import org.haiku.haikudepotserver.dataobjects.PkgSupplement;
+import org.haiku.haikudepotserver.dataobjects.auto._HaikuDepot;
 import org.haiku.haikudepotserver.pkg.model.PkgIconExportArchiveJobSpecification;
 import org.haiku.haikudepotserver.support.RuntimeInformationService;
 import org.springframework.stereotype.Component;
@@ -106,7 +107,7 @@ public class PkgIconExportArchiveJobRunner extends AbstractPkgResourceExportArch
     @Override
     SQLTemplate createQuery(PkgIconExportArchiveJobSpecification specification) {
         return (SQLTemplate) serverRuntime.newContext().getEntityResolver()
-                .getQueryDescriptor("AllPkgIcons").buildQuery();
+                .getQueryDescriptor(_HaikuDepot.ALL_PKG_ICONS_QUERYNAME).buildQuery();
     }
 
     @Override

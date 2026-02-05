@@ -109,12 +109,6 @@
             <artifactId>cayenne-server</artifactId>
         </dependency>
 
-        <!-- required for some of the more complex SQL queries -->
-        <dependency>
-            <groupId>org.apache.cayenne</groupId>
-            <artifactId>cayenne-velocity</artifactId>
-        </dependency>
-
         <dependency>
             <groupId>com.zaxxer</groupId>
             <artifactId>HikariCP</artifactId>

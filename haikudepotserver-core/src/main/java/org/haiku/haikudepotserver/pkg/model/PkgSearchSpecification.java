@@ -5,6 +5,7 @@
 
 package org.haiku.haikudepotserver.pkg.model;
 
+import org.apache.commons.collections4.CollectionUtils;
 import org.haiku.haikudepotserver.dataobjects.Architecture;
 import org.haiku.haikudepotserver.dataobjects.NaturalLanguage;
 import org.haiku.haikudepotserver.dataobjects.PkgCategory;
@@ -14,6 +15,7 @@ import org.haiku.haikudepotserver.support.AbstractSearchSpecification;
 
 import java.util.Collection;
 import java.util.List;
+import java.util.Set;
 
 /**
  * <p>This model object specifies the parameters of a search into the system for packages.  See the
@@ -126,4 +128,42 @@ public class PkgSearchSpecification extends AbstractSearchSpecification {
     public void setOnlyDesktop(Boolean onlyDesktop) {
         this.onlyDesktop = onlyDesktop;
     }
+
+    // The template for SQL queries are not able to do boolean operators so
+    // we provide them here.
+
+    public boolean isSortOrderingName() {
+        return getSortOrdering() == SortOrdering.NAME;
+    }
+
+    public boolean isSortOrderingProminence() {
+        return getSortOrdering() == SortOrdering.PROMINENCE;
+    }
+
+    public boolean isSortOrderingVersionCreateTimestamp() {
+        return getSortOrdering() == SortOrdering.VERSIONCREATETIMESTAMP;
+    }
+
+    public boolean isSortOrderingVersionViewCounter() {
+        return getSortOrdering() == SortOrdering.VERSIONVIEWCOUNTER;
+    }
+
+    public List<String> getRepositoryCodes() {
+        return getRepositories().stream().map(Repository::getCode).toList();
+    }
+
+    public boolean getNotIncludeInactive() {
+        return !getIncludeInactive();
+    }
+
+    public boolean getNotIncludeDevelopment() {
+        return !getIncludeDevelopment();
+    }
+
+    public boolean hasRepositoriesOrIsSortOrderingProminenceOrHasArchitecture() {
+        return CollectionUtils.isNotEmpty(getRepositories()) ||
+                isSortOrderingProminence() ||
+                null != getArchitecture();
+    }
+
 }

@@ -14,7 +14,6 @@ import org.apache.cayenne.configuration.Constants;
 import org.apache.cayenne.configuration.server.ServerModule;
 import org.apache.cayenne.configuration.server.ServerRuntime;
 import org.apache.cayenne.di.MapBuilder;
-import org.apache.cayenne.velocity.VelocityModule;
 import org.haiku.haikudepotserver.dataobjects.*;
 import org.haiku.haikudepotserver.support.cayenne.NotifyingQueryCache;
 import org.haiku.haikudepotserver.support.cayenne.QueryCacheRemoveEventNotifyControl;
@@ -56,7 +55,6 @@ public class PersistenceConfig {
                 .addConfigs("cayenne-haikudepotserver.xml")
                 .dataSource(dataSource)
                 .addModule(new ServerModule())
-                .addModule(new VelocityModule())
                 .addModule(binder -> binder
                         .bind(QueryCacheRemoveEventNotifyControl.class)
                         .toInstance(notifyControl))

@@ -1031,7 +1031,7 @@
 	<query name="AllActivePkgNames" type="SQLTemplate" root="data-map" root-name="HaikuDepot">
 		<property name="cayenne.GenericSelectQuery.fetchingDataRows" value="true"/>
 		<sql adapter-class="org.apache.cayenne.dba.postgres.PostgresAdapter"><![CDATA[SELECT
-#if($isTotal)
+#if($specification.isTotal())
 #result('COUNT(p.id)' 'long' 'total')
 #else
 #result('p.name' 'String' 'name')
@@ -1040,7 +1040,7 @@ FROM haikudepot.pkg p
 WHERE
 1 = 1
 AND p.active = true
-#if(! $includeDevelopment)
+#if($specification.notIncludeDevelopment())
 AND p.name NOT LIKE '%_devel'
 AND p.name NOT LIKE '%_source'
 AND p.name NOT LIKE '%_debuginfo'
@@ -1053,14 +1053,14 @@ AND EXISTS(
   WHERE
     1 = 1
     AND pv1.pkg_id = p.id
-#if(! $includeDevelopment)
+#if($specification.notIncludeDevelopment())
     AND a1.code <> 'source'
 #end
     AND pv1.active = true
     AND rs1.active = true
     AND r1.active = true
 )
-#if($isTotal)
+#if($specification.isTotal())
 #else
 ORDER BY p.name ASC
 #end]]></sql>
@@ -1265,29 +1265,29 @@ COUNT(DISTINCT pv.id) AS "total"
 #end
 FROM
 haikudepot.pkg_version pv
-#if($search.sortOrdering.name() == "VERSIONVIEWCOUNTER")
+#if($search.isSortOrderingVersionViewCounter())
 LEFT JOIN haikudepot.pkg_version_interaction pva ON pva.id = pv.pkg_version_interaction_id
 #end
 JOIN haikudepot.pkg p ON p.id = pv.pkg_id
 JOIN haikudepot.pkg_supplement ps ON ps.id = p.pkg_supplement_id
-#if($search.repositories || $search.sortOrdering.name() == "PROMINENCE" || $search.architecture)
+#if($search.hasRepositoriesOrIsSortOrderingProminenceOrHasArchitecture())
   JOIN haikudepot.repository_source rs ON pv.repository_source_id = rs.id
   JOIN haikudepot.repository r ON rs.repository_id = r.id
 #end
-#if($search.architecture)
+#if($search.getArchitecture())
 JOIN haikudepot.architecture a ON a.id = rs.architecture_id
 #end
 LEFT JOIN haikudepot.pkg_localization pl_nl ON pl_nl.pkg_supplement_id = ps.id AND
-    #if($search.naturalLanguage)
-        #bindObjectEqual($search.naturalLanguage,'pl_nl.natural_language_id','id')
+    #if($search.getNaturalLanguage())
+        #bindObjectEqual($search.getNaturalLanguage(),'pl_nl.natural_language_id','id')
     #else
         #bindObjectEqual($englishNaturalLanguage,'pl_nl.natural_language_id','id')
     #end
 LEFT JOIN haikudepot.pkg_localization pl_en ON pl_en.pkg_supplement_id = ps.id AND
     #bindObjectEqual($englishNaturalLanguage,'pl_en.natural_language_id','id')
 LEFT JOIN haikudepot.pkg_version_localization pvl_nl ON pvl_nl.pkg_version_id = pv.id AND
-#if($search.naturalLanguage)
-    #bindObjectEqual($search.naturalLanguage,'pvl_nl.natural_language_id','id')
+#if($search.getNaturalLanguage())
+    #bindObjectEqual($search.getNaturalLanguage(),'pvl_nl.natural_language_id','id')
 #else
     #bindObjectEqual($englishNaturalLanguage,'pvl_nl.natural_language_id','id')
 #end
@@ -1299,84 +1299,72 @@ LEFT JOIN haikudepot.pkg_version_localization pvl_en ON pvl_en.pkg_version_id = 
 LEFT JOIN haikudepot.localization_content pvl_en_summary_lc ON pvl_en_summary_lc.id = pvl_en.summary_localization_content_id
 LEFT JOIN haikudepot.localization_content pvl_en_description_lc ON pvl_en_description_lc.id = pvl_en.description_localization_content_id
 LEFT JOIN haikudepot.localization_content pvl_en_title_lc ON pvl_en_title_lc.id = pvl_en.title_localization_content_id
-#if($search.pkgCategory)
+#if($search.getPkgCategory())
 JOIN haikudepot.pkg_pkg_category ppc ON ppc.pkg_supplement_id = ps.id
 #end
-#if($search.sortOrdering.name() == "PROMINENCE")
+#if($search.isSortOrderingProminence())
 LEFT JOIN haikudepot.pkg_prominence ppr ON ppr.pkg_id = p.id AND ppr.repository_id = r.id
 LEFT JOIN haikudepot.prominence pr ON ppr.prominence_id = pr.id
 #end
 WHERE
 1 = 1
 AND pv.is_latest = true
-#if(! $search.includeDevelopment)
+#if($search.getNotIncludeDevelopment())
 AND p.name NOT LIKE '%_devel'
 AND p.name NOT LIKE '%_source'
 AND p.name NOT LIKE '%_debuginfo'
 #end
-#if($search.onlyDesktop)
+#if($search.getOnlyDesktop())
 AND p.is_desktop = true
 #end
-#if($search.onlyNativeDesktop)
+#if($search.getOnlyNativeDesktop())
 AND p.is_native_desktop = true
 #end
-#if(! $search.includeInactive)
+#if($search.getNotIncludeInactive())
 AND p.active = true
 AND pv.active = true
 #end
-#if($search.repositories)
-AND r.code IN (
-    #foreach( $repository in $search.repositories )
-        #bind($repository.code)
-        #if($foreach.hasNext)
-        ,
-        #end
-    #end
-)
+#if($search.getRepositories())
+AND r.code IN (#bind($search.getRepositoryCodes()))
 #end
-#if($search.architecture)
-AND a.code = #bind($search.architecture.code)
+#if($search.getArchitecture())
+AND a.code = #bind($search.getArchitecture().getCode())
 #end
-#if($search.daysSinceLatestVersion)
-AND pv.create_timestamp >= now() - #bind($search.daysSinceLatestVersion, 'INTEGER') * INTERVAL '1 DAY'
+#if($search.getDaysSinceLatestVersion())
+AND pv.create_timestamp >= now() - #bind($search.getDaysSinceLatestVersion(), 'INTEGER') * INTERVAL '1 DAY'
 #end
-#if($search.expression)
+#if($search.getExpression())
 AND (
-   LOWER(COALESCE(pvl_nl_summary_lc.content,pl_nl.summary)) LIKE #bind($search.expressionAsSqlLike) ESCAPE '|'
-OR LOWER(COALESCE(pvl_en_summary_lc.content,pl_en.summary)) LIKE #bind($search.expressionAsSqlLike) ESCAPE '|'
-OR LOWER(COALESCE(pvl_en_description_lc.content,pl_en.description)) LIKE #bind($search.expressionAsSqlLike) ESCAPE '|'
-OR LOWER(COALESCE(pvl_en_description_lc.content,pl_en.description)) LIKE #bind($search.expressionAsSqlLike) ESCAPE '|'
-OR LOWER(COALESCE(pvl_nl_title_lc.content,pl_nl.title)) LIKE #bind($search.expressionAsSqlLike) ESCAPE '|'
-OR LOWER(COALESCE(pvl_en_title_lc.content,pl_en.title)) LIKE #bind($search.expressionAsSqlLike) ESCAPE '|'
-OR LOWER(p.name) LIKE #bind($search.expressionAsSqlLike) ESCAPE '|'
+   LOWER(COALESCE(pvl_nl_summary_lc.content,pl_nl.summary)) LIKE #bind($search.getExpressionAsSqlLike()) ESCAPE '|'
+OR LOWER(COALESCE(pvl_en_summary_lc.content,pl_en.summary)) LIKE #bind($search.getExpressionAsSqlLike()) ESCAPE '|'
+OR LOWER(COALESCE(pvl_en_description_lc.content,pl_en.description)) LIKE #bind($search.getExpressionAsSqlLike()) ESCAPE '|'
+OR LOWER(COALESCE(pvl_en_description_lc.content,pl_en.description)) LIKE #bind($search.getExpressionAsSqlLike()) ESCAPE '|'
+OR LOWER(COALESCE(pvl_nl_title_lc.content,pl_nl.title)) LIKE #bind($search.getExpressionAsSqlLike()) ESCAPE '|'
+OR LOWER(COALESCE(pvl_en_title_lc.content,pl_en.title)) LIKE #bind($search.getExpressionAsSqlLike()) ESCAPE '|'
+OR LOWER(p.name) LIKE #bind($search.getExpressionAsSqlLike()) ESCAPE '|'
 )
 #end
-#if($search.pkgCategory)
-AND #bindObjectEqual($search.pkgCategory, 'ppc.pkg_category_id', 'id')
+#if($search.getPkgCategory())
+AND #bindObjectEqual($search.getPkgCategory(), 'ppc.pkg_category_id', 'id')
 #end
-#if($search.pkgNames)
-    #if($search.pkgNames.isEmpty())
-	AND true = false
-    #else
-    AND p.name IN (#bind($search.pkgNames))
-    #end
-#end
-#if(!$isTotal)
+#if($isNotTotal)
 ORDER BY
-    #if($search.sortOrdering)
-        #if($search.sortOrdering.name() == "PROMINENCE")
+    #if($search.getSortOrdering())
+        #if($search.isSortOrderingProminence())
         pr.ordering ASC,
-        #elseif($search.sortOrdering.name() == "VERSIONVIEWCOUNTER")
+        #end
+        #if($search.isSortOrderingVersionViewCounter())
         COALESCE(pva.view_counter, 0) DESC,
-        #elseif($search.sortOrdering.name() == "VERSIONCREATETIMESTAMP")
+        #end
+        #if($search.isSortOrderingVersionCreateTimestamp())
         pv.create_timestamp DESC,
         #end
     #end
-#if($search.expression)
+#if($search.getExpression())
 CASE
-	WHEN LOWER(COALESCE(pvl_nl_title_lc.content,pl_nl.title)) LIKE #bind($search.expressionAsSqlLike) ESCAPE '|'
+	WHEN LOWER(COALESCE(pvl_nl_title_lc.content,pl_nl.title)) LIKE #bind($search.getExpressionAsSqlLike()) ESCAPE '|'
 		THEN LOWER(COALESCE(pvl_nl_title_lc.content,pl_nl.title))
-	WHEN LOWER(COALESCE(pvl_en_title_lc.content,pl_en.title,p.name)) LIKE #bind($search.expressionAsSqlLike) ESCAPE '|'
+	WHEN LOWER(COALESCE(pvl_en_title_lc.content,pl_en.title,p.name)) LIKE #bind($search.getExpressionAsSqlLike()) ESCAPE '|'
 		THEN LOWER(COALESCE(pvl_en_title_lc.content,pl_en.title,p.name))
 	ELSE LOWER(COALESCE(pvl_nl_title_lc.content,pl_nl.title,pvl_en_title_lc.content,pl_en.title,p.name))
 END ASC,
@@ -1384,8 +1372,8 @@ END ASC,
 LOWER(COALESCE(pvl_nl_title_lc.content,pl_nl.title,pvl_en_title_lc.content,pl_en.title,p.name)) ASC,
 #end
 pv.id ASC
-OFFSET #bind($search.offset)
-LIMIT #bind($search.limit)
+OFFSET #bind($search.getOffset())
+LIMIT #bind($search.getLimit())
 #end]]></sql>
 	</query>
 	<cgen xmlns="http://cayenne.apache.org/schema/10/cgen">
