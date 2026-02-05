@@ -5,7 +5,6 @@
 
 package org.haiku.haikudepotserver.repository;
 
-import com.google.common.collect.ImmutableSet;
 import com.google.common.io.Files;
 import com.google.common.util.concurrent.Uninterruptibles;
 import jakarta.annotation.Resource;
@@ -29,6 +28,7 @@ import org.springframework.test.context.ContextConfiguration;
 import java.io.File;
 import java.util.List;
 import java.util.Optional;
+import java.util.Set;
 import java.util.concurrent.TimeUnit;
 
 /**
@@ -268,12 +268,12 @@ public class RepositoryHpkrIngressServiceIT extends AbstractIntegrationTest {
                 // the former rubbish copyright is removed
                 List<String> copyrights = pkgVersion.getCopyrights();
                 Assertions.assertThat(copyrights.size()).isEqualTo(2);
-                Assertions.assertThat(ImmutableSet.copyOf(copyrights)).containsOnly("2000-2003 Fabrice Bellard", "2003-2017 the FFmpeg developers");
+                Assertions.assertThat(Set.copyOf(copyrights)).containsOnly("2000-2003 Fabrice Bellard", "2003-2017 the FFmpeg developers");
 
                 // the former rubbish license is removed
                 List<String> licenses = pkgVersion.getLicenses();
                 Assertions.assertThat(licenses.size()).isEqualTo(2);
-                Assertions.assertThat(ImmutableSet.copyOf(licenses)).containsOnly("GNU LGPL v2.1", "GNU GPL v2");
+                Assertions.assertThat(Set.copyOf(licenses)).containsOnly("GNU LGPL v2.1", "GNU GPL v2");
 
                 Optional<PkgVersionUrl> pkgVersionUrlOptional = pkgVersion.getPkgVersionUrlForType(PkgUrlType.getByCode(
                         context,

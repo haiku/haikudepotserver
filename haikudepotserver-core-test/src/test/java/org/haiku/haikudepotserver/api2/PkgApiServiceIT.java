@@ -5,10 +5,9 @@
 
 package org.haiku.haikudepotserver.api2;
 
-import com.google.common.collect.ImmutableList;
-import com.google.common.collect.ImmutableSet;
 import com.google.common.net.MediaType;
 import com.google.common.util.concurrent.Uninterruptibles;
+import jakarta.annotation.Resource;
 import org.apache.cayenne.ObjectContext;
 import org.apache.cayenne.query.ObjectSelect;
 import org.apache.cayenne.query.SortOrder;
@@ -16,25 +15,24 @@ import org.fest.assertions.Assertions;
 import org.haiku.haikudepotserver.AbstractIntegrationTest;
 import org.haiku.haikudepotserver.IntegrationTestSupportService;
 import org.haiku.haikudepotserver.api2.model.*;
+import org.haiku.haikudepotserver.config.TestConfig;
 import org.haiku.haikudepotserver.dataobjects.*;
 import org.haiku.haikudepotserver.dataobjects.Architecture;
 import org.haiku.haikudepotserver.dataobjects.PkgCategory;
 import org.haiku.haikudepotserver.naturallanguage.model.NaturalLanguageCoded;
 import org.haiku.haikudepotserver.naturallanguage.model.NaturalLanguageCoordinates;
+import org.haiku.haikudepotserver.support.VersionCoordinates;
 import org.haiku.haikudepotserver.support.exception.BadPkgIconException;
 import org.haiku.haikudepotserver.support.exception.ObjectNotFoundException;
-import org.haiku.haikudepotserver.config.TestConfig;
-import org.haiku.haikudepotserver.support.VersionCoordinates;
 import org.junit.Assert;
 import org.junit.jupiter.api.Test;
 import org.springframework.test.context.ContextConfiguration;
-
-import jakarta.annotation.Resource;
 
 import java.time.Duration;
 import java.util.Base64;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 @ContextConfiguration(classes = TestConfig.class)
@@ -88,7 +86,7 @@ public class PkgApiServiceIT extends AbstractIntegrationTest {
             ObjectContext context = serverRuntime.newContext();
             Pkg pkg = Pkg.getByName(context, data.pkg1.getName());
 
-            Assertions.assertThat(ImmutableSet.of("business", "development")).isEqualTo(
+            Assertions.assertThat(Set.of("business", "development")).isEqualTo(
                     pkg.getPkgSupplement().getPkgPkgCategories()
                             .stream()
                             .map(ppc -> ppc.getPkgCategory().getCode())
@@ -676,7 +674,7 @@ public class PkgApiServiceIT extends AbstractIntegrationTest {
         {
             ObjectContext context = serverRuntime.newContext();
             Pkg pkg1 = Pkg.getByName(context, "pkg1");
-            List<String[]> rules = ImmutableList.of(
+            List<String[]> rules = List.of(
                     new String[] { NaturalLanguageCoordinates.LANGUAGE_CODE_ENGLISH, "flourescence" },
                     new String[] { NaturalLanguageCoordinates.LANGUAGE_CODE_FRENCH, "treacle" },
                     new String[] { NaturalLanguageCoordinates.LANGUAGE_CODE_GERMAN, "Packet 1" }

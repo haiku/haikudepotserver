@@ -5,34 +5,25 @@
 
 package org.haiku.haikudepotserver.api2;
 
-import com.google.common.collect.ImmutableSet;
+import jakarta.annotation.Resource;
 import org.apache.cayenne.ObjectContext;
 import org.fest.assertions.Assertions;
 import org.haiku.haikudepotserver.AbstractIntegrationTest;
 import org.haiku.haikudepotserver.IntegrationTestSupportService;
-import org.haiku.haikudepotserver.api2.model.AuthorizationTargetAndPermissionRequest;
-import org.haiku.haikudepotserver.api2.model.AuthorizationTargetAndPermissionResult;
-import org.haiku.haikudepotserver.api2.model.AuthorizationTargetType;
-import org.haiku.haikudepotserver.api2.model.CheckAuthorizationRequestEnvelope;
-import org.haiku.haikudepotserver.api2.model.CheckAuthorizationResult;
-import org.haiku.haikudepotserver.api2.model.CreateAuthorizationPkgRuleRequestEnvelope;
-import org.haiku.haikudepotserver.api2.model.RemoveAuthorizationPkgRuleRequestEnvelope;
-import org.haiku.haikudepotserver.api2.model.SearchAuthorizationPkgRulesRequestEnvelope;
-import org.haiku.haikudepotserver.api2.model.SearchAuthorizationPkgRulesResult;
-import org.haiku.haikudepotserver.api2.model.SearchAuthorizationPkgRulesResultItem;
-import org.haiku.haikudepotserver.support.exception.AuthorizationRuleConflictException;
+import org.haiku.haikudepotserver.api2.model.*;
 import org.haiku.haikudepotserver.config.TestConfig;
 import org.haiku.haikudepotserver.dataobjects.PermissionUserPkg;
 import org.haiku.haikudepotserver.dataobjects.Pkg;
 import org.haiku.haikudepotserver.dataobjects.User;
 import org.haiku.haikudepotserver.security.model.Permission;
+import org.haiku.haikudepotserver.support.exception.AuthorizationRuleConflictException;
 import org.junit.jupiter.api.Test;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.test.context.ContextConfiguration;
 
-import jakarta.annotation.Resource;
 import java.util.List;
 import java.util.Optional;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 @ContextConfiguration(classes = TestConfig.class)
@@ -401,7 +392,7 @@ public class AuthorizationApiServiceIT extends AbstractIntegrationTest {
                             .stream()
                             .map(SearchAuthorizationPkgRulesResultItem::getPkgName)
                             .collect(Collectors.toSet()))
-                .isEqualTo(ImmutableSet.of("pkg1", "pkg2"));
+                .isEqualTo(Set.of("pkg1", "pkg2"));
         }
 
     }
@@ -430,7 +421,7 @@ public class AuthorizationApiServiceIT extends AbstractIntegrationTest {
                             .stream()
                             .map(SearchAuthorizationPkgRulesResultItem::getUserNickname)
                             .collect(Collectors.toSet()))
-                .isEqualTo(ImmutableSet.of("testuser1", "testuser2", "testuser3"));
+                .isEqualTo(Set.of("testuser1", "testuser2", "testuser3"));
         }
 
     }

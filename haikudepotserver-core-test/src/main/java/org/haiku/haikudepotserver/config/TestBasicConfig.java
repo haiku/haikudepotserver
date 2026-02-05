@@ -5,7 +5,6 @@
 
 package org.haiku.haikudepotserver.config;
 
-import com.google.common.collect.ImmutableList;
 import io.micrometer.core.instrument.MeterRegistry;
 import io.micrometer.core.instrument.simple.SimpleMeterRegistry;
 import org.haiku.haikudepotserver.CapturingMailSender;
@@ -25,7 +24,7 @@ public class TestBasicConfig {
 
     @Bean("messageSourceBaseNames")
     public List<String> messageSourceBaseNames() {
-        return ImmutableList.of(
+        return List.of(
                 "classpath:messages",
                 "classpath:webmessages",
                 "classpath:naturallanguagemessages"
