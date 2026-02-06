@@ -5,7 +5,7 @@
         <artifactId>haikudepotserver-parent</artifactId>
         <groupId>org.haiku</groupId>
         <relativePath>../haikudepotserver-parent</relativePath>
-        <version>1.0.186-SNAPSHOT</version>
+        <version>1.0.186</version>
     </parent>
 
     <modelVersion>4.0.0</modelVersion>
@@ -18,6 +18,13 @@
             <groupId>org.haiku</groupId>
             <artifactId>haikudepotserver-core</artifactId>
             <version>${project.version}</version>
+        </dependency>
+
+        <!-- This is included as a dependency so that it ends up in the dependencies downloaded in the
+        Docker assembly. -->
+        <dependency>
+            <groupId>org.mockito</groupId>
+            <artifactId>mockito-core</artifactId>
         </dependency>
 
         <dependency>
