@@ -11,6 +11,7 @@ import org.apache.cayenne.query.ObjectSelect;
 import org.haiku.haikudepotserver.dataobjects.auto._JobDataType;
 import org.haiku.haikudepotserver.support.exception.ObjectNotFoundException;
 
+import java.io.Serial;
 import java.util.Optional;
 
 public class JobDataType extends _JobDataType {
@@ -18,6 +19,7 @@ public class JobDataType extends _JobDataType {
     public final static String CODE_SUPPLIED = "supplied";
     public final static String CODE_GENERATED = "generated";
 
+    @Serial
     private static final long serialVersionUID = 1L;
 
     public static Optional<JobDataType> tryGetByCode(ObjectContext context, String code) {

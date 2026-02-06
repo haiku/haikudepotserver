@@ -1,5 +1,5 @@
 /*
- * Copyright 2017-2023, Andrew Lindesay
+ * Copyright 2017-2026, Andrew Lindesay
  * Distributed under the terms of the MIT License.
  */
 
@@ -20,7 +20,6 @@ public class ArchiveInfo {
     private final String createTimestampIso;
     private final Date dataModifiedTimestamp;
     private final String dataModifiedTimestampIso;
-    private final String agent = AGENT;
     private final String agentVersion;
 
     public ArchiveInfo(
@@ -54,7 +53,7 @@ public class ArchiveInfo {
     }
 
     public String getAgent() {
-        return agent;
+        return AGENT;
     }
 
     public String getAgentVersion() {

@@ -1,5 +1,5 @@
 /*
- * Copyright 2025, Andrew Lindesay
+ * Copyright 2025-2026, Andrew Lindesay
  * Distributed under the terms of the MIT License.
  */
 package org.haiku.haikudepotserver.dataobjects;
@@ -8,8 +8,11 @@ import org.apache.cayenne.validation.BeanValidationFailure;
 import org.apache.cayenne.validation.ValidationResult;
 import org.haiku.haikudepotserver.dataobjects.auto._PkgVersionInteraction;
 
+import java.io.Serial;
+
 public class PkgVersionInteraction extends _PkgVersionInteraction {
 
+    @Serial
     private static final long serialVersionUID = 1L;
 
     @Override

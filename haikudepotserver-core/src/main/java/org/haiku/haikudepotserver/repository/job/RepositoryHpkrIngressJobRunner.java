@@ -1,5 +1,5 @@
 /*
- * Copyright 2018-2025, Andrew Lindesay
+ * Copyright 2018-2026, Andrew Lindesay
  * Distributed under the terms of the MIT License.
  */
 
@@ -123,9 +123,7 @@ public class RepositoryHpkrIngressJobRunner extends AbstractJobRunner<Repository
                         .toList()
         );
 
-        for (int i = 0; i < repositorySourcesAndProgresses.size(); i++) {
-            RepositorySourceAndProgresses repositorySourceAndProgresses = repositorySourcesAndProgresses.get(i);
-
+        for (RepositorySourceAndProgresses repositorySourceAndProgresses : repositorySourcesAndProgresses) {
             serverRuntime.performInTransaction(() -> {
                 try {
                     runForRepositorySource(mainContext, jobService, specification, repositorySourceAndProgresses, compositeProgress);

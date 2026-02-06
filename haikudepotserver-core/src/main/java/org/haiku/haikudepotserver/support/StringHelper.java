@@ -1,6 +1,11 @@
+/*
+ * Copyright 2026, Andrew Lindesay
+ * Distributed under the terms of the MIT License.
+ */
 package org.haiku.haikudepotserver.support;
 
 import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.Strings;
 
 import java.util.Optional;
 
@@ -18,7 +23,7 @@ public class StringHelper {
         }
 
         search = StringUtils.trimToEmpty(search);
-        int firstIndex = StringUtils.indexOfIgnoreCase(text, search);
+        int firstIndex = Strings.CI.indexOf(text, search);
 
         if (-1 == firstIndex) {
             return Optional.empty();

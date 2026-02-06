@@ -17,6 +17,8 @@ import org.haiku.haikudepotserver.support.exception.ObjectNotFoundException;
 
 public abstract class AbstractApiService extends AbstractUserAuthenticationAware {
 
+    protected static final int DEFAULT_LIST_LIMIT = 10;
+
     protected Pkg getPkg(ObjectContext context, String pkgName) {
         Preconditions.checkNotNull(context);
         Preconditions.checkState(!Strings.isNullOrEmpty(pkgName));

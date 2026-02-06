@@ -1,5 +1,5 @@
 /*
- * Copyright 2022-2023, Andrew Lindesay
+ * Copyright 2022-2026, Andrew Lindesay
  * Distributed under the terms of the MIT License.
  */
 package org.haiku.haikudepotserver.support;
@@ -204,6 +204,11 @@ public class TestDatabase {
 
     private static Optional<Integer> tryGetBestInstalledPostgresMajorVersion() {
         String[] leaves = new File(ROOT_POSTGRES).list((dir, name) -> PATTERN_POSTGRES_MAJOR_VERSION.matcher(name).matches());
+
+        if (null == leaves) {
+            return Optional.empty();
+        }
+
         return Stream.of(leaves)
                 .map(Integer::parseInt)
                 .sorted()

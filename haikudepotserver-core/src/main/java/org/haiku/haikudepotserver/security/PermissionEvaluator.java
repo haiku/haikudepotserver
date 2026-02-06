@@ -6,6 +6,7 @@
 package org.haiku.haikudepotserver.security;
 
 import com.google.common.base.Preconditions;
+import jakarta.annotation.Nullable;
 import org.apache.cayenne.DataObject;
 import org.apache.cayenne.ObjectContext;
 import org.apache.cayenne.ObjectId;

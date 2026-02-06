@@ -1,5 +1,5 @@
 /*
- * Copyright 2018-2025, Andrew Lindesay
+ * Copyright 2018-2026, Andrew Lindesay
  * Distributed under the terms of the MIT License.
  */
 
@@ -18,7 +18,6 @@ import org.apache.cayenne.ObjectContext;
 import org.apache.cayenne.ObjectId;
 import org.apache.cayenne.configuration.server.ServerRuntime;
 import org.apache.commons.lang3.StringUtils;
-import org.apache.commons.lang3.tuple.Pair;
 import org.haiku.haikudepotserver.dataobjects.User;
 import org.haiku.haikudepotserver.security.model.UserAuthenticationService;
 import org.haiku.haikudepotserver.user.model.UserService;
@@ -34,7 +33,6 @@ import java.text.ParseException;
 import java.time.Clock;
 import java.time.Instant;
 import java.time.temporal.ChronoUnit;
-import java.util.Base64;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
@@ -377,23 +375,6 @@ public class UserAuthenticationServiceImpl implements UserAuthenticationService 
         }
 
         return signedJWT.serialize();
-    }
-
-    @Override
-    public Optional<Pair<String, String>> tryExtractCredentialsFromBasicAuthorizationHeader(String header) {
-        return Optional.ofNullable(header)
-                .filter(h -> h.startsWith("Basic "))
-                .map(h -> h.substring(6))
-                .map(s -> new String(Base64.getDecoder().decode(s), StandardCharsets.UTF_8))
-                .map(s -> {
-                    int colonIndex = s.indexOf(":");
-
-                    if (-1 == colonIndex) {
-                        return null;
-                    }
-
-                    return Pair.of(s.substring(0, colonIndex), s.substring(colonIndex + 1));
-                });
     }
 
 }

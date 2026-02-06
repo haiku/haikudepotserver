@@ -17,7 +17,7 @@ public interface DataStorageInUseChecker {
     /**
      * Returns the codes that are currently in-use and therefore should not be
      * deleted.
-     * @param codes
+     * @param codes to check to see if they are in use.
      * @return the {@link Set} of codes which are being used.
      */
 

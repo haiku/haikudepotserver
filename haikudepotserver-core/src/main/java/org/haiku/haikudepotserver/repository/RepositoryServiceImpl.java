@@ -1,5 +1,5 @@
 /*
- * Copyright 2018-2025, Andrew Lindesay
+ * Copyright 2018-2026, Andrew Lindesay
  * Distributed under the terms of the MIT License.
  */
 
@@ -120,15 +120,12 @@ public class RepositoryServiceImpl implements RepositoryService {
 
         if (null != search.getExpression()) {
             switch (search.getExpressionType()) {
-
-                case CONTAINS:
+                case CONTAINS -> {
                     String likeExpression = "%" + LikeHelper.ESCAPER.escape(search.getExpression()) + "%";
                     objectSelect = objectSelect.and(Repository.CODE.lower().like(likeExpression, '|'));
-                    break;
-
-                default:
-                    throw new IllegalStateException("unsupported expression type; "+search.getExpressionType());
-
+                }
+                default ->
+                        throw new IllegalStateException("unsupported expression type; " + search.getExpressionType());
             }
         }
 

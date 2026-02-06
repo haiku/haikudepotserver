@@ -1,5 +1,5 @@
 /*
- * Copyright 2018-2023, Andrew Lindesay
+ * Copyright 2018-2026, Andrew Lindesay
  * Distributed under the terms of the MIT License.
  */
 
@@ -16,7 +16,7 @@ import java.util.Set;
 
 /**
  * <p>This one hooks into the Cayenne "transaction" flow in order to pick up
- * all of the groups that need to be flushed at the end of the transaction.
+ * all the groups that need to be flushed at the end of the transaction.
  * </p>
  */
 

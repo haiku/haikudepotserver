@@ -1,5 +1,5 @@
 /*
- * Copyright 2022-2023, Andrew Lindesay
+ * Copyright 2022-2026, Andrew Lindesay
  * Distributed under the terms of the MIT License.
  */
 package org.haiku.haikudepotserver.api2;
@@ -21,7 +21,6 @@ import org.haiku.haikudepotserver.job.model.JobService;
 import org.haiku.haikudepotserver.job.model.JobSnapshot;
 import org.haiku.haikudepotserver.passwordreset.model.PasswordResetService;
 import org.haiku.haikudepotserver.pkg.model.PkgSearchSpecification;
-import org.haiku.haikudepotserver.security.PermissionEvaluator;
 import org.haiku.haikudepotserver.security.model.Permission;
 import org.haiku.haikudepotserver.security.model.UserAuthenticationService;
 import org.haiku.haikudepotserver.support.exception.*;
@@ -31,6 +30,7 @@ import org.haiku.haikudepotserver.userrating.model.UserRatingDerivationJobSpecif
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.security.access.AccessDeniedException;
+import org.springframework.security.access.PermissionEvaluator;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Component;
 
@@ -370,8 +370,8 @@ public class UserApiService extends AbstractApiService {
         specification.setExpressionType(Optional.ofNullable(request.getExpressionType())
                 .map(et -> PkgSearchSpecification.ExpressionType.valueOf(et.name()))
                 .orElse(null));
-        specification.setLimit(request.getLimit());
-        specification.setOffset(request.getOffset());
+        specification.setLimit(Optional.ofNullable(request.getLimit()).orElse(DEFAULT_LIST_LIMIT));
+        specification.setOffset(Optional.ofNullable(request.getOffset()).orElse(0));
         specification.setIncludeInactive(BooleanUtils.isTrue(request.getIncludeInactive()));
 
         long total = userService.total(context,specification);

@@ -14,11 +14,13 @@ import org.haiku.haikudepotserver.dataobjects.auto._Job;
 import org.haiku.haikudepotserver.dataobjects.support.MutableCreateAndModifyTimestamped;
 import org.haiku.haikudepotserver.support.exception.ObjectNotFoundException;
 
+import java.io.Serial;
 import java.util.Optional;
 import java.util.regex.Pattern;
 
 public class Job extends _Job implements MutableCreateAndModifyTimestamped {
 
+    @Serial
     private static final long serialVersionUID = 1L;
 
     private final static Pattern PATTERN_CODE = Pattern.compile("^[a-z0-9-]{36}");

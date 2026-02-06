@@ -1,5 +1,5 @@
 /*
- * Copyright 2013-2021, Andrew Lindesay
+ * Copyright 2013-2027, Andrew Lindesay
  * Distributed under the terms of the MIT License.
  */
 
@@ -56,8 +56,8 @@ public class HeapCoordinates {
 
     @Override
     public int hashCode() {
-        int result = (int) (offset ^ (offset >>> 32));
-        result = 31 * result + (int) (length ^ (length >>> 32));
+        int result = Long.hashCode(offset);
+        result = 31 * result + Long.hashCode(length);
         return result;
     }
 

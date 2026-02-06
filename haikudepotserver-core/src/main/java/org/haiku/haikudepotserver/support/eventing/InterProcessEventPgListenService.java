@@ -1,5 +1,5 @@
 /*
- * Copyright 2025, Andrew Lindesay
+ * Copyright 2025-2026, Andrew Lindesay
  * Distributed under the terms of the MIT License.
  */
 package org.haiku.haikudepotserver.support.eventing;
@@ -11,6 +11,7 @@ import com.google.common.util.concurrent.AbstractExecutionThreadService;
 import jakarta.annotation.PostConstruct;
 import jakarta.annotation.PreDestroy;
 import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.Strings;
 import org.haiku.haikudepotserver.support.eventing.model.InterProcessEvent;
 import org.postgresql.PGConnection;
 import org.slf4j.Logger;
@@ -73,11 +74,6 @@ public class InterProcessEventPgListenService extends AbstractExecutionThreadSer
     public void tearDown() {
         stopAsync();
         awaitTerminated();
-    }
-
-    @Override
-    protected String serviceName() {
-        return this.getClass().getSimpleName();
     }
 
     private RetryTemplate createRetryTemplate() {
@@ -161,7 +157,7 @@ public class InterProcessEventPgListenService extends AbstractExecutionThreadSer
             return;
         }
 
-        if (!StringUtils.equals(config.getSourceIdentifier(), event.getSourceIdentifier())) {
+        if (!Strings.CS.equals(config.getSourceIdentifier(), event.getSourceIdentifier())) {
             handler.accept(event);
         }
     }

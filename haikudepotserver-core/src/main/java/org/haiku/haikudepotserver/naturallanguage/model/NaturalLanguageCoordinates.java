@@ -1,5 +1,5 @@
 /*
- * Copyright 2024, Andrew Lindesay
+ * Copyright 2024-2026, Andrew Lindesay
  * Distributed under the terms of the MIT License.
  */
 package org.haiku.haikudepotserver.naturallanguage.model;
@@ -7,6 +7,7 @@ package org.haiku.haikudepotserver.naturallanguage.model;
 import com.google.common.base.Preconditions;
 import com.google.common.base.Splitter;
 import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.Strings;
 import org.haiku.haikudepotserver.reference.model.MalformedNaturalLanguageCodeException;
 
 import java.util.*;
@@ -49,9 +50,9 @@ public record NaturalLanguageCoordinates(String languageCode, String scriptCode,
     private final static Pattern PATTERN_COMPONENT_SEPARATOR = Pattern.compile("[_-]");
 
     private final static Comparator<NaturalLanguageCoordinates> COMPARATOR = Comparator
-            .comparing(NaturalLanguageCoordinates::languageCode, StringUtils::compare)
-            .thenComparing(NaturalLanguageCoordinates::countryCode, StringUtils::compare)
-            .thenComparing(NaturalLanguageCoordinates::scriptCode, StringUtils::compare);
+            .comparing(NaturalLanguageCoordinates::languageCode, Strings.CS::compare)
+            .thenComparing(NaturalLanguageCoordinates::countryCode, Strings.CS::compare)
+            .thenComparing(NaturalLanguageCoordinates::scriptCode, Strings.CS::compare);
 
     public static NaturalLanguageCoordinates english() {
         return new NaturalLanguageCoordinates(LANGUAGE_CODE_ENGLISH, null, null);

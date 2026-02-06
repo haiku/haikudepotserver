@@ -60,7 +60,7 @@ public class TestLockableJobRunner extends AbstractJobRunner<TestLockableJobSpec
         try {
             return locks.computeIfAbsent(
                     lockId,
-                    (key) -> new ReentrantLock()
+                    (_) -> new ReentrantLock()
             );
         } finally {
             locksLock.unlock();

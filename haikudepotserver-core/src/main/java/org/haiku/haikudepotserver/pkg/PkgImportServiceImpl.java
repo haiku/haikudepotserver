@@ -1,12 +1,11 @@
 /*
- * Copyright 2018-2025, Andrew Lindesay
+ * Copyright 2018-2026, Andrew Lindesay
  * Distributed under the terms of the MIT License.
  */
 
 package org.haiku.haikudepotserver.pkg;
 
 import com.google.common.base.Preconditions;
-import com.google.common.base.Strings;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Iterables;
 import com.google.common.io.ByteSource;
@@ -15,6 +14,7 @@ import org.apache.cayenne.ObjectId;
 import org.apache.commons.lang3.BooleanUtils;
 import org.apache.commons.lang3.RandomStringUtils;
 import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.Strings;
 import org.haiku.haikudepotserver.dataobjects.*;
 import org.haiku.haikudepotserver.pkg.model.*;
 import org.haiku.haikudepotserver.support.*;
@@ -36,7 +36,6 @@ import java.time.Clock;
 import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
-import java.util.stream.Stream;
 
 @Service
 public class PkgImportServiceImpl implements PkgImportService {
@@ -148,7 +147,7 @@ public class PkgImportServiceImpl implements PkgImportService {
         importLicenses(objectContext, pkg, persistedPkgVersion);
         importUrls(objectContext, pkg, persistedPkgVersion);
 
-        if (!Strings.isNullOrEmpty(pkg.getSummary()) || !Strings.isNullOrEmpty(pkg.getDescription())) {
+        if (!StringUtils.isEmpty(pkg.getSummary()) || !StringUtils.isEmpty(pkg.getDescription())) {
             pkgLocalizationService.updatePkgVersionLocalization(
                     objectContext,
                     persistedPkgVersion,
@@ -237,10 +236,10 @@ public class PkgImportServiceImpl implements PkgImportService {
                 persistedPkgVersionUrl.setPkgUrlType(pkgUrlType);
                 persistedPkgVersionUrl.setPkgVersion(persistedPkgVersion);
             } else {
-                if (!StringUtils.equals(homePkgVersionUrl.getUrl(), url)) {
+                if (!Strings.CS.equals(homePkgVersionUrl.getUrl(), url)) {
                     homePkgVersionUrl.setUrl(url);
                 }
-                if (!StringUtils.equals(homePkgVersionUrl.getName(), name)) {
+                if (!Strings.CS.equals(homePkgVersionUrl.getName(), name)) {
                     homePkgVersionUrl.setName(name);
                 }
             }

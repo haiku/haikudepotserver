@@ -1,5 +1,5 @@
 /*
- * Copyright 2023-2025, Andrew Lindesay
+ * Copyright 2023-2026, Andrew Lindesay
  * Distributed under the terms of the MIT License.
  */
 
@@ -10,6 +10,7 @@ import com.google.common.net.MediaType;
 import io.micrometer.core.instrument.MeterRegistry;
 import io.micrometer.core.instrument.Timer;
 import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.Strings;
 import org.haiku.haikudepotserver.job.AbstractJobRunner;
 import org.haiku.haikudepotserver.job.model.*;
 import org.haiku.haikudepotserver.metrics.MetricsConstants;
@@ -126,7 +127,7 @@ public class MetricsGeneralReportJobRunner extends AbstractJobRunner<MetricsGene
                         .filter(pathPredicate)
                         .isPresent())
                 .filter(t -> null == method || Optional.ofNullable(t.getId().getTag("method"))
-                        .filter(m -> StringUtils.equalsIgnoreCase(m, method))
+                        .filter(m -> Strings.CI.equals(m, method))
                         .isPresent())
                 .mapToLong(Timer::count)
                 .sum();

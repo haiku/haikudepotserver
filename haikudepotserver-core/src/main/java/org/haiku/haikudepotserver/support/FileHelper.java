@@ -1,5 +1,5 @@
 /*
- * Copyright 2015-2025, Andrew Lindesay
+ * Copyright 2015-2026, Andrew Lindesay
  * Distributed under the terms of the MIT License.
  */
 
@@ -35,11 +35,11 @@ public class FileHelper {
     }
 
     private static void streamHttpUriDataToFile(URI uri, File file, long timeoutMillis) throws IOException {
-        try {
-            HttpResponse<InputStream> response = HttpClient.newBuilder()
-                    .connectTimeout(Duration.ofMillis(timeoutMillis))
-                    .followRedirects(HttpClient.Redirect.NORMAL)
-                    .build()
+        try (HttpClient httpClient = HttpClient.newBuilder()
+                .connectTimeout(Duration.ofMillis(timeoutMillis))
+                .followRedirects(HttpClient.Redirect.NORMAL)
+                .build()) {
+            HttpResponse<InputStream> response = httpClient
                     .send(HttpRequest.newBuilder(uri)
                             .timeout(Duration.ofMillis(timeoutMillis))
                             .GET()
@@ -65,8 +65,11 @@ public class FileHelper {
     public static void delete(File f) throws IOException {
         Preconditions.checkArgument(null != f, "the file must be provided");
         if (f.isDirectory()) {
-            for (File c : f.listFiles())
-                delete(c);
+            File[] files = f.listFiles();
+            if (null != files) {
+                for (File c : files)
+                    delete(c);
+            }
         }
         if (!f.delete())
             throw new FileNotFoundException("Failed to delete file: " + f);

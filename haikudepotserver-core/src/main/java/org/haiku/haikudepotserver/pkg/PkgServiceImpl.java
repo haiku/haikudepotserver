@@ -1,12 +1,11 @@
 /*
- * Copyright 2018-2025, Andrew Lindesay
+ * Copyright 2018-2026, Andrew Lindesay
  * Distributed under the terms of the MIT License.
  */
 
 package org.haiku.haikudepotserver.pkg;
 
 import com.google.common.base.Preconditions;
-import com.google.common.base.Strings;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
@@ -500,7 +499,7 @@ public class PkgServiceImpl implements PkgService {
     @Override
     public Optional<String> tryGetMainPkgNameForSubordinatePkg(
             final String subordinatePkgName) {
-        Preconditions.checkArgument(!Strings.isNullOrEmpty(subordinatePkgName), "the pkg must be provided");
+        Preconditions.checkArgument(!StringUtils.isEmpty(subordinatePkgName), "the pkg must be provided");
 
         return SUFFIXES_SUBORDINATE_PKG_NAMES
                 .stream()

@@ -1,5 +1,5 @@
 /*
- * Copyright 2018-2025, Andrew Lindesay
+ * Copyright 2018-2026, Andrew Lindesay
  * Distributed under the terms of the MIT License.
  */
 
@@ -148,7 +148,7 @@ public class RenderedPkgIconRepositoryImpl implements RenderedPkgIconRepository 
                     }
 
                     if(!pkgIconList.isEmpty()) {
-                        return Optional.of(pkgIconList.get(pkgIconList.size() - 1).getPkgIconImage().getData());
+                        return Optional.of(pkgIconList.getLast().getPkgIconImage().getData());
                     }
 
                 }

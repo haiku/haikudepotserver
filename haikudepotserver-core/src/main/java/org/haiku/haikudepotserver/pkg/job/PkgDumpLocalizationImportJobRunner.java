@@ -1,5 +1,5 @@
 /*
- * Copyright 2024-2025, Andrew Lindesay
+ * Copyright 2024-2026, Andrew Lindesay
  * Distributed under the terms of the MIT License.
  */
 package org.haiku.haikudepotserver.pkg.job;
@@ -13,6 +13,7 @@ import com.google.common.net.MediaType;
 import org.apache.cayenne.ObjectContext;
 import org.apache.cayenne.configuration.server.ServerRuntime;
 import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.Strings;
 import org.haiku.haikudepotserver.dataobjects.Pkg;
 import org.haiku.haikudepotserver.dataobjects.PkgLocalization;
 import org.haiku.haikudepotserver.job.AbstractAuthenticatedJobRunner;
@@ -25,13 +26,13 @@ import org.haiku.haikudepotserver.pkg.model.dumpexport.DumpExportPkgLocalization
 import org.haiku.haikudepotserver.reference.model.dumpexport.DumpExportPkgLocalizationError;
 import org.haiku.haikudepotserver.reference.model.dumpexport.DumpExportPkgLocalizationNaturalLanguage;
 import org.haiku.haikudepotserver.reference.model.dumpexport.DumpExportPkgLocalizationStatus;
-import org.haiku.haikudepotserver.security.PermissionEvaluator;
 import org.haiku.haikudepotserver.security.model.Permission;
 import org.haiku.haikudepotserver.support.ArchiveInfo;
 import org.haiku.haikudepotserver.support.DateTimeHelper;
 import org.haiku.haikudepotserver.support.RuntimeInformationService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.security.access.PermissionEvaluator;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Component;
 
@@ -360,8 +361,7 @@ public class PkgDumpLocalizationImportJobRunner extends AbstractAuthenticatedJob
             result = switch (PkgLocalizationContentType
                     .tryFromCode(importLocalization.getCode())
                     .orElseThrow(() -> new FailedImportException("unexpected code [" + importLocalization.getCode() + "]"))) {
-                case PkgLocalizationContentType.TITLE ->
-                        StringUtils.equals(StringUtils.trimToNull(importLocalization.getContent()), result.title().content())
+                case PkgLocalizationContentType.TITLE -> Strings.CS.equals(StringUtils.trimToNull(importLocalization.getContent()), result.title().content())
                                 ? result :
                                 new CombinedLocalizationUpdates(
                                         new LocalizationUpdate(
@@ -371,7 +371,7 @@ public class PkgDumpLocalizationImportJobRunner extends AbstractAuthenticatedJob
                                         result.description()
                                 );
                 case PkgLocalizationContentType.SUMMARY ->
-                        StringUtils.equals(StringUtils.trimToNull(importLocalization.getContent()), result.summary().content())
+                        Strings.CS.equals(StringUtils.trimToNull(importLocalization.getContent()), result.summary().content())
                                 ? result :
                                 new CombinedLocalizationUpdates(
                                         result.title(),
@@ -381,7 +381,7 @@ public class PkgDumpLocalizationImportJobRunner extends AbstractAuthenticatedJob
                                         result.description()
                                 );
                 case PkgLocalizationContentType.DESCRIPTION ->
-                        StringUtils.equals(StringUtils.trimToNull(importLocalization.getContent()), result.description().content())
+                        Strings.CS.equals(StringUtils.trimToNull(importLocalization.getContent()), result.description().content())
                                 ? result :
                                 new CombinedLocalizationUpdates(
                                         result.title(),
@@ -435,9 +435,9 @@ public class PkgDumpLocalizationImportJobRunner extends AbstractAuthenticatedJob
                 CombinedLocalizationUpdates base,
                 String userDescription) {
             return new CombinedLocalizationUpdates(
-                    StringUtils.equals(userDescription, title().userDescription()) ? title() : base.title(),
-                    StringUtils.equals(userDescription, summary().userDescription()) ? summary() : base.summary(),
-                    StringUtils.equals(userDescription, description().userDescription()) ? description() : base.description());
+                    Strings.CS.equals(userDescription, title().userDescription()) ? title() : base.title(),
+                    Strings.CS.equals(userDescription, summary().userDescription()) ? summary() : base.summary(),
+                    Strings.CS.equals(userDescription, description().userDescription()) ? description() : base.description());
         }
 
     }

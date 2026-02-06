@@ -1,5 +1,5 @@
 /*
- * Copyright 2022, Andrew Lindesay
+ * Copyright 2022-2026, Andrew Lindesay
  * Distributed under the terms of the MIT License.
  */
 package org.haiku.haikudepotserver.api2;
@@ -398,8 +398,8 @@ public class RepositoryApiService extends AbstractApiService {
                 Optional.ofNullable(request.getExpressionType())
                         .map(et -> PkgSearchSpecification.ExpressionType.valueOf(request.getExpressionType().name()))
                         .orElse(null));
-        specification.setLimit(request.getLimit());
-        specification.setOffset(request.getOffset());
+        specification.setLimit(Optional.ofNullable(request.getLimit()).orElse(DEFAULT_LIST_LIMIT));
+        specification.setOffset(Optional.ofNullable(request.getOffset()).orElse(0));
         specification.setIncludeInactive(BooleanUtils.isTrue(request.getIncludeInactive()));
 
         long total = repositoryService.total(context, specification);
@@ -462,7 +462,7 @@ public class RepositoryApiService extends AbstractApiService {
             throw new AccessDeniedException("unable to edit the repository [" + repository + "]");
         }
 
-        for (UpdateRepositoryFilter filter : request.getFilter()) {
+        for (UpdateRepositoryFilter filter : CollectionUtils.emptyIfNull(request.getFilter())) {
             switch (filter) {
 
                 case ACTIVE:

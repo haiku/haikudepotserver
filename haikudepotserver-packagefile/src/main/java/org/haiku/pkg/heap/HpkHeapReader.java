@@ -254,10 +254,9 @@ public class HpkHeapReader implements Closeable, HeapReader {
         byte[] deflatedBuffer = new byte[chunkCompressedLength];
         readFully(deflatedBuffer);
 
-        Inflater inflater = new Inflater();
-        inflater.setInput(deflatedBuffer);
+        try (Inflater inflater = new Inflater()) {
+            inflater.setInput(deflatedBuffer);
 
-        try {
             int read;
 
             if (chunkUncompressedLength != (read = inflater.inflate(buffer))) {

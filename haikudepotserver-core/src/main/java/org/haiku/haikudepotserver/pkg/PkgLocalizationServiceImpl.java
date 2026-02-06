@@ -1,14 +1,14 @@
 /*
- * Copyright 2018-2024, Andrew Lindesay
+ * Copyright 2018-2026, Andrew Lindesay
  * Distributed under the terms of the MIT License.
  */
 
 package org.haiku.haikudepotserver.pkg;
 
 import com.google.common.base.Preconditions;
-import com.google.common.base.Strings;
 import org.apache.cayenne.ObjectContext;
 import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.Strings;
 import org.haiku.haikudepotserver.dataobjects.*;
 import org.haiku.haikudepotserver.naturallanguage.model.NaturalLanguageCoded;
 import org.haiku.haikudepotserver.pkg.model.PkgLocalizationService;
@@ -35,40 +35,40 @@ public class PkgLocalizationServiceImpl implements PkgLocalizationService {
     }
 
     private void fill(ResolvedPkgVersionLocalization result, Pattern pattern, PkgVersionLocalization pvl) {
-        if(Strings.isNullOrEmpty(result.getTitle())
-                && !Strings.isNullOrEmpty(pvl.getTitle().orElse(null))
+        if(StringUtils.isEmpty(result.getTitle())
+                && !StringUtils.isEmpty(pvl.getTitle().orElse(null))
                 && (null == pattern || pattern.matcher(pvl.getTitle().get()).matches())) {
             result.setTitle(pvl.getTitle().get());
         }
 
-        if(Strings.isNullOrEmpty(result.getSummary())
-                && !Strings.isNullOrEmpty(pvl.getSummary().orElse(null))
+        if(StringUtils.isEmpty(result.getSummary())
+                && !StringUtils.isEmpty(pvl.getSummary().orElse(null))
                 && (null == pattern || pattern.matcher(pvl.getSummary().get()).matches()) ) {
             result.setSummary(pvl.getSummary().orElse(null));
         }
 
-        if(Strings.isNullOrEmpty(result.getDescription())
-                && !Strings.isNullOrEmpty(pvl.getDescription().orElse(null))
+        if(StringUtils.isEmpty(result.getDescription())
+                && !StringUtils.isEmpty(pvl.getDescription().orElse(null))
                 && (null == pattern || pattern.matcher(pvl.getDescription().get()).matches()) ) {
             result.setDescription(pvl.getDescription().orElse(null));
         }
     }
 
     private void fill(ResolvedPkgVersionLocalization result, Pattern pattern, PkgLocalization pl) {
-        if(Strings.isNullOrEmpty(result.getTitle())
-                && !Strings.isNullOrEmpty(pl.getTitle())
+        if(StringUtils.isEmpty(result.getTitle())
+                && !StringUtils.isEmpty(pl.getTitle())
                 && (null == pattern || pattern.matcher(pl.getTitle()).matches())) {
             result.setTitle(pl.getTitle());
         }
 
-        if(Strings.isNullOrEmpty(result.getSummary())
-                && !Strings.isNullOrEmpty(pl.getSummary())
+        if(StringUtils.isEmpty(result.getSummary())
+                && !StringUtils.isEmpty(pl.getSummary())
                 && (null == pattern || pattern.matcher(pl.getSummary()).matches())) {
             result.setSummary(pl.getSummary());
         }
 
-        if(Strings.isNullOrEmpty(result.getDescription())
-                && !Strings.isNullOrEmpty(pl.getDescription())
+        if(StringUtils.isEmpty(result.getDescription())
+                && !StringUtils.isEmpty(pl.getDescription())
                 && (null == pattern || pattern.matcher(pl.getDescription()).matches())) {
             result.setDescription(pl.getDescription());
         }
@@ -163,7 +163,7 @@ public class PkgLocalizationServiceImpl implements PkgLocalizationService {
         // was using the static method, but won't work with temporary objects.
         Optional<PkgLocalization> pkgLocalizationOptional = pkgSupplement.getPkgLocalization(naturalLanguage);
 
-        if(Strings.isNullOrEmpty(title) && Strings.isNullOrEmpty(summary) && Strings.isNullOrEmpty(description)) {
+        if(StringUtils.isEmpty(title) && StringUtils.isEmpty(summary) && StringUtils.isEmpty(description)) {
             pkgLocalizationOptional.ifPresent((context::deleteObject));
             return null;
         }
@@ -175,9 +175,9 @@ public class PkgLocalizationServiceImpl implements PkgLocalizationService {
             return created;
         });
 
-        boolean titleChanged = !StringUtils.equals(title, pkgLocalization.getTitle());
-        boolean summaryChanged = !StringUtils.equals(summary, pkgLocalization.getSummary());
-        boolean descriptionChanged = !StringUtils.equals(description, pkgLocalization.getDescription());
+        boolean titleChanged = !Strings.CS.equals(title, pkgLocalization.getTitle());
+        boolean summaryChanged = !Strings.CS.equals(summary, pkgLocalization.getSummary());
+        boolean descriptionChanged = !Strings.CS.equals(description, pkgLocalization.getDescription());
 
         if (titleChanged || summaryChanged || descriptionChanged) {
             String result = String.format("changing localization for pkg [%s] in natural language [%s];",
@@ -214,7 +214,7 @@ public class PkgLocalizationServiceImpl implements PkgLocalizationService {
         description = StringUtils.trimToNull(description);
 
         Set<String> localizedStrings = Arrays.stream(new String[] { title, summary, description })
-                .filter((s) -> !Strings.isNullOrEmpty(s))
+                .filter((s) -> !StringUtils.isEmpty(s))
                 .collect(Collectors.toSet());
 
         Optional<PkgVersionLocalization> pkgVersionLocalizationOptional =
@@ -265,7 +265,7 @@ public class PkgLocalizationServiceImpl implements PkgLocalizationService {
             String elementName,
             String existingContent,
             String newContent) {
-        if (!StringUtils.equals(existingContent, newContent)) {
+        if (!Strings.CS.equals(existingContent, newContent)) {
             if (StringUtils.isEmpty(newContent)) {
                 return String.format("\n%s: deleted", elementName);
             }

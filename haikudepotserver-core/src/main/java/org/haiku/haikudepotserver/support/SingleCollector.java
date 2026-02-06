@@ -1,5 +1,5 @@
 /*
- * Copyright 2018, Andrew Lindesay
+ * Copyright 2018-2026, Andrew Lindesay
  * Distributed under the terms of the MIT License.
  */
 
@@ -19,7 +19,6 @@ import java.util.stream.Collector;
 public class SingleCollector {
 
     public static <T> Collector<T, ResultHolder<T>, T> single() {
-        //noinspection Convert2MethodRef
         return Collector.of(
                 ResultHolder::new,
                 (h, i) -> {
@@ -90,7 +89,7 @@ public class SingleCollector {
             return null!=value;
         }
 
-        public Optional toOptional() {
+        public Optional<T> toOptional() {
             return Optional.ofNullable(getValue());
         }
 

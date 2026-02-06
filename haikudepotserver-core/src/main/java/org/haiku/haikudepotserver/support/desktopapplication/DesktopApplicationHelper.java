@@ -1,5 +1,5 @@
 /*
- * Copyright 2024, Andrew Lindesay
+ * Copyright 2024-2026, Andrew Lindesay
  * Distributed under the terms of the MIT License.
  */
 package org.haiku.haikudepotserver.support.desktopapplication;
@@ -7,6 +7,7 @@ package org.haiku.haikudepotserver.support.desktopapplication;
 import com.google.common.base.Preconditions;
 import com.google.common.base.Splitter;
 import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.Strings;
 
 import java.util.Arrays;
 import java.util.Optional;
@@ -29,7 +30,7 @@ public class DesktopApplicationHelper {
     public static Optional<int[]> tryDeriveVersionFromUserAgent(String userAgent) {
         return Optional.ofNullable(StringUtils.trimToNull(userAgent))
                 .filter(ua -> ua.startsWith(USER_AGENT_PREFIX_HAIKU_DEPOT))
-                .map(ua -> StringUtils.removeStart(ua, USER_AGENT_PREFIX_HAIKU_DEPOT))
+                .map(ua -> Strings.CS.removeStart(ua, USER_AGENT_PREFIX_HAIKU_DEPOT))
                 .flatMap(DesktopApplicationHelper::tryDeriveVersion);
     }
 

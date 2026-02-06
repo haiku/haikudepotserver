@@ -15,6 +15,7 @@ import org.haiku.haikudepotserver.support.AbstractSearchSpecification;
 
 import java.util.Collection;
 import java.util.List;
+import java.util.Optional;
 import java.util.Set;
 
 /**
@@ -156,8 +157,8 @@ public class PkgSearchSpecification extends AbstractSearchSpecification {
         return !getIncludeInactive();
     }
 
-    public boolean getNotIncludeDevelopment() {
-        return !getIncludeDevelopment();
+    public Boolean getNotIncludeDevelopment() {
+        return Optional.ofNullable(getIncludeDevelopment()).map(b -> !b).orElse(null);
     }
 
     public boolean hasRepositoriesOrIsSortOrderingProminenceOrHasArchitecture() {

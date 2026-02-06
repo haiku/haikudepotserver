@@ -1,11 +1,11 @@
 /*
- * Copyright 2014-2022, Andrew Lindesay
+ * Copyright 2014-2026, Andrew Lindesay
  * Distributed under the terms of the MIT License.
  */
 
 package org.haiku.haikudepotserver.userrating.model;
 
-import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.Strings;
 import org.haiku.haikudepotserver.job.model.AbstractJobSpecification;
 import org.haiku.haikudepotserver.job.model.JobSpecification;
 
@@ -56,8 +56,8 @@ public class UserRatingDerivationJobSpecification extends AbstractJobSpecificati
         if(super.isEquivalent(other)) {
             UserRatingDerivationJobSpecification other2 = (UserRatingDerivationJobSpecification) other;
             return
-                    StringUtils.equals(other2.getUserNickname(), getUserNickname())
-                    && StringUtils.equals(other2.getPkgName(), getPkgName());
+                    Strings.CS.equals(other2.getUserNickname(), getUserNickname())
+                    && Strings.CS.equals(other2.getPkgName(), getPkgName());
         }
 
         return false;

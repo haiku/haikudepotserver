@@ -1,5 +1,5 @@
 /*
- * Copyright 2014-2016, Andrew Lindesay
+ * Copyright 2014-2026, Andrew Lindesay
  * Distributed under the terms of the MIT License.
  */
 
@@ -20,8 +20,8 @@ public class PkgIconConfiguration implements Comparable<PkgIconConfiguration> {
     private final Integer size;
 
     public PkgIconConfiguration(MediaType mediaType, Integer size) {
-        Preconditions.checkState(null!=mediaType, "the media type is required");
-        Preconditions.checkState(null==size || size > 0, "illegal size value for icon configuration");
+        Preconditions.checkState(null != mediaType, "the media type is required");
+        Preconditions.checkState(null == size || size > 0, "illegal size value for icon configuration");
         this.mediaType = mediaType;
         this.size = size;
     }

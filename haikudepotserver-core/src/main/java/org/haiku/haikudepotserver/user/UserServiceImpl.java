@@ -1,5 +1,5 @@
 /*
- * Copyright 2018-2023, Andrew Lindesay
+ * Copyright 2018-2026, Andrew Lindesay
  * Distributed under the terms of the MIT License.
  */
 
@@ -32,17 +32,12 @@ public class UserServiceImpl implements UserService {
         ObjectSelect<User> objectSelect = ObjectSelect.query(User.class);
 
         if (!Strings.isNullOrEmpty(search.getExpression())) {
-            switch (search.getExpressionType()) {
-
-                case CONTAINS:
-                    objectSelect = objectSelect.where(User.NICKNAME.likeIgnoreCase(
-                            "%" + LikeHelper.ESCAPER.escape(search.getExpression()) + "%"));
-                    break;
-
-                default:
-                    throw new IllegalStateException("unknown expression type " + search.getExpressionType().name());
-
-            }
+            objectSelect = switch (search.getExpressionType()) {
+                case CONTAINS -> objectSelect.where(User.NICKNAME.likeIgnoreCase(
+                        "%" + LikeHelper.ESCAPER.escape(search.getExpression()) + "%"));
+                default ->
+                        throw new IllegalStateException("unknown expression type " + search.getExpressionType().name());
+            };
         }
 
         if (!search.getIncludeInactive()) {

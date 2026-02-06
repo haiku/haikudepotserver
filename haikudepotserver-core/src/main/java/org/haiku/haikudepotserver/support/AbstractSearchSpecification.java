@@ -1,5 +1,5 @@
 /*
- * Copyright 2018, Andrew Lindesay
+ * Copyright 2018-2026, Andrew Lindesay
  * Distributed under the terms of the MIT License.
  */
 
@@ -90,13 +90,9 @@ public abstract class AbstractSearchSpecification {
             return null;
         }
 
-        switch(getExpressionType()) {
-            case CONTAINS:
-                return Pattern.compile(".*" + Pattern.quote(getExpression()) + ".*");
-
-            default:
-                throw new IllegalStateException("unknown expression type; " + getExpressionType().name());
-        }
+        return switch (getExpressionType()) {
+            case CONTAINS -> Pattern.compile(".*" + Pattern.quote(getExpression()) + ".*");
+        };
     }
 
     /**

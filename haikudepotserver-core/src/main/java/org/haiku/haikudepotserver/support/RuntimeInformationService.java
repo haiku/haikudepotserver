@@ -1,11 +1,10 @@
 /*
- * Copyright 2018-2025, Andrew Lindesay
+ * Copyright 2018-2026, Andrew Lindesay
  * Distributed under the terms of the MIT License.
  */
 
 package org.haiku.haikudepotserver.support;
 
-import com.google.common.base.Strings;
 import org.apache.commons.lang3.StringUtils;
 
 import java.io.IOException;
@@ -46,7 +45,7 @@ public class RuntimeInformationService {
     }
 
     private String versionOrPlaceholder(String v) {
-        return Strings.isNullOrEmpty(v) ? "???" : v;
+        return StringUtils.isEmpty(v) ? "???" : v;
     }
 
     public String getProjectVersion() {
@@ -56,7 +55,7 @@ public class RuntimeInformationService {
     public Instant getBuildTimestamp() {
         return Optional.of(getBuildProperties().getProperty("build.timestamp"))
                 .filter(StringUtils::isNotBlank)
-                .filter(s -> !StringUtils.startsWith(s, "${"))
+                .filter(s -> !org.apache.commons.lang3.Strings.CS.startsWith(s, "${"))
                 // ^^ if the variable is not substituted in the build process
                 .map(DateTimeFormatter.ISO_DATE_TIME::parse)
                 .map(Instant::from)

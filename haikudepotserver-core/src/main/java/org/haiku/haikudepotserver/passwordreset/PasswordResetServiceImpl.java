@@ -1,5 +1,5 @@
 /*
- * Copyright 2018-2024, Andrew Lindesay
+ * Copyright 2018-2026, Andrew Lindesay
  * Distributed under the terms of the MIT License.
  */
 
@@ -7,6 +7,7 @@ package org.haiku.haikudepotserver.passwordreset;
 
 import com.google.common.base.Preconditions;
 import com.google.common.base.Strings;
+import io.micrometer.common.util.StringUtils;
 import org.apache.cayenne.ObjectContext;
 import org.apache.cayenne.configuration.server.ServerRuntime;
 import org.apache.cayenne.query.ObjectSelect;
@@ -132,7 +133,7 @@ public class PasswordResetServiceImpl implements PasswordResetService {
         Instant now = Instant.now();
 
         try {
-            if (!Strings.isNullOrEmpty(tokenCode)) {
+            if (!StringUtils.isEmpty(tokenCode)) {
 
                 ObjectContext context = serverRuntime.newContext();
                 Optional<UserPasswordResetToken> tokenOptional = UserPasswordResetToken.getByCode(context, tokenCode);
@@ -148,7 +149,7 @@ public class PasswordResetServiceImpl implements PasswordResetService {
 
                             if (user.getActive()) {
 
-                                if (!Strings.isNullOrEmpty(passwordClear) && userAuthenticationService.validatePassword(passwordClear)) {
+                                if (!StringUtils.isEmpty(passwordClear) && userAuthenticationService.validatePassword(passwordClear)) {
                                     userAuthenticationService.setPassword(user, passwordClear);
                                     context.deleteObjects(token);
                                     context.commitChanges();

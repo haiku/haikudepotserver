@@ -30,7 +30,7 @@ public class AttributeDumpTool implements Runnable {
     @Option(name = "-f", required = true, usage = "the HPKR/HPKG file is required")
     private File hpkFile;
 
-    public static void main(String[] args) {
+    static void main(String[] args) {
         AttributeDumpTool main = new AttributeDumpTool();
         CmdLineParser parser = new CmdLineParser(main);
 

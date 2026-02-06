@@ -11,10 +11,12 @@ import org.apache.cayenne.query.ObjectSelect;
 import org.haiku.haikudepotserver.dataobjects.auto._JobType;
 import org.haiku.haikudepotserver.support.exception.ObjectNotFoundException;
 
+import java.io.Serial;
 import java.util.Optional;
 
 public class JobType extends _JobType {
 
+    @Serial
     private static final long serialVersionUID = 1L;
 
     public static Optional<JobType> tryGetByCode(ObjectContext context, String code) {

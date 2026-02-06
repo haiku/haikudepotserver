@@ -51,11 +51,4 @@ public interface UserAuthenticationService {
 
     String generateToken(User user);
 
-    /**
-     * <p>This will extract the username, password couple that are transported in the Authorization header
-     * when Basic authentication is used on an HTTP request.</p>
-     */
-
-    Optional<Pair<String, String>> tryExtractCredentialsFromBasicAuthorizationHeader(String header);
-
 }

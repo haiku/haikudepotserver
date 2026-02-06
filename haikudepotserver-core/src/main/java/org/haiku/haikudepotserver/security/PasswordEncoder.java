@@ -1,5 +1,5 @@
 /*
- * Copyright 2020, Andrew Lindesay
+ * Copyright 2020-2026, Andrew Lindesay
  * Distributed under the terms of the MIT License.
  */
 package org.haiku.haikudepotserver.security;
@@ -8,6 +8,7 @@ import com.google.common.base.Preconditions;
 import com.google.common.base.Splitter;
 import com.google.common.io.BaseEncoding;
 import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.Strings;
 import org.springframework.security.crypto.codec.Utf8;
 import org.springframework.security.crypto.keygen.BytesKeyGenerator;
 
@@ -34,8 +35,8 @@ public class PasswordEncoder implements org.springframework.security.crypto.pass
         if (2 != saltAndHash.size()) {
             throw new IllegalStateException("bad encoded password");
         }
-        byte[] saltBytes = BaseEncoding.base16().decode(saltAndHash.get(0).toUpperCase());
-        return StringUtils.equals(encodedPassword, encode(saltBytes, rawPassword));
+        byte[] saltBytes = BaseEncoding.base16().decode(saltAndHash.getFirst().toUpperCase());
+        return Strings.CS.equals(encodedPassword, encode(saltBytes, rawPassword));
     }
 
     private String encode(byte[] saltBytes, CharSequence rawPassword) {

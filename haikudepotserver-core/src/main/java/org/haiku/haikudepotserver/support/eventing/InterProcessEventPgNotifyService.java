@@ -1,12 +1,12 @@
 /*
- * Copyright 2025, Andrew Lindesay
+ * Copyright 2025-2026, Andrew Lindesay
  * Distributed under the terms of the MIT License.
  */
 package org.haiku.haikudepotserver.support.eventing;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.base.Preconditions;
-import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.Strings;
 import org.haiku.haikudepotserver.support.eventing.model.InterProcessEvent;
 import org.haiku.haikudepotserver.support.eventing.model.NotifyService;
 import org.slf4j.Logger;
@@ -53,7 +53,7 @@ public class InterProcessEventPgNotifyService implements NotifyService {
             event.setSourceIdentifier(config.getSourceIdentifier());
         }
 
-        if (StringUtils.equals(config.getSourceIdentifier(), event.getSourceIdentifier())) {
+        if (Strings.CS.equals(config.getSourceIdentifier(), event.getSourceIdentifier())) {
             publishEvent(event);
         }
     }

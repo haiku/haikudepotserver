@@ -29,7 +29,7 @@ public class PkgDumpTool {
     @Option(name = "-f", required = true, usage = "the HPKR file is required")
     private File hpkrFile;
 
-    public static void main(String[] args) {
+    static void main(String[] args) {
         PkgDumpTool main = new PkgDumpTool();
         CmdLineParser parser = new CmdLineParser(main);
 

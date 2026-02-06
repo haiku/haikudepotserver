@@ -1,5 +1,5 @@
 /*
- * Copyright 2022-2024, Andrew Lindesay
+ * Copyright 2022-2026, Andrew Lindesay
  * Distributed under the terms of the MIT License.
  */
 package org.haiku.haikudepotserver.api2;
@@ -18,7 +18,6 @@ import org.haiku.haikudepotserver.dataobjects.auto._PkgVersion;
 import org.haiku.haikudepotserver.job.model.JobService;
 import org.haiku.haikudepotserver.job.model.JobSnapshot;
 import org.haiku.haikudepotserver.pkg.model.PkgService;
-import org.haiku.haikudepotserver.security.PermissionEvaluator;
 import org.haiku.haikudepotserver.security.model.Permission;
 import org.haiku.haikudepotserver.support.VersionCoordinates;
 import org.haiku.haikudepotserver.support.exception.ObjectNotFoundException;
@@ -28,6 +27,7 @@ import org.haiku.haikudepotserver.userrating.model.UserRatingService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.security.access.AccessDeniedException;
+import org.springframework.security.access.PermissionEvaluator;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Component;
 
@@ -450,7 +450,7 @@ public class UserRatingApiService extends AbstractApiService {
         }
 
         searchSpecification.setLimit(request.getLimit());
-        searchSpecification.setOffset(request.getOffset());
+        searchSpecification.setOffset(Optional.ofNullable(request.getOffset()).orElse(0));
 
         long total = userRatingService.total(context, searchSpecification);
         List<SearchUserRatingsResultItemsInner> items = List.of();

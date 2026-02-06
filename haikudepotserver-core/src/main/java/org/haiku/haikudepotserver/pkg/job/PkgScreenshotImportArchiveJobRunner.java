@@ -1,5 +1,5 @@
 /*
- * Copyright 2018-2025, Andrew Lindesay
+ * Copyright 2018-2026, Andrew Lindesay
  * Distributed under the terms of the MIT License.
  */
 
@@ -167,7 +167,6 @@ public class PkgScreenshotImportArchiveJobRunner extends AbstractJobRunner<PkgSc
             throw new JobRunnerException("unable to complete job");
         }
     }
-
 
     private int consumeScreenshotArchiveEntries(
             ByteSource byteSource,
@@ -484,7 +483,6 @@ public class PkgScreenshotImportArchiveJobRunner extends AbstractJobRunner<PkgSc
         private final List<FromArchiveScreenshotMetadata> fromArchiveScreenshots = new ArrayList<>();
 
         private boolean notFound = false;
-
 
         Collection<ExistingScreenshotMetadata> getExistingScreenshots() {
             return existingScreenshots;

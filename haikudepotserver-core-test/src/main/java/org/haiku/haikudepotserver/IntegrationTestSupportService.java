@@ -1,5 +1,5 @@
 /*
- * Copyright 2018-2025, Andrew Lindesay
+ * Copyright 2018-2027, Andrew Lindesay
  * Distributed under the terms of the MIT License.
  */
 
@@ -151,7 +151,7 @@ public class IntegrationTestSupportService {
 
         StandardTestData result = new StandardTestData();
 
-        Prominence prominence = Prominence.tryGetByOrdering(context, Prominence.ORDERING_LAST).get();
+        Prominence prominence = Prominence.tryGetByOrdering(context, Prominence.ORDERING_LAST).orElseThrow();
 
         Architecture x86_64 = Architecture.getByCode(context, "x86_64");
         Architecture x86_gcc2 = Architecture.getByCode(context, "x86_gcc2");
@@ -206,7 +206,7 @@ public class IntegrationTestSupportService {
         {
             PkgPkgCategory pkgPkgCategory = context.newObject(PkgPkgCategory.class);
             result.pkg1.getPkgSupplement().addToManyTarget(PkgSupplement.PKG_PKG_CATEGORIES.getName(), pkgPkgCategory, true);
-            pkgPkgCategory.setPkgCategory(PkgCategory.tryGetByCode(context, "graphics").get());
+            pkgPkgCategory.setPkgCategory(PkgCategory.tryGetByCode(context, "graphics").orElseThrow());
         }
 
         {
@@ -397,7 +397,7 @@ public class IntegrationTestSupportService {
                 context,
                 pkg,
                 RepositorySource.getByCode(context, "testreposrc_xyz"),
-                Collections.singletonList(x86_64)).get();
+                Collections.singletonList(x86_64)).orElseThrow();
 
         NaturalLanguage english = NaturalLanguage.getByCode(context, NaturalLanguageCoordinates.
                 LANGUAGE_CODE_ENGLISH);
@@ -427,7 +427,7 @@ public class IntegrationTestSupportService {
                 userRating.setPkgVersion(pkgVersion);
                 userRating.setComment("Winter banana apples");
                 userRating.setCode("GHIJKL"); // known code that can be used for reference later
-                userRating.setUserRatingStability(UserRatingStability.tryGetByCode(context, UserRatingStability.CODE_UNSTABLEBUTUSABLE).get());
+                userRating.setUserRatingStability(UserRatingStability.tryGetByCode(context, UserRatingStability.CODE_UNSTABLEBUTUSABLE).orElseThrow());
             }
         }
 

@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2025, Andrew Lindesay
+ * Copyright 2019-2026, Andrew Lindesay
  * Distributed under the terms of the MIT License.
  */
 
@@ -96,8 +96,8 @@ public class UserUsageConditionsInitializer {
             throw new UncheckedIOException(ioe);
         }
 
-        if (mutableOrdering.getValue() > initialOrdering) {
-            LOGGER.info("did create {} user usage conditions", mutableOrdering.getValue() - initialOrdering);
+        if (mutableOrdering.get().intValue() > initialOrdering) {
+            LOGGER.info("did create {} user usage conditions", mutableOrdering.get().intValue() - initialOrdering);
             context.commitChanges();
         }
 
@@ -122,8 +122,15 @@ public class UserUsageConditionsInitializer {
                 InputStream markdownInputStream = markdownResource.getInputStream()) {
             UserUsageConditionsMetaData metaData = objectMapper.readValue(metaDataInputStream, UserUsageConditionsMetaData.class);
             String markdownString = StreamUtils.copyToString(markdownInputStream, StandardCharsets.UTF_8);
+
+            String filename = metaDataResource.getFilename();
+
+            if (StringUtils.isEmpty(filename)) {
+                throw new IllegalStateException("the uuc at [%s] has no filenames".formatted(metaDataResource.toString()));
+            }
+
             UserUsageConditions userUsageConditions = context.newObject(UserUsageConditions.class);
-            userUsageConditions.setCode(Files.getNameWithoutExtension(metaDataResource.getFilename()));
+            userUsageConditions.setCode(Files.getNameWithoutExtension(filename));
             userUsageConditions.setCopyMarkdown(markdownString);
             userUsageConditions.setMinimumAge(metaData.getMinimumAge());
             userUsageConditions.setOrdering(ordering);

@@ -1,9 +1,12 @@
 /*
- * Copyright 2013-2022, Andrew Lindesay
+ * Copyright 2013-2026, Andrew Lindesay
  * Distributed under the terms of the MIT License.
  */
 
 package org.haiku.haikudepotserver.support.exception;
+
+import com.google.common.base.Preconditions;
+import org.apache.commons.lang3.StringUtils;
 
 /**
  * <p>This object models a validation failure in the system.  The property indicates what element of the object in
@@ -12,19 +15,14 @@ package org.haiku.haikudepotserver.support.exception;
 
 public class ValidationFailure {
 
-    private String property;
-    private String message;
+    private final String property;
+    private final String message;
 
     public ValidationFailure(String property, String message) {
+        Preconditions.checkArgument(StringUtils.isNotBlank(property), "the property is required");
+        Preconditions.checkArgument(StringUtils.isNotBlank(message), "the message is required");
+
         super();
-
-        if(null==property || 0==property.length()) {
-            throw new IllegalStateException("the property is required for a validation failure");
-        }
-
-        if(null==message || 0==message.length()) {
-            throw new IllegalStateException("the message is required for a validation failure");
-        }
 
         this.property = property;
         this.message = message;
