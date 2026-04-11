@@ -1,5 +1,5 @@
 /*
- * Copyright 2018-2025, Andrew Lindesay
+ * Copyright 2018-2026, Andrew Lindesay
  * Distributed under the terms of the MIT License.
  */
 
@@ -26,6 +26,7 @@ import org.haiku.haikudepotserver.pkg.job.PkgDumpExportJobRunner;
 import org.haiku.haikudepotserver.reference.model.ReferenceDumpExportJobSpecification;
 import org.haiku.haikudepotserver.reference.model.dumpexport.*;
 import org.haiku.haikudepotserver.support.ArchiveInfo;
+import org.haiku.haikudepotserver.support.DateTimeHelper;
 import org.haiku.haikudepotserver.support.RuntimeInformationService;
 import org.haiku.haikudepotserver.support.cayenne.GeneralQueryHelper;
 import org.slf4j.Logger;
@@ -35,6 +36,7 @@ import org.springframework.stereotype.Component;
 
 import java.io.IOException;
 import java.io.OutputStream;
+import java.time.Instant;
 import java.util.Date;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -79,6 +81,11 @@ public class ReferenceDumpExportJobRunner extends AbstractJobRunner<ReferenceDum
     @Override
     public void run(JobService jobService, ReferenceDumpExportJobSpecification specification)
             throws IOException {
+
+        jobService.setJobDescription(
+                specification.getGuid(),
+                String.format("dump reference data for natural language [%s]", specification.getNaturalLanguageCode()));
+
         // this will register the outbound data against the job.
         JobDataWithByteSink jobDataWithByteSink = jobService.storeGeneratedData(
                 specification.getGuid(),
@@ -86,21 +93,24 @@ public class ReferenceDumpExportJobRunner extends AbstractJobRunner<ReferenceDum
                 MediaType.JSON_UTF_8.toString(),
                 JobDataEncoding.GZIP);
 
+        Instant dataTimestamp = getModifyTimestamp(serverRuntime.newContext(), runtimeInformationService).toInstant();
+        jobService.setJobDataTimestamp(specification.getGuid(), dataTimestamp);
+
         try (
                 final OutputStream outputStream = jobDataWithByteSink.getByteSink().openBufferedStream();
                 final GZIPOutputStream gzipOutputStream = new GZIPOutputStream(outputStream);
                 final JsonGenerator jsonGenerator = objectMapper.getFactory().createGenerator(gzipOutputStream)
         ) {
             jsonGenerator.writeStartObject();
-            writeInfo(jsonGenerator);
+            writeInfo(jsonGenerator, dataTimestamp);
             writeData(jsonGenerator, specification);
             jsonGenerator.writeEndObject();
         }
     }
 
-    private void writeInfo(JsonGenerator jsonGenerator) throws IOException {
+    private void writeInfo(JsonGenerator jsonGenerator, Instant dataTimestamp) throws IOException {
         jsonGenerator.writeFieldName("info");
-        objectMapper.writeValue(jsonGenerator, createArchiveInfo(serverRuntime.newContext()));
+        objectMapper.writeValue(jsonGenerator, createArchiveInfo(dataTimestamp));
     }
 
     private void writeData(
@@ -123,14 +133,14 @@ public class ReferenceDumpExportJobRunner extends AbstractJobRunner<ReferenceDum
                 Country.class, NaturalLanguage.class, PkgCategory.class);
         Date buildTimestamp = new Date(runtimeInformationService.getBuildTimestamp().toEpochMilli());
         if (buildTimestamp.getTime() > modifyTimestamp.getTime()) {
-            return buildTimestamp;
+            return DateTimeHelper.secondAccuracyDatePlusOneSecond(buildTimestamp);
         }
-        return modifyTimestamp;
+        return DateTimeHelper.secondAccuracyDatePlusOneSecond(modifyTimestamp);
     }
 
-    private ArchiveInfo createArchiveInfo(ObjectContext context) {
+    private ArchiveInfo createArchiveInfo(Instant dataTimestamp) {
         return new ArchiveInfo(
-                getModifyTimestamp(context, runtimeInformationService),
+                Date.from(dataTimestamp),
                 runtimeInformationService.getProjectVersion());
     }
 

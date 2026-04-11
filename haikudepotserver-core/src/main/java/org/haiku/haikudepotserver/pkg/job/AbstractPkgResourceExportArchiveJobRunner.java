@@ -1,5 +1,5 @@
 /*
- * Copyright 2018-2025, Andrew Lindesay
+ * Copyright 2018-2026, Andrew Lindesay
  * Distributed under the terms of the MIT License.
  */
 
@@ -85,7 +85,9 @@ abstract class AbstractPkgResourceExportArchiveJobRunner<T extends JobSpecificat
             // this coming early means that if a client is trying to find this data
             // then they will find it more quickly saving time for the client.
 
-            appendArchiveInfo(state, getLatestModifiedTimestamp(specification));
+            Date latestModifiedTimestamp = getLatestModifiedTimestamp(specification);
+            jobService.setJobDataTimestamp(specification.getGuid(), latestModifiedTimestamp.toInstant());
+            appendArchiveInfo(state, latestModifiedTimestamp);
 
             do {
                 Query pageQuery = query.createQuery(

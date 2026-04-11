@@ -10,6 +10,8 @@
 		<db-attribute name="cancel_timestamp" type="TIMESTAMP"/>
 		<db-attribute name="code" type="VARCHAR" length="36"/>
 		<db-attribute name="create_timestamp" type="TIMESTAMP" isMandatory="true"/>
+		<db-attribute name="data_timestamp" type="TIMESTAMP"/>
+		<db-attribute name="description" type="VARCHAR" length="8192"/>
 		<db-attribute name="expiry_timestamp" type="TIMESTAMP" isMandatory="true"/>
 		<db-attribute name="fail_timestamp" type="TIMESTAMP"/>
 		<db-attribute name="finish_timestamp" type="TIMESTAMP"/>
@@ -94,6 +96,8 @@
 		<obj-attribute name="cancelTimestamp" type="java.sql.Timestamp" db-attribute-path="cancel_timestamp"/>
 		<obj-attribute name="code" type="java.lang.String" lock="true" db-attribute-path="code"/>
 		<obj-attribute name="createTimestamp" type="java.sql.Timestamp" db-attribute-path="create_timestamp"/>
+		<obj-attribute name="dataTimestamp" type="java.sql.Timestamp" db-attribute-path="data_timestamp"/>
+		<obj-attribute name="description" type="java.lang.String" lock="true" db-attribute-path="description"/>
 		<obj-attribute name="expiryTimestamp" type="java.sql.Timestamp" db-attribute-path="expiry_timestamp"/>
 		<obj-attribute name="failTimestamp" type="java.sql.Timestamp" db-attribute-path="fail_timestamp"/>
 		<obj-attribute name="finishTimestamp" type="java.sql.Timestamp" db-attribute-path="finish_timestamp"/>

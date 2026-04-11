@@ -66,6 +66,19 @@ hds:
       # property controls who the alerts will go to. If not then no alerts will be
       # sent.
       # to: somebody@example.com
+  bulk-data:
+    # When the data stored has less than 1h remaining then replace it with
+    # new data.
+    renew-after-remaining-hours: 1
+    # When data has been stored, don't renew the data for at least this many
+    # minutes has passed to avoid excessive re-generation of data.
+    renew-standdown-since-last-start-minutes: 15
+    # When data has been requested for a language, keep renewing for this many hours
+    # after the last request.
+    renew-for-natural-language-hours: 48
+    # When expired data should be removed, only remove it after this many hours
+    # because somebody might still be downloading the older version of the data.
+    clear-expired-after-finished-hours: 1
   email:
     # This is the email address from which emails outbound from the system
     # will be sent. Typically, this might be a "no-reply" email address

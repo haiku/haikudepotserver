@@ -49,6 +49,7 @@ public class PostAddMutableCreateAndModifyTimestampListener implements Lifecycle
         callbackRegistry.addListener(PkgSupplementModification.class, this);
         callbackRegistry.addListener(Job.class, this);
         callbackRegistry.addListener(JobData.class, this);
+        callbackRegistry.addListener(NaturalLanguageUse.class, this);
     }
 
     @Override

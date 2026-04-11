@@ -5,11 +5,14 @@
 package org.haiku.haikudepotserver.job;
 
 import com.google.common.io.ByteSource;
-import org.haiku.haikudepotserver.dataobjects.User;
 import org.haiku.haikudepotserver.job.model.*;
 
 import java.io.IOException;
-import java.util.*;
+import java.time.Instant;
+import java.util.List;
+import java.util.Optional;
+import java.util.Set;
+import java.util.UUID;
 
 /**
  * <p>This is a special instance of {@link JobService} which does not actually run any jobs.</p>
@@ -27,6 +30,14 @@ public class NoopJobServiceImpl implements JobService {
     }
 
     @Override
+    public void setJobDescription(String guid, String description) {
+    }
+
+    @Override
+    public void setJobDataTimestamp(String guid, Instant instant) {
+    }
+
+    @Override
     public void setJobProgressPercent(String guid, Integer progressPercent) {
     }
 
@@ -35,12 +46,17 @@ public class NoopJobServiceImpl implements JobService {
     }
 
     @Override
-    public List<? extends JobSnapshot> findJobs(User user, Set<JobSnapshot.Status> statuses, int offset, int limit) {
+    public List<? extends JobSnapshot> findJobs(JobFindRequest findRequest, int offset, int limit) {
         return List.of();
     }
 
     @Override
-    public int totalJobs(User user, Set<JobSnapshot.Status> statuses) {
+    public Optional<? extends JobSnapshot> tryGetLatestMatchingJob(JobSpecification specification, Set<JobSnapshot.Status> statuses) {
+        return Optional.empty();
+    }
+
+    @Override
+    public int totalJobs(JobFindRequest findRequest) {
         return 0;
     }
 
@@ -65,7 +81,7 @@ public class NoopJobServiceImpl implements JobService {
     }
 
     @Override
-    public JobData storeSuppliedData(String useCode, String mediaTypeCode, JobDataEncoding encoding, ByteSource byteSource) throws IOException {
+    public JobData storeSuppliedData(String useCode, String mediaTypeCode, JobDataEncoding encoding, ByteSource byteSource) {
         throw new UnsupportedOperationException();
     }
 

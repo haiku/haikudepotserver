@@ -6,9 +6,9 @@
 package org.haiku.haikudepotserver.job.model;
 
 import com.google.common.io.ByteSource;
-import org.haiku.haikudepotserver.dataobjects.User;
 
 import java.io.IOException;
+import java.time.Instant;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
@@ -68,6 +68,16 @@ public interface JobService {
 
     void removeJob(String guid);
 
+    /**
+     * <p>Sets the description for the job.</p>
+     */
+    void setJobDescription(String guid, String description);
+
+    /**
+     * Sets the date-time at which the data is actual to.
+     */
+    void setJobDataTimestamp(String guid, Instant instant);
+
     void setJobProgressPercent(String guid, Integer progressPercent);
 
     void clearExpiredJobs();
@@ -78,21 +88,25 @@ public interface JobService {
      * user (or all users if this value is null).  It will return those
      * {@link JobSnapshot} objects that are from the
      * specified offset with a maximum of the specified limit.</p>
-     * @param user only return {@link JobSnapshot} objects
-     *             for this user.  If the user is null then return values for any user.
-     * @param statuses only return {@link JobSnapshot}
-     *                 objects that have the specified status.
+     * @param request specifies which Jobs are to be returned.
      */
 
-    List<? extends JobSnapshot> findJobs(User user, Set<JobSnapshot.Status> statuses, int offset, int limit);
+    List<? extends JobSnapshot> findJobs(JobFindRequest request, int offset, int limit);
+
+    /**
+     * <p>This method will try to return the latest {@link JobSnapshot} that matches the
+     * supplied {@link JobSpecification} that is in the supplied status.</p>
+     */
+
+    Optional<? extends JobSnapshot> tryGetLatestMatchingJob(JobSpecification specification, Set<JobSnapshot.Status> statuses);
 
     /**
      * <p>This method returns the count of packages that could be returned from
-     * {@link #findJobs(User, java.util.Set, int, int)}
+     * {@link #findJobs(JobFindRequest request, int, int)}
      * but without the offset and limits considered.</p>
      */
 
-    int totalJobs(User user, Set<JobSnapshot.Status> statuses);
+    int totalJobs(JobFindRequest request);
 
     /**
      * <p>Tries to identify a job which is associated with the job data guid supplied.</p>

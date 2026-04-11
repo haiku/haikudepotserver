@@ -101,6 +101,8 @@ components:
       properties:
         guid:
           type: string
+        description:
+          type: string
         jobStatus:
           $ref: "./common.yaml#/components/schemas/jobStatus"
         jobTypeCode:
@@ -124,6 +126,9 @@ components:
           format: int64
         progressPercent:
           type: integer
+        dataTimestamp:
+          type: integer
+          format: int64
     getJobRequestEnvelope:
       type: object
       properties:
@@ -141,6 +146,8 @@ components:
       properties:
         guid:
           type: string
+        description:
+          type: string
         jobStatus:
           $ref: "./common.yaml#/components/schemas/jobStatus"
         jobTypeCode:
@@ -164,6 +171,9 @@ components:
           format: int64
         progressPercent:
           type: integer
+        dataTimestamp:
+          type: integer
+          format: int64
         generatedDatas:
           type: array
           items:

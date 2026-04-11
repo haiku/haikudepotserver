@@ -1,5 +1,5 @@
 /*
- * Copyright 2018-2025, Andrew Lindesay
+ * Copyright 2018-2026, Andrew Lindesay
  * Distributed under the terms of the MIT License.
  */
 
@@ -18,6 +18,7 @@ import org.haiku.haikudepotserver.config.BasicConfig;
 import org.haiku.haikudepotserver.config.TestBasicConfig;
 import org.haiku.haikudepotserver.dataobjects.User;
 import org.haiku.haikudepotserver.job.TestJobServiceImpl;
+import org.haiku.haikudepotserver.job.model.BulkDataJobCoordinatorService;
 import org.haiku.haikudepotserver.job.model.JobService;
 import org.haiku.haikudepotserver.storage.model.DataStorageService;
 import org.junit.jupiter.api.Test;
@@ -50,7 +51,7 @@ public class JobApiServiceIT extends AbstractIntegrationTest {
         SearchJobsResult result = jobApiService.searchJobs(new SearchJobsRequestEnvelope());
         // ------------------------------------
 
-        Assertions.assertThat(result.getItems().size()).isEqualTo(3);
+        Assertions.assertThat(result.getItems()).hasSize(3);
     }
 
     @Test
@@ -138,6 +139,11 @@ public class JobApiServiceIT extends AbstractIntegrationTest {
         @Bean
         DataStorageService dataStorageService() {
             return Mockito.mock(DataStorageService.class);
+        }
+
+        @Bean
+        BulkDataJobCoordinatorService bulkDataJobCoordinatorService() {
+            return Mockito.mock(BulkDataJobCoordinatorService.class);
         }
     }
 

@@ -1,5 +1,5 @@
 /*
- * Copyright 2018-2023, Andrew Lindesay
+ * Copyright 2018-2026, Andrew Lindesay
  * Distributed under the terms of the MIT License.
  */
 
@@ -7,13 +7,14 @@ package org.haiku.haikudepotserver.pkg.controller;
 
 import com.google.common.base.Preconditions;
 import com.google.common.net.HttpHeaders;
+import jakarta.servlet.http.HttpServletResponse;
 import org.apache.cayenne.ObjectContext;
 import org.apache.cayenne.configuration.server.ServerRuntime;
 import org.haiku.haikudepotserver.dataobjects.RepositorySource;
-import org.haiku.haikudepotserver.job.controller.JobController;
+import org.haiku.haikudepotserver.job.model.BulkDataJobCoordinatorService;
 import org.haiku.haikudepotserver.job.model.JobService;
-import org.haiku.haikudepotserver.pkg.model.PkgDumpExportJobSpecification;
-import org.haiku.haikudepotserver.pkg.model.PkgService;
+import org.haiku.haikudepotserver.naturallanguage.model.NaturalLanguageCoordinates;
+import org.haiku.haikudepotserver.support.ControllerHelper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpStatus;
@@ -23,31 +24,29 @@ import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 
-import jakarta.servlet.http.HttpServletResponse;
 import java.io.IOException;
-import java.util.Date;
 import java.util.Optional;
 
 @Controller
 @RequestMapping(path = { "__pkg" })
 public class PkgController {
 
-    protected static final Logger LOGGER = LoggerFactory.getLogger(PkgController.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(PkgController.class);
 
     private final static String KEY_REPOSITORYSOURCECODE = "repositorySourceCode";
     private final static String KEY_NATURALLANGUAGECODE = "naturalLanguageCode";
 
     private final ServerRuntime serverRuntime;
+    private final BulkDataJobCoordinatorService bulkDataJobCoordinatorService;
     private final JobService jobService;
-    private final PkgService pkgService;
 
     public PkgController(
             ServerRuntime serverRuntime,
-            JobService jobService,
-            PkgService pkgService) {
+            BulkDataJobCoordinatorService bulkDataJobCoordinatorService,
+            JobService jobService) {
         this.serverRuntime = Preconditions.checkNotNull(serverRuntime);
-        this.jobService = Preconditions.checkNotNull(jobService);
-        this.pkgService = Preconditions.checkNotNull(pkgService);
+        this.bulkDataJobCoordinatorService = Preconditions.checkNotNull(bulkDataJobCoordinatorService);
+        this.jobService = jobService;
     }
 
     /**
@@ -66,7 +65,8 @@ public class PkgController {
             HttpServletResponse response,
             @PathVariable(value = KEY_NATURALLANGUAGECODE) String naturalLanguageCode,
             @PathVariable(value = KEY_REPOSITORYSOURCECODE) String repositorySourceCode,
-            @RequestHeader(value = HttpHeaders.IF_MODIFIED_SINCE, required = false) String ifModifiedSinceHeader)
+            @RequestHeader(value = HttpHeaders.IF_MODIFIED_SINCE, required = false) String ifModifiedSinceHeader,
+            @RequestHeader(value = HttpHeaders.USER_AGENT, required = false) String userAgentHeader)
             throws IOException {
 
         ObjectContext objectContext = serverRuntime.newContext();
@@ -75,21 +75,20 @@ public class PkgController {
                 RepositorySource.tryGetByCode(objectContext, repositorySourceCode);
 
         if (repositorySourceOptional.isEmpty()) {
-            LOGGER.info("repository source [" + repositorySourceCode + "] not found");
+            LOGGER.info("repository source [{}] not found", repositorySourceCode);
             response.setStatus(HttpStatus.NOT_FOUND.value());
         } else {
-            Date lastModifiedTimestamp = pkgService.getLastModifyTimestampSecondAccuracy(
-                    objectContext, repositorySourceOptional.get());
-            PkgDumpExportJobSpecification specification = new PkgDumpExportJobSpecification();
-            specification.setNaturalLanguageCode(naturalLanguageCode);
-            specification.setRepositorySourceCode(repositorySourceCode);
+            String jobCode = bulkDataJobCoordinatorService.getOrCreatePkgDumpExport(
+                    NaturalLanguageCoordinates.fromCode(naturalLanguageCode),
+                    repositorySourceCode
+            );
 
-            JobController.handleRedirectToJobData(
-                    response,
+            ControllerHelper.maybeRedirectToJobData(
                     jobService,
+                    response,
+                    jobCode,
                     ifModifiedSinceHeader,
-                    lastModifiedTimestamp,
-                    specification);
+                    userAgentHeader);
         }
     }
 

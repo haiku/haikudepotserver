@@ -1,5 +1,5 @@
 /*
- * Copyright 2018-2024, Andrew Lindesay
+ * Copyright 2018-2026, Andrew Lindesay
  * Distributed under the terms of the MIT License.
  */
 
@@ -56,12 +56,14 @@ public class ReferenceDumpExportJobRunnerIT extends AbstractIntegrationTest {
         // ------------------------------------
 
         jobService.awaitJobFinishedUninterruptibly(guid, 10000);
-        Optional<? extends JobSnapshot> snapshotOptional = jobService.tryGetJob(guid);
-        Assertions.assertThat(snapshotOptional.get().getStatus()).isEqualTo(JobSnapshot.Status.FINISHED);
+        JobSnapshot snapshot = jobService.tryGetJob(guid).orElseThrow();
+        Assertions.assertThat(snapshot.getStatus()).isEqualTo(JobSnapshot.Status.FINISHED);
+        Assertions.assertThat(snapshot.getDataTimestamp().getTime())
+                .isGreaterThanOrEqualTo(latestModifyTimestamp.getTime());
 
         // pull in the ZIP file now and extract the data
 
-        String dataGuid = snapshotOptional.get().getGeneratedDataGuids().iterator().next();
+        String dataGuid = snapshot.getGeneratedDataGuids().iterator().next();
         JobDataWithByteSource jobSource = jobService.tryObtainData(dataGuid).get();
 
         try (

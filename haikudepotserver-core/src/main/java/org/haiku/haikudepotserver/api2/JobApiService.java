@@ -1,5 +1,5 @@
 /*
- * Copyright 2022-2025, Andrew Lindesay
+ * Copyright 2022-2026, Andrew Lindesay
  * Distributed under the terms of the MIT License.
  */
 package org.haiku.haikudepotserver.api2;
@@ -11,6 +11,7 @@ import org.apache.cayenne.configuration.server.ServerRuntime;
 import org.apache.commons.collections4.CollectionUtils;
 import org.haiku.haikudepotserver.api2.model.*;
 import org.haiku.haikudepotserver.dataobjects.User;
+import org.haiku.haikudepotserver.job.model.JobFindRequest;
 import org.haiku.haikudepotserver.job.model.JobService;
 import org.haiku.haikudepotserver.job.model.JobSnapshot;
 import org.haiku.haikudepotserver.security.model.Permission;
@@ -78,6 +79,7 @@ public class JobApiService extends AbstractApiService {
 
         return new GetJobResult()
                 .guid(job.getGuid())
+                .description(job.getDescription())
                 .jobStatus(JobStatus.valueOf(job.getStatus().name()))
                 .jobTypeCode(job.getJobTypeCode())
                 .ownerUserNickname(job.getOwnerUserNickname())
@@ -87,6 +89,7 @@ public class JobApiService extends AbstractApiService {
                 .failTimestamp(Optional.ofNullable(job.getFailTimestamp()).map(Date::getTime).orElse(null))
                 .cancelTimestamp(Optional.ofNullable(job.getCancelTimestamp()).map(Date::getTime).orElse(null))
                 .progressPercent(job.getProgressPercent())
+                .dataTimestamp(Optional.ofNullable(job.getDataTimestamp()).map(Date::getTime).orElse(null))
                 .generatedDatas(job.getGeneratedDataGuids().stream()
                         .map(jobService::tryGetData)
                         .filter(Optional::isPresent)
@@ -140,17 +143,21 @@ public class JobApiService extends AbstractApiService {
                 statuses = request.getStatuses().stream().map(s -> JobSnapshot.Status.valueOf(s.name())).collect(Collectors.toSet());
             }
 
-            total = jobService.totalJobs(ownerUser, statuses);
+            JobFindRequest findRequest = new JobFindRequest(
+                    Optional.ofNullable(ownerUser).map(User::getNickname).orElse(null),
+                    null,
+                    statuses);
+            total = jobService.totalJobs(findRequest);
 
             if (total > 0) {
                 items = jobService.findJobs(
-                                ownerUser,
-                                statuses,
+                                findRequest,
                                 Optional.ofNullable(request.getOffset()).orElse(0),
                                 Optional.ofNullable(request.getLimit()).orElse(Integer.MAX_VALUE))
                         .stream()
                         .map(js -> new SearchJobsResultItem()
                                 .guid(js.getGuid())
+                                .description(js.getDescription())
                                 .jobStatus(JobStatus.valueOf(js.getStatus().name()))
                                 .jobTypeCode(js.getJobTypeCode())
                                 .ownerUserNickname(js.getOwnerUserNickname())
@@ -159,7 +166,8 @@ public class JobApiService extends AbstractApiService {
                                 .queuedTimestamp(Optional.ofNullable(js.getQueuedTimestamp()).map(Date::getTime).orElse(null))
                                 .failTimestamp(Optional.ofNullable(js.getFailTimestamp()).map(Date::getTime).orElse(null))
                                 .cancelTimestamp(Optional.ofNullable(js.getCancelTimestamp()).map(Date::getTime).orElse(null))
-                                .progressPercent(js.getProgressPercent()))
+                                .progressPercent(js.getProgressPercent())
+                                .dataTimestamp(Optional.ofNullable(js.getDataTimestamp()).map(Date::getTime).orElse(null)))
                         .collect(Collectors.toList());
             }
 
@@ -184,7 +192,9 @@ public class JobApiService extends AbstractApiService {
                         Arrays.stream(JobSnapshot.Status.values())
                                 .filter(s -> s != JobSnapshot.Status.INDETERMINATE)
                                 .map(s -> new JobStatusCountsResultItem()
-                                        .count(Integer.valueOf(jobService.totalJobs(null, Set.of(s))).longValue())
+                                        .count(Integer.valueOf(jobService.totalJobs(
+                                                new JobFindRequest(null, null, Set.of(s))
+                                        )).longValue())
                                         .jobStatus(JobStatus.valueOf(s.name()))
                                 )
                                 .toList()

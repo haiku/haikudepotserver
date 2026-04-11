@@ -7,6 +7,7 @@ package org.haiku.haikudepotserver.naturallanguage.model;
 
 import org.haiku.haikudepotserver.naturallanguage.NaturalLanguageCodeComparator;
 
+import java.time.Instant;
 import java.util.*;
 
 /**
@@ -45,5 +46,18 @@ public interface NaturalLanguageService {
     Set<NaturalLanguageCoordinates> findNaturalLanguagesWithData();
 
     Properties getAllLocalizationMessages(NaturalLanguageCoordinates naturalLanguageCoordinates);
+
+    /**
+     * <p>Mark the {@link org.haiku.haikudepotserver.dataobjects.NaturalLanguage} as being in use.</p>
+     */
+
+    void updateUse(NaturalLanguageCoordinates naturalLanguage);
+
+    /**
+     * <p>Find out those {@link org.haiku.haikudepotserver.dataobjects.NaturalLanguage}s which have
+     * been used since the date supplied.</p>
+     */
+
+    Set<NaturalLanguageCoordinates> naturalLanguagesUsedSince(Instant since);
 
 }

@@ -9,6 +9,7 @@ import com.google.common.base.Preconditions;
 import com.google.common.base.Strings;
 import com.google.common.collect.Streams;
 import com.google.common.util.concurrent.Uninterruptibles;
+import jakarta.annotation.Nullable;
 import org.apache.cayenne.ObjectContext;
 import org.apache.cayenne.ResultBatchIterator;
 import org.apache.cayenne.configuration.server.ServerRuntime;
@@ -22,6 +23,7 @@ import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.collections4.SetUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.haiku.haikudepotserver.dataobjects.*;
+import org.haiku.haikudepotserver.job.model.JobFindRequest;
 import org.haiku.haikudepotserver.job.model.JobServiceException;
 import org.haiku.haikudepotserver.job.model.JobServiceStateTransitionException;
 import org.haiku.haikudepotserver.job.model.JobSnapshot;
@@ -52,16 +54,16 @@ public class DbDistributedJob2Helper {
      * <p>This query will find the next available job but does not lock it.</p>
      */
     private final static String SQL_NEXT_AVAILABLE_JOB_CODE = """
-              SELECT j2.code FROM job2.job j2
-              WHERE 1 = 1
-                AND j2.queue_timestamp IS NOT NULL
-                AND j2.start_timestamp IS NULL
-                AND j2.cancel_timestamp IS NULL
-                AND j2.fail_timestamp IS NULL
-                AND j2.finish_timestamp IS NULL
-              ORDER BY j2.queue_timestamp ASC, j2.create_timestamp ASC
-              LIMIT 1
-              """;
+            SELECT j2.code FROM job2.job j2
+            WHERE 1 = 1
+              AND j2.queue_timestamp IS NOT NULL
+              AND j2.start_timestamp IS NULL
+              AND j2.cancel_timestamp IS NULL
+              AND j2.fail_timestamp IS NULL
+              AND j2.finish_timestamp IS NULL
+            ORDER BY j2.queue_timestamp ASC, j2.create_timestamp ASC
+            LIMIT 1
+            """;
 
     /**
      * <p>This query will lock the nominated job.</p>
@@ -149,7 +151,7 @@ public class DbDistributedJob2Helper {
 
             LOGGER.info("unable to acquire lock on job [{}]; will try to find next job again", jobCode);
             Uninterruptibles.sleepUninterruptibly(GET_NEXT_AVAILABLE_JOB_DELAY);
-            attempts --;
+            attempts--;
         }
 
         LOGGER.info("attempted to find next job {} times; aborting", GET_NEXT_AVAILABLE_JOB_ATTEMPTS);
@@ -241,6 +243,7 @@ public class DbDistributedJob2Helper {
 
     /**
      * <p>Goes through all the Jobs which have reached their expiry. It will delete each of them.</p>
+     *
      * @return the quantity of Jobs deleted.
      */
 
@@ -259,6 +262,7 @@ public class DbDistributedJob2Helper {
     /**
      * <p>Goes through all the jobs which have reached their expiry and have already completed. It will delete
      * each of them.</p>
+     *
      * @return the quantity of Jobs deleted.
      */
 
@@ -275,7 +279,7 @@ public class DbDistributedJob2Helper {
         }
     }
 
-    public static List<Job> findJobs(ObjectContext objectContext, String userNickname, Set<JobSnapshot.Status> statuses, int offset, int limit) {
+    public static List<Job> findJobs(ObjectContext objectContext, JobFindRequest findRequest, int offset, int limit) {
         Preconditions.checkNotNull(objectContext, "the object context must be supplied");
         Preconditions.checkArgument(offset >= 0, "illegal offset value");
 
@@ -284,17 +288,17 @@ public class DbDistributedJob2Helper {
         }
 
         return ObjectSelect.query(Job.class)
-                .where(expressionForUserNicknameAndStatuses(userNickname, statuses))
+                .where(expressionForFindRequest(findRequest))
                 .orderBy(Job.CREATE_TIMESTAMP.desc())
                 .offset(offset)
                 .limit(limit)
                 .select(objectContext);
     }
 
-    public static long totalJobs(ObjectContext objectContext, String userNickname, Set<JobSnapshot.Status> statuses) {
+    public static long totalJobs(ObjectContext objectContext, JobFindRequest findRequest) {
         Preconditions.checkNotNull(objectContext, "the object context must be supplied");
         return ObjectSelect.query(Job.class)
-                .where(expressionForUserNicknameAndStatuses(userNickname, statuses))
+                .where(expressionForFindRequest(findRequest))
                 .selectCount(objectContext);
     }
 
@@ -340,12 +344,26 @@ public class DbDistributedJob2Helper {
                 JobDataType.CODE_SUPPLIED);
     }
 
+    public static void updateDescription(ObjectContext objectContext, String jobCode, String description) {
+        Preconditions.checkArgument(null != objectContext, "the object context must be supplied");
+        Job job = Job.getByCode(objectContext, jobCode);
+        job.setDescription(StringUtils.trimToNull(description));
+    }
+
+    public static void updateDataTimestamp(ObjectContext objectContext, String jobCode, Instant value) {
+        Preconditions.checkArgument(null != objectContext, "the object context must be supplied");
+        Preconditions.checkArgument(StringUtils.isNotBlank(jobCode));
+        Job job = Job.getByCode(objectContext, jobCode);
+        job.setDataTimestamp(Optional.of(value).map(i -> new java.sql.Timestamp(i.toEpochMilli())).orElse(null));
+    }
+
     /**
      * Updates the status of the Job. Only some transitions from one state to another are supported. If an illegal
      * state transition is attempted, this method will throw {@link JobServiceStateTransitionException}.
      */
 
     public static void updateJobStatus(ObjectContext objectContext, String jobCode, Instant now, JobSnapshot.Status targetStatus) {
+        Preconditions.checkArgument(null != objectContext, "the object context must be supplied");
         Preconditions.checkArgument(StringUtils.isNotBlank(jobCode));
         Preconditions.checkArgument(null != now, "the now instant must be supplied");
         Preconditions.checkArgument(null != targetStatus, "the targetStatus must be supplied");
@@ -417,6 +435,7 @@ public class DbDistributedJob2Helper {
     // TODO; although the API allows streaming, the data is not streamed.
     public static Stream<Job> streamJobsByTypeAndStatuses(
             ObjectContext objectContext,
+            @Nullable Instant now,
             String jobTypeCode,
             Set<JobSnapshot.Status> statuses) {
         Preconditions.checkNotNull(objectContext, "the object context must be supplied");
@@ -431,6 +450,9 @@ public class DbDistributedJob2Helper {
         }
 
         Expression jobTypeExpression = Job.JOB_TYPE.dot(JobType.CODE).eq(jobTypeCode);
+        Expression expiredExpression = null == now
+                ? ExpressionFactory.expTrue()
+                : Job.EXPIRY_TIMESTAMP.gte(new java.sql.Timestamp(now.toEpochMilli()));
 
         // This would be way more efficient as a SQL statement, but this is quite comprehensible using JPA. The idea
         // is that we want to get the Jobs in a distinct order; the finished ones, the started ones, the queued ones
@@ -441,28 +463,34 @@ public class DbDistributedJob2Helper {
         if (statuses.contains(JobSnapshot.Status.FINISHED)) {
             result.addAll(
                     ObjectSelect.query(Job.class)
-                            .where(jobTypeExpression.andExp(hasStatusExpression(JobSnapshot.Status.FINISHED)))
+                            .where(jobTypeExpression
+                                    .andExp(hasStatusExpression(JobSnapshot.Status.FINISHED))
+                                    .andExp(expiredExpression))
                             .orderBy(Job.FINISH_TIMESTAMP.desc(), Job.CODE.desc())
                             .select(objectContext)
-                            );
+            );
         }
 
         if (statuses.contains(JobSnapshot.Status.STARTED)) {
             result.addAll(
                     ObjectSelect.query(Job.class)
-                            .where(jobTypeExpression.andExp(hasStatusExpression(JobSnapshot.Status.STARTED)))
+                            .where(jobTypeExpression
+                                    .andExp(hasStatusExpression(JobSnapshot.Status.STARTED))
+                                    .andExp(expiredExpression))
                             .orderBy(Job.START_TIMESTAMP.desc(), Job.CODE.desc())
                             .select(objectContext)
-                            );
+            );
         }
 
         if (statuses.contains(JobSnapshot.Status.QUEUED)) {
             result.addAll(
                     ObjectSelect.query(Job.class)
-                            .where(jobTypeExpression.andExp(hasStatusExpression(JobSnapshot.Status.QUEUED)))
+                            .where(jobTypeExpression
+                                    .andExp(hasStatusExpression(JobSnapshot.Status.QUEUED))
+                                    .andExp(expiredExpression))
                             .orderBy(Job.QUEUE_TIMESTAMP.desc(), Job.CODE.desc())
                             .select(objectContext)
-                            );
+            );
         }
 
         Set<JobSnapshot.Status> remainingStatuses = SetUtils.difference(
@@ -472,9 +500,11 @@ public class DbDistributedJob2Helper {
         if (!remainingStatuses.isEmpty()) {
             result.addAll(
                     ObjectSelect.query(Job.class)
-                            .where(jobTypeExpression.andExp(ExpressionFactory.or(
-                                    remainingStatuses.stream().map(DbDistributedJob2Helper::hasStatusExpression).toList()
-                            )))
+                            .where(jobTypeExpression
+                                    .andExp(ExpressionFactory.or(
+                                            remainingStatuses.stream().map(DbDistributedJob2Helper::hasStatusExpression).toList()
+                                    ))
+                                    .andExp(expiredExpression))
                             .orderBy(SORTS_STATE_TIMESTAMPS)
                             .select(objectContext)
             );
@@ -532,21 +562,27 @@ public class DbDistributedJob2Helper {
         }
     }
 
-    private static Expression expressionForUserNicknameAndStatuses(String userNickname, Set<JobSnapshot.Status> statuses) {
+    private static Expression expressionForFindRequest(JobFindRequest request) {
         List<Expression> result = new ArrayList<>();
 
         result.add(ExpressionFactory.expTrue());
 
-        if (StringUtils.isNotBlank(userNickname)) {
-            result.add(Job.OWNER_USER_NICKNAME.eq(userNickname));
+        if (null != request.ownerUserNickname()) {
+            result.add(Job.OWNER_USER_NICKNAME.eq(request.ownerUserNickname()));
         }
 
-        result.addAll(
-                CollectionUtils.emptyIfNull(statuses)
-                        .stream()
-                        .map(DbDistributedJob2Helper::hasStatusExpression)
-                        .toList()
-        );
+        if (null != request.jobTypeCode()) {
+            result.add(Job.JOB_TYPE.dot(JobType.CODE).eq(request.jobTypeCode()));
+        }
+
+        if (null != request.statuses()) {
+            result.addAll(
+                    request.statuses()
+                            .stream()
+                            .map(DbDistributedJob2Helper::hasStatusExpression)
+                            .toList()
+            );
+        }
 
         return ExpressionFactory.and(result);
     }

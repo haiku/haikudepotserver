@@ -1,5 +1,5 @@
 /*
- * Copyright 2018-2025, Andrew Lindesay
+ * Copyright 2018-2026, Andrew Lindesay
  * Distributed under the terms of the MIT License.
  */
 
@@ -30,6 +30,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.nio.charset.StandardCharsets;
+import java.time.Instant;
 import java.util.*;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.locks.Lock;
@@ -102,11 +103,12 @@ public class NaturalLanguageServiceImpl implements NaturalLanguageService {
                 .map(NaturalLanguage::getTitleKey)
                 .forEach(key -> messageSource.getMessage(key, new Object[]{}, Locale.ENGLISH));
 
-        // Check that the natural langauges that are present are able to be dealt with by the Java locale system.
+        // Check that the natural languages that are present are able to be dealt with by the Java locale system.
         naturalLanguages
                 .stream()
                 .map(NaturalLanguage::toCoordinates)
                 .forEach(NaturalLanguageServiceImpl::verifyNaturalLanguageLocaleConversion);
+
     }
 
     private Properties assembleAllLocalizationMessagesUncached(NaturalLanguageCoordinates naturalLanguageCoordinates) {
@@ -204,6 +206,47 @@ public class NaturalLanguageServiceImpl implements NaturalLanguageService {
                         UserRating.NATURAL_LANGUAGE.dot(NaturalLanguage.SCRIPT_CODE),
                         UserRating.NATURAL_LANGUAGE.dot(NaturalLanguage.COUNTRY_CODE)));
     }
+
+    @Override
+    public void updateUse(NaturalLanguageCoordinates naturalLanguageCoordinate) {
+        Preconditions.checkArgument(naturalLanguageCoordinate != null);
+        ObjectContext context = serverRuntime.newContext();
+        NaturalLanguage naturalLanguage = NaturalLanguage.getByNaturalLanguage(context, naturalLanguageCoordinate);
+        NaturalLanguageUse use = NaturalLanguageUse.tryGetForNaturalLanguage(context, naturalLanguage)
+                .orElseGet(() -> {
+                    NaturalLanguageUse result = context.newObject(NaturalLanguageUse.class);
+                    result.setCount(0L);
+                    result.setNaturalLanguage(naturalLanguage);
+                    return result;
+                });
+
+        use.setCount(use.getCount() + 1);
+        use.setLastUseTimestamp(new java.sql.Timestamp(System.currentTimeMillis()));
+        context.commitChanges();
+    }
+
+    @Override
+    public Set<NaturalLanguageCoordinates> naturalLanguagesUsedSince(Instant since) {
+        ObjectContext context = serverRuntime.newContext();
+
+        List<Object[]> rows = ObjectSelect.query(NaturalLanguageUse.class)
+                .where(NaturalLanguageUse.LAST_USE_TIMESTAMP.gt(new java.sql.Timestamp(since.toEpochMilli())))
+                .fetchDataRows()
+                .columns(
+                        NaturalLanguageUse.NATURAL_LANGUAGE.dot(NaturalLanguage.LANGUAGE_CODE),
+                        NaturalLanguageUse.NATURAL_LANGUAGE.dot(NaturalLanguage.SCRIPT_CODE),
+                        NaturalLanguageUse.NATURAL_LANGUAGE.dot(NaturalLanguage.COUNTRY_CODE)
+                )
+                .select(context);
+
+        return rows.stream()
+                .map(r -> new NaturalLanguageCoordinates(
+                        r[0].toString(),
+                        Optional.ofNullable(r[1]).map(Object::toString).orElse(null),
+                        Optional.ofNullable(r[2]).map(Object::toString).orElse(null)))
+                .collect(Collectors.toUnmodifiableSet());
+    }
+
 
     @Override
     public Properties getAllLocalizationMessages(NaturalLanguageCoordinates naturalLanguageCoordinates) {

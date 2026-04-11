@@ -6,10 +6,9 @@
 package org.haiku.haikudepotserver.job;
 
 import com.google.common.io.ByteSource;
-import org.haiku.haikudepotserver.dataobjects.User;
+import jakarta.annotation.PostConstruct;
 import org.haiku.haikudepotserver.job.model.*;
 
-import jakarta.annotation.PostConstruct;
 import java.io.IOException;
 import java.time.Instant;
 import java.time.LocalDateTime;
@@ -106,6 +105,16 @@ public class TestJobServiceImpl implements JobService {
     }
 
     @Override
+    public void setJobDescription(String guid, String description) {
+        throw new UnsupportedOperationException();
+    }
+
+    @Override
+    public void setJobDataTimestamp(String guid, Instant instant) {
+        throw new UnsupportedOperationException();
+    }
+
+    @Override
     public void setJobProgressPercent(String guid, Integer progressPercent) {
         throw new UnsupportedOperationException();
     }
@@ -115,33 +124,33 @@ public class TestJobServiceImpl implements JobService {
         // do nothing.
     }
 
-    private boolean matches(JobSnapshot job, User user, Set<JobSnapshot.Status> statuses) {
-        if (null != user) {
+    private boolean matches(JobSnapshot job, JobFindRequest findRequest) {
+        if (null != findRequest.ownerUserNickname()) {
             if (null == job.getOwnerUserNickname()) {
                 return false;
             }
 
-            if(!job.getOwnerUserNickname().equals(user.getNickname())) {
+            if(!job.getOwnerUserNickname().equals(findRequest.ownerUserNickname())) {
                 return false;
             }
         }
 
-        if (null != statuses) {
-            return statuses.contains(job.getStatus());
+        if (null != findRequest.statuses()) {
+            return findRequest.statuses().contains(job.getStatus());
         }
 
         return true;
     }
 
-    private List<Job> filteredJobs(final User user, final Set<JobSnapshot.Status> statuses) {
+    private List<Job> filteredJobs(JobFindRequest findRequest) {
         return Stream.of(queuedJob, startedJob, finishedJob)
-                .filter(j -> matches(j, user, statuses))
+                .filter(j -> matches(j, findRequest))
                 .collect(Collectors.toList());
     }
 
     @Override
-    public List<? extends JobSnapshot> findJobs(User user, Set<JobSnapshot.Status> statuses, int offset, int limit) {
-        List<Job> result = filteredJobs(user, statuses);
+    public List<? extends JobSnapshot> findJobs(JobFindRequest findRequest, int offset, int limit) {
+        List<Job> result = filteredJobs(findRequest);
 
         if (offset >= result.size()) {
             return Collections.emptyList();
@@ -157,12 +166,17 @@ public class TestJobServiceImpl implements JobService {
     }
 
     @Override
-    public int totalJobs(User user, Set<JobSnapshot.Status> statuses) {
-        return filteredJobs(user, statuses).size();
+    public Optional<? extends JobSnapshot> tryGetLatestMatchingJob(JobSpecification specification, Set<JobSnapshot.Status> statuses) {
+        return Optional.empty();
     }
 
     @Override
-    public JobDataWithByteSink storeGeneratedData(String jobGuid, String useCode, String mediaTypeCode, JobDataEncoding encoding) throws IOException {
+    public int totalJobs(JobFindRequest findRequest) {
+        return filteredJobs(findRequest).size();
+    }
+
+    @Override
+    public JobDataWithByteSink storeGeneratedData(String jobGuid, String useCode, String mediaTypeCode, JobDataEncoding encoding) {
         throw new UnsupportedOperationException();
     }
 

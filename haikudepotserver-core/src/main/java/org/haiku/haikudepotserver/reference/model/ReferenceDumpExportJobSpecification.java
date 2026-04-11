@@ -1,5 +1,5 @@
 /*
- * Copyright 2018, Andrew Lindesay
+ * Copyright 2018-2026, Andrew Lindesay
  * Distributed under the terms of the MIT License.
  */
 
@@ -14,9 +14,18 @@ import java.util.concurrent.TimeUnit;
 
 public class ReferenceDumpExportJobSpecification extends AbstractJobSpecification {
 
-    private final static long TTL_MINUTES = 30;
+    /**
+     * <p>The reference data is able to be left for a long time as it rarely changes.</p>
+     */
+    private final static long TTL_HOURS = 24;
 
     private String naturalLanguageCode;
+
+    /**
+     * <p>This is the version of the HDS project. The reference data could change between versions of HDS because new
+     * reference data can be applied in a data migration.</p>
+     */
+    private String projectVersion;
 
     /**
      * <p>This flag will control that only natural languages with two-character codes will be returned; no script
@@ -28,7 +37,7 @@ public class ReferenceDumpExportJobSpecification extends AbstractJobSpecificatio
 
     @Override
     public Optional<Long> tryGetTimeToLiveMillis() {
-        return Optional.of(TimeUnit.MINUTES.toMillis(TTL_MINUTES));
+        return Optional.of(TimeUnit.HOURS.toMillis(TTL_HOURS) + createTimeToLiveJitterMillis(TimeUnit.HOURS));
     }
 
     public String getNaturalLanguageCode() {
@@ -49,13 +58,22 @@ public class ReferenceDumpExportJobSpecification extends AbstractJobSpecificatio
         this.filterForSimpleTwoCharLanguageCodes = filterForSimpleTwoCharLanguageCodes;
     }
 
+    public String getProjectVersion() {
+        return projectVersion;
+    }
+
+    public void setProjectVersion(String projectVersion) {
+        this.projectVersion = projectVersion;
+    }
+
     public boolean isEquivalent(JobSpecification other) {
         if (!super.isEquivalent(other)) {
             return false;
         }
 
-        ReferenceDumpExportJobSpecification pkgOther = ReferenceDumpExportJobSpecification.class.cast(other);
+        ReferenceDumpExportJobSpecification pkgOther = (ReferenceDumpExportJobSpecification) other;
         return Objects.equals(pkgOther.getNaturalLanguageCode(), getNaturalLanguageCode())
+                && Objects.equals(pkgOther.getProjectVersion(), getProjectVersion())
                 && pkgOther.isFilterForSimpleTwoCharLanguageCodes() == isFilterForSimpleTwoCharLanguageCodes();
     }
 

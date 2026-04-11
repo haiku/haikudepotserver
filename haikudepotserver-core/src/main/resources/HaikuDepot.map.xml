@@ -61,6 +61,19 @@
 			<db-key-cache-size>1</db-key-cache-size>
 		</db-key-generator>
 	</db-entity>
+	<db-entity name="natural_language_use" schema="haikudepot">
+		<db-attribute name="count" type="BIGINT" isMandatory="true"/>
+		<db-attribute name="create_timestamp" type="TIMESTAMP" isMandatory="true"/>
+		<db-attribute name="id" type="BIGINT" isPrimaryKey="true" isMandatory="true"/>
+		<db-attribute name="last_use_timestamp" type="TIMESTAMP" isMandatory="true"/>
+		<db-attribute name="modify_timestamp" type="TIMESTAMP" isMandatory="true"/>
+		<db-attribute name="natural_language_id" type="BIGINT" isMandatory="true"/>
+		<db-key-generator>
+			<db-generator-type>ORACLE</db-generator-type>
+			<db-generator-name>haikudepot.natural_language_use_seq</db-generator-name>
+			<db-key-cache-size>1</db-key-cache-size>
+		</db-key-generator>
+	</db-entity>
 	<db-entity name="permission" schema="haikudepot">
 		<db-attribute name="code" type="VARCHAR" isMandatory="true" length="255"/>
 		<db-attribute name="id" type="BIGINT" isPrimaryKey="true" isMandatory="true"/>
@@ -510,6 +523,12 @@
 		<obj-attribute name="name" type="java.lang.String" db-attribute-path="name"/>
 		<obj-attribute name="scriptCode" type="java.lang.String" lock="true" db-attribute-path="script_code"/>
 	</obj-entity>
+	<obj-entity name="NaturalLanguageUse" className="org.haiku.haikudepotserver.dataobjects.NaturalLanguageUse" dbEntityName="natural_language_use" superClassName="org.haiku.haikudepotserver.dataobjects.support.AbstractDataObject">
+		<obj-attribute name="count" type="java.lang.Long" lock="true" db-attribute-path="count"/>
+		<obj-attribute name="createTimestamp" type="java.sql.Timestamp" db-attribute-path="create_timestamp"/>
+		<obj-attribute name="lastUseTimestamp" type="java.sql.Timestamp" db-attribute-path="last_use_timestamp"/>
+		<obj-attribute name="modifyTimestamp" type="java.sql.Timestamp" db-attribute-path="modify_timestamp"/>
+	</obj-entity>
 	<obj-entity name="Permission" className="org.haiku.haikudepotserver.dataobjects.Permission" readOnly="true" dbEntityName="permission" superClassName="org.haiku.haikudepotserver.dataobjects.support.AbstractDataObject">
 		<obj-attribute name="code" type="java.lang.String" db-attribute-path="code"/>
 		<obj-attribute name="name" type="java.lang.String" db-attribute-path="name"/>
@@ -709,11 +728,17 @@
 	<db-relationship name="untitledRel" source="natural_language" target="pkg_localization" toMany="true">
 		<db-attribute-pair source="id" target="natural_language_id"/>
 	</db-relationship>
+	<db-relationship name="untitledRel1" source="natural_language" target="natural_language_use" toMany="true">
+		<db-attribute-pair source="id" target="natural_language_id"/>
+	</db-relationship>
 	<db-relationship name="user_ratings" source="natural_language" target="user_rating" toMany="true">
 		<db-attribute-pair source="id" target="natural_language_id"/>
 	</db-relationship>
 	<db-relationship name="users" source="natural_language" target="user" toMany="true">
 		<db-attribute-pair source="id" target="natural_language_id"/>
+	</db-relationship>
+	<db-relationship name="natural_language" source="natural_language_use" target="natural_language">
+		<db-attribute-pair source="natural_language_id" target="id"/>
 	</db-relationship>
 	<db-relationship name="untitledRel" source="permission" target="permission_user_pkg" toMany="true">
 		<db-attribute-pair source="id" target="permission_id"/>
@@ -958,6 +983,7 @@
 	<db-relationship name="user_usage_conditions" source="user_usage_conditions_agreement" target="user_usage_conditions">
 		<db-attribute-pair source="user_usage_conditions_id" target="id"/>
 	</db-relationship>
+	<obj-relationship name="naturalLanguage" source="NaturalLanguageUse" target="NaturalLanguage" deleteRule="Nullify" db-relationship-path="natural_language"/>
 	<obj-relationship name="permission" source="PermissionUserPkg" target="Permission" deleteRule="Nullify" db-relationship-path="permission"/>
 	<obj-relationship name="pkg" source="PermissionUserPkg" target="Pkg" deleteRule="Nullify" db-relationship-path="pkg"/>
 	<obj-relationship name="user" source="PermissionUserPkg" target="User" deleteRule="Nullify" db-relationship-path="user"/>

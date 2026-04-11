@@ -1,5 +1,5 @@
 /*
- * Copyright 2018-2025, Andrew Lindesay
+ * Copyright 2018-2026, Andrew Lindesay
  * Distributed under the terms of the MIT License.
  */
 
@@ -40,6 +40,7 @@ import org.springframework.stereotype.Component;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.io.UncheckedIOException;
+import java.time.Instant;
 import java.util.*;
 import java.util.stream.Collectors;
 import java.util.zip.GZIPOutputStream;
@@ -76,6 +77,12 @@ public class PkgDumpExportJobRunner extends AbstractJobRunner<PkgDumpExportJobSp
     public void run(JobService jobService, PkgDumpExportJobSpecification specification)
             throws IOException {
 
+        jobService.setJobDescription(
+                specification.getGuid(),
+                String.format("pkg dump for repository [%s] with natural language [%s]",
+                        specification.getRepositorySourceCode(), specification.getNaturalLanguageCode())
+        );
+
         // this will register the outbound data against the job.
         JobDataWithByteSink jobDataWithByteSink = jobService.storeGeneratedData(
                 specification.getGuid(),
@@ -83,13 +90,16 @@ public class PkgDumpExportJobRunner extends AbstractJobRunner<PkgDumpExportJobSp
                 MediaType.JSON_UTF_8.toString(),
                 JobDataEncoding.GZIP);
 
+        Instant dataLastModifyTimestamp = getDataLastModifyTimestamp(specification);
+        jobService.setJobDataTimestamp(specification.getGuid(), dataLastModifyTimestamp);
+
         try (
                 final OutputStream outputStream = jobDataWithByteSink.getByteSink().openBufferedStream();
                 final GZIPOutputStream gzipOutputStream = new GZIPOutputStream(outputStream);
                 final JsonGenerator jsonGenerator = objectMapper.getFactory().createGenerator(gzipOutputStream)
         ) {
             jsonGenerator.writeStartObject();
-            writeInfo(jsonGenerator, specification);
+            writeInfo(jsonGenerator, specification, dataLastModifyTimestamp);
             writePkgs(jsonGenerator, specification);
             jsonGenerator.writeEndObject();
         }
@@ -289,22 +299,28 @@ public class PkgDumpExportJobRunner extends AbstractJobRunner<PkgDumpExportJobSp
 
     private void writeInfo(
             JsonGenerator jsonGenerator,
-            PkgDumpExportJobSpecification specification) throws IOException {
+            PkgDumpExportJobSpecification specification,
+            Instant dataLastModifyTimestamp) throws IOException {
         jsonGenerator.writeFieldName("info");
-        objectMapper.writeValue(jsonGenerator, createArchiveInfo(serverRuntime.newContext(), specification));
+        objectMapper.writeValue(jsonGenerator, createArchiveInfo(dataLastModifyTimestamp));
     }
 
-    private ArchiveInfo createArchiveInfo(ObjectContext context, PkgDumpExportJobSpecification specification) {
+    private ArchiveInfo createArchiveInfo(Instant dataLastModifyTimestamp) throws IOException {
+        return new ArchiveInfo(
+                Date.from(dataLastModifyTimestamp),
+                runtimeInformationService.getProjectVersion());
+    }
+
+    private Instant getDataLastModifyTimestamp(PkgDumpExportJobSpecification specification) {
+        ObjectContext context = serverRuntime.newContext();
         RepositorySource repositorySource = RepositorySource.tryGetByCode(
                 context,
                 specification.getRepositorySourceCode()
         ).orElseThrow(() -> new IllegalStateException(
                 "unable to find the repository source [" + specification.getRepositorySourceCode() + "]")
         );
-        Date modifyTimestamp = pkgService.getLastModifyTimestampSecondAccuracy(context, repositorySource);
-        return new ArchiveInfo(
-                DateTimeHelper.secondAccuracyDatePlusOneSecond(modifyTimestamp),
-                runtimeInformationService.getProjectVersion());
+        Instant value = pkgService.getLastModifyTimestampSecondAccuracy(context, repositorySource.getCode()).toInstant();
+        return DateTimeHelper.secondAccuracyInstantPlusOneSecond(value);
     }
 
 }

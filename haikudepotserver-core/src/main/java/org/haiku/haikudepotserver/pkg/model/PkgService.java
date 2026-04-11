@@ -1,5 +1,5 @@
 /*
- * Copyright 2018-2024, Andrew Lindesay
+ * Copyright 2018-2026, Andrew Lindesay
  * Distributed under the terms of the MIT License.
  */
 
@@ -216,7 +216,7 @@ public interface PkgService {
      * This also considers the Pkg as well.</p>
      */
 
-    Date getLastModifyTimestampSecondAccuracy(ObjectContext context, RepositorySource repositorySource);
+    Date getLastModifyTimestampSecondAccuracy(ObjectContext context, String repositorySourceCode);
 
     /**
      * <p>This is a URL that is nice to look at for the package.</p>

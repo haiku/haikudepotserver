@@ -1,10 +1,11 @@
 /*
- * Copyright 2014-2017, Andrew Lindesay
+ * Copyright 2014-2026, Andrew Lindesay
  * Distributed under the terms of the MIT License.
  */
 
 package org.haiku.haikudepotserver.support;
 
+import java.time.Instant;
 import java.time.ZoneOffset;
 import java.time.format.DateTimeFormatter;
 import java.time.format.DateTimeFormatterBuilder;
@@ -17,6 +18,14 @@ import static java.time.temporal.ChronoField.MINUTE_OF_HOUR;
 import static java.time.temporal.ChronoField.SECOND_OF_MINUTE;
 
 public class DateTimeHelper {
+
+    public static Instant secondAccuracyInstant(Instant instant) {
+        return Instant.ofEpochMilli((instant.toEpochMilli() / 1000) * 1000);
+    }
+
+    public static Instant secondAccuracyInstantPlusOneSecond(Instant instant) {
+        return Instant.ofEpochMilli(((instant.toEpochMilli() / 1000) * 1000) + 1000);
+    }
 
     public static Date secondAccuracyDate(Date date) {
         return new Date((date.getTime() / 1000) * 1000);

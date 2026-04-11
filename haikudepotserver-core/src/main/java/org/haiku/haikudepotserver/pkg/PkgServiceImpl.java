@@ -21,6 +21,7 @@ import org.apache.cayenne.query.ObjectSelect;
 import org.apache.cayenne.query.SQLTemplate;
 import org.apache.commons.lang3.ObjectUtils;
 import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.Strings;
 import org.haiku.haikudepotserver.dataobjects.*;
 import org.haiku.haikudepotserver.dataobjects.auto._HaikuDepot;
 import org.haiku.haikudepotserver.pkg.model.PkgSearchSpecification;
@@ -356,7 +357,7 @@ public class PkgServiceImpl implements PkgService {
         newContent = StringUtils.trimToNull(newContent);
 
         if (null == newContent) {
-            pkgChangelogOptional.ifPresent(pcl -> {
+            pkgChangelogOptional.ifPresent(_ -> {
                 context.deleteObject(pkgChangelogOptional.get());
 
                 pkgSupplementModificationService.appendModification(
@@ -368,10 +369,6 @@ public class PkgServiceImpl implements PkgService {
                 LOGGER.info("did remove the changelog for; {}", pkgSupplement.getBasePkgName());
             });
         } else {
-            String oldContent = pkgChangelogOptional
-                    .map(PkgChangelog::getContent)
-                    .map(StringUtils::trimToNull)
-                    .orElse(null);
             newContent = newContent.replace("\r\n", "\n"); // windows to unix newline.
 
             PkgChangelog pkgChangelog = pkgChangelogOptional.orElseGet(() -> {
@@ -504,7 +501,7 @@ public class PkgServiceImpl implements PkgService {
         return SUFFIXES_SUBORDINATE_PKG_NAMES
                 .stream()
                 .filter(subordinatePkgName::endsWith)
-                .map(suffix -> StringUtils.removeEnd(subordinatePkgName, suffix))
+                .map(suffix -> Strings.CS.removeEnd(subordinatePkgName, suffix))
                 .findFirst();
     }
 
@@ -640,14 +637,14 @@ public class PkgServiceImpl implements PkgService {
     }
 
     @Override
-    public Date getLastModifyTimestampSecondAccuracy(ObjectContext context, RepositorySource repositorySource) {
+    public Date getLastModifyTimestampSecondAccuracy(ObjectContext context, String repositorySourceCode) {
         Preconditions.checkNotNull(context);
 
         Date pkgVersionMax = ObjectUtils.firstNonNull(
                 ObjectSelect
                         .query(PkgVersion.class)
                         .where(PkgVersion.ACTIVE.isTrue())
-                        .and(PkgVersion.REPOSITORY_SOURCE.eq(repositorySource))
+                        .and(PkgVersion.REPOSITORY_SOURCE.dot(RepositorySource.CODE).eq(repositorySourceCode))
                         .and(PkgVersion.PKG.dot(Pkg.ACTIVE).isTrue())
                         .max(PkgVersion.MODIFY_TIMESTAMP)
                         .sharedCache()
@@ -659,7 +656,7 @@ public class PkgServiceImpl implements PkgService {
                 ObjectSelect
                         .query(PkgVersion.class)
                         .where(PkgVersion.ACTIVE.isTrue())
-                        .and(PkgVersion.REPOSITORY_SOURCE.eq(repositorySource))
+                        .and(PkgVersion.REPOSITORY_SOURCE.dot(RepositorySource.CODE).eq(repositorySourceCode))
                         .and(PkgVersion.PKG.dot(Pkg.ACTIVE).isTrue())
                         .max(PkgVersion.PKG.dot(Pkg.MODIFY_TIMESTAMP))
                         .sharedCache()
@@ -671,7 +668,7 @@ public class PkgServiceImpl implements PkgService {
                 ObjectSelect
                         .query(PkgVersion.class)
                         .where(PkgVersion.ACTIVE.isTrue())
-                        .and(PkgVersion.REPOSITORY_SOURCE.eq(repositorySource))
+                        .and(PkgVersion.REPOSITORY_SOURCE.dot(RepositorySource.CODE).eq(repositorySourceCode))
                         .and(PkgVersion.PKG.dot(Pkg.ACTIVE).isTrue())
                         .max(PkgVersion.PKG.dot(Pkg.PKG_SUPPLEMENT).dot(PkgSupplement.MODIFY_TIMESTAMP))
                         .sharedCache()

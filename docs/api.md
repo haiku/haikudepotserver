@@ -279,3 +279,4 @@ Possible values for `type` are;
 
 - `HOURLY`
 - `DAILY`
+- `FIVE_MINUTELY`

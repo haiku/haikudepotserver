@@ -13,7 +13,6 @@ import com.google.common.net.MediaType;
 import com.google.common.util.concurrent.AbstractExecutionThreadService;
 import com.google.common.util.concurrent.Service;
 import com.google.common.util.concurrent.Uninterruptibles;
-import jakarta.annotation.Nullable;
 import jakarta.annotation.PostConstruct;
 import jakarta.annotation.PreDestroy;
 import org.apache.cayenne.CayenneRuntimeException;
@@ -25,7 +24,6 @@ import org.apache.cayenne.tx.TransactionPropagation;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.text.RandomStringGenerator;
-import org.haiku.haikudepotserver.dataobjects.User;
 import org.haiku.haikudepotserver.dataobjects.auto._JobData;
 import org.haiku.haikudepotserver.job.model.*;
 import org.haiku.haikudepotserver.storage.model.DataStorageService;
@@ -48,7 +46,9 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.sql.Connection;
 import java.sql.SQLException;
-import java.time.*;
+import java.time.Clock;
+import java.time.Duration;
+import java.time.Instant;
 import java.time.temporal.ChronoUnit;
 import java.util.*;
 import java.util.concurrent.TimeUnit;
@@ -125,7 +125,7 @@ public class DbDistributedJob2ServiceImpl extends AbstractExecutionThreadService
 
     private static String createServiceName() {
         RandomStringGenerator generator = new RandomStringGenerator.Builder()
-                .withinRange(new char[][] {{'a','z'}, {'0','9'}}).get();
+                .withinRange(new char[][]{{'a', 'z'}, {'0', '9'}}).get();
         return String.format("%s-%s",
                 DbDistributedJob2ServiceImpl.class.getSimpleName(),
                 generator.generate(4)
@@ -164,7 +164,7 @@ public class DbDistributedJob2ServiceImpl extends AbstractExecutionThreadService
         RetryTemplate retryTemplate = createRunRetryTemplate();
 
         try {
-            retryTemplate.execute((RetryCallback<Object, Throwable>) context -> {
+            retryTemplate.execute((RetryCallback<Object, Throwable>) _ -> {
                 loopAwaitingAndRunningAvailableJobs();
                 return Boolean.TRUE;
             });
@@ -299,6 +299,37 @@ public class DbDistributedJob2ServiceImpl extends AbstractExecutionThreadService
     }
 
     @Override
+    public void setJobDescription(String guid, String description) {
+        Preconditions.checkArgument(StringUtils.isNotBlank(guid), "the guid is required");
+        LOGGER.info("job [{}]; setting description to [{}]", guid, description);
+        serverRuntime.performInTransaction(
+                () -> {
+                    ObjectContext objectContext = serverRuntime.newContext();
+                    DbDistributedJob2Helper.updateDescription(objectContext, guid, description);
+                    objectContext.commitChanges();
+                    return Boolean.TRUE;
+                },
+                CAY_TRANSACTION_DESCRIPTOR_NEW
+        );
+    }
+
+    @Override
+    public void setJobDataTimestamp(String guid, Instant instant) {
+        Preconditions.checkArgument(StringUtils.isNotBlank(guid), "the guid is required");
+
+        serverRuntime.performInTransaction(
+                () -> {
+                    ObjectContext objectContext = serverRuntime.newContext();
+                    DbDistributedJob2Helper.updateDataTimestamp(objectContext, guid, instant);
+                    objectContext.commitChanges();
+                    return Boolean.TRUE;
+                },
+                CAY_TRANSACTION_DESCRIPTOR_NEW
+        );
+    }
+
+
+    @Override
     public void setJobProgressPercent(String guid, Integer progressPercent) {
         Preconditions.checkArgument(StringUtils.isNotBlank(guid), "the guid is required");
 
@@ -372,16 +403,14 @@ public class DbDistributedJob2ServiceImpl extends AbstractExecutionThreadService
 
     @Override
     public List<? extends JobSnapshot> findJobs(
-            @Nullable User user,
-            @Nullable Set<JobSnapshot.Status> statuses,
+            JobFindRequest findRequest,
             int offset,
             int limit) {
         Preconditions.checkArgument(offset >= 0, "bad offset");
         Preconditions.checkArgument(limit > 0, "bad limit");
         return DbDistributedJob2Helper.findJobs(
                         serverRuntime.newContext(),
-                        Optional.ofNullable(user).map(User::getNickname).orElse(null),
-                        statuses,
+                        findRequest,
                         offset,
                         limit)
                 .stream()
@@ -390,13 +419,13 @@ public class DbDistributedJob2ServiceImpl extends AbstractExecutionThreadService
     }
 
     @Override
-    public int totalJobs(
-            @Nullable User user,
-            @Nullable Set<JobSnapshot.Status> statuses) {
-        return (int) DbDistributedJob2Helper.totalJobs(
-                serverRuntime.newContext(),
-                        Optional.ofNullable(user).map(User::getNickname).orElse(null),
-                        statuses);
+    public Optional<? extends JobSnapshot> tryGetLatestMatchingJob(JobSpecification specification, Set<JobSnapshot.Status> statuses) {
+        return getMatchingJob(specification, statuses);
+    }
+
+    @Override
+    public int totalJobs(JobFindRequest findRequest) {
+        return (int) DbDistributedJob2Helper.totalJobs(serverRuntime.newContext(), findRequest);
     }
 
     @Override
@@ -491,7 +520,7 @@ public class DbDistributedJob2ServiceImpl extends AbstractExecutionThreadService
         JobData data;
         long len;
 
-        try(InputStream inputStream = byteSource.openStream()) {
+        try (InputStream inputStream = byteSource.openStream()) {
 
             // TODO; constrain this to a sensible size
 
@@ -622,6 +651,7 @@ public class DbDistributedJob2ServiceImpl extends AbstractExecutionThreadService
 
     /**
      * <p>Obtains work from the queue and runs it.</p>
+     *
      * @return true if there was a job processed.
      */
     private boolean runNextAvailableJob() {
@@ -705,7 +735,7 @@ public class DbDistributedJob2ServiceImpl extends AbstractExecutionThreadService
 
     private Optional<JobRunner<? extends JobSpecification>> tryGetJobRunner(final String jobTypeCode) {
         Preconditions.checkArgument(!Strings.isNullOrEmpty(jobTypeCode));
-        Preconditions.checkState(null!=jobRunners,"the job runners must be configured - was this started up properly?");
+        Preconditions.checkState(null != jobRunners, "the job runners must be configured - was this started up properly?");
         return jobRunners.stream()
                 .filter(j -> j.getJobTypeCode().equals(jobTypeCode))
                 .collect(SingleCollector.optional());
@@ -733,8 +763,7 @@ public class DbDistributedJob2ServiceImpl extends AbstractExecutionThreadService
             updateStateStatus(specification.getGuid(), JobSnapshot.Status.STARTED);
             jobRunner.run(this, specification);
             updateStateStatus(specification.getGuid(), JobSnapshot.Status.FINISHED);
-        }
-        catch(Throwable th) {
+        } catch (Throwable th) {
             LOGGER.error(specification.getGuid() + "; failure to run the job", th);
             setJobFailTimestamp(specification.getGuid());
         }
@@ -742,7 +771,8 @@ public class DbDistributedJob2ServiceImpl extends AbstractExecutionThreadService
 
     /**
      * <p>Create a new Job in the database based on the specification.</p>
-     * @return the code of the {@link org.haiku.haikudepotserver.job.jpa.model.Job}.
+     *
+     * @return the code of the {@link Job}.
      */
     private String persistNewJob(JobSpecification specification, boolean started) {
         Preconditions.checkNotNull(specification, "the specification must be supplied");
@@ -814,7 +844,9 @@ public class DbDistributedJob2ServiceImpl extends AbstractExecutionThreadService
         objectContext.commitChanges();
     }
 
-    private Optional<Job> getMatchingJob(JobSpecification specification, Set<JobSnapshot.Status> statuses) {
+    private Optional<Job> getMatchingJob(
+            JobSpecification specification,
+            Set<JobSnapshot.Status> statuses) {
         // if we're including any started jobs then we need to check that there's no started ones in the
         // database which are dangling as this may mess-up the queries.
 
@@ -823,7 +855,11 @@ public class DbDistributedJob2ServiceImpl extends AbstractExecutionThreadService
         }
 
         // the stream will be in the most desirable ordering.
-        return DbDistributedJob2Helper.streamJobsByTypeAndStatuses(serverRuntime.newContext(), specification.getJobTypeCode(), statuses)
+        return DbDistributedJob2Helper.streamJobsByTypeAndStatuses(
+                        serverRuntime.newContext(),
+                        clock.instant(),
+                        specification.getJobTypeCode(),
+                        statuses)
                 .map(this::mapPersistedJobToJob)
                 .filter(job -> job.getJobSpecification().isEquivalent(specification))
                 .findFirst();
@@ -839,22 +875,17 @@ public class DbDistributedJob2ServiceImpl extends AbstractExecutionThreadService
         );
     }
 
-    private java.util.Date toDateIfNotNull(LocalDateTime localDateTime) {
-        return Optional.ofNullable(localDateTime)
-                .map(ldt -> ldt.toInstant(ZoneOffset.UTC))
-                .map(java.util.Date::from)
-                .orElse(null);
-    }
-
     private Job mapPersistedJobToJob(org.haiku.haikudepotserver.dataobjects.Job persistedJob) {
         Job result = new Job();
 
+        result.setDescription(persistedJob.getDescription());
         result.setStartTimestamp(persistedJob.getStartTimestamp());
         result.setFinishTimestamp(persistedJob.getFinishTimestamp());
         result.setQueuedTimestamp(persistedJob.getQueueTimestamp());
         result.setFailTimestamp(persistedJob.getFailTimestamp());
         result.setCancelTimestamp(persistedJob.getCancelTimestamp());
         result.setProgressPercent(persistedJob.getProgressPercent());
+        result.setDataTimestamp(persistedJob.getDataTimestamp());
 
         // TODO; pro-actively loading the job specification here is going to be an
         //  overhead that could be handled better; for now continue the same approach.

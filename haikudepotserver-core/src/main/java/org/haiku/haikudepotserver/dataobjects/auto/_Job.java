@@ -32,6 +32,8 @@ public abstract class _Job extends AbstractDataObject {
     public static final DateProperty<Timestamp> CANCEL_TIMESTAMP = PropertyFactory.createDate("cancelTimestamp", Timestamp.class);
     public static final StringProperty<String> CODE = PropertyFactory.createString("code", String.class);
     public static final DateProperty<Timestamp> CREATE_TIMESTAMP = PropertyFactory.createDate("createTimestamp", Timestamp.class);
+    public static final DateProperty<Timestamp> DATA_TIMESTAMP = PropertyFactory.createDate("dataTimestamp", Timestamp.class);
+    public static final StringProperty<String> DESCRIPTION = PropertyFactory.createString("description", String.class);
     public static final DateProperty<Timestamp> EXPIRY_TIMESTAMP = PropertyFactory.createDate("expiryTimestamp", Timestamp.class);
     public static final DateProperty<Timestamp> FAIL_TIMESTAMP = PropertyFactory.createDate("failTimestamp", Timestamp.class);
     public static final DateProperty<Timestamp> FINISH_TIMESTAMP = PropertyFactory.createDate("finishTimestamp", Timestamp.class);
@@ -48,6 +50,8 @@ public abstract class _Job extends AbstractDataObject {
     protected Timestamp cancelTimestamp;
     protected String code;
     protected Timestamp createTimestamp;
+    protected Timestamp dataTimestamp;
+    protected String description;
     protected Timestamp expiryTimestamp;
     protected Timestamp failTimestamp;
     protected Timestamp finishTimestamp;
@@ -90,6 +94,26 @@ public abstract class _Job extends AbstractDataObject {
     public Timestamp getCreateTimestamp() {
         beforePropertyRead("createTimestamp");
         return this.createTimestamp;
+    }
+
+    public void setDataTimestamp(Timestamp dataTimestamp) {
+        beforePropertyWrite("dataTimestamp", this.dataTimestamp, dataTimestamp);
+        this.dataTimestamp = dataTimestamp;
+    }
+
+    public Timestamp getDataTimestamp() {
+        beforePropertyRead("dataTimestamp");
+        return this.dataTimestamp;
+    }
+
+    public void setDescription(String description) {
+        beforePropertyWrite("description", this.description, description);
+        this.description = description;
+    }
+
+    public String getDescription() {
+        beforePropertyRead("description");
+        return this.description;
     }
 
     public void setExpiryTimestamp(Timestamp expiryTimestamp) {
@@ -224,6 +248,10 @@ public abstract class _Job extends AbstractDataObject {
                 return this.code;
             case "createTimestamp":
                 return this.createTimestamp;
+            case "dataTimestamp":
+                return this.dataTimestamp;
+            case "description":
+                return this.description;
             case "expiryTimestamp":
                 return this.expiryTimestamp;
             case "failTimestamp":
@@ -268,6 +296,12 @@ public abstract class _Job extends AbstractDataObject {
                 break;
             case "createTimestamp":
                 this.createTimestamp = (Timestamp)val;
+                break;
+            case "dataTimestamp":
+                this.dataTimestamp = (Timestamp)val;
+                break;
+            case "description":
+                this.description = (String)val;
                 break;
             case "expiryTimestamp":
                 this.expiryTimestamp = (Timestamp)val;
@@ -324,6 +358,8 @@ public abstract class _Job extends AbstractDataObject {
         out.writeObject(this.cancelTimestamp);
         out.writeObject(this.code);
         out.writeObject(this.createTimestamp);
+        out.writeObject(this.dataTimestamp);
+        out.writeObject(this.description);
         out.writeObject(this.expiryTimestamp);
         out.writeObject(this.failTimestamp);
         out.writeObject(this.finishTimestamp);
@@ -344,6 +380,8 @@ public abstract class _Job extends AbstractDataObject {
         this.cancelTimestamp = (Timestamp)in.readObject();
         this.code = (String)in.readObject();
         this.createTimestamp = (Timestamp)in.readObject();
+        this.dataTimestamp = (Timestamp)in.readObject();
+        this.description = (String)in.readObject();
         this.expiryTimestamp = (Timestamp)in.readObject();
         this.failTimestamp = (Timestamp)in.readObject();
         this.finishTimestamp = (Timestamp)in.readObject();

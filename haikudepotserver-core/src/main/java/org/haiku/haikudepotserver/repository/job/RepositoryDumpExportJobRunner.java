@@ -1,5 +1,5 @@
 /*
- * Copyright 2018-2025, Andrew Lindesay
+ * Copyright 2018-2026, Andrew Lindesay
  * Distributed under the terms of the MIT License.
  */
 
@@ -17,7 +17,10 @@ import org.haiku.haikudepotserver.dataobjects.auto._Repository;
 import org.haiku.haikudepotserver.dataobjects.auto._RepositorySource;
 import org.haiku.haikudepotserver.dataobjects.auto._RepositorySourceMirror;
 import org.haiku.haikudepotserver.job.AbstractJobRunner;
-import org.haiku.haikudepotserver.job.model.*;
+import org.haiku.haikudepotserver.job.model.JobDataEncoding;
+import org.haiku.haikudepotserver.job.model.JobDataWithByteSink;
+import org.haiku.haikudepotserver.job.model.JobRunnerException;
+import org.haiku.haikudepotserver.job.model.JobService;
 import org.haiku.haikudepotserver.repository.model.RepositoryDumpExportJobSpecification;
 import org.haiku.haikudepotserver.repository.model.dumpexport.DumpExportRepository;
 import org.haiku.haikudepotserver.repository.model.dumpexport.DumpExportRepositorySource;
@@ -29,6 +32,7 @@ import org.springframework.stereotype.Component;
 
 import java.io.IOException;
 import java.io.OutputStream;
+import java.time.Instant;
 import java.util.Comparator;
 import java.util.Date;
 import java.util.List;
@@ -85,8 +89,11 @@ public class RepositoryDumpExportJobRunner extends AbstractJobRunner<RepositoryD
                     .filter(_Repository::getActive)
                     .collect(Collectors.toList());
 
+            Instant dataLastModifyTimestamp = getDataLastModifyTimestamp(repositories);
+            jobService.setJobDataTimestamp(specification.getGuid(), dataLastModifyTimestamp);
+
             jsonGenerator.writeStartObject();
-            writeInfo(jsonGenerator, repositories);
+            writeInfo(jsonGenerator, dataLastModifyTimestamp);
             writeRepositories(jsonGenerator, repositories);
             jsonGenerator.writeEndObject();
 
@@ -148,20 +155,24 @@ public class RepositoryDumpExportJobRunner extends AbstractJobRunner<RepositoryD
         return dumpRepository;
     }
 
-    private void writeInfo(JsonGenerator jsonGenerator, List<Repository> repositories) throws IOException {
+    private void writeInfo(JsonGenerator jsonGenerator, Instant dataLastModifyTimestamp) throws IOException {
         jsonGenerator.writeFieldName("info");
-        objectMapper.writeValue(jsonGenerator, createArchiveInfo(repositories));
+        objectMapper.writeValue(jsonGenerator, createArchiveInfo(dataLastModifyTimestamp));
     }
 
-    private ArchiveInfo createArchiveInfo(List<Repository> repositories) {
-        Date modifyTimestamp = repositories
-                .stream().max(Comparator.comparing(Repository::getModifyTimestamp))
-                .map(_Repository::getModifyTimestamp)
-                .orElse(new java.sql.Timestamp(0L));
-
+    private ArchiveInfo createArchiveInfo(Instant dataLastModifyTimestamp) {
         return new ArchiveInfo(
-                DateTimeHelper.secondAccuracyDatePlusOneSecond(modifyTimestamp),
+                DateTimeHelper.secondAccuracyDatePlusOneSecond(Date.from(dataLastModifyTimestamp)),
                 runtimeInformationService.getProjectVersion());
+    }
+
+    private Instant getDataLastModifyTimestamp(List<Repository> repositories) {
+        return repositories
+                .stream()
+                .max(Comparator.comparing(Repository::getModifyTimestamp))
+                .map(_Repository::getModifyTimestamp)
+                .orElse(new java.sql.Timestamp(0L))
+                .toInstant();
     }
 
 }

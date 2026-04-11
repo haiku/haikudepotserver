@@ -1,5 +1,5 @@
 /*
- * Copyright 2014-2016, Andrew Lindesay
+ * Copyright 2014-2026, Andrew Lindesay
  * Distributed under the terms of the MIT License.
  */
 
@@ -39,6 +39,8 @@ public interface JobSnapshot {
 
     Integer getProgressPercent();
 
+    Date getDataTimestamp();
+
     JobSpecification getJobSpecification();
 
     Set<String> getGeneratedDataGuids();
@@ -52,6 +54,8 @@ public interface JobSnapshot {
     String getJobTypeCode();
 
     String getGuid();
+
+    String getDescription();
 
     Optional<Long> tryGetTimeToLiveMillis();
 

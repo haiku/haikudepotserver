@@ -9,11 +9,16 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.collect.ImmutableList;
 import io.micrometer.core.instrument.MeterRegistry;
 import org.apache.cayenne.configuration.server.ServerRuntime;
+import org.haiku.haikudepotserver.job.BulkDataJobCoordinatorServiceImpl;
 import org.haiku.haikudepotserver.job.DbDistributedJob2ServiceImpl;
 import org.haiku.haikudepotserver.job.NoopJobServiceImpl;
+import org.haiku.haikudepotserver.job.model.BulkDataJobCoordinatorService;
 import org.haiku.haikudepotserver.job.model.JobRunner;
 import org.haiku.haikudepotserver.job.model.JobService;
+import org.haiku.haikudepotserver.naturallanguage.model.NaturalLanguageService;
 import org.haiku.haikudepotserver.pkg.model.PkgLocalizationLookupService;
+import org.haiku.haikudepotserver.pkg.model.PkgService;
+import org.haiku.haikudepotserver.repository.model.RepositoryService;
 import org.haiku.haikudepotserver.storage.PgDataStorageServiceImpl;
 import org.haiku.haikudepotserver.storage.model.DataStorageService;
 import org.haiku.haikudepotserver.thymeleaf.Dialect;
@@ -25,6 +30,8 @@ import org.springframework.context.annotation.Import;
 import org.springframework.core.io.Resource;
 
 import javax.sql.DataSource;
+import java.time.Clock;
+import java.time.Duration;
 import java.util.Collection;
 import java.util.List;
 
@@ -51,6 +58,32 @@ public class AppConfig {
                     applicationEventPublisher);
             default -> throw new IllegalStateException("unexpected job service type: " + type);
         };
+    }
+
+    @Bean
+    public BulkDataJobCoordinatorService bulkDataJobCoordinatorService(
+            ServerRuntime serverRuntime,
+            JobService jobService,
+            RepositoryService repositoryService,
+            PkgService pkgService,
+            NaturalLanguageService naturalLanguageService,
+            @Value("${hds.bulk-data.renew-after-remaining-hours}") Integer renewAfterRemainingHours,
+            @Value("${hds.bulk-data.renew-standdown-since-last-start-minutes}") Integer renewStanddownSinceLastStartMinutes,
+            @Value("${hds.bulk-data.renew-for-natural-language-hours}") Integer renewForNaturalLanguageHours,
+            @Value("${hds.bulk-data.clear-expired-after-finished-hours}") Integer clearExpiredAfterFinishedHours
+    ) {
+        return new BulkDataJobCoordinatorServiceImpl(
+                Clock.systemUTC(),
+                serverRuntime,
+                jobService,
+                repositoryService,
+                pkgService,
+                naturalLanguageService,
+                Duration.ofHours(renewAfterRemainingHours),
+                Duration.ofMinutes(renewStanddownSinceLastStartMinutes),
+                Duration.ofHours(renewForNaturalLanguageHours),
+                Duration.ofHours(clearExpiredAfterFinishedHours)
+        );
     }
 
     @Bean

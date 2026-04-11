@@ -25,6 +25,7 @@
                 <th><message key="listJobs.table.type.title"></message></th>
                 <th><message key="listJobs.table.user.title"></message></th>
                 <th><message key="listJobs.table.queued.title"></message></th>
+                <th><message key="listJobs.table.data.title"></message></th>
                 <th><message key="listJobs.table.status.title"></message></th>
                 </thead>
                 <tbody>
@@ -36,12 +37,19 @@
                             {{job.guid|croppedGuid}}
                         </a>
                     </td>
-                    <td><message key="{{'job.jobtype.' + job.jobTypeCode + '.title'}}"></message></td>
+                    <td>
+                        <message key="{{'job.jobtype.' + job.jobTypeCode + '.title'}}"></message>
+                        <div class="muted" ng-if="job.description">{{job.description}}</div>
+                    </td>
                     <td>
                         <span ng-show="job.ownerUser"><user-label user="job.ownerUser"></user-label></span>
                         <span ng-show="!job.ownerUser">&mdash;</span>
                     </td>
                     <td>{{job.queuedTimestamp|timestamp}}</td>
+                    <td>
+                        <span ng-show="job.dataTimestamp">{{job.dataTimestamp|timestamp}}</span>
+                        <span ng-show="!job.dataTimestamp">&mdash;</span>
+                    </td>
                     <td><job-status-indicator job="job"></job-status-indicator></td>
                 </tr>
                 </tbody>

@@ -1,5 +1,5 @@
 /*
- * Copyright 2017, Andrew Lindesay
+ * Copyright 2017-2026, Andrew Lindesay
  * Distributed under the terms of the MIT License.
  */
 
@@ -12,11 +12,14 @@ import java.util.concurrent.TimeUnit;
 
 public class RepositoryDumpExportJobSpecification extends AbstractJobSpecification {
 
-    private final static long TTL_MINUTES = 30;
+    /**
+     * <p>The reference data is able to be left for a long time as it rarely changes.</p>
+     */
+    private final static long TT_HOURS = 24;
 
     @Override
     public Optional<Long> tryGetTimeToLiveMillis() {
-        return Optional.of(TimeUnit.MINUTES.toMillis(TTL_MINUTES));
+        return Optional.of(TimeUnit.HOURS.toMillis(TT_HOURS) + createTimeToLiveJitterMillis(TimeUnit.HOURS));
     }
 
 }

@@ -1,5 +1,5 @@
 /*
- * Copyright 2018-2023, Andrew Lindesay
+ * Copyright 2018-2026, Andrew Lindesay
  * Distributed under the terms of the MIT License.
  */
 
@@ -16,22 +16,17 @@ import org.apache.commons.lang3.StringUtils;
 import org.haiku.haikudepotserver.dataobjects.Pkg;
 import org.haiku.haikudepotserver.dataobjects.PkgIcon;
 import org.haiku.haikudepotserver.dataobjects.PkgSupplement;
-import org.haiku.haikudepotserver.job.controller.JobController;
+import org.haiku.haikudepotserver.job.model.BulkDataJobCoordinatorService;
 import org.haiku.haikudepotserver.job.model.JobService;
 import org.haiku.haikudepotserver.pkg.RenderedPkgIconRepository;
-import org.haiku.haikudepotserver.pkg.model.PkgIconExportArchiveJobSpecification;
 import org.haiku.haikudepotserver.pkg.model.PkgIconService;
+import org.haiku.haikudepotserver.support.ControllerHelper;
 import org.haiku.haikudepotserver.support.web.AbstractController;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Controller;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestHeader;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestMethod;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.ResponseStatus;
+import org.springframework.web.bind.annotation.*;
 
 import java.io.IOException;
 import java.io.OutputStream;
@@ -47,7 +42,7 @@ import java.util.Optional;
 @Controller
 public class PkgIconController extends AbstractController {
 
-    protected static final Logger LOGGER = LoggerFactory.getLogger(PkgIconController.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(PkgIconController.class);
 
     public final static String SEGMENT_PKGICON = "__pkgicon";
 
@@ -61,41 +56,46 @@ public class PkgIconController extends AbstractController {
     public final static String KEY_FALLBACK = "f";
 
     private final ServerRuntime serverRuntime;
-    private final PkgIconService pkgIconService;
+    private final BulkDataJobCoordinatorService bulkDataJobCoordinatorService;
     private final JobService jobService;
     private final RenderedPkgIconRepository renderedPkgIconRepository;
     private final long startupMillis;
 
     public PkgIconController(
             ServerRuntime serverRuntime,
+            BulkDataJobCoordinatorService bulkDataJobCoordinatorService,
             PkgIconService pkgIconService,
             JobService jobService,
             RenderedPkgIconRepository renderedPkgIconRepository) {
         this.serverRuntime = Preconditions.checkNotNull(serverRuntime);
-        this.pkgIconService = Preconditions.checkNotNull(pkgIconService);
+        this.bulkDataJobCoordinatorService = Preconditions.checkNotNull(bulkDataJobCoordinatorService);
         this.jobService = Preconditions.checkNotNull(jobService);
         this.renderedPkgIconRepository = Preconditions.checkNotNull(renderedPkgIconRepository);
         startupMillis = System.currentTimeMillis();
     }
 
     /**
-     * <p>This method will provide a tar-ball of all of the icons.  This can be used by the desktop application.  It
-     * honours the typical <code>If-Modified-Since</code> header and will return the "Not Modified" (304) response
-     * if the data that is held by the client is still valid and no new data need to be pulled down.  Otherwise it
+     * <p>This method will provide a tar-ball of all icons.  This can be used by the desktop application.  It
+     * honors the typical <code>If-Modified-Since</code> header and will return the "Not Modified" (304) response
+     * if the data that is held by the client is still valid and no new data need to be pulled down.  Otherwise, it
      * will return the data to the client; possibly via a re-direct.</p>
      */
 
     @RequestMapping(value = "/" + SEGMENT_PKGICON + "/" + SEGMENT_ALL_TAR_BALL, method = RequestMethod.GET)
     public void getAllAsTarBall(
             HttpServletResponse response,
-            @RequestHeader(value = HttpHeaders.IF_MODIFIED_SINCE, required = false) String ifModifiedSinceHeader)
+            @RequestHeader(value = HttpHeaders.IF_MODIFIED_SINCE, required = false) String ifModifiedSinceHeader,
+            @RequestHeader(value = HttpHeaders.USER_AGENT, required = false) String userAgentHeader)
             throws IOException {
-        JobController.handleRedirectToJobData(
-                response,
+
+        String jobCode = bulkDataJobCoordinatorService.getOrCreatePkgIconExportArchive();
+
+        ControllerHelper.maybeRedirectToJobData(
                 jobService,
+                response,
+                jobCode,
                 ifModifiedSinceHeader,
-                pkgIconService.getLastPkgIconModifyTimestampSecondAccuracy(serverRuntime.newContext()),
-                new PkgIconExportArchiveJobSpecification());
+                userAgentHeader);
     }
 
     @RequestMapping(value = "/" + SEGMENT_GENERICPKGICON, method = RequestMethod.HEAD)

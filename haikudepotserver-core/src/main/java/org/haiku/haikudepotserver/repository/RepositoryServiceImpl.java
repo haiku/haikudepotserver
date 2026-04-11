@@ -67,6 +67,11 @@ public class RepositoryServiceImpl implements RepositoryService {
                 .where(Repository.ACTIVE.isTrue())
                 .column(Repository.MODIFY_TIMESTAMP.max())
                 .selectOne(context);
+
+        if (null == maxModifyTimestamp) {
+            return new java.sql.Timestamp(1000L);
+        }
+
         return DateTimeHelper.secondAccuracyDate(maxModifyTimestamp);
     }
 

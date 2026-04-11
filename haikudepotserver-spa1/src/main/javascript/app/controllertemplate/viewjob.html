@@ -5,8 +5,12 @@
         <dl>
             <dt><message key="viewJob.typecode.title"></message></dt>
             <dd><message key="{{'job.jobtype.' + job.jobTypeCode + '.title'}}"></message></dd>
+            <dt ng-if="job.description"><message key="viewJob.description.title"></message></dt>
+            <dd ng-if="job.description">{{job.description}}</dd>
             <dt><message key="viewJob.queuedtimestamp.title"></message></dt>
             <dd>{{job.queuedTimestamp|timestamp}}</dd>
+            <dt ng-if="job.dataTimestamp"><message key="viewJob.datatimestamp.title"></message></dt>
+            <dd ng-if="job.dataTimestamp">{{job.dataTimestamp|timestamp}}</dd>
             <dt><message key="viewJob.id.title"></message></dt>
             <dd><code>{{job.guid}}</code></dd>
             <dt><message key="viewJob.status.title"></message></dt>

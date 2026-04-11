@@ -1,5 +1,5 @@
 /*
- * Copyright 2018-2025, Andrew Lindesay
+ * Copyright 2018-2026, Andrew Lindesay
  * Distributed under the terms of the MIT License.
  */
 
@@ -16,6 +16,7 @@ import org.haiku.haikudepotserver.dataobjects.PkgIcon;
 import org.haiku.haikudepotserver.dataobjects.PkgSupplement;
 import org.haiku.haikudepotserver.dataobjects.auto._HaikuDepot;
 import org.haiku.haikudepotserver.pkg.model.PkgIconExportArchiveJobSpecification;
+import org.haiku.haikudepotserver.support.DateTimeHelper;
 import org.haiku.haikudepotserver.support.RuntimeInformationService;
 import org.springframework.stereotype.Component;
 
@@ -23,7 +24,7 @@ import java.io.IOException;
 import java.util.Date;
 
 /**
- * <p>Produce a tar-ball file containing all of the icons of the packages.  This uses a direct query avoiding the
+ * <p>Produce a tar-ball file containing all the icons of the packages.  This uses a direct query avoiding the
  * object layer in order to stream to the tar-ball faster.</p>
  */
 
@@ -90,7 +91,7 @@ public class PkgIconExportArchiveJobRunner extends AbstractPkgResourceExportArch
 
         String filename = String.join("/", PATH_COMPONENT_TOP,
                 pkgName, PkgIcon.deriveFilename(
-                        mediaTypeCode, null==size ? null : size.intValue()));
+                        mediaTypeCode, null == size ? null : size.intValue()));
 
         TarArchiveEntry tarEntry = new TarArchiveEntry(filename);
         tarEntry.setSize(payload.length);
@@ -99,7 +100,7 @@ public class PkgIconExportArchiveJobRunner extends AbstractPkgResourceExportArch
         state.tarArchiveOutputStream.write(payload);
         state.tarArchiveOutputStream.closeArchiveEntry();
 
-        if(modifyTimestamp.after(state.latestModifiedTimestamp)) {
+        if (modifyTimestamp.after(state.latestModifiedTimestamp)) {
             state.latestModifiedTimestamp = modifyTimestamp;
         }
     }
@@ -112,8 +113,9 @@ public class PkgIconExportArchiveJobRunner extends AbstractPkgResourceExportArch
 
     @Override
     Date getLatestModifiedTimestamp(PkgIconExportArchiveJobSpecification specification) {
-        return PkgSupplement.getLatestIconModifyTimestamp(serverRuntime.newContext())
-                .orElse(new Date(0L));
+        return DateTimeHelper.secondAccuracyDatePlusOneSecond(
+                PkgSupplement.getLatestIconModifyTimestamp(serverRuntime.newContext())
+                        .orElse(new Date(0L)));
     }
 
 }

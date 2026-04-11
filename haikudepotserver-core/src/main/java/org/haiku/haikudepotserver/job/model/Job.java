@@ -1,5 +1,5 @@
 /*
- * Copyright 2014-2016, Andrew Lindesay
+ * Copyright 2014-2026, Andrew Lindesay
  * Distributed under the terms of the MIT License.
  */
 
@@ -27,6 +27,8 @@ public class Job implements Comparable<JobSnapshot>, JobSnapshot {
     private Date failTimestamp;
     private Date cancelTimestamp;
     private Integer progressPercent;
+    private Date dataTimestamp;
+    private String description;
 
     /**
      * <p>This is the {@link JobSpecification} that this instance is
@@ -44,12 +46,14 @@ public class Job implements Comparable<JobSnapshot>, JobSnapshot {
     public Job(JobSnapshot other) {
         this();
         Preconditions.checkArgument(null != other, "the other job run state must be supplied");
+        this.description = other.getDescription();
         this.startTimestamp = other.getStartTimestamp();
         this.finishTimestamp = other.getFinishTimestamp();
         this.queuedTimestamp = other.getQueuedTimestamp();
         this.failTimestamp = other.getFailTimestamp();
         this.cancelTimestamp = other.getCancelTimestamp();
         this.progressPercent = other.getProgressPercent();
+        this.dataTimestamp = other.getDataTimestamp();
         this.jobSpecification = other.getJobSpecification();
         this.generatedDataGuids = Sets.newHashSet(other.getGeneratedDataGuids());
     }
@@ -57,6 +61,15 @@ public class Job implements Comparable<JobSnapshot>, JobSnapshot {
     public Job(JobSpecification jobSpecification) {
         this();
         this.jobSpecification = jobSpecification;
+    }
+
+    @Override
+    public String getDescription() {
+        return description;
+    }
+
+    public void setDescription(String description) {
+        this.description = description;
     }
 
     @Override
@@ -131,6 +144,15 @@ public class Job implements Comparable<JobSnapshot>, JobSnapshot {
 
     public void setProgressPercent(Integer progressPercent) {
         this.progressPercent = progressPercent;
+    }
+
+    @Override
+    public Date getDataTimestamp() {
+        return dataTimestamp;
+    }
+
+    public void setDataTimestamp(Date dataTimestamp) {
+        this.dataTimestamp = dataTimestamp;
     }
 
     @Override

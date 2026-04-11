@@ -1,5 +1,5 @@
 /*
- * Copyright 2024-2025, Andrew Lindesay
+ * Copyright 2024-2026, Andrew Lindesay
  * Distributed under the terms of the MIT License.
  */
 
@@ -9,6 +9,7 @@ import org.apache.cayenne.ObjectContext;
 import org.apache.cayenne.configuration.server.ServerRuntime;
 import org.haiku.haikudepotserver.dataobjects.Repository;
 import org.haiku.haikudepotserver.dataobjects.UserPasswordResetToken;
+import org.haiku.haikudepotserver.job.model.BulkDataJobCoordinatorService;
 import org.haiku.haikudepotserver.job.model.JobService;
 import org.haiku.haikudepotserver.job.model.JobSnapshot;
 import org.haiku.haikudepotserver.maintenance.model.MaintenanceService;
@@ -47,11 +48,14 @@ public class MaintenanceServiceImpl implements MaintenanceService {
 
     private final ServerRuntime serverRuntime;
     private final JobService jobService;
+    private final BulkDataJobCoordinatorService bulkDataJobCoordinatorService;
 
     public MaintenanceServiceImpl(
             ServerRuntime serverRuntime,
+            BulkDataJobCoordinatorService bulkDataJobCoordinatorService,
             JobService jobService) {
         this.serverRuntime = serverRuntime;
+        this.bulkDataJobCoordinatorService = bulkDataJobCoordinatorService;
         this.jobService = jobService;
     }
 
@@ -133,6 +137,14 @@ public class MaintenanceServiceImpl implements MaintenanceService {
 
     @Override
     public void fiveMinutely() {
+
+        // check bulk data freshness.
+
+        executor.execute(() -> {
+            bulkDataJobCoordinatorService.clearExpiredJobs();
+            bulkDataJobCoordinatorService.performRefresh();
+        });
+
         LOGGER.info("did trigger five minutely maintenance");
     }
 }
