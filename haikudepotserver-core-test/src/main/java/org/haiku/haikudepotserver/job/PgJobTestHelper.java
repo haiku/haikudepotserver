@@ -20,6 +20,9 @@ public class PgJobTestHelper {
     private final static String SELECT_JOB_TYPE = "SELECT jt.id FROM job2.job_type jt WHERE jt.code = ?";
     private final static String SELECT_JOB_DATA_MEDIA_TYPE = "SELECT jdmt.id FROM job2.job_data_media_type jdmt WHERE jdmt.code = ?";
 
+    private final static String SELECT_TAGS = """
+            SELECT jt.code, jt.value FROM job2.job_tag jt JOIN job2.job j ON j.id = jt.job_id WHERE j.code = ?""";
+
     private final static String SELECT_SUPPLIED_JOB_DATA = """
             SELECT jd.code FROM job2.job_data jd JOIN job2.job_data_type jdt ON jdt.id = jd.job_data_type_id
                            WHERE jdt.code = 'supplied' AND jd.code = ?
@@ -356,6 +359,30 @@ public class PgJobTestHelper {
         }
 
         return jobCode;
+    }
+
+    public static Map<String, String> getJobTagsForJobCode(DataSource dataSource, String jobCode) throws SQLException {
+        try (
+                Connection connection = dataSource.getConnection();
+                PreparedStatement preparedStatement = connection.prepareStatement(SELECT_TAGS)
+        ) {
+            connection.setAutoCommit(false);
+
+            Map<String, String> result = new HashMap<>();
+
+            preparedStatement.setString(1, jobCode);
+
+            try (ResultSet resultSet = preparedStatement.executeQuery()) {
+                while(resultSet.next()) {
+                    result.put(
+                            resultSet.getString(1),
+                            resultSet.getString(2)
+                    );
+                }
+            }
+
+            return Collections.unmodifiableMap(result);
+        }
     }
 
     public static Set<String> getJobDataCodesForJobCode(DataSource dataSource, String jobCode, String jobDataTypeCode) throws SQLException {

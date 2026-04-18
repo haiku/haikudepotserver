@@ -32,10 +32,7 @@ import java.sql.SQLException;
 import java.time.Clock;
 import java.time.Duration;
 import java.time.Instant;
-import java.util.List;
-import java.util.Optional;
-import java.util.Set;
-import java.util.UUID;
+import java.util.*;
 import java.util.concurrent.Semaphore;
 import java.util.stream.Stream;
 
@@ -394,6 +391,10 @@ class DbDistributedJob2HelperIT extends AbstractIntegrationTest {
                 Duration.ofMinutes(10).toMillis(),
                 objectMapper.createObjectNode(),
                 Set.of(suppliedJobDataCode),
+                Map.of(
+                        "SOME_TAG_1", "SOME_VALUE_1",
+                        "SOME_TAG_2", "SOME_VALUE_2"
+                ),
                 false);
         // -------------------------
 
@@ -407,6 +408,13 @@ class DbDistributedJob2HelperIT extends AbstractIntegrationTest {
         // check that the supplied data is now associated with the job.
 
         Assertions.assertThat(getJobDataCodesForJobCode(jobCode, "supplied")).containsOnly(suppliedJobDataCode);
+
+        // check that the job's tags are there.
+        Map<String, String> actualTags = getJobTagsForJobCode(jobCode);
+        Assertions.assertThat(actualTags).isEqualTo(Map.of(
+                "SOME_TAG_1", "SOME_VALUE_1",
+                "SOME_TAG_2", "SOME_VALUE_2"
+        ));
     }
 
     /**
@@ -557,6 +565,10 @@ class DbDistributedJob2HelperIT extends AbstractIntegrationTest {
 
     private Set<String> getJobDataCodesForJobCode(String jobCode, String jobDataTypeCode) throws SQLException {
         return PgJobTestHelper.getJobDataCodesForJobCode(dataSource, jobCode, jobDataTypeCode);
+    }
+
+    private Map<String, String> getJobTagsForJobCode(String jobCode) throws SQLException{
+        return PgJobTestHelper.getJobTagsForJobCode(dataSource, jobCode);
     }
 
 }

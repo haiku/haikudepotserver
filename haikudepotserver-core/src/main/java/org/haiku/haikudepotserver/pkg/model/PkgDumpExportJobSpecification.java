@@ -8,6 +8,7 @@ package org.haiku.haikudepotserver.pkg.model;
 import org.haiku.haikudepotserver.job.model.AbstractJobSpecification;
 import org.haiku.haikudepotserver.job.model.JobSpecification;
 
+import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.concurrent.TimeUnit;
@@ -49,6 +50,16 @@ public class PkgDumpExportJobSpecification extends AbstractJobSpecification {
         PkgDumpExportJobSpecification pkgOther = PkgDumpExportJobSpecification.class.cast(other);
         return Objects.equals(pkgOther.getNaturalLanguageCode(), getNaturalLanguageCode())
                 && Objects.equals(pkgOther.getRepositorySourceCode(), getRepositorySourceCode());
+    }
+
+    @Override
+    public Map<String, String> getTags() {
+        return Map.of(
+                TAG_NATURAL_LANGUAGE_CODE,
+                getNaturalLanguageCode(),
+                TAG_REPOSITORY_SOURCE_CODE,
+                getRepositorySourceCode()
+        );
     }
 
 }

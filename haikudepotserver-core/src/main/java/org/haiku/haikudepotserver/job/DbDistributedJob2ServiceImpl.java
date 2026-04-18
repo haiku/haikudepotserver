@@ -801,6 +801,7 @@ public class DbDistributedJob2ServiceImpl extends AbstractExecutionThreadService
                 specification.tryGetTimeToLiveMillis().orElse(TTL_DEFAULT),
                 objectMapper.valueToTree(specification),
                 specification.getSuppliedDataGuids(),
+                specification.getTags(),
                 started);
 
         objectContext.commitChanges();

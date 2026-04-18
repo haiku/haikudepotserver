@@ -20,6 +20,7 @@ import org.apache.cayenne.exp.property.DateProperty;
 import org.apache.cayenne.query.ObjectSelect;
 import org.apache.cayenne.query.Ordering;
 import org.apache.commons.collections4.CollectionUtils;
+import org.apache.commons.collections4.MapUtils;
 import org.apache.commons.collections4.SetUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.haiku.haikudepotserver.dataobjects.*;
@@ -204,6 +205,7 @@ public class DbDistributedJob2Helper {
 
         objectContext.deleteObject(job.getJobAssignment());
         objectContext.deleteObjects(job.getJobDatas());
+        objectContext.deleteObjects(job.getJobTags());
         objectContext.deleteObject(job);
 
         return true;
@@ -522,6 +524,7 @@ public class DbDistributedJob2Helper {
             long ttlMillis,
             JsonNode specificationSerialized,
             Collection<String> suppliedDataCodes,
+            @Nullable Map<String, String> tags,
             boolean started
     ) {
         Preconditions.checkArgument(null != code, "the job code must be supplied");
@@ -560,6 +563,16 @@ public class DbDistributedJob2Helper {
 
             jobData.setJob(job);
         }
+
+        MapUtils.emptyIfNull(tags).entrySet()
+                .stream()
+                .filter(e -> StringUtils.isNotBlank(e.getValue()))
+                .forEach(entry -> {
+                    JobTag tag = objectContext.newObject(JobTag.class);
+                    tag.setCode(entry.getKey());
+                    tag.setValue(entry.getValue());
+                    tag.setJob(job);
+                });
     }
 
     private static Expression expressionForFindRequest(JobFindRequest request) {

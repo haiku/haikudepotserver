@@ -1,11 +1,14 @@
 /*
- * Copyright 2014-2016, Andrew Lindesay
+ * Copyright 2014-2026, Andrew Lindesay
  * Distributed under the terms of the MIT License.
  */
 
 package org.haiku.haikudepotserver.job.model;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+
 import java.util.Collection;
+import java.util.Map;
 import java.util.Optional;
 
 /**
@@ -16,6 +19,9 @@ import java.util.Optional;
  */
 
 public interface JobSpecification {
+
+    String TAG_NATURAL_LANGUAGE_CODE = "NATURAL_LANGUAGE_CODE";
+    String TAG_REPOSITORY_SOURCE_CODE = "REPOSITORY_SOURCE_CODE";
 
     /**
      * <p>This is a unique identifier for the job specification.</p>
@@ -56,5 +62,14 @@ public interface JobSpecification {
      */
 
     boolean isEquivalent(JobSpecification other);
+
+    /**
+     * <p>Return a set of key-value pairs that will help identify the specification. This
+     * can help find jobs during searches; or at least make the search more efficient.</p>
+     */
+    @JsonIgnore
+    default Map<String, String> getTags() {
+        return Map.of();
+    }
 
 }

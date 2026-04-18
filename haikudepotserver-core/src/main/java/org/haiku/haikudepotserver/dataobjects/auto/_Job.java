@@ -14,6 +14,7 @@ import org.apache.cayenne.exp.property.PropertyFactory;
 import org.apache.cayenne.exp.property.StringProperty;
 import org.haiku.haikudepotserver.dataobjects.JobAssignment;
 import org.haiku.haikudepotserver.dataobjects.JobData;
+import org.haiku.haikudepotserver.dataobjects.JobTag;
 import org.haiku.haikudepotserver.dataobjects.JobType;
 import org.haiku.haikudepotserver.dataobjects.support.AbstractDataObject;
 
@@ -45,6 +46,7 @@ public abstract class _Job extends AbstractDataObject {
     public static final DateProperty<Timestamp> START_TIMESTAMP = PropertyFactory.createDate("startTimestamp", Timestamp.class);
     public static final EntityProperty<JobAssignment> JOB_ASSIGNMENT = PropertyFactory.createEntity("jobAssignment", JobAssignment.class);
     public static final ListProperty<JobData> JOB_DATAS = PropertyFactory.createList("jobDatas", JobData.class);
+    public static final ListProperty<JobTag> JOB_TAGS = PropertyFactory.createList("jobTags", JobTag.class);
     public static final EntityProperty<JobType> JOB_TYPE = PropertyFactory.createEntity("jobType", JobType.class);
 
     protected Timestamp cancelTimestamp;
@@ -64,6 +66,7 @@ public abstract class _Job extends AbstractDataObject {
 
     protected Object jobAssignment;
     protected Object jobDatas;
+    protected Object jobTags;
     protected Object jobType;
 
     public void setCancelTimestamp(Timestamp cancelTimestamp) {
@@ -227,6 +230,19 @@ public abstract class _Job extends AbstractDataObject {
         return (List<JobData>)readProperty("jobDatas");
     }
 
+    public void addToJobTags(JobTag obj) {
+        addToManyTarget("jobTags", obj, true);
+    }
+
+    public void removeFromJobTags(JobTag obj) {
+        removeToManyTarget("jobTags", obj, true);
+    }
+
+    @SuppressWarnings("unchecked")
+    public List<JobTag> getJobTags() {
+        return (List<JobTag>)readProperty("jobTags");
+    }
+
     public void setJobType(JobType jobType) {
         setToOneTarget("jobType", jobType, true);
     }
@@ -274,6 +290,8 @@ public abstract class _Job extends AbstractDataObject {
                 return this.jobAssignment;
             case "jobDatas":
                 return this.jobDatas;
+            case "jobTags":
+                return this.jobTags;
             case "jobType":
                 return this.jobType;
             default:
@@ -336,6 +354,9 @@ public abstract class _Job extends AbstractDataObject {
             case "jobDatas":
                 this.jobDatas = val;
                 break;
+            case "jobTags":
+                this.jobTags = val;
+                break;
             case "jobType":
                 this.jobType = val;
                 break;
@@ -371,6 +392,7 @@ public abstract class _Job extends AbstractDataObject {
         out.writeObject(this.startTimestamp);
         out.writeObject(this.jobAssignment);
         out.writeObject(this.jobDatas);
+        out.writeObject(this.jobTags);
         out.writeObject(this.jobType);
     }
 
@@ -393,6 +415,7 @@ public abstract class _Job extends AbstractDataObject {
         this.startTimestamp = (Timestamp)in.readObject();
         this.jobAssignment = in.readObject();
         this.jobDatas = in.readObject();
+        this.jobTags = in.readObject();
         this.jobType = in.readObject();
     }
 
