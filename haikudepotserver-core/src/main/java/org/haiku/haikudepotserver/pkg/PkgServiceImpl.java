@@ -639,6 +639,7 @@ public class PkgServiceImpl implements PkgService {
     @Override
     public Date getLastModifyTimestampSecondAccuracy(ObjectContext context, String repositorySourceCode) {
         Preconditions.checkNotNull(context);
+        Preconditions.checkArgument(StringUtils.isNotBlank(repositorySourceCode));
 
         Date pkgVersionMax = ObjectUtils.firstNonNull(
                 ObjectSelect
@@ -678,7 +679,10 @@ public class PkgServiceImpl implements PkgService {
 
         return DateTimeHelper.secondAccuracyDate(new Date(
                 Math.max(
-                        Math.max(pkgVersionMax.getTime(), pkgMax.getTime()),
+                        Math.max(
+                                pkgVersionMax.getTime(),
+                                pkgMax.getTime()
+                        ),
                         pkgSupplementMax.getTime())));
     }
 

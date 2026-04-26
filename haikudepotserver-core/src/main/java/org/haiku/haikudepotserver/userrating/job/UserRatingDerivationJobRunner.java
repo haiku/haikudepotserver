@@ -42,12 +42,10 @@ public class UserRatingDerivationJobRunner
 
         if (StringUtils.isNotBlank(job.getUserNickname())) {
             userRatingService.updateUserRatingDerivationsForUser(job.getUserNickname());
-        }
-        else {
+        } else {
             if (StringUtils.isNotBlank(job.getPkgName())) {
                 userRatingService.updateUserRatingDerivationsForPkg(job.getPkgName());
-            }
-            else {
+            } else {
                 userRatingService.updateUserRatingDerivationsForAllPkgs();
             }
         }

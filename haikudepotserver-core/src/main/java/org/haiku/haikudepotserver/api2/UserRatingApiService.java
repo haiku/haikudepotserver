@@ -160,6 +160,7 @@ public class UserRatingApiService extends AbstractApiService {
         };
 
         if (pkgVersionOptional.isEmpty()) {
+            LOGGER.info("package [{}]; version not found - will not add user rating", pkg);
             throw new ObjectNotFoundException(PkgVersion.class.getSimpleName(), pkg.getName() + "_" + request.getPkgVersionType());
         }
 
