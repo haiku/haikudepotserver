@@ -39,44 +39,54 @@
 
         <guava.version>33.6.0-jre</guava.version>
 
-        <openapi-generator-maven-plugin.version>7.17.0</openapi-generator-maven-plugin.version>
+        <openapi-generator-maven-plugin.version>7.22.0</openapi-generator-maven-plugin.version>
         <springfox.version>3.0.0</springfox.version>
 
-        <nimbus-jose-jwt.version>10.6</nimbus-jose-jwt.version>
+        <nimbus-jose-jwt.version>10.9</nimbus-jose-jwt.version>
 
-        <maven-war-plugin.version>3.5.1</maven-war-plugin.version>
-        <maven-failsafe-plugin.version>3.5.4</maven-failsafe-plugin.version>
-        <maven-resources-plugin.version>3.4.0</maven-resources-plugin.version>
-        <jsonschema2pojo-maven-plugin.version>1.2.2</jsonschema2pojo-maven-plugin.version>
+        <maven-war-plugin.version>3.6.3</maven-war-plugin.version>
+        <maven-failsafe-plugin.version>3.5.5</maven-failsafe-plugin.version>
+        <maven-resources-plugin.version>3.5.0</maven-resources-plugin.version>
+        <maven-surefire-plugin.version>3.5.5</maven-surefire-plugin.version>
+        <maven-enforcer-plugin.version>3.6.2</maven-enforcer-plugin.version>
+        <maven-shade-plugin.version>3.6.2</maven-shade-plugin.version>
+        <maven-compiler-plugin.version>3.15.0</maven-compiler-plugin.version>
+
+        <jsonschema2pojo-maven-plugin.version>1.3.3</jsonschema2pojo-maven-plugin.version>
 
         <flexmark.version>0.64.8</flexmark.version>
         <freemarker.version>2.3.34</freemarker.version>
         <opencsv.version>5.12.0</opencsv.version>
-        <aircompressor.version>3.4</aircompressor.version>
+        <aircompressor.version>3.6</aircompressor.version>
 
         <commons-collections4.version>4.5.0</commons-collections4.version>
         <commons-lang3.version>3.20.0</commons-lang3.version>
         <commons-compress.version>1.28.0</commons-compress.version>
-        <commons-codec.version>1.20.0</commons-codec.version>
+        <commons-codec.version>1.22.0</commons-codec.version>
         <commons-csv.version>1.14.1</commons-csv.version>
 
-        <testcontainers.version>1.21.3</testcontainers.version>
+        <testcontainers.version>1.21.4</testcontainers.version>
 
-        <avaje-http.version>3.6-RC2</avaje-http.version>
-        <avaje-inject.version>12.1-RC1</avaje-inject.version>
-        <avaje-http-inject-plugin.version>3.6-RC3</avaje-http-inject-plugin.version>
-        <avaje-config.version>5.0-RC1</avaje-config.version>
-        <avaje-simple-logger.version>1.1-RC1</avaje-simple-logger.version>
-        <avaje-jex.version>3.4-RC2</avaje-jex.version>
-        <avaje-applog-slf4j.version>1.0</avaje-applog-slf4j.version>
+        <avaje-http.version>3.8</avaje-http.version>
+        <avaje-inject.version>12.5</avaje-inject.version>
+        <avaje-http-inject-plugin.version>3.8</avaje-http-inject-plugin.version>
+        <avaje-config.version>5.1</avaje-config.version>
+        <avaje-simple-logger.version>1.5</avaje-simple-logger.version>
+        <avaje-jex.version>3.5</avaje-jex.version>
+        <avaje-applog-slf4j.version>1.2</avaje-applog-slf4j.version>
 
         <!--
         This is required to configure the agent in the test plugin. The actual version is
         coming from `org.springframework.boot:spring-boot-starter-test:jar` so may unfortunately
         require manual synchronization.
         -->
-        <mockito.version>5.17.0</mockito.version>
-        <bytebuddy.version>1.17.8</bytebuddy.version>
+        <mockito.version>5.23.0</mockito.version>
+        <bytebuddy.version>1.18.8</bytebuddy.version>
+
+        <junit-jupiter.version>6.0.3</junit-jupiter.version>
+        <fest-assert.artifactId>fest-assert</fest-assert.artifactId>
+        <fest-assert.version>1.4</fest-assert.version>
+        <awaitility.version>4.3.0</awaitility.version>
 
     </properties>
 
@@ -235,12 +245,12 @@
             <dependency>
                 <groupId>org.junit.jupiter</groupId>
                 <artifactId>junit-jupiter</artifactId>
-                <version>5.13.0</version>
+                <version>${junit-jupiter.version}</version>
             </dependency>
             <dependency>
                 <groupId>org.easytesting</groupId>
                 <artifactId>fest-assert</artifactId>
-                <version>1.4</version>
+                <version>${fest-assert.version}</version>
             </dependency>
             <dependency>
                 <groupId>org.postgresql</groupId>
@@ -274,7 +284,7 @@
             <dependency>
                 <groupId>org.awaitility</groupId>
                 <artifactId>awaitility</artifactId>
-                <version>4.3.0</version>
+                <version>${awaitility.version}</version>
                 <scope>test</scope>
             </dependency>
 
@@ -343,37 +353,37 @@
                 <plugin>
                     <groupId>org.apache.maven.plugins</groupId>
                     <artifactId>maven-compiler-plugin</artifactId>
-                    <version>3.14.1</version>
+                    <version>${maven-compiler-plugin.version}</version>
                 </plugin>
 
                 <plugin>
                     <groupId>org.apache.maven.plugins</groupId>
                     <artifactId>maven-resources-plugin</artifactId>
-                    <version>3.4.0</version>
+                    <version>${maven-resources-plugin.version}</version>
                 </plugin>
 
                 <plugin>
                     <groupId>org.apache.maven.plugins</groupId>
                     <artifactId>maven-failsafe-plugin</artifactId>
-                    <version>3.5.4</version>
+                    <version>${maven-failsafe-plugin.version}</version>
                 </plugin>
 
                 <plugin>
                     <groupId>org.apache.maven.plugins</groupId>
                     <artifactId>maven-surefire-plugin</artifactId>
-                    <version>3.2.5</version>
+                    <version>${maven-surefire-plugin.version}</version>
                 </plugin>
 
                 <plugin>
                     <groupId>org.apache.maven.plugins</groupId>
                     <artifactId>maven-enforcer-plugin</artifactId>
-                    <version>3.4.1</version>
+                    <version>${maven-enforcer-plugin.version}</version>
                 </plugin>
 
                 <plugin>
                     <groupId>org.apache.maven.plugins</groupId>
                     <artifactId>maven-shade-plugin</artifactId>
-                    <version>3.6.1</version>
+                    <version>${maven-shade-plugin.version}</version>
                 </plugin>
 
             </plugins>
@@ -403,6 +413,13 @@
                         <user.timezone>GMT0</user.timezone>
                     </systemPropertyVariables>
                 </configuration>
+                <dependencies>
+                    <dependency>
+                        <groupId>net.bytebuddy</groupId>
+                        <artifactId>byte-buddy-agent</artifactId>
+                        <version>${bytebuddy.version}</version>
+                    </dependency>
+                </dependencies>
             </plugin>
 
             <plugin>
