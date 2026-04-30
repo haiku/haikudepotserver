@@ -16,17 +16,16 @@ import org.haiku.haikudepotserver.support.eventing.model.InterProcessEvent;
 import org.postgresql.PGConnection;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.retry.RetryCallback;
-import org.springframework.retry.RetryContext;
-import org.springframework.retry.RetryListener;
-import org.springframework.retry.backoff.ExponentialBackOffPolicy;
-import org.springframework.retry.policy.AlwaysRetryPolicy;
-import org.springframework.retry.support.RetryTemplate;
+import org.springframework.core.retry.RetryListener;
+import org.springframework.core.retry.RetryPolicy;
+import org.springframework.core.retry.RetryTemplate;
+import org.springframework.core.retry.Retryable;
 
 import javax.sql.DataSource;
 import java.sql.Connection;
 import java.sql.SQLException;
 import java.sql.Statement;
+import java.time.Duration;
 import java.util.function.Consumer;
 
 /**
@@ -79,21 +78,23 @@ public class InterProcessEventPgListenService extends AbstractExecutionThreadSer
     private RetryTemplate createRetryTemplate() {
         RetryTemplate retryTemplate = new RetryTemplate();
 
-        ExponentialBackOffPolicy backOffPolicy = new ExponentialBackOffPolicy();
-        backOffPolicy.setInitialInterval(500L);
-        backOffPolicy.setMaxInterval(30000L);
+        RetryPolicy policy = RetryPolicy.builder()
+                .maxDelay(Duration.ofSeconds(20))
+                .multiplier(1.5)
+                .delay(Duration.ofMillis(500L))
+                .maxRetries(10)
+                .build();
 
-        retryTemplate.setBackOffPolicy(backOffPolicy);
-        retryTemplate.setRetryPolicy(new AlwaysRetryPolicy());
-        retryTemplate.setListeners(new RetryListener[]{
-           new RetryListener() {
-               @Override
-               public <T, E extends Throwable> void onError(RetryContext context, RetryCallback<T, E> callback, Throwable throwable) {
-                   RetryListener.super.onError(context, callback, throwable);
-                   LOGGER.error("failed to retry", throwable);
-               }
-           }
-        });
+        retryTemplate.setRetryPolicy(policy);
+        retryTemplate.setRetryListener(
+                new RetryListener() {
+                    @Override
+                    public void onRetryFailure(RetryPolicy retryPolicy, Retryable<?> retryable, Throwable throwable) {
+                        RetryListener.super.onRetryFailure(retryPolicy, retryable, throwable);
+                        LOGGER.error("failed to retry", throwable);
+                    }
+                }
+        );
 
         return retryTemplate;
     }
@@ -107,7 +108,7 @@ public class InterProcessEventPgListenService extends AbstractExecutionThreadSer
         RetryTemplate retryTemplate = createRetryTemplate();
 
         try {
-            retryTemplate.execute((RetryCallback<Object, Throwable>) context -> {
+            retryTemplate.execute(() -> {
                 tryListenForPgEvents();
                 return Boolean.TRUE;
             });

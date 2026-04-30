@@ -15,7 +15,6 @@ import com.google.common.util.concurrent.Service;
 import com.google.common.util.concurrent.Uninterruptibles;
 import jakarta.annotation.PostConstruct;
 import jakarta.annotation.PreDestroy;
-import org.apache.cayenne.CayenneRuntimeException;
 import org.apache.cayenne.ObjectContext;
 import org.apache.cayenne.access.DataNode;
 import org.apache.cayenne.configuration.server.ServerRuntime;
@@ -33,14 +32,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.context.event.EventListener;
-import org.springframework.retry.RetryCallback;
-import org.springframework.retry.RetryContext;
-import org.springframework.retry.RetryListener;
-import org.springframework.retry.backoff.ExponentialBackOffPolicy;
-import org.springframework.retry.backoff.ExponentialRandomBackOffPolicy;
-import org.springframework.retry.policy.AlwaysRetryPolicy;
-import org.springframework.retry.policy.MaxAttemptsRetryPolicy;
-import org.springframework.retry.support.RetryTemplate;
+import org.springframework.core.retry.*;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -164,7 +156,7 @@ public class DbDistributedJob2ServiceImpl extends AbstractExecutionThreadService
         RetryTemplate retryTemplate = createRunRetryTemplate();
 
         try {
-            retryTemplate.execute((RetryCallback<Object, Throwable>) _ -> {
+            retryTemplate.execute(() -> {
                 loopAwaitingAndRunningAvailableJobs();
                 return Boolean.TRUE;
             });
@@ -483,12 +475,16 @@ public class DbDistributedJob2ServiceImpl extends AbstractExecutionThreadService
 
         // make sure tha the media type is already persisted.
 
-        contentedDataRetryTemplate.execute((RetryCallback<Object, CayenneRuntimeException>) context -> {
-            ObjectContext objectContext = serverRuntime.newContext();
-            DbDistributedJob2Helper.ensureJobDataMediaType(objectContext, simplifiedMediaTypeCode);
-            objectContext.commitChanges();
-            return true;
-        });
+        try {
+            contentedDataRetryTemplate.execute((Retryable<Object>) () -> {
+                ObjectContext objectContext = serverRuntime.newContext();
+                DbDistributedJob2Helper.ensureJobDataMediaType(objectContext, simplifiedMediaTypeCode);
+                objectContext.commitChanges();
+                return true;
+            });
+        } catch (RetryException re) {
+            throw new RuntimeException("unable to ensure the job data media type [%s]".formatted(simplifiedMediaTypeCode), re);
+        }
 
         serverRuntime.performInTransaction(
                 () -> {
@@ -588,15 +584,14 @@ public class DbDistributedJob2ServiceImpl extends AbstractExecutionThreadService
     private static RetryTemplate createContentedDataRetryTemplate() {
         RetryTemplate retryTemplate = new RetryTemplate();
 
-        ExponentialRandomBackOffPolicy backOffPolicy = new ExponentialRandomBackOffPolicy();
-        backOffPolicy.setInitialInterval(500L);
-        backOffPolicy.setMaxInterval(10000L);
+        RetryPolicy policy = RetryPolicy.builder()
+                .maxDelay(Duration.ofSeconds(10))
+                .multiplier(1.5)
+                .delay(Duration.ofMillis(500L))
+                .maxRetries(10)
+                .build();
 
-        MaxAttemptsRetryPolicy retryPolicy = new MaxAttemptsRetryPolicy();
-        retryPolicy.setMaxAttempts(10);
-
-        retryTemplate.setBackOffPolicy(backOffPolicy);
-        retryTemplate.setRetryPolicy(retryPolicy);
+        retryTemplate.setRetryPolicy(policy);
 
         return retryTemplate;
     }
@@ -604,21 +599,22 @@ public class DbDistributedJob2ServiceImpl extends AbstractExecutionThreadService
     private static RetryTemplate createRunRetryTemplate() {
         RetryTemplate retryTemplate = new RetryTemplate();
 
-        ExponentialBackOffPolicy backOffPolicy = new ExponentialBackOffPolicy();
-        backOffPolicy.setInitialInterval(500L);
-        backOffPolicy.setMaxInterval(30000L);
+        RetryPolicy policy = RetryPolicy.builder()
+                .maxDelay(Duration.ofSeconds(30))
+                .multiplier(1.5)
+                .delay(Duration.ofMillis(500L))
+                .build();
 
-        retryTemplate.setBackOffPolicy(backOffPolicy);
-        retryTemplate.setRetryPolicy(new AlwaysRetryPolicy());
-        retryTemplate.setListeners(new RetryListener[]{
+        retryTemplate.setRetryPolicy(policy);
+        retryTemplate.setRetryListener(
                 new RetryListener() {
                     @Override
-                    public <T, E extends Throwable> void onError(RetryContext context, RetryCallback<T, E> callback, Throwable throwable) {
-                        RetryListener.super.onError(context, callback, throwable);
+                    public void onRetryFailure(RetryPolicy retryPolicy, Retryable<?> retryable, Throwable throwable) {
+                        RetryListener.super.onRetryFailure(retryPolicy, retryable, throwable);
                         LOGGER.error("failed to retry", throwable);
                     }
                 }
-        });
+        );
 
         return retryTemplate;
     }

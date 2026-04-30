@@ -58,6 +58,8 @@ public class BulkDataJobCoordinatorServiceImplIT extends AbstractIntegrationTest
         // WHEN
         coordinatorService.maybePerformRepositoryDumpExportRefresh(Instant.now());
 
+        awaitAllJobsFinishedUninterruptibly();
+
         // THEN
         {
             ObjectContext context = serverRuntime.newContext();
@@ -81,6 +83,8 @@ public class BulkDataJobCoordinatorServiceImplIT extends AbstractIntegrationTest
 
         // WHEN
         coordinatorService.maybePerformRepositoryDumpExportRefresh(Instant.now());
+
+        awaitAllJobsFinishedUninterruptibly();
 
         // THEN
         // we expect to see only the existing job present and no new job added.
@@ -124,11 +128,12 @@ public class BulkDataJobCoordinatorServiceImplIT extends AbstractIntegrationTest
         // WHEN
         coordinatorService.maybePerformRepositoryDumpExportRefresh(Instant.now());
 
+        awaitAllJobsFinishedUninterruptibly();
+
         // THEN
         // we expect to see the one that was added earlier, but also the new one from the renewal.
 
         {
-            ObjectContext context = serverRuntime.newContext();
             List<? extends JobSnapshot> jobs = jobService.findJobs(
                     new JobFindRequest(null, "repositorydumpexport", null),
                     0,
@@ -166,6 +171,8 @@ public class BulkDataJobCoordinatorServiceImplIT extends AbstractIntegrationTest
 
         // WHEN
         coordinatorService.maybePerformRepositoryDumpExportRefresh(now);
+
+        awaitAllJobsFinishedUninterruptibly();
 
         // THEN
         // we expect to see the one that was added earlier, but also the new one from the renewal.
@@ -206,6 +213,8 @@ public class BulkDataJobCoordinatorServiceImplIT extends AbstractIntegrationTest
 
         // WHEN
         coordinatorService.maybePerformRepositoryDumpExportRefresh(Instant.now());
+
+        awaitAllJobsFinishedUninterruptibly();
 
         // THEN
         // we expect to see the one that was added earlier, but also the new one from the renewal.
@@ -292,9 +301,9 @@ public class BulkDataJobCoordinatorServiceImplIT extends AbstractIntegrationTest
         // WHEN
         coordinatorService.performRefresh();
 
-        // THEN
+        awaitAllJobsFinishedUninterruptibly();
 
-        jobService.awaitAllJobsFinishedUninterruptibly(10_000L);
+        // THEN
 
         {
             List<? extends JobSnapshot> jobs = jobService.findJobs(
@@ -318,6 +327,10 @@ public class BulkDataJobCoordinatorServiceImplIT extends AbstractIntegrationTest
 
             Assertions.assertThat(actualCodes).isEqualTo(expectedCodes);
         }
+    }
+
+    private void awaitAllJobsFinishedUninterruptibly() {
+        jobService.awaitAllJobsFinishedUninterruptibly(10_000L);
     }
 
     record NaturalLanguageAndRepositorySourceCode(String naturalLanguageCode, String repositorySourceCode) {
