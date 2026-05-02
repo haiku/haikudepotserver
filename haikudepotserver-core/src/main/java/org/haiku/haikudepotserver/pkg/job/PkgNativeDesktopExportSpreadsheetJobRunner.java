@@ -1,16 +1,20 @@
 /*
- * Copyright 2024-2025, Andrew Lindesay
+ * Copyright 2024-2026, Andrew Lindesay
  * Distributed under the terms of the MIT License.
  */
 
 package org.haiku.haikudepotserver.pkg.job;
 
 import com.google.common.net.MediaType;
-import com.opencsv.CSVWriter;
 import org.apache.cayenne.ObjectContext;
 import org.apache.cayenne.configuration.server.ServerRuntime;
+import org.apache.commons.csv.CSVFormat;
+import org.apache.commons.csv.CSVPrinter;
 import org.haiku.haikudepotserver.job.AbstractJobRunner;
-import org.haiku.haikudepotserver.job.model.*;
+import org.haiku.haikudepotserver.job.model.JobDataEncoding;
+import org.haiku.haikudepotserver.job.model.JobDataWithByteSink;
+import org.haiku.haikudepotserver.job.model.JobRunnerException;
+import org.haiku.haikudepotserver.job.model.JobService;
 import org.haiku.haikudepotserver.pkg.PkgServiceImpl;
 import org.haiku.haikudepotserver.pkg.model.PkgNativeDesktopExportSpreadsheetJobSpecification;
 import org.springframework.stereotype.Component;
@@ -18,6 +22,7 @@ import org.springframework.stereotype.Component;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.io.OutputStreamWriter;
+import java.io.UncheckedIOException;
 
 @Component
 public class PkgNativeDesktopExportSpreadsheetJobRunner
@@ -49,6 +54,10 @@ public class PkgNativeDesktopExportSpreadsheetJobRunner
 
         ObjectContext context = serverRuntime.newContext();
 
+        CSVFormat format = CSVFormat.DEFAULT.builder()
+                .setHeader(COLUMN_PKG_NAME, COLUMN_IS_NATIVE_DESKTOP, COLUMN_HAS_ICON)
+                .get();
+
         try {
             // this will register the outbound data against the job.
             JobDataWithByteSink jobDataWithByteSink = jobService.storeGeneratedData(
@@ -58,19 +67,20 @@ public class PkgNativeDesktopExportSpreadsheetJobRunner
                     JobDataEncoding.NONE);
 
             try(
-                    OutputStream outputStream = jobDataWithByteSink.getByteSink().openBufferedStream();
-                    OutputStreamWriter outputStreamWriter = new OutputStreamWriter(outputStream);
-                    CSVWriter writer = new CSVWriter(outputStreamWriter)
+                    final OutputStream outputStream = jobDataWithByteSink.getByteSink().openBufferedStream();
+                    final OutputStreamWriter outputStreamWriter = new OutputStreamWriter(outputStream);
+                    final CSVPrinter printer = new CSVPrinter(outputStreamWriter, format)
             ) {
-
-                writer.writeNext(new String[] { COLUMN_PKG_NAME, COLUMN_IS_NATIVE_DESKTOP, COLUMN_HAS_ICON });
-
                 pkgServiceImpl.eachPkg(context, false, (pkg) -> {
-                    writer.writeNext(new String[] {
-                            pkg.getName(),
-                            pkg.getIsNativeDesktop() ? AbstractJobRunner.MARKER : "",
-                            !pkg.getPkgSupplement().getPkgIcons().isEmpty() ? AbstractJobRunner.MARKER : "",
-                    });
+                    try {
+                        printer.printRecord(
+                                pkg.getName(),
+                                pkg.getIsNativeDesktop() ? AbstractJobRunner.MARKER : "",
+                                !pkg.getPkgSupplement().getPkgIcons().isEmpty() ? AbstractJobRunner.MARKER : ""
+                        );
+                    } catch (IOException ioe) {
+                        throw new UncheckedIOException("unable to write row", ioe);
+                    }
 
                     return true;
                 });

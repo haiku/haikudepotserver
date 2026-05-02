@@ -7,9 +7,10 @@ package org.haiku.haikudepotserver.pkg.job;
 
 import com.google.common.base.Preconditions;
 import com.google.common.net.MediaType;
-import com.opencsv.CSVWriter;
 import org.apache.cayenne.ObjectContext;
 import org.apache.cayenne.configuration.server.ServerRuntime;
+import org.apache.commons.csv.CSVFormat;
+import org.apache.commons.csv.CSVPrinter;
 import org.haiku.haikudepotserver.dataobjects.PkgProminence;
 import org.haiku.haikudepotserver.dataobjects.PkgUserRatingAggregate;
 import org.haiku.haikudepotserver.dataobjects.Repository;
@@ -27,6 +28,7 @@ import org.springframework.stereotype.Component;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.io.OutputStreamWriter;
+import java.io.UncheckedIOException;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Stream;
@@ -40,6 +42,15 @@ public class PkgProminenceAndUserRatingSpreadsheetJobRunner
         extends AbstractJobRunner<PkgProminenceAndUserRatingSpreadsheetJobSpecification> {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(PkgProminenceAndUserRatingSpreadsheetJobRunner.class);
+
+    private static final String[] HEADERS = new String[]{
+            "pkg-name",
+            "repository-code",
+            "prominence-name",
+            "prominence-ordering",
+            "derived-rating",
+            "derived-rating-sample-size"
+    };
 
     private final ServerRuntime serverRuntime;
     private final PkgService pkgService;
@@ -60,7 +71,11 @@ public class PkgProminenceAndUserRatingSpreadsheetJobRunner
     public void run(JobService jobService, PkgProminenceAndUserRatingSpreadsheetJobSpecification specification) throws IOException {
 
         Preconditions.checkArgument(null != jobService);
-        Preconditions.checkArgument(null!=specification);
+        Preconditions.checkArgument(null != specification);
+
+        CSVFormat format = CSVFormat.DEFAULT.builder()
+                .setHeader(HEADERS)
+                .get();
 
         final ObjectContext context = serverRuntime.newContext();
 
@@ -71,21 +86,11 @@ public class PkgProminenceAndUserRatingSpreadsheetJobRunner
                 MediaType.CSV_UTF_8.toString(),
                 JobDataEncoding.NONE);
 
-        try(
-                OutputStream outputStream = jobDataWithByteSink.getByteSink().openBufferedStream();
-                OutputStreamWriter outputStreamWriter = new OutputStreamWriter(outputStream);
-                CSVWriter writer = new CSVWriter(outputStreamWriter)
+        try (
+                final OutputStream outputStream = jobDataWithByteSink.getByteSink().openBufferedStream();
+                final OutputStreamWriter outputStreamWriter = new OutputStreamWriter(outputStream);
+                final CSVPrinter printer = new CSVPrinter(outputStreamWriter, format)
         ) {
-
-            writer.writeNext(new String[]{
-                    "pkg-name",
-                    "repository-code",
-                    "prominence-name",
-                    "prominence-ordering",
-                    "derived-rating",
-                    "derived-rating-sample-size"
-            });
-
             // stream out the packages.
 
             long startMs = System.currentTimeMillis();
@@ -103,11 +108,14 @@ public class PkgProminenceAndUserRatingSpreadsheetJobRunner
                                 pkgUserRatingAggregates.stream().map(PkgUserRatingAggregate::getRepository)
                         ).distinct().sorted().toList();
 
-                        if(repositories.isEmpty()) {
-                            writer.writeNext(new String[]{ pkg.getName(),"","","","","" });
-                        }
-                        else {
-                            for(Repository repository : repositories) {
+                        if (repositories.isEmpty()) {
+                            try {
+                                printer.printRecord(pkg.getName(), "", "", "", "", "");
+                            } catch (IOException e) {
+                                throw new UncheckedIOException("unable to write row", e);
+                            }
+                        } else {
+                            for (Repository repository : repositories) {
 
                                 Optional<PkgProminence> pkgProminenceOptional = pkgProminences
                                         .stream()
@@ -119,16 +127,18 @@ public class PkgProminenceAndUserRatingSpreadsheetJobRunner
                                         .filter(pura -> pura.getRepository().equals(repository))
                                         .collect(SingleCollector.optional());
 
-                                writer.writeNext(
-                                        new String[]{
-                                                pkg.getName(),
-                                                repository.getCode(),
-                                                pkgProminenceOptional.map(p -> p.getProminence().getName()).orElse(""),
-                                                pkgProminenceOptional.map(p -> p.getProminence().getOrdering().toString()).orElse(""),
-                                                pkgUserRatingAggregateOptional.map(p -> p.getDerivedRating().toString()).orElse(""),
-                                                pkgUserRatingAggregateOptional.map(p -> p.getDerivedRatingSampleSize().toString()).orElse(""),
-                                        }
-                                );
+                                try {
+                                    printer.printRecord(
+                                            pkg.getName(),
+                                            repository.getCode(),
+                                            pkgProminenceOptional.map(p -> p.getProminence().getName()).orElse(""),
+                                            pkgProminenceOptional.map(p -> p.getProminence().getOrdering().toString()).orElse(""),
+                                            pkgUserRatingAggregateOptional.map(p -> p.getDerivedRating().toString()).orElse(""),
+                                            pkgUserRatingAggregateOptional.map(p -> p.getDerivedRatingSampleSize().toString()).orElse("")
+                                    );
+                                } catch (IOException ioe) {
+                                    throw new UncheckedIOException("unable to write row", ioe);
+                                }
                             }
                         }
 

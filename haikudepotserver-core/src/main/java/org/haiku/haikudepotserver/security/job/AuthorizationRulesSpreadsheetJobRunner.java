@@ -1,5 +1,5 @@
 /*
- * Copyright 2016-2025, Andrew Lindesay
+ * Copyright 2016-2026, Andrew Lindesay
  * Distributed under the terms of the MIT License.
  */
 
@@ -7,11 +7,12 @@ package org.haiku.haikudepotserver.security.job;
 
 import com.google.common.base.Preconditions;
 import com.google.common.net.MediaType;
-import com.opencsv.CSVWriter;
 import org.apache.cayenne.ObjectContext;
 import org.apache.cayenne.ResultBatchIterator;
 import org.apache.cayenne.configuration.server.ServerRuntime;
 import org.apache.cayenne.query.ObjectSelect;
+import org.apache.commons.csv.CSVFormat;
+import org.apache.commons.csv.CSVPrinter;
 import org.haiku.haikudepotserver.dataobjects.Permission;
 import org.haiku.haikudepotserver.dataobjects.PermissionUserPkg;
 import org.haiku.haikudepotserver.dataobjects.User;
@@ -34,6 +35,15 @@ import java.time.format.DateTimeFormatter;
 public class AuthorizationRulesSpreadsheetJobRunner
         extends AbstractJobRunner<AuthorizationRulesSpreadsheetJobSpecification> {
 
+    private final static String[] HEADERS = new String[] {
+            "create-timestamp",
+            "user-nickname",
+            "user-active",
+            "permission-code",
+            "permission-name",
+            "pkg-name"
+    };
+
     private final ServerRuntime serverRuntime;
 
     public AuthorizationRulesSpreadsheetJobRunner(ServerRuntime serverRuntime) {
@@ -53,6 +63,10 @@ public class AuthorizationRulesSpreadsheetJobRunner
 
         final ObjectContext context = serverRuntime.newContext();
 
+        CSVFormat format = CSVFormat.DEFAULT.builder()
+                .setHeader(HEADERS)
+                .get();
+
         DateTimeFormatter dateTimeFormatter = DateTimeHelper.createStandardDateTimeFormat();
 
         // this will register the outbound data against the job.
@@ -65,17 +79,8 @@ public class AuthorizationRulesSpreadsheetJobRunner
         try(
                 OutputStream outputStream = jobDataWithByteSink.getByteSink().openBufferedStream();
                 OutputStreamWriter outputStreamWriter = new OutputStreamWriter(outputStream);
-                CSVWriter writer = new CSVWriter(outputStreamWriter)
+                final CSVPrinter printer = new CSVPrinter(outputStreamWriter, format)
         ) {
-
-            writer.writeNext(new String[]{
-                    "create-timestamp",
-                    "user-nickname",
-                    "user-active",
-                    "permission-code",
-                    "permission-name",
-                    "pkg-name"
-            });
 
             ObjectSelect<PermissionUserPkg> objectSelect = ObjectSelect.query(PermissionUserPkg.class)
                     .orderBy(
@@ -83,17 +88,22 @@ public class AuthorizationRulesSpreadsheetJobRunner
                             PermissionUserPkg.PERMISSION.dot(Permission.CODE).asc());
 
             try (ResultBatchIterator<PermissionUserPkg> batchIterator = objectSelect.batchIterator(context, 50)) {
-                batchIterator.forEach((pups) -> pups.forEach((pup) -> writer.writeNext(new String[]{
-                        dateTimeFormatter.format(Instant.ofEpochMilli(pup.getCreateTimestamp().getTime())),
-                        pup.getUser().getNickname(),
-                        Boolean.toString(pup.getUser().getActive()),
-                        pup.getPermission().getCode(),
-                        pup.getPermission().getName(),
-                        null != pup.getPkg() ? pup.getPkg().getName() : ""
-                })));
+
+                while (batchIterator.hasNext()) {
+                    for (PermissionUserPkg pup : batchIterator.next()) {
+                        printer.printRecord(
+                                dateTimeFormatter.format(Instant.ofEpochMilli(pup.getCreateTimestamp().getTime())),
+                                pup.getUser().getNickname(),
+                                Boolean.toString(pup.getUser().getActive()),
+                                pup.getPermission().getCode(),
+                                pup.getPermission().getName(),
+                                null != pup.getPkg() ? pup.getPkg().getName() : ""
+                        );
+                    }
+                }
             }
 
-            writer.flush();
+            printer.flush();
             outputStreamWriter.flush();
         }
 

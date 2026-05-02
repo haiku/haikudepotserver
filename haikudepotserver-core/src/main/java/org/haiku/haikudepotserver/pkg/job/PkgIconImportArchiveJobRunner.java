@@ -1,5 +1,5 @@
 /*
- * Copyright 2018-2025, Andrew Lindesay
+ * Copyright 2018-2026, Andrew Lindesay
  * Distributed under the terms of the MIT License.
  */
 
@@ -7,12 +7,14 @@ package org.haiku.haikudepotserver.pkg.job;
 
 import com.google.common.base.Preconditions;
 import com.google.common.net.MediaType;
-import com.opencsv.CSVWriter;
 import org.apache.cayenne.ObjectContext;
 import org.apache.cayenne.configuration.server.ServerRuntime;
 import org.apache.commons.compress.archivers.ArchiveEntry;
 import org.apache.commons.compress.archivers.ArchiveInputStream;
 import org.apache.commons.compress.archivers.tar.TarArchiveInputStream;
+import org.apache.commons.csv.CSVFormat;
+import org.apache.commons.csv.CSVPrinter;
+import org.apache.commons.csv.QuoteMode;
 import org.apache.commons.lang3.StringUtils;
 import org.haiku.haikudepotserver.dataobjects.Pkg;
 import org.haiku.haikudepotserver.dataobjects.User;
@@ -30,6 +32,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.io.OutputStreamWriter;
+import java.util.Arrays;
 import java.util.HashSet;
 import java.util.Optional;
 import java.util.Set;
@@ -46,6 +49,8 @@ import java.util.zip.GZIPInputStream;
 public class PkgIconImportArchiveJobRunner extends AbstractJobRunner<PkgIconImportArchiveJobSpecification> {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(PkgIconImportArchiveJobRunner.class);
+
+    private static final String[] HEADERS = new String[]{"path", "action", "message"};
 
     private static final Pattern PATTERN_PATH = Pattern.compile("^/?" +
             PkgIconExportArchiveJobRunner.PATH_COMPONENT_TOP +
@@ -98,6 +103,11 @@ public class PkgIconImportArchiveJobRunner extends AbstractJobRunner<PkgIconImpo
         Preconditions.checkArgument(null != specification.getInputDataGuid(), "missing input data guid on specification");
         Preconditions.checkArgument(null != specification.getOwnerUserNickname(), "the owner nickname is required");
 
+        CSVFormat format = CSVFormat.DEFAULT.builder()
+                .setHeader(HEADERS)
+                .setQuoteMode(QuoteMode.ALL)
+                .get();
+
         // this will register the outbound data against the job.
         JobDataWithByteSink jobDataWithByteSink = jobService.storeGeneratedData(
                 specification.getGuid(),
@@ -107,19 +117,17 @@ public class PkgIconImportArchiveJobRunner extends AbstractJobRunner<PkgIconImpo
 
         Optional<JobDataWithByteSource> jobDataWithByteSourceOptional = jobService.tryObtainData(specification.getInputDataGuid());
 
-        if(jobDataWithByteSourceOptional.isEmpty()) {
+        if (jobDataWithByteSourceOptional.isEmpty()) {
             throw new IllegalStateException("the job data was not able to be found for guid; " + specification.getInputDataGuid());
         }
 
-        if(!serverRuntime.performInTransaction(() -> {
+        if (!serverRuntime.performInTransaction(() -> {
 
             try (
-                    OutputStream outputStream = jobDataWithByteSink.getByteSink().openBufferedStream();
-                    OutputStreamWriter outputStreamWriter = new OutputStreamWriter(outputStream);
-                    CSVWriter writer = new CSVWriter(outputStreamWriter)) {
-
-                String[] headings = new String[]{"path", "action", "message"};
-                writer.writeNext(headings);
+                    final OutputStream outputStream = jobDataWithByteSink.getByteSink().openBufferedStream();
+                    final OutputStreamWriter outputStreamWriter = new OutputStreamWriter(outputStream);
+                    final CSVPrinter printer = new CSVPrinter(outputStreamWriter, format)
+            ) {
 
                 // make a first sweep to delete all existing icons for packages in the spreadsheet.
 
@@ -128,7 +136,7 @@ public class PkgIconImportArchiveJobRunner extends AbstractJobRunner<PkgIconImpo
                         GZIPInputStream gzipInputStream = new GZIPInputStream(inputStream);
                         TarArchiveInputStream tarArchiveInputStream = new TarArchiveInputStream(gzipInputStream)
                 ) {
-                    clearPackagesIconsAppearingInArchive(specification, tarArchiveInputStream, writer);
+                    clearPackagesIconsAppearingInArchive(specification, tarArchiveInputStream, printer);
                 }
 
                 // now load the icons in.
@@ -138,7 +146,7 @@ public class PkgIconImportArchiveJobRunner extends AbstractJobRunner<PkgIconImpo
                         GZIPInputStream gzipInputStream = new GZIPInputStream(inputStream);
                         TarArchiveInputStream tarArchiveInputStream = new TarArchiveInputStream(gzipInputStream)
                 ) {
-                    processEntriesFromArchive(specification, tarArchiveInputStream, writer);
+                    processEntriesFromArchive(specification, tarArchiveInputStream, printer);
                 }
 
                 return true;
@@ -159,14 +167,14 @@ public class PkgIconImportArchiveJobRunner extends AbstractJobRunner<PkgIconImpo
     private void clearPackagesIconsAppearingInArchive(
             PkgIconImportArchiveJobSpecification specification,
             ArchiveInputStream archiveInputStream,
-            CSVWriter writer) throws IOException {
+            CSVPrinter printer) throws IOException {
 
         String[] row = new String[3];
         Set<String> pkgNamesProcessed = new HashSet<>();
         ArchiveEntry archiveEntry;
         row[CSV_COLUMN_MESSAGE] = "";
 
-        while(null != (archiveEntry = archiveInputStream.getNextEntry())) {
+        while (null != (archiveEntry = archiveInputStream.getNextEntry())) {
             Matcher matcher = PATTERN_PKG_PATH.matcher(archiveEntry.getName());
 
             if (matcher.matches()) {
@@ -191,7 +199,7 @@ public class PkgIconImportArchiveJobRunner extends AbstractJobRunner<PkgIconImpo
                     }
 
                     pkgNamesProcessed.add(pkgName);
-                    writer.writeNext(row);
+                    printer.printRecord(Arrays.stream(row));
                 }
             }
         }
@@ -200,7 +208,7 @@ public class PkgIconImportArchiveJobRunner extends AbstractJobRunner<PkgIconImpo
     private void processEntriesFromArchive(
             PkgIconImportArchiveJobSpecification specification,
             ArchiveInputStream archiveInputStream,
-            CSVWriter writer) throws IOException {
+            CSVPrinter printer) throws IOException {
         String[] row = new String[3];
 
         ArchiveEntry archiveEntry;
@@ -234,7 +242,7 @@ public class PkgIconImportArchiveJobRunner extends AbstractJobRunner<PkgIconImpo
 
                 row[CSV_COLUMN_ACTION] = result.action.name();
                 row[CSV_COLUMN_MESSAGE] = StringUtils.trimToEmpty(result.message);
-                writer.writeNext(row);
+                printer.printRecord(Arrays.stream(row));
 
             } else {
                 LOGGER.debug("ignoring directory from archive; [{}]", archiveEntry.getName());

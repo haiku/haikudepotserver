@@ -1,5 +1,5 @@
 /*
- * Copyright 2018-2025, Andrew Lindesay
+ * Copyright 2018-2026, Andrew Lindesay
  * Distributed under the terms of the MIT License.
  */
 
@@ -7,18 +7,22 @@ package org.haiku.haikudepotserver.pkg.job;
 
 import com.google.common.base.Preconditions;
 import com.google.common.net.MediaType;
-import com.opencsv.CSVWriter;
 import org.apache.cayenne.ObjectContext;
 import org.apache.cayenne.configuration.server.ServerRuntime;
 import org.apache.cayenne.query.ObjectSelect;
+import org.apache.commons.csv.CSVFormat;
+import org.apache.commons.csv.CSVPrinter;
 import org.haiku.haikudepotserver.dataobjects.NaturalLanguage;
 import org.haiku.haikudepotserver.dataobjects.PkgSupplement;
 import org.haiku.haikudepotserver.job.AbstractJobRunner;
-import org.haiku.haikudepotserver.job.model.*;
+import org.haiku.haikudepotserver.job.model.JobDataEncoding;
+import org.haiku.haikudepotserver.job.model.JobDataWithByteSink;
+import org.haiku.haikudepotserver.job.model.JobRunnerException;
+import org.haiku.haikudepotserver.job.model.JobService;
+import org.haiku.haikudepotserver.naturallanguage.model.NaturalLanguageCoordinates;
 import org.haiku.haikudepotserver.naturallanguage.model.NaturalLanguageService;
 import org.haiku.haikudepotserver.pkg.model.PkgLocalizationCoverageExportSpreadsheetJobSpecification;
 import org.haiku.haikudepotserver.pkg.model.PkgService;
-import org.haiku.haikudepotserver.naturallanguage.model.NaturalLanguageCoordinates;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
@@ -26,6 +30,8 @@ import org.springframework.stereotype.Component;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.io.OutputStreamWriter;
+import java.io.UncheckedIOException;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Set;
 import java.util.concurrent.atomic.AtomicLong;
@@ -93,6 +99,12 @@ public class PkgLocalizationCoverageExportSpreadsheetJobRunner
             throw new RuntimeException("there appear to be no natural languages in the system");
         }
 
+        final String[] headers = deriveHeaders(naturalLanguages);
+
+        CSVFormat format = CSVFormat.DEFAULT.builder()
+                .setHeader(headers)
+                .get();
+
         // this will register the outbound data against the job.
         JobDataWithByteSink jobDataWithByteSink = jobService.storeGeneratedData(
                 specification.getGuid(),
@@ -101,28 +113,13 @@ public class PkgLocalizationCoverageExportSpreadsheetJobRunner
                 JobDataEncoding.NONE);
 
         try(
-                OutputStream outputStream = jobDataWithByteSink.getByteSink().openBufferedStream();
-                OutputStreamWriter outputStreamWriter = new OutputStreamWriter(outputStream);
-                CSVWriter writer = new CSVWriter(outputStreamWriter)
+                final OutputStream outputStream = jobDataWithByteSink.getByteSink().openBufferedStream();
+                final OutputStreamWriter outputStreamWriter = new OutputStreamWriter(outputStream);
+                final CSVPrinter printer = new CSVPrinter(outputStreamWriter, format)
         ) {
 
             final String[] cells = new String[1 + naturalLanguages.size()];
-
-            // headers
-
-            {
-                int c = 0;
-
-                cells[c++] = "pkg-name";
-
-                for (NaturalLanguage naturalLanguage : naturalLanguages) {
-                    cells[c++] = naturalLanguage.getCode();
-                }
-            }
-
             long startMs = System.currentTimeMillis();
-
-            writer.writeNext(cells);
 
             // stream out the packages.
 
@@ -144,7 +141,11 @@ public class PkgLocalizationCoverageExportSpreadsheetJobRunner
                             cells[c++] = pkgSupplement.getPkgLocalization(naturalLanguage).map(pl -> MARKER).orElse("");
                         }
 
-                        writer.writeNext(cells);
+                        try {
+                            printer.printRecord(Arrays.stream(cells));
+                        } catch (IOException ioe) {
+                            throw new UncheckedIOException("unable to write row", ioe);
+                        }
 
                         jobService.setJobProgressPercent(
                                 specification.getGuid(),
@@ -153,6 +154,9 @@ public class PkgLocalizationCoverageExportSpreadsheetJobRunner
                         return true; // keep going!
                     }
             );
+
+            printer.flush();
+            outputStreamWriter.flush();
 
             LOGGER.info(
                     "did produce pkg localization coverage spreadsheet report for {} packages in {}ms",
@@ -163,4 +167,17 @@ public class PkgLocalizationCoverageExportSpreadsheetJobRunner
 
 
     }
+
+    private String[] deriveHeaders(List<NaturalLanguage> naturalLanguages) {
+        String[] headers = new String[1 + naturalLanguages.size()];
+
+        headers[0] = "pkg-name";
+
+        for (int i = 0; i < naturalLanguages.size(); i++) {
+            headers[1 + i] = naturalLanguages.get(i).getCode();
+        }
+
+        return headers;
+    }
+
 }

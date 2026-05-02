@@ -1,5 +1,5 @@
 /*
- * Copyright 2018-2025, Andrew Lindesay
+ * Copyright 2018-2026, Andrew Lindesay
  * Distributed under the terms of the MIT License.
  */
 
@@ -7,9 +7,11 @@ package org.haiku.haikudepotserver.pkg.job;
 
 import com.google.common.base.Preconditions;
 import com.google.common.net.MediaType;
-import com.opencsv.CSVWriter;
 import org.apache.cayenne.ObjectContext;
 import org.apache.cayenne.configuration.server.ServerRuntime;
+import org.apache.commons.csv.CSVFormat;
+import org.apache.commons.csv.CSVPrinter;
+import org.apache.commons.csv.QuoteMode;
 import org.haiku.haikudepotserver.dataobjects.PkgSupplement;
 import org.haiku.haikudepotserver.dataobjects.Repository;
 import org.haiku.haikudepotserver.dataobjects.auto._PkgScreenshot;
@@ -27,6 +29,8 @@ import org.springframework.stereotype.Component;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.io.OutputStreamWriter;
+import java.io.UncheckedIOException;
+import java.util.Arrays;
 import java.util.stream.Collectors;
 
 @Component
@@ -34,6 +38,13 @@ import java.util.stream.Collectors;
 public class PkgScreenshotSpreadsheetJobRunner extends AbstractJobRunner<PkgScreenshotSpreadsheetJobSpecification> {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(PkgScreenshotSpreadsheetJobRunner.class);
+
+    private static final String[] HEADERS = new String[] {
+            "pkg-name",
+            "repository-codes",
+            "screenshot-count",
+            "screenshot-bytes"
+    };
 
     private final ServerRuntime serverRuntime;
     private final RepositoryService repositoryService;
@@ -70,19 +81,16 @@ public class PkgScreenshotSpreadsheetJobRunner extends AbstractJobRunner<PkgScre
                 MediaType.CSV_UTF_8.toString(),
                 JobDataEncoding.NONE);
 
+        CSVFormat format = CSVFormat.DEFAULT.builder()
+                .setHeader(HEADERS)
+                .setQuoteMode(QuoteMode.ALL)
+                .get();
+
         try (
                 OutputStream outputStream = jobDataWithByteSink.getByteSink().openBufferedStream();
                 OutputStreamWriter outputStreamWriter = new OutputStreamWriter(outputStream);
-                CSVWriter writer = new CSVWriter(outputStreamWriter)
+                final CSVPrinter printer = new CSVPrinter(outputStreamWriter, format)
         ) {
-            String[] headings = new String[]{
-                    "pkg-name",
-                    "repository-codes",
-                    "screenshot-count",
-                    "screenshot-bytes"
-            };
-
-            writer.writeNext(headings);
 
             String[] cells = new String[4];
 
@@ -108,7 +116,11 @@ public class PkgScreenshotSpreadsheetJobRunner extends AbstractJobRunner<PkgScre
                                 .mapToInt(_PkgScreenshot::getLength)
                                 .sum());
 
-                        writer.writeNext(cells);
+                        try {
+                            printer.printRecord(Arrays.stream(cells));
+                        } catch (IOException ioe) {
+                            throw new UncheckedIOException("cannot write row", ioe);
+                        }
 
                         return true;
                     });

@@ -1,5 +1,5 @@
 /*
- * Copyright 2018-2025, Andrew Lindesay
+ * Copyright 2018-2026, Andrew Lindesay
  * Distributed under the terms of the MIT License.
  */
 
@@ -7,9 +7,10 @@ package org.haiku.haikudepotserver.pkg.job;
 
 import com.google.common.base.Preconditions;
 import com.google.common.net.MediaType;
-import com.opencsv.CSVWriter;
 import org.apache.cayenne.ObjectContext;
 import org.apache.cayenne.configuration.server.ServerRuntime;
+import org.apache.commons.csv.CSVFormat;
+import org.apache.commons.csv.CSVPrinter;
 import org.haiku.haikudepotserver.dataobjects.PkgSupplement;
 import org.haiku.haikudepotserver.dataobjects.Repository;
 import org.haiku.haikudepotserver.job.AbstractJobRunner;
@@ -28,6 +29,7 @@ import org.springframework.stereotype.Component;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.io.OutputStreamWriter;
+import java.io.UncheckedIOException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -73,6 +75,12 @@ public class PkgIconSpreadsheetJobRunner extends AbstractJobRunner<PkgIconSpread
         Preconditions.checkArgument(null!=specification);
 
         final ObjectContext context = serverRuntime.newContext();
+        final List<PkgIconConfiguration> pkgIconConfigurations = pkgIconService.getInUsePkgIconConfigurations(context);
+        final String[] headers = deriveHeaders(pkgIconConfigurations);
+
+        final CSVFormat format = CSVFormat.DEFAULT.builder()
+                .setHeader(headers)
+                .get();
 
         // this will register the outbound data against the job.
         JobDataWithByteSink jobDataWithByteSink = jobService.storeGeneratedData(
@@ -82,37 +90,10 @@ public class PkgIconSpreadsheetJobRunner extends AbstractJobRunner<PkgIconSpread
                 JobDataEncoding.NONE);
 
         try(
-                OutputStream outputStream = jobDataWithByteSink.getByteSink().openBufferedStream();
-                OutputStreamWriter outputStreamWriter = new OutputStreamWriter(outputStream);
-                CSVWriter writer = new CSVWriter(outputStreamWriter)
+                final OutputStream outputStream = jobDataWithByteSink.getByteSink().openBufferedStream();
+                final OutputStreamWriter outputStreamWriter = new OutputStreamWriter(outputStream);
+                final CSVPrinter printer = new CSVPrinter(outputStreamWriter, format)
         ) {
-            final List<PkgIconConfiguration> pkgIconConfigurations = pkgIconService.getInUsePkgIconConfigurations(context);
-
-            {
-                List<String> headings = new ArrayList<>();
-
-                headings.add("pkg-name");
-                headings.add("repository-codes");
-                headings.add("no-icons");
-
-                for (PkgIconConfiguration pkgIconConfiguration : pkgIconConfigurations) {
-
-                    StringBuilder heading = new StringBuilder();
-
-                    heading.append(pkgIconConfiguration.getMediaType().getCode());
-
-                    if (null != pkgIconConfiguration.getSize()) {
-                        heading.append("@");
-                        heading.append(pkgIconConfiguration.getSize().toString());
-                    }
-
-                    headings.add(heading.toString());
-
-                }
-
-                writer.writeNext(headings.toArray(new String[0]));
-            }
-
             // stream out the packages.
 
             long startMs = System.currentTimeMillis();
@@ -140,7 +121,11 @@ public class PkgIconSpreadsheetJobRunner extends AbstractJobRunner<PkgIconSpread
                                     ).map(pi -> MARKER).orElse(""));
                         }
 
-                        writer.writeNext(cells.toArray(new String[0]));
+                        try {
+                            printer.printRecord(cells);
+                        } catch (IOException e) {
+                            throw new UncheckedIOException("unable to write row", e);
+                        }
 
                         return true;
                     });
@@ -151,6 +136,30 @@ public class PkgIconSpreadsheetJobRunner extends AbstractJobRunner<PkgIconSpread
                     System.currentTimeMillis() - startMs);
         }
 
+    }
+
+    private String[] deriveHeaders(final List<PkgIconConfiguration> pkgIconConfigurations) {
+        String[] headings = new String[pkgIconConfigurations.size() + 3];
+
+        headings[0] = "pkg-name";
+        headings[1] = "repository-codes";
+        headings[2] = "no-icons";
+
+        for (int i = 0; i < pkgIconConfigurations.size(); i++) {
+            PkgIconConfiguration pkgIconConfiguration = pkgIconConfigurations.get(i);
+            StringBuilder heading = new StringBuilder();
+
+            heading.append(pkgIconConfiguration.getMediaType().getCode());
+
+            if (null != pkgIconConfiguration.getSize()) {
+                heading.append("@");
+                heading.append(pkgIconConfiguration.getSize().toString());
+            }
+
+            headings[3 + i] = heading.toString();
+        }
+
+        return headings;
     }
 
 }

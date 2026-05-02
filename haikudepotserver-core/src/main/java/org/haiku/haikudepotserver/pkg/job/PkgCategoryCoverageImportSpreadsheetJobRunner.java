@@ -1,5 +1,5 @@
 /*
- * Copyright 2018-2025, Andrew Lindesay
+ * Copyright 2018-2026, Andrew Lindesay
  * Distributed under the terms of the MIT License.
  */
 
@@ -7,11 +7,9 @@ package org.haiku.haikudepotserver.pkg.job;
 
 import com.google.common.base.Preconditions;
 import com.google.common.net.MediaType;
-import com.opencsv.CSVReader;
-import com.opencsv.CSVWriter;
-import com.opencsv.exceptions.CsvValidationException;
 import org.apache.cayenne.ObjectContext;
 import org.apache.cayenne.configuration.server.ServerRuntime;
+import org.apache.commons.csv.*;
 import org.haiku.haikudepotserver.dataobjects.Pkg;
 import org.haiku.haikudepotserver.dataobjects.PkgCategory;
 import org.haiku.haikudepotserver.dataobjects.User;
@@ -26,6 +24,7 @@ import org.springframework.stereotype.Component;
 
 import java.io.*;
 import java.util.*;
+import java.util.stream.Stream;
 
 @Component
 public class PkgCategoryCoverageImportSpreadsheetJobRunner
@@ -66,6 +65,14 @@ public class PkgCategoryCoverageImportSpreadsheetJobRunner
         Preconditions.checkArgument(null != specification.getInputDataGuid(), "missing imput data guid on specification");
         Preconditions.checkArgument(null != specification.getOwnerUserNickname(), "the owner user must be identified");
 
+        List<String> pkgCategoryCodes = getPkgCategoryCodes();
+        String[] headings = getHeadingRow(pkgCategoryCodes);
+
+        CSVFormat format = CSVFormat.DEFAULT.builder()
+                .setHeader(getHeadingRow(pkgCategoryCodes))
+                .setQuoteMode(QuoteMode.ALL)
+                .get();
+
         // this will register the outbound data against the job.
         JobDataWithByteSink jobDataWithByteSink = jobService.storeGeneratedData(
                 specification.getGuid(),
@@ -83,23 +90,20 @@ public class PkgCategoryCoverageImportSpreadsheetJobRunner
         }
 
         try(
-                OutputStream outputStream = jobDataWithByteSink.getByteSink().openBufferedStream();
-                OutputStreamWriter outputStreamWriter = new OutputStreamWriter(outputStream);
-                CSVWriter writer = new CSVWriter(outputStreamWriter);
-                InputStream inputStream = jobDataWithByteSourceOptional.get().getByteSource().openStream();
-                InputStreamReader inputStreamReader = new InputStreamReader(inputStream);
-                CSVReader reader = new CSVReader(inputStreamReader);
+                final OutputStream outputStream = jobDataWithByteSink.getByteSink().openBufferedStream();
+                final OutputStreamWriter outputStreamWriter = new OutputStreamWriter(outputStream);
+                final CSVPrinter printer = new CSVPrinter(outputStreamWriter, format);
+                final InputStream inputStream = jobDataWithByteSourceOptional.get().getByteSource().openStream();
+                final InputStreamReader inputStreamReader = new InputStreamReader(inputStream);
+                final CSVParser parser = format.parse(inputStreamReader);
         ) {
 
-            // headers
-
-            List<String> pkgCategoryCodes = getPkgCategoryCodes();
-            String[] headings = getHeadingRow(pkgCategoryCodes);
+            Iterator<CSVRecord> csvIterator = parser.iterator();
 
             // read in the first row of the input and check the headings are there to quasi-validate
             // that the input is not some random rubbish.
 
-            String[] headerRow = reader.readNext();
+            String[] headerRow = csvIterator.next().values();
 
             if(headings.length != headerRow.length) {
                 throw new JobRunnerException("wrong number of header columns in input");
@@ -109,14 +113,11 @@ public class PkgCategoryCoverageImportSpreadsheetJobRunner
                 throw new JobRunnerException("mismatched input headers");
             }
 
-            writer.writeNext(headings);
-
             serverRuntime.performInTransaction(() -> {
 
                 try {
-                    String[] row;
-
-                    while (null != (row = reader.readNext())) {
+                    while (csvIterator.hasNext()) {
+                        String[] row = csvIterator.next().values();
                         if (0 != row.length) {
 
                             ObjectContext rowContext = serverRuntime.newContext();
@@ -187,10 +188,13 @@ public class PkgCategoryCoverageImportSpreadsheetJobRunner
                             rowOutput.removeLast();
                             rowOutput.add(action.name());
 
-                            writer.writeNext(rowOutput.toArray(new String[0]));
+                            printer.printRecord(rowOutput);
                         }
 
                     }
+
+                    printer.flush();
+                    outputStreamWriter.flush();
 
                 } catch (Throwable th) {
                     LOGGER.error("a problem has arisen importing package categories from a spreadsheet", th);
@@ -199,8 +203,6 @@ public class PkgCategoryCoverageImportSpreadsheetJobRunner
                 return null;
             });
 
-        } catch (CsvValidationException e) {
-            throw new JobRunnerException("unable to validate the csv data", e);
         }
 
     }

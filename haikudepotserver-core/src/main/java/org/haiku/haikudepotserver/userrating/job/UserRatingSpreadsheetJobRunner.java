@@ -1,5 +1,5 @@
 /*
- * Copyright 2018-2025, Andrew Lindesay
+ * Copyright 2018-2026, Andrew Lindesay
  * Distributed under the terms of the MIT License.
  */
 
@@ -7,9 +7,10 @@ package org.haiku.haikudepotserver.userrating.job;
 
 import com.google.common.base.Preconditions;
 import com.google.common.net.MediaType;
-import com.opencsv.CSVWriter;
 import org.apache.cayenne.ObjectContext;
 import org.apache.cayenne.configuration.server.ServerRuntime;
+import org.apache.commons.csv.CSVFormat;
+import org.apache.commons.csv.CSVPrinter;
 import org.apache.commons.lang3.StringUtils;
 import org.haiku.haikudepotserver.dataobjects.Pkg;
 import org.haiku.haikudepotserver.dataobjects.Repository;
@@ -29,8 +30,10 @@ import org.springframework.stereotype.Component;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.io.OutputStreamWriter;
+import java.io.UncheckedIOException;
 import java.time.Instant;
 import java.time.format.DateTimeFormatter;
+import java.util.Arrays;
 import java.util.Optional;
 
 /**
@@ -48,6 +51,21 @@ import java.util.Optional;
 public class UserRatingSpreadsheetJobRunner extends AbstractJobRunner<UserRatingSpreadsheetJobSpecification> {
 
     private final static Logger LOGGER = LoggerFactory.getLogger(UserRatingSpreadsheetJobRunner.class);
+
+    private final static String[] HEADERS = new String[]{
+            "pkg-name",
+            "repository-code",
+            "architecture-code",
+            "version-coordinates",
+            "user-nickname",
+            "create-timestamp",
+            "modify-timestamp",
+            "rating",
+            "stability-code",
+            "natural-language-code",
+            "comment",
+            "code"
+    };
 
     private final ServerRuntime serverRuntime;
     private final UserRatingService userRatingService;
@@ -72,6 +90,10 @@ public class UserRatingSpreadsheetJobRunner extends AbstractJobRunner<UserRating
 
         final ObjectContext context = serverRuntime.newContext();
 
+        final CSVFormat format = CSVFormat.DEFAULT.builder()
+                .setHeader(HEADERS)
+                .get();
+
         // this will register the outbound data against the job.
         JobDataWithByteSink jobDataWithByteSink = jobService.storeGeneratedData(
                 specification.getGuid(),
@@ -80,9 +102,9 @@ public class UserRatingSpreadsheetJobRunner extends AbstractJobRunner<UserRating
                 JobDataEncoding.NONE);
 
         try(
-                OutputStream outputStream = jobDataWithByteSink.getByteSink().openBufferedStream();
-                OutputStreamWriter outputStreamWriter = new OutputStreamWriter(outputStream);
-                CSVWriter writer = new CSVWriter(outputStreamWriter)
+                final OutputStream outputStream = jobDataWithByteSink.getByteSink().openBufferedStream();
+                final OutputStreamWriter outputStreamWriter = new OutputStreamWriter(outputStream);
+                final CSVPrinter printer = new CSVPrinter(outputStreamWriter, format)
         ) {
 
             Pkg pkg = Optional.ofNullable(specification.getPkgName())
@@ -100,21 +122,6 @@ public class UserRatingSpreadsheetJobRunner extends AbstractJobRunner<UserRating
                     .map(c -> Repository.getByCode(context, c))
                     .orElse(null);
 
-            writer.writeNext(new String[]{
-                    "pkg-name",
-                    "repository-code",
-                    "architecture-code",
-                    "version-coordinates",
-                    "user-nickname",
-                    "create-timestamp",
-                    "modify-timestamp",
-                    "rating",
-                    "stability-code",
-                    "natural-language-code",
-                    "comment",
-                    "code"
-            });
-
             // stream out the packages.
 
             long startMs = System.currentTimeMillis();
@@ -127,28 +134,34 @@ public class UserRatingSpreadsheetJobRunner extends AbstractJobRunner<UserRating
             spec.setUser(user);
             spec.setRepository(repository);
 
+            String[] row = new String[HEADERS.length];
+
             // TODO; provide a prefetch tree into the user, pkgversion.
             int count = userRatingService.each(context, spec, userRating -> {
+                row[0] = userRating.getPkgVersion().getPkg().getName();
+                row[1] = userRating.getPkgVersion().getRepositorySource().getRepository().getCode();
+                row[2] = userRating.getPkgVersion().getArchitecture().getCode();
+                row[3] = userRating.getPkgVersion().toVersionCoordinates().toString();
+                row[4] = userRating.getUser().getNickname();
+                row[5] = dateTimeFormatter.format(Instant.ofEpochMilli(userRating.getCreateTimestamp().getTime()));
+                row[6] = dateTimeFormatter.format(Instant.ofEpochMilli(userRating.getModifyTimestamp().getTime()));
+                row[7] = null != userRating.getRating() ? userRating.getRating().toString() : "";
+                row[8] = null != userRating.getUserRatingStability() ? userRating.getUserRatingStability().getCode() : "";
+                row[9] = userRating.getNaturalLanguage().getCode();
+                row[10] = userRating.getComment();
+                row[11] = userRating.getCode();
 
-                writer.writeNext(
-                        new String[]{
-                                userRating.getPkgVersion().getPkg().getName(),
-                                userRating.getPkgVersion().getRepositorySource().getRepository().getCode(),
-                                userRating.getPkgVersion().getArchitecture().getCode(),
-                                userRating.getPkgVersion().toVersionCoordinates().toString(),
-                                userRating.getUser().getNickname(),
-                                dateTimeFormatter.format(Instant.ofEpochMilli(userRating.getCreateTimestamp().getTime())),
-                                dateTimeFormatter.format(Instant.ofEpochMilli(userRating.getModifyTimestamp().getTime())),
-                                null != userRating.getRating() ? userRating.getRating().toString() : "",
-                                null != userRating.getUserRatingStability() ? userRating.getUserRatingStability().getCode() : "",
-                                userRating.getNaturalLanguage().getCode(),
-                                userRating.getComment(),
-                                userRating.getCode()
-                        }
-                );
+                try {
+                    printer.printRecord(Arrays.stream(row));
+                } catch (IOException ioe) {
+                    throw new UncheckedIOException("unable to write row", ioe);
+                }
 
                 return true;
             });
+
+            printer.flush();
+            outputStreamWriter.flush();
 
             LOGGER.info(
                     "did produce user rating spreadsheet report for {} user ratings in {}ms",

@@ -1,5 +1,5 @@
 /*
- * Copyright 2018-2025, Andrew Lindesay
+ * Copyright 2018-2026, Andrew Lindesay
  * Distributed under the terms of the MIT License.
  */
 
@@ -7,9 +7,11 @@ package org.haiku.haikudepotserver.pkg.job;
 
 import com.google.common.base.Preconditions;
 import com.google.common.net.MediaType;
-import com.opencsv.CSVWriter;
 import org.apache.cayenne.ObjectContext;
 import org.apache.cayenne.configuration.server.ServerRuntime;
+import org.apache.commons.csv.CSVFormat;
+import org.apache.commons.csv.CSVPrinter;
+import org.apache.commons.csv.QuoteMode;
 import org.haiku.haikudepotserver.dataobjects.PkgSupplement;
 import org.haiku.haikudepotserver.dataobjects.PkgVersionLocalization;
 import org.haiku.haikudepotserver.dataobjects.Repository;
@@ -27,6 +29,7 @@ import org.springframework.stereotype.Component;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.io.OutputStreamWriter;
+import java.io.UncheckedIOException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
@@ -67,6 +70,12 @@ public class PkgCategoryCoverageExportSpreadsheetJobRunner extends AbstractPkgCa
         Preconditions.checkArgument(null!=specification);
 
         final ObjectContext context = serverRuntime.newContext();
+        final List<String> pkgCategoryCodes = getPkgCategoryCodes();
+
+        CSVFormat format = CSVFormat.DEFAULT.builder()
+                .setHeader(getHeadingRow(pkgCategoryCodes))
+                .setQuoteMode(QuoteMode.ALL)
+                .get();
 
         // this will register the outbound data against the job.
         JobDataWithByteSink jobDataWithByteSink = jobService.storeGeneratedData(
@@ -76,19 +85,11 @@ public class PkgCategoryCoverageExportSpreadsheetJobRunner extends AbstractPkgCa
                 JobDataEncoding.NONE);
 
         try(
-                OutputStream outputStream = jobDataWithByteSink.getByteSink().openBufferedStream();
-                OutputStreamWriter outputStreamWriter = new OutputStreamWriter(outputStream);
-                CSVWriter writer = new CSVWriter(outputStreamWriter)
+                final OutputStream outputStream = jobDataWithByteSink.getByteSink().openBufferedStream();
+                final OutputStreamWriter outputStreamWriter = new OutputStreamWriter(outputStream);
+                final CSVPrinter printer = new CSVPrinter(outputStreamWriter, format)
         ) {
-
-            // headers
-
-            final List<String> pkgCategoryCodes = getPkgCategoryCodes();
-            String[] headings = getHeadingRow(pkgCategoryCodes);
-
             long startMs = System.currentTimeMillis();
-
-            writer.writeNext(headings);
 
             // stream out the packages.
 
@@ -117,10 +118,19 @@ public class PkgCategoryCoverageExportSpreadsheetJobRunner extends AbstractPkgCa
                         }
 
                         cols.add(""); // no action
-                        writer.writeNext(cols.toArray(new String[0]));
+
+                        try {
+                            printer.printRecord(cols.stream());
+                        } catch (IOException ioe) {
+                            throw new UncheckedIOException("unable to write csv line", ioe);
+                        }
+
                         return true; // keep going!
                     }
             );
+
+            printer.flush();
+            outputStreamWriter.flush();
 
             LOGGER.info(
                     "did produce category coverage spreadsheet report for {} packages in {}ms",

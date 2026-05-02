@@ -7,18 +7,25 @@ package org.haiku.haikudepotserver.pkg.job;
 
 import com.google.common.base.Preconditions;
 import com.google.common.net.MediaType;
-import com.opencsv.CSVWriter;
 import org.apache.cayenne.ObjectContext;
 import org.apache.cayenne.configuration.server.ServerRuntime;
 import org.apache.cayenne.query.ObjectSelect;
-import org.haiku.haikudepotserver.dataobjects.*;
+import org.apache.commons.csv.CSVFormat;
+import org.apache.commons.csv.CSVPrinter;
+import org.apache.commons.csv.QuoteMode;
+import org.haiku.haikudepotserver.dataobjects.Architecture;
+import org.haiku.haikudepotserver.dataobjects.NaturalLanguage;
+import org.haiku.haikudepotserver.dataobjects.PkgVersionLocalization;
+import org.haiku.haikudepotserver.dataobjects.Repository;
 import org.haiku.haikudepotserver.job.AbstractJobRunner;
-import org.haiku.haikudepotserver.job.model.*;
 import org.haiku.haikudepotserver.job.model.JobDataEncoding;
+import org.haiku.haikudepotserver.job.model.JobDataWithByteSink;
+import org.haiku.haikudepotserver.job.model.JobRunnerException;
+import org.haiku.haikudepotserver.job.model.JobService;
+import org.haiku.haikudepotserver.naturallanguage.model.NaturalLanguageCoordinates;
 import org.haiku.haikudepotserver.naturallanguage.model.NaturalLanguageService;
 import org.haiku.haikudepotserver.pkg.model.PkgService;
 import org.haiku.haikudepotserver.pkg.model.PkgVersionLocalizationCoverageExportSpreadsheetJobSpecification;
-import org.haiku.haikudepotserver.naturallanguage.model.NaturalLanguageCoordinates;
 import org.haiku.haikudepotserver.repository.model.RepositoryService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -27,6 +34,8 @@ import org.springframework.stereotype.Component;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.io.OutputStreamWriter;
+import java.io.UncheckedIOException;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
@@ -114,32 +123,19 @@ extends AbstractJobRunner<PkgVersionLocalizationCoverageExportSpreadsheetJobSpec
                 MediaType.CSV_UTF_8.toString(),
                 JobDataEncoding.NONE);
 
+        CSVFormat format = CSVFormat.DEFAULT.builder()
+                .setHeader(deriveHeaders(naturalLanguages))
+                .setQuoteMode(QuoteMode.ALL)
+                .get();
+
         try(
-                OutputStream outputStream = jobDataWithByteSink.getByteSink().openBufferedStream();
-                OutputStreamWriter outputStreamWriter = new OutputStreamWriter(outputStream);
-                CSVWriter writer = new CSVWriter(outputStreamWriter)
+                final OutputStream outputStream = jobDataWithByteSink.getByteSink().openBufferedStream();
+                final OutputStreamWriter outputStreamWriter = new OutputStreamWriter(outputStream);
+                final CSVPrinter printer = new CSVPrinter(outputStreamWriter, format)
         ) {
 
             final String[] cells = new String[4 + naturalLanguages.size()];
-
-            // headers
-
-            {
-                int c = 0;
-
-                cells[c++] = "pkg-name";
-                cells[c++] = "repository";
-                cells[c++] = "architecture";
-                cells[c++] = "latest-version-coordinates";
-
-                for (NaturalLanguage naturalLanguage : naturalLanguages) {
-                    cells[c++] = naturalLanguage.getCode();
-                }
-            }
-
             long startMs = System.currentTimeMillis();
-
-            writer.writeNext(cells);
 
             // stream out the packages.
 
@@ -175,7 +171,11 @@ extends AbstractJobRunner<PkgVersionLocalizationCoverageExportSpreadsheetJobSpec
                                             cells[c++] = pkgVersionLocalizationOptional.isPresent() ? MARKER : "";
                                         }
 
-                                        writer.writeNext(cells);
+                                        try {
+                                            printer.printRecord(Arrays.stream(cells));
+                                        } catch (IOException ioe) {
+                                            throw new UncheckedIOException("cannot write row", ioe);
+                                        }
                                     });
                         }
 
@@ -194,6 +194,20 @@ extends AbstractJobRunner<PkgVersionLocalizationCoverageExportSpreadsheetJobSpec
 
         }
 
+    }
+
+    private String[] deriveHeaders(List<NaturalLanguage> naturalLanguages) {
+        String[] headers = new String[4 + naturalLanguages.size()];
+        headers[0] = "pkg-name";
+        headers[1] = "repository";
+        headers[2] = "architecture";
+        headers[3] = "latest-version-coordinates";
+
+        for (int i = 0; i < naturalLanguages.size(); i++) {
+            headers[4 + i] = naturalLanguages.get(i).getCode();
+        }
+
+        return headers;
     }
 
 }

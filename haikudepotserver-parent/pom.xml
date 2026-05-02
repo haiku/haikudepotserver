@@ -26,23 +26,15 @@
 
     <properties>
 
+        <!-- build settings -->
+
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 
         <maven.compiler.target>25</maven.compiler.target>
         <maven.compiler.source>25</maven.compiler.source>
         <maven.compiler.parameters>true</maven.compiler.parameters>
 
-        <spring-boot.version>4.0.6</spring-boot.version>
-
-        <postgresql.version>42.7.11</postgresql.version>
-        <cayenne.version>4.2.3</cayenne.version>
-
-        <guava.version>33.6.0-jre</guava.version>
-
-        <openapi-generator-maven-plugin.version>7.22.0</openapi-generator-maven-plugin.version>
-        <springfox.version>3.0.0</springfox.version>
-
-        <nimbus-jose-jwt.version>10.9</nimbus-jose-jwt.version>
+        <!-- build time dependencies -->
 
         <maven-war-plugin.version>3.6.3</maven-war-plugin.version>
         <maven-failsafe-plugin.version>3.5.5</maven-failsafe-plugin.version>
@@ -53,19 +45,28 @@
         <maven-compiler-plugin.version>3.15.0</maven-compiler-plugin.version>
 
         <jsonschema2pojo-maven-plugin.version>1.3.3</jsonschema2pojo-maven-plugin.version>
+        <openapi-generator-maven-plugin.version>7.22.0</openapi-generator-maven-plugin.version>
+
+        <!-- runtime dependencies -->
+
+        <spring-boot.version>4.0.6</spring-boot.version>
+
+        <postgresql.version>42.7.11</postgresql.version>
+        <cayenne.version>4.2.3</cayenne.version>
 
         <flexmark.version>0.64.8</flexmark.version>
         <freemarker.version>2.3.34</freemarker.version>
-        <opencsv.version>5.12.0</opencsv.version>
         <aircompressor.version>3.6</aircompressor.version>
+        <guava.version>33.6.0-jre</guava.version>
+        <springfox.version>3.0.0</springfox.version>
+        <nimbus-jose-jwt.version>10.9</nimbus-jose-jwt.version>
 
         <commons-collections4.version>4.5.0</commons-collections4.version>
         <commons-lang3.version>3.20.0</commons-lang3.version>
         <commons-compress.version>1.28.0</commons-compress.version>
         <commons-codec.version>1.22.0</commons-codec.version>
         <commons-csv.version>1.14.1</commons-csv.version>
-
-        <testcontainers.version>1.21.4</testcontainers.version>
+        <commons-text.version>1.15.0</commons-text.version>
 
         <avaje-http.version>3.8</avaje-http.version>
         <avaje-inject.version>12.5</avaje-inject.version>
@@ -74,6 +75,8 @@
         <avaje-simple-logger.version>1.5</avaje-simple-logger.version>
         <avaje-jex.version>3.5</avaje-jex.version>
         <avaje-applog-slf4j.version>1.2</avaje-applog-slf4j.version>
+
+        <!-- test time dependencies -->
 
         <!--
         This is required to configure the agent in the test plugin. The actual version is
@@ -87,6 +90,7 @@
         <fest-assert.artifactId>fest-assert</fest-assert.artifactId>
         <fest-assert.version>1.4</fest-assert.version>
         <awaitility.version>4.3.0</awaitility.version>
+        <testcontainers.version>1.21.4</testcontainers.version>
 
     </properties>
 
@@ -111,11 +115,6 @@
                 <groupId>com.google.guava</groupId>
                 <artifactId>guava</artifactId>
                 <version>${guava.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>com.opencsv</groupId>
-                <artifactId>opencsv</artifactId>
-                <version>${opencsv.version}</version>
             </dependency>
             <dependency>
                 <groupId>org.freemarker</groupId>
@@ -208,6 +207,11 @@
                 <groupId>org.apache.commons</groupId>
                 <artifactId>commons-csv</artifactId>
                 <version>${commons-csv.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.apache.commons</groupId>
+                <artifactId>commons-text</artifactId>
+                <version>${commons-text.version}</version>
             </dependency>
 
             <dependency>

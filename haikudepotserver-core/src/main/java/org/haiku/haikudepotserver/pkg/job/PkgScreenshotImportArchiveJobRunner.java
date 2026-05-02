@@ -13,12 +13,14 @@ import com.google.common.hash.HashingInputStream;
 import com.google.common.io.ByteSource;
 import com.google.common.io.ByteStreams;
 import com.google.common.net.MediaType;
-import com.opencsv.CSVWriter;
 import org.apache.cayenne.ObjectContext;
 import org.apache.cayenne.configuration.server.ServerRuntime;
 import org.apache.commons.compress.archivers.ArchiveEntry;
 import org.apache.commons.compress.archivers.ArchiveInputStream;
 import org.apache.commons.compress.archivers.tar.TarArchiveInputStream;
+import org.apache.commons.csv.CSVFormat;
+import org.apache.commons.csv.CSVPrinter;
+import org.apache.commons.csv.QuoteMode;
 import org.haiku.haikudepotserver.dataobjects.Pkg;
 import org.haiku.haikudepotserver.dataobjects.PkgScreenshot;
 import org.haiku.haikudepotserver.dataobjects.PkgScreenshotImage;
@@ -45,6 +47,10 @@ public class PkgScreenshotImportArchiveJobRunner extends AbstractJobRunner<PkgSc
 
     private static final Logger LOGGER = LoggerFactory.getLogger(PkgScreenshotImportArchiveJobRunner.class);
 
+    private static final String[] HEADERS = new String[]{
+            "path", "pkg-name", "action", "message", "code"
+    };
+
     private static final HashFunction HASH_FUNCTION = Hashing.sha1();
 
     private static final Pattern PATTERN_PATH = Pattern.compile("^/?" +
@@ -58,7 +64,6 @@ public class PkgScreenshotImportArchiveJobRunner extends AbstractJobRunner<PkgSc
     private static final int CSV_COLUMN_ACTION = 2;
     private static final int CSV_COLUMN_MESSAGE = 3;
     private static final int CSV_COLUMN_CODE = 4;
-
 
     private enum Action {
         INVALID,
@@ -104,19 +109,23 @@ public class PkgScreenshotImportArchiveJobRunner extends AbstractJobRunner<PkgSc
 
         Optional<JobDataWithByteSource> jobDataWithByteSourceOptional = jobService.tryObtainData(specification.getInputDataGuid());
 
-        if(jobDataWithByteSourceOptional.isEmpty()) {
+        if (jobDataWithByteSourceOptional.isEmpty()) {
             throw new IllegalStateException("the job data was not able to be found for guid; " + specification.getInputDataGuid());
         }
 
-        if(!serverRuntime.performInTransaction(() -> {
+        CSVFormat format = CSVFormat.DEFAULT.builder()
+                .setHeader(HEADERS)
+                .setQuoteMode(QuoteMode.ALL)
+                .get();
+
+        if (!serverRuntime.performInTransaction(() -> {
             try (
-                    OutputStream outputStream = jobDataWithByteSink.getByteSink().openBufferedStream();
-                    OutputStreamWriter outputStreamWriter = new OutputStreamWriter(outputStream);
-                    CSVWriter writer = new CSVWriter(outputStreamWriter)) {
+                    final OutputStream outputStream = jobDataWithByteSink.getByteSink().openBufferedStream();
+                    final OutputStreamWriter outputStreamWriter = new OutputStreamWriter(outputStream);
+                    final CSVPrinter printer = new CSVPrinter(outputStreamWriter, format)
+            ) {
 
                 Map<String, ScreenshotImportMetadatas> metadatas = new HashMap<>();
-
-                writer.writeNext(new String[]{"path", "pkg-name", "action", "message", "code"});
 
                 // sweep through and collect meta-data about the packages in the tar file.
                 LOGGER.info("will collect data about packages' screenshots from the archive");
@@ -137,7 +146,7 @@ public class PkgScreenshotImportArchiveJobRunner extends AbstractJobRunner<PkgSc
                 if (specification.getImportStrategy() == PkgScreenshotImportArchiveJobSpecification.ImportStrategy.REPLACE) {
                     LOGGER.info("will delete persisted screenshots that are absent from the archive");
                     int deleted = deletePersistedScreenshotsThatAreNotPresentInArchiveAndReport(
-                            specification, writer, metadatas.values());
+                            specification, printer, metadatas.values());
                     LOGGER.info("did delete {} persisted screenshots that are absent from the archive", deleted);
                 }
 
@@ -148,14 +157,20 @@ public class PkgScreenshotImportArchiveJobRunner extends AbstractJobRunner<PkgSc
                 LOGGER.info("will load screenshots from archive");
                 consumeScreenshotArchiveEntries(
                         jobDataWithByteSourceOptional.get().getByteSource(),
-                        (ae) -> importScreenshotsFromArchiveAndReport(
-                                specification,
-                                writer,
-                                metadatas.get(ae.getPkgName()),
-                                ae.getArchiveInputStream(),
-                                ae.getArchiveEntry(),
-                                ae.getPkgName(),
-                                ae.getOrder()));
+                        (ae) -> {
+                            try {
+                                importScreenshotsFromArchiveAndReport(
+                                        specification,
+                                        printer,
+                                        metadatas.get(ae.getPkgName()),
+                                        ae.getArchiveInputStream(),
+                                        ae.getArchiveEntry(),
+                                        ae.getPkgName(),
+                                        ae.getOrder());
+                            } catch (IOException ioe) {
+                                throw new UncheckedIOException(ioe);
+                            }
+                        });
                 LOGGER.info("did load screenshots from archive");
                 return true;
             } catch (IOException e) {
@@ -207,39 +222,45 @@ public class PkgScreenshotImportArchiveJobRunner extends AbstractJobRunner<PkgSc
 
     private int deletePersistedScreenshotsThatAreNotPresentInArchiveAndReport(
             PkgScreenshotImportArchiveJobSpecification specification,
-            final CSVWriter writer,
+            final CSVPrinter printer,
             Collection<ScreenshotImportMetadatas> metadatas) {
         return metadatas
                 .stream()
-                .mapToInt((m) -> deletePersistedScreenshotsThatAreNotPresentInArchiveAndReport(specification, writer, m))
+                .mapToInt((m) -> deletePersistedScreenshotsThatAreNotPresentInArchiveAndReport(specification, printer, m))
                 .sum();
     }
 
     private int deletePersistedScreenshotsThatAreNotPresentInArchiveAndReport(
             PkgScreenshotImportArchiveJobSpecification specification,
-            final CSVWriter writer,
+            final CSVPrinter printer,
             ScreenshotImportMetadatas metadata) {
         return metadata.getExistingScreenshots()
                 .stream()
-                .mapToInt((es) -> deletePersistedScreenshotsThatAreNotPresentInArchiveAndReport(
-                        specification, writer, metadata, es))
+                .mapToInt((es) -> {
+                    try {
+                        return deletePersistedScreenshotsThatAreNotPresentInArchiveAndReport(
+                                specification, printer, metadata, es);
+                    } catch (IOException ioe) {
+                        throw new UncheckedIOException(ioe);
+                    }
+                })
                 .sum();
     }
 
     private int deletePersistedScreenshotsThatAreNotPresentInArchiveAndReport(
             PkgScreenshotImportArchiveJobSpecification specification,
-            CSVWriter writer,
+            final CSVPrinter printer,
             ScreenshotImportMetadatas metadata,
-            ExistingScreenshotMetadata existingScreenshot) {
+            ExistingScreenshotMetadata existingScreenshot) throws IOException {
         boolean fromArchiveScreenshotMatches = metadata.getFromArchiveScreenshots()
                 .stream()
                 .filter((as) -> as.getLength() == existingScreenshot.getLength())
                 .anyMatch((as) -> as.getDataHash().equals(existingScreenshot.getDataHash()));
 
-        if(!fromArchiveScreenshotMatches) {
+        if (!fromArchiveScreenshotMatches) {
             ObjectContext context = serverRuntime.newContext();
             PkgScreenshot pkgScreenshot = PkgScreenshot.getByCode(context, existingScreenshot.getCode());
-            String[] row = new String[] {
+            String[] row = new String[]{
                     "",
                     pkgScreenshot.getPkgSupplement().getBasePkgName(),
                     Action.REMOVED.name(),
@@ -252,7 +273,7 @@ public class PkgScreenshotImportArchiveJobRunner extends AbstractJobRunner<PkgSc
                     new UserPkgSupplementModificationAgent(User.getByNickname(context, specification.getOwnerUserNickname())),
                     pkgScreenshot);
 
-            writer.writeNext(row);
+            printer.printRecord(row);
             context.commitChanges(); // job-length txn so won't *actually* be committed here.
 
             return 1;
@@ -291,7 +312,7 @@ public class PkgScreenshotImportArchiveJobRunner extends AbstractJobRunner<PkgSc
 
             try {
                 hashingInputStream.transferTo(ByteStreams.nullOutputStream());
-            } catch(IOException ioe) {
+            } catch (IOException ioe) {
                 throw new UncheckedIOException(ioe);
             }
 
@@ -355,14 +376,15 @@ public class PkgScreenshotImportArchiveJobRunner extends AbstractJobRunner<PkgSc
 
     private void importScreenshotsFromArchiveAndReport(
             PkgScreenshotImportArchiveJobSpecification specification,
-            CSVWriter writer,
+            final CSVPrinter printer,
             ScreenshotImportMetadatas data,
             ArchiveInputStream archiveInputStream,
             ArchiveEntry archiveEntry,
             String pkgName,
-            int order) {
+            int order
+    ) throws IOException {
 
-        String[] row = new String[] {
+        String[] row = new String[]{
                 archiveEntry.getName(), // path
                 pkgName, // pkg
                 "", // action
@@ -415,7 +437,7 @@ public class PkgScreenshotImportArchiveJobRunner extends AbstractJobRunner<PkgSc
             }
         }
 
-        writer.writeNext(row);
+        printer.printRecord(row);
     }
 
 

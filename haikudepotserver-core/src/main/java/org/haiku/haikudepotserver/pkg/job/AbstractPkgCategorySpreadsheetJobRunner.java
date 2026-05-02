@@ -1,5 +1,5 @@
 /*
- * Copyright 2018, Andrew Lindesay
+ * Copyright 2018-2026, Andrew Lindesay
  * Distributed under the terms of the MIT License.
  */
 
@@ -15,7 +15,6 @@ import org.haiku.haikudepotserver.pkg.model.PkgService;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
-import java.util.stream.Collectors;
 
 abstract class AbstractPkgCategorySpreadsheetJobRunner<T extends JobSpecification>
         extends AbstractJobRunner<T> {
@@ -36,7 +35,7 @@ abstract class AbstractPkgCategorySpreadsheetJobRunner<T extends JobSpecificatio
         return PkgCategory.getAll(serverRuntime.newContext())
                 .stream()
                 .map(PkgCategory::getCode)
-                .collect(Collectors.toList());
+                .toList();
     }
 
     String[] getHeadingRow(List<String> pkgCategoryCodes) {
