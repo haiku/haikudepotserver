@@ -17,6 +17,7 @@ import org.apache.cayenne.ObjectContext;
 import org.apache.cayenne.configuration.server.ServerRuntime;
 import org.apache.commons.compress.archivers.ArchiveEntry;
 import org.apache.commons.compress.archivers.ArchiveInputStream;
+import org.apache.commons.compress.archivers.tar.TarArchiveEntry;
 import org.apache.commons.compress.archivers.tar.TarArchiveInputStream;
 import org.apache.commons.csv.CSVFormat;
 import org.apache.commons.csv.CSVPrinter;
@@ -191,7 +192,7 @@ public class PkgScreenshotImportArchiveJobRunner extends AbstractJobRunner<PkgSc
         try (
                 InputStream inputStream = byteSource.openStream();
                 GZIPInputStream gzipInputStream = new GZIPInputStream(inputStream);
-                ArchiveInputStream tarArchiveInputStream = new TarArchiveInputStream(gzipInputStream)
+                ArchiveInputStream<TarArchiveEntry> tarArchiveInputStream = new TarArchiveInputStream(gzipInputStream)
         ) {
             ArchiveEntry archiveEntry;
 
@@ -273,7 +274,7 @@ public class PkgScreenshotImportArchiveJobRunner extends AbstractJobRunner<PkgSc
                     new UserPkgSupplementModificationAgent(User.getByNickname(context, specification.getOwnerUserNickname())),
                     pkgScreenshot);
 
-            printer.printRecord(row);
+            printer.printRecord(Arrays.stream(row));
             context.commitChanges(); // job-length txn so won't *actually* be committed here.
 
             return 1;
@@ -288,7 +289,7 @@ public class PkgScreenshotImportArchiveJobRunner extends AbstractJobRunner<PkgSc
 
     private void collectScreenshotMetadataFromArchive(
             Map<String, ScreenshotImportMetadatas> data,
-            ArchiveInputStream archiveInputStream,
+            ArchiveInputStream<TarArchiveEntry> archiveInputStream,
             ArchiveEntry archiveEntry,
             String pkgName,
             int order) {
@@ -378,7 +379,7 @@ public class PkgScreenshotImportArchiveJobRunner extends AbstractJobRunner<PkgSc
             PkgScreenshotImportArchiveJobSpecification specification,
             final CSVPrinter printer,
             ScreenshotImportMetadatas data,
-            ArchiveInputStream archiveInputStream,
+            ArchiveInputStream<TarArchiveEntry> archiveInputStream,
             ArchiveEntry archiveEntry,
             String pkgName,
             int order
@@ -437,7 +438,7 @@ public class PkgScreenshotImportArchiveJobRunner extends AbstractJobRunner<PkgSc
             }
         }
 
-        printer.printRecord(row);
+        printer.printRecord(Arrays.stream(row));
     }
 
 
@@ -456,7 +457,7 @@ public class PkgScreenshotImportArchiveJobRunner extends AbstractJobRunner<PkgSc
 
     private static class ArchiveEntryWithPkgNameAndOrdering {
 
-        private final ArchiveInputStream archiveInputStream;
+        private final ArchiveInputStream<TarArchiveEntry> archiveInputStream;
 
         private final ArchiveEntry archiveEntry;
 
@@ -465,7 +466,7 @@ public class PkgScreenshotImportArchiveJobRunner extends AbstractJobRunner<PkgSc
         private final int order;
 
         ArchiveEntryWithPkgNameAndOrdering(
-                ArchiveInputStream archiveInputStream,
+                ArchiveInputStream<TarArchiveEntry> archiveInputStream,
                 ArchiveEntry archiveEntry,
                 String pkgName,
                 int order) {
@@ -475,7 +476,7 @@ public class PkgScreenshotImportArchiveJobRunner extends AbstractJobRunner<PkgSc
             this.order = order;
         }
 
-        ArchiveInputStream getArchiveInputStream() {
+        ArchiveInputStream<TarArchiveEntry> getArchiveInputStream() {
             return archiveInputStream;
         }
 

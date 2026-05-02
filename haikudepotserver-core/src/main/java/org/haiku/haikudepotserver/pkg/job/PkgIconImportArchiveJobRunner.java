@@ -11,6 +11,7 @@ import org.apache.cayenne.ObjectContext;
 import org.apache.cayenne.configuration.server.ServerRuntime;
 import org.apache.commons.compress.archivers.ArchiveEntry;
 import org.apache.commons.compress.archivers.ArchiveInputStream;
+import org.apache.commons.compress.archivers.tar.TarArchiveEntry;
 import org.apache.commons.compress.archivers.tar.TarArchiveInputStream;
 import org.apache.commons.csv.CSVFormat;
 import org.apache.commons.csv.CSVPrinter;
@@ -166,7 +167,7 @@ public class PkgIconImportArchiveJobRunner extends AbstractJobRunner<PkgIconImpo
 
     private void clearPackagesIconsAppearingInArchive(
             PkgIconImportArchiveJobSpecification specification,
-            ArchiveInputStream archiveInputStream,
+            ArchiveInputStream<TarArchiveEntry> archiveInputStream,
             CSVPrinter printer) throws IOException {
 
         String[] row = new String[3];
@@ -207,7 +208,7 @@ public class PkgIconImportArchiveJobRunner extends AbstractJobRunner<PkgIconImpo
 
     private void processEntriesFromArchive(
             PkgIconImportArchiveJobSpecification specification,
-            ArchiveInputStream archiveInputStream,
+            ArchiveInputStream<TarArchiveEntry> archiveInputStream,
             CSVPrinter printer) throws IOException {
         String[] row = new String[3];
 
@@ -253,7 +254,7 @@ public class PkgIconImportArchiveJobRunner extends AbstractJobRunner<PkgIconImpo
 
     private ArchiveEntryResult processMatchingFileEntryFromArchive(
             PkgIconImportArchiveJobSpecification specification,
-            ArchiveInputStream archiveInputStream,
+            ArchiveInputStream<TarArchiveEntry> archiveInputStream,
             String pkgName, String leafnameExtension)
             throws IOException {
 
