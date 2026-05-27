@@ -404,6 +404,10 @@ components:
           format: int64
         isProduction:
           type: boolean
+        allowsNicknamePasswordAuthentication:
+          type: boolean
+          description: >
+            Indicates to the client that it's OK to use username + password authentication.
         defaults:
           type: object
           properties:

@@ -275,6 +275,7 @@ public class MiscellaneousApiService extends AbstractApiService {
         GetRuntimeInformationResult result = new GetRuntimeInformationResult()
                 .projectVersion(runtimeInformationService.getProjectVersion())
                 .isProduction(isProduction)
+                .allowsNicknamePasswordAuthentication(true) // <-- to handle later
                 .currentTimestamp(clock.millis())
                 .defaults(new GetRuntimeInformationResultDefaults()
                         .architectureCode(architectureDefaultCode)
