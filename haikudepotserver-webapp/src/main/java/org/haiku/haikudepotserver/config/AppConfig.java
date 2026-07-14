@@ -6,7 +6,6 @@
 package org.haiku.haikudepotserver.config;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.google.common.collect.ImmutableList;
 import io.micrometer.core.instrument.MeterRegistry;
 import org.apache.cayenne.configuration.server.ServerRuntime;
 import org.haiku.haikudepotserver.job.BulkDataJobCoordinatorServiceImpl;
@@ -16,26 +15,27 @@ import org.haiku.haikudepotserver.job.model.BulkDataJobCoordinatorService;
 import org.haiku.haikudepotserver.job.model.JobRunner;
 import org.haiku.haikudepotserver.job.model.JobService;
 import org.haiku.haikudepotserver.naturallanguage.model.NaturalLanguageService;
-import org.haiku.haikudepotserver.pkg.model.PkgLocalizationLookupService;
 import org.haiku.haikudepotserver.pkg.model.PkgService;
 import org.haiku.haikudepotserver.repository.model.RepositoryService;
 import org.haiku.haikudepotserver.storage.PgDataStorageServiceImpl;
 import org.haiku.haikudepotserver.storage.model.DataStorageService;
-import org.haiku.haikudepotserver.thymeleaf.Dialect;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Import;
-import org.springframework.core.io.Resource;
 
 import javax.sql.DataSource;
 import java.time.Clock;
 import java.time.Duration;
 import java.util.Collection;
-import java.util.List;
 
-@Import({BasicConfig.class, ScheduleConfig.class})
+@Import({
+        BasicConfig.class,
+        ScheduleConfig.class,
+        MultipageAppConfig.class,
+        MessageSourceConfig.class
+})
 @Configuration
 public class AppConfig {
 
@@ -93,28 +93,6 @@ public class AppConfig {
             @Value("${hds.storage.pg.part-size:262144}") Long partSize
     ) {
         return new PgDataStorageServiceImpl(dataSource, meterRegistry, partSize);
-    }
-
-    @Bean("messageSourceBaseNames")
-    public List<String> messageSourceBaseNames() {
-        return ImmutableList.of(
-                "classpath:messages",
-                "classpath:webmessages",
-                "classpath:naturallanguagemessages"
-        );
-    }
-
-    @Bean
-    public Dialect processorDialect(
-            ServerRuntime serverRuntime,
-            PkgLocalizationLookupService pkgLocalizationLookupService,
-            @Value("${hds.deployment.is-production:false}") Boolean isProduction,
-            @Value("classpath:/spa1/js/index.txt") Resource singlePageApplicationJavaScriptIndexResource) {
-        return new Dialect(
-                serverRuntime,
-                pkgLocalizationLookupService,
-                isProduction,
-                singlePageApplicationJavaScriptIndexResource);
     }
 
 }

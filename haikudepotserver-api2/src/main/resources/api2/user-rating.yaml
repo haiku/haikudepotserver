@@ -439,6 +439,14 @@ components:
           $ref: "./error.yaml#/components/schemas/error"
     getUserRatingByUserAndPkgVersionResult:
       type: object
+      required:
+        - active
+        - code
+        - naturalLanguageCode
+        - user
+        - modifyTimestamp
+        - createTimestamp
+        - pkgVersion
       properties:
         code:
           type: string
@@ -465,11 +473,17 @@ components:
           $ref: "#/components/schemas/getUserRatingByUserAndPkgVersionPkgVersion"
     getUserRatingByUserAndPkgVersionUser:
       type: object
+      required:
+        - nickname
       properties:
         nickname:
           type: string
     getUserRatingByUserAndPkgVersionPkgVersion:
       type: object
+      required:
+        - major
+        - pkg
+        - repositorySourceCode
       properties:
         repositoryCode:
           type: string
@@ -493,6 +507,8 @@ components:
           $ref: "#/components/schemas/getUserRatingByUserAndPkgVersionPkg"
     getUserRatingByUserAndPkgVersionPkg:
       type: object
+      required:
+        - name
       properties:
         name:
           type: string

@@ -752,7 +752,7 @@ public class PkgApiService extends AbstractApiService {
                         && Stream.of(
                                 resolvedPkgVersionLocalization.getTitle(),
                                 resolvedPkgVersionLocalization.getSummary())
-                        .noneMatch(s -> StringUtils.containsIgnoreCase(
+                        .noneMatch(s -> org.apache.commons.lang3.Strings.CI.contains(
                                 StringUtils.trimToEmpty(s),
                                 StringUtils.trimToEmpty(specification.getExpression())))
         ) {

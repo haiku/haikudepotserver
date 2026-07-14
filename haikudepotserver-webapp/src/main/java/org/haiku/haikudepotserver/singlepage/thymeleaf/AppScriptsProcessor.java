@@ -28,6 +28,7 @@ import java.util.Optional;
  * browser as a combined minified file.  In development the individual files are delivered to the
  * browser so that they can be debugged.  This processor takes care of this aspect.</p>
  */
+@Deprecated
 public class AppScriptsProcessor extends AbstractElementTagProcessor {
 
     private final static String URL_PATH_PREFIX = "/__js";

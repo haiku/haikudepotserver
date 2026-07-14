@@ -19,6 +19,7 @@ import java.util.Optional;
  * </p>
  */
 
+@Deprecated
 public class ExpressionObject {
 
     private final static DecimalFormat NUMBER_FORMAT = new DecimalFormat("#,##0.#");

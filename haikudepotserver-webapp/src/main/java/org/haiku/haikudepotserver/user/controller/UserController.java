@@ -33,9 +33,9 @@ public class UserController {
 
     public final static String SEGMENT_USER = "__user";
 
-    private final static String KEY_CODE = "code";
+    public final static String LATEST = "latest";
 
-    private final static String LATEST = "latest";
+    private final static String KEY_CODE = "code";
 
     private final ServerRuntime serverRuntime;
 

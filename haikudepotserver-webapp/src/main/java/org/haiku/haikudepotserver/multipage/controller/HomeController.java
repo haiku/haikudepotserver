@@ -1,338 +1,193 @@
 /*
- * Copyright 2018-2024, Andrew Lindesay
+ * Copyright 2018-2026, Andrew Lindesay
  * Distributed under the terms of the MIT License.
  */
 
 package org.haiku.haikudepotserver.multipage.controller;
 
-import com.google.common.base.Strings;
-import com.google.common.collect.ImmutableList;
-import com.google.common.collect.ImmutableSet;
+import com.google.common.base.Preconditions;
+import jakarta.annotation.Nullable;
 import jakarta.servlet.http.HttpServletRequest;
-import org.apache.cayenne.ObjectContext;
-import org.apache.cayenne.configuration.server.ServerRuntime;
 import org.apache.commons.lang3.StringUtils;
-import org.haiku.haikudepotserver.dataobjects.*;
+import org.haiku.haikudepotserver.api2.PkgApiService;
+import org.haiku.haikudepotserver.api2.model.*;
 import org.haiku.haikudepotserver.multipage.MultipageConstants;
-import org.haiku.haikudepotserver.multipage.model.Pagination;
+import org.haiku.haikudepotserver.multipage.ReferenceDataRepository;
+import org.haiku.haikudepotserver.multipage.internationalization.InternationalizationSupplierFactory;
+import org.haiku.haikudepotserver.multipage.model.*;
+import org.haiku.haikudepotserver.multipage.model.PkgCategory;
+import org.haiku.haikudepotserver.multipage.navigation.MultipageNavigationService;
 import org.haiku.haikudepotserver.naturallanguage.model.NaturalLanguageCoordinates;
-import org.haiku.haikudepotserver.pkg.FixedPkgLocalizationLookupServiceImpl;
-import org.haiku.haikudepotserver.pkg.model.PkgSearchSpecification;
-import org.haiku.haikudepotserver.pkg.model.PkgService;
-import org.haiku.haikudepotserver.support.AbstractSearchSpecification;
-import org.springframework.beans.factory.annotation.Value;
+import org.haiku.haikudepotserver.support.VersionCoordinates;
+import org.springframework.http.MediaType;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.servlet.ModelAndView;
+import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
+import org.springframework.web.util.UriComponents;
 
+import java.math.BigDecimal;
+import java.time.Instant;
 import java.util.*;
-import java.util.stream.Collectors;
 
 /**
- * <p>Renders the home page of the multi-page (simple) view of the application.</p>
+ * <p>Renders the home page for the HaikuDepotSever system. It is a splash page about
+ * the packages.</p>
  */
 
 @Controller
 @RequestMapping(MultipageConstants.PATH_MULTIPAGE)
 public class HomeController {
 
-    /**
-     * <p>This defines the type of display of packages that are shown.</p>
-     */
-
-    public enum ViewCriteriaType {
-        FEATURED,
-        ALL,
-        CATEGORIES,
-        MOSTRECENT,
-        MOSTVIEWED;
-
-        public String getTitleKey() {
-            return "home.viewCriteriaType." + name().toLowerCase();
-        }
-
-    }
-
-    // these should correspond to the single-page keys for the home page.
-    private final static String KEY_OFFSET = "o";
-    private final static String KEY_REPOSITORIESCODES = "repos";
-    private final static String KEY_ARCHITECTURECODE = "arch";
-    private final static String KEY_PKGCATEGORYCODE = "pkgcat";
-    private final static String KEY_SEARCHEXPRESSION = "srchexpr";
-    private final static String KEY_VIEWCRITERIATYPECODE = "viewcrttyp";
-
     private final static int PAGESIZE = 15;
 
-    private final ServerRuntime serverRuntime;
-    private final PkgService pkgService;
-    private final String defaultArchitectureCode;
+    private final InternationalizationSupplierFactory internationalizationSupplierFactory;
+    private final ReferenceDataRepository referenceDataRepository;
+    private final MultipageNavigationService navigationService;
+    private final PkgApiService pkgApiService;
+    private final HttpServletRequest httpServletRequest;
 
     public HomeController(
-            ServerRuntime serverRuntime,
-            PkgService pkgService,
-            @Value("${hds.architecture.default.code}") String defaultArchitectureCode) {
-        this.serverRuntime = serverRuntime;
-        this.pkgService = pkgService;
-        this.defaultArchitectureCode = defaultArchitectureCode;
+            InternationalizationSupplierFactory internationalizationSupplierFactory,
+            ReferenceDataRepository referenceDataRepository,
+            MultipageNavigationService navigationService,
+            PkgApiService pkgApiService, HttpServletRequest httpServletRequest) {
+        this.internationalizationSupplierFactory = Preconditions.checkNotNull(internationalizationSupplierFactory);
+        this.referenceDataRepository = referenceDataRepository;
+        this.navigationService = navigationService;
+        this.pkgApiService = pkgApiService;
+        this.httpServletRequest = httpServletRequest;
     }
 
-    /**
-     * <p>This is the entry point for the home page.  It will look at the parameters supplied and will
-     * establish what should be displayed.</p>
-     */
-
-    @RequestMapping(method = RequestMethod.GET)
+    @RequestMapping(method = RequestMethod.GET, produces = MediaType.TEXT_HTML_VALUE)
     public ModelAndView home(
             HttpServletRequest httpServletRequest,
             Locale locale,
-            @RequestParam(value = KEY_OFFSET, defaultValue = "0") Integer offset,
-            @RequestParam(value = KEY_REPOSITORIESCODES, required = false) String repositoryCodes,
-            @RequestParam(value = KEY_ARCHITECTURECODE, required = false) String architectureCode,
-            @RequestParam(value = KEY_PKGCATEGORYCODE, required = false) String pkgCategoryCode,
-            @RequestParam(value = KEY_SEARCHEXPRESSION, required = false) String searchExpression,
-            @RequestParam(value = KEY_VIEWCRITERIATYPECODE, required = false) ViewCriteriaType viewCriteriaType) {
-
-        ObjectContext context = serverRuntime.newContext();
-
-        if (Strings.isNullOrEmpty(architectureCode)) {
-            architectureCode = defaultArchitectureCode;
-        }
-
-        if (null == repositoryCodes) {
-            repositoryCodes = Repository.CODE_DEFAULT;
-        }
-
-        // ------------------------------
-        // FETCH THE DATA
-
-        PkgSearchSpecification searchSpecification = new PkgSearchSpecification();
-
-        searchSpecification.setOffset(offset);
-        searchSpecification.setLimit(PAGESIZE);
-        searchSpecification.setExpression(searchExpression);
-        searchSpecification.setExpressionType(AbstractSearchSpecification.ExpressionType.CONTAINS);
-
-        Repository repository = StringUtils.isBlank(repositoryCodes) ? null : Repository.getByCode(context, repositoryCodes);
-        searchSpecification.setRepositories(null == repository ? Repository.getAllActive(context) : Collections.singletonList(repository));
-
-        Architecture architecture = Architecture.getByCode(context, architectureCode);
-        searchSpecification.setArchitecture(architecture);
-
-        Optional<PkgCategory> pkgCategoryOptional = Optional.empty();
-
-        if (null != pkgCategoryCode) {
-            pkgCategoryOptional = PkgCategory.tryGetByCode(context, pkgCategoryCode);
-        }
-
-        NaturalLanguage naturalLanguage = NaturalLanguage.getByNaturalLanguage(context, NaturalLanguageCoordinates.fromLocale(locale));
-
-        searchSpecification.setNaturalLanguage(naturalLanguage);
-
-        switch (null == viewCriteriaType ? ViewCriteriaType.FEATURED : viewCriteriaType) {
-            case FEATURED -> searchSpecification.setSortOrdering(PkgSearchSpecification.SortOrdering.PROMINENCE);
-            case CATEGORIES -> {
-                searchSpecification.setSortOrdering(PkgSearchSpecification.SortOrdering.NAME);
-                searchSpecification.setPkgCategory(pkgCategoryOptional.orElseThrow(() ->
-                        new IllegalStateException(
-                                "the pkg category code was unable to be found; " + pkgCategoryCode)));
-            }
-            case ALL -> searchSpecification.setSortOrdering(PkgSearchSpecification.SortOrdering.NAME);
-            case MOSTVIEWED ->
-                    searchSpecification.setSortOrdering(PkgSearchSpecification.SortOrdering.VERSIONVIEWCOUNTER);
-            case MOSTRECENT ->
-                    searchSpecification.setSortOrdering(PkgSearchSpecification.SortOrdering.VERSIONCREATETIMESTAMP);
-            default -> throw new IllegalStateException("unhandled view criteria type");
-        }
-
-        Long totalPkgVersions = pkgService.total(context, searchSpecification);
-
-        if(searchSpecification.getOffset() > totalPkgVersions) {
-            searchSpecification.setOffset(totalPkgVersions.intValue());
-        }
-
-        List<PkgVersion> pkgVersions = pkgService.search(context, searchSpecification);
-
-        // ------------------------------
-        // GENERATE OUTPUT
-
-        HomeData data = new HomeData();
-
-        data.setNaturalLanguage(naturalLanguage);
-
-        final Set<String> excludedArchitectureCode = ImmutableSet.of(
-                Architecture.CODE_ANY,
-                Architecture.CODE_SOURCE
+            @RequestParam(value = MultipageConstants.KEY_OFFSET, defaultValue = "0") Integer offset,
+            @RequestParam(value = MultipageConstants.KEY_PKGCATEGORYCODE, required = false) String pkgCategoryCode
+    ) {
+        return new ModelAndView(NavigationDestination.HOME.template(),
+                Map.of(
+                        MultipageConstants.KEY_DATA, createData(httpServletRequest, locale, offset, pkgCategoryCode),
+                        MultipageConstants.KEY_INTERNATIONALIZATION_SUPPLIER, internationalizationSupplierFactory.create(locale)
+                )
         );
-
-        data.setAllArchitectures(
-                Architecture.getAll(context)
-                        .stream()
-                        .filter(a -> !excludedArchitectureCode.contains(a.getCode()))
-                        .collect(Collectors.toList()));
-
-        data.setArchitecture(architecture);
-        data.setRepository(repository);
-
-        data.setAllRepositories(Repository.getAllActive(context));
-        data.setAllPkgCategories(PkgCategory.getAll(context));
-        data.setPkgCategory(pkgCategoryOptional.orElseGet(() -> PkgCategory.getAll(context).getFirst()));
-
-        data.setAllViewCriteriaTypes(ImmutableList.copyOf(ViewCriteriaType.values()));
-        data.setViewCriteriaType(viewCriteriaType);
-
-        data.setSearchExpression(searchExpression);
-        data.setPkgVersions(pkgVersions);
-
-        int total = totalPkgVersions.intValue();
-
-        if (0 != total) {
-            data.setPagination(new Pagination(
-                    total,
-                    Math.max(0, Math.min(offset, total - 1)),
-                    PAGESIZE)
-            );
-        }
-
-        httpServletRequest.setAttribute(
-                MultipageConstants.KEY_PKGLOCALIZATIONLOOKUPSERVICE,
-                new FixedPkgLocalizationLookupServiceImpl(context, pkgVersions, naturalLanguage));
-
-        httpServletRequest.setAttribute(MultipageConstants.KEY_SERVERRUNTIME, serverRuntime);
-
-        ModelAndView result = new ModelAndView("multipage/home");
-        result.addObject("data", data);
-        result.addObject("request", httpServletRequest);
-        return result;
     }
 
-    /**
-     * <p>This is the data model for the page to be rendered from.</p>
-     */
+    private HomeData createData(
+            HttpServletRequest httpServletRequest,
+            Locale locale,
+            Integer offset,
+            String pkgCategoryCode
+    ) {
+        ReferenceData referenceData = referenceDataRepository.getReferenceData(locale.toLanguageTag());
 
-    @SuppressWarnings("WeakerAccess") // required for Thymeleaf rendering.
-    public static class HomeData {
+        final String actualPkgCategoryCode = Optional.ofNullable(pkgCategoryCode)
+                .map(StringUtils::trimToNull)
+                .orElse(null);
 
-        private NaturalLanguage naturalLanguage;
+        SearchPkgsRequestEnvelope searchRequest = new SearchPkgsRequestEnvelope();
 
-        private List<PkgVersion> pkgVersions;
+        searchRequest.setOffset(offset);
+        searchRequest.setLimit(PAGESIZE);
+        searchRequest.setIncludeDevelopment(false);
+        searchRequest.setOnlyDesktop(true);
+        searchRequest.setArchitectureCode(referenceDataRepository.getDefaults().defaultArchitectureCode());
+        searchRequest.setRepositoryCodes(List.of(referenceDataRepository.getDefaults().defaultRepositoryCode()));
+        searchRequest.setNaturalLanguageCode(locale.getLanguage());
+        searchRequest.setSortOrdering(SearchPkgsSortOrdering.PROMINENCE);
 
-        private List<Repository> allRepositories;
-
-        private List<Architecture> allArchitectures;
-
-        private List<PkgCategory> allPkgCategories;
-
-        private List<ViewCriteriaType> allViewCriteriaTypes;
-
-        private Architecture architecture;
-
-        private Repository repository;
-
-        private PkgCategory pkgCategory;
-
-        private String searchExpression;
-
-        private ViewCriteriaType viewCriteriaType;
-
-        private Pagination pagination;
-
-        public Repository getRepository() {
-            return repository;
+        if (StringUtils.isNotBlank(actualPkgCategoryCode)) {
+            searchRequest.setPkgCategoryCode(referenceData.pkgCategoryForCode(actualPkgCategoryCode).code());
         }
 
-        public void setRepository(Repository repository) {
-            this.repository = repository;
-        }
+        SearchPkgsResult searchResult = pkgApiService.searchPkgs(searchRequest);
 
-        public NaturalLanguage getNaturalLanguage() {
-            return naturalLanguage;
-        }
+        Integer total = searchResult.getTotal();
 
-        public void setNaturalLanguage(NaturalLanguage naturalLanguage) {
-            this.naturalLanguage = naturalLanguage;
-        }
+        return new HomeData(
+                ServletUriComponentsBuilder.fromRequest(httpServletRequest).build(),
+                MultipageNavigationService.stripDestination(
+                        navigationService.deriveMenuGroups(httpServletRequest),
+                        EnumSet.of(NavigationDestination.HOME)
+                ),
 
-        public List<PkgVersion> getPkgVersions() {
-            return pkgVersions;
-        }
+                NaturalLanguageCoordinates.fromLocale(locale),
+                navigationService.homeUri(httpServletRequest).build().toUriString(),
+                navigationService.createRelayParameters(httpServletRequest),
+                new Criteria(
+                        referenceData,
+                        Optional.ofNullable(actualPkgCategoryCode)
+                                .map(referenceData::pkgCategoryForCode)
+                                .orElse(null)
+                ),
+                searchResult.getItems().stream().map(this::mapToPkgVersion).toList(),
+                (null == total || 0 == total) ? null :
+                        new Pagination(
+                                Math.clamp(offset, 0, total - 1),
+                                total,
+                                PAGESIZE)
+        );
+    }
 
-        public void setPkgVersions(List<PkgVersion> pkgVersions) {
-            this.pkgVersions = pkgVersions;
-        }
+    private HomeController.PkgVersion mapToPkgVersion(SearchPkgsPkg pkg) {
+        SearchPkgsPkgVersion pkgVersion = pkg.getVersions().getLast();
+        UriComponents viewUri = navigationService.pkgViewUri(
+                httpServletRequest,
+                pkg.getName(),
+                pkgVersion.getRepositorySourceCode(),
+                pkgVersion.getArchitectureCode(),
+                new VersionCoordinates(
+                        pkgVersion.getMajor(),
+                        pkgVersion.getMinor(),
+                        pkgVersion.getMicro(),
+                        pkgVersion.getPreRelease(),
+                        pkgVersion.getRevision()
+                ))
+                .build();
 
-        public List<Repository> getAllRepositories() {
-            return allRepositories;
-        }
+        return new HomeController.PkgVersion(
+                pkg.getName(),
+                pkgVersion.getTitle(),
+                pkgVersion.getSummary(),
+                viewUri,
+                pkg.getIsNativeDesktop(),
+                pkg.getDerivedRating(),
+                Instant.ofEpochMilli(pkg.getModifyTimestamp())
+        );
+    }
 
-        public void setAllRepositories(List<Repository> allRepositories) {
-            this.allRepositories = allRepositories;
-        }
 
-        public List<Architecture> getAllArchitectures() {
-            return allArchitectures;
-        }
+    public record HomeData(
+            UriComponents uriComponents,
+            List<MenuGroup> menuGroups,
 
-        public void setAllArchitectures(List<Architecture> allArchitectures) {
-            this.allArchitectures = allArchitectures;
-        }
+            NaturalLanguageCoordinates naturalLanguage,
+            String searchUrl,
+            Map<String, String> relayParameters,
+            Criteria criteria,
+            List<HomeController.PkgVersion> pkgVersions,
+            Pagination pagination
+    ) {
+    }
 
-        public Architecture getArchitecture() {
-            return architecture;
-        }
+    public record Criteria(
+            ReferenceData referenceData,
+            @Nullable PkgCategory pkgCategory
+    ) {
+    }
 
-        public void setArchitecture(Architecture architecture) {
-            this.architecture = architecture;
-        }
-
-        public String getSearchExpression() {
-            return searchExpression;
-        }
-
-        public void setSearchExpression(String searchExpression) {
-            this.searchExpression = searchExpression;
-        }
-
-        public List<PkgCategory> getAllPkgCategories() {
-            return allPkgCategories;
-        }
-
-        public void setAllPkgCategories(List<PkgCategory> allPkgCategories) {
-            this.allPkgCategories = allPkgCategories;
-        }
-
-        public List<ViewCriteriaType> getAllViewCriteriaTypes() {
-            return allViewCriteriaTypes;
-        }
-
-        public void setAllViewCriteriaTypes(List<ViewCriteriaType> allViewCriteriaTypes) {
-            this.allViewCriteriaTypes = allViewCriteriaTypes;
-        }
-
-        public PkgCategory getPkgCategory() {
-            return pkgCategory;
-        }
-
-        public void setPkgCategory(PkgCategory pkgCategory) {
-            this.pkgCategory = pkgCategory;
-        }
-
-        public ViewCriteriaType getViewCriteriaType() {
-            return viewCriteriaType;
-        }
-
-        public void setViewCriteriaType(ViewCriteriaType viewCriteriaType) {
-            this.viewCriteriaType = viewCriteriaType;
-        }
-
-        public Pagination getPagination() {
-            return pagination;
-        }
-
-        public void setPagination(Pagination pagination) {
-            this.pagination = pagination;
-        }
+    public record PkgVersion(
+            String pkgName,
+            String title,
+            String summary,
+            UriComponents viewUriComponents,
+            boolean isNativeDesktop,
+            BigDecimal derivedRating,
+            Instant versionCreateTimestamp
+    ) {
     }
 
 }

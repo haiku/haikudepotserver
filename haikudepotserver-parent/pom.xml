@@ -56,10 +56,14 @@
 
         <flexmark.version>0.64.8</flexmark.version>
         <freemarker.version>2.3.34</freemarker.version>
+        <jte.version>3.2.4</jte.version>
         <aircompressor.version>3.6</aircompressor.version>
         <guava.version>33.6.0-jre</guava.version>
         <springfox.version>3.0.0</springfox.version>
         <nimbus-jose-jwt.version>10.9</nimbus-jose-jwt.version>
+
+        <!-- webjars -->
+        <jquery.version>4.0.0</jquery.version>
 
         <commons-collections4.version>4.5.0</commons-collections4.version>
         <commons-lang3.version>3.20.0</commons-lang3.version>
@@ -91,6 +95,7 @@
         <fest-assert.version>1.4</fest-assert.version>
         <awaitility.version>4.3.0</awaitility.version>
         <testcontainers.version>1.21.4</testcontainers.version>
+        <htmlunit.version>5.3.0</htmlunit.version>
 
     </properties>
 
@@ -120,6 +125,18 @@
                 <groupId>org.freemarker</groupId>
                 <artifactId>freemarker</artifactId>
                 <version>${freemarker.version}</version>
+            </dependency>
+
+            <!-- web page rendering -->
+            <dependency>
+                <groupId>gg.jte</groupId>
+                <artifactId>jte</artifactId>
+                <version>${jte.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>gg.jte</groupId>
+                <artifactId>jte-spring-boot-starter-4</artifactId>
+                <version>${jte.version}</version>
             </dependency>
 
             <!-- used to render markdown to html -->
@@ -283,6 +300,12 @@
                 <groupId>org.testcontainers</groupId>
                 <artifactId>postgresql</artifactId>
                 <version>${testcontainers.version}</version>
+            </dependency>
+
+            <dependency>
+                <groupId>org.htmlunit</groupId>
+                <artifactId>htmlunit</artifactId>
+                <version>${htmlunit.version}</version>
             </dependency>
 
             <dependency>

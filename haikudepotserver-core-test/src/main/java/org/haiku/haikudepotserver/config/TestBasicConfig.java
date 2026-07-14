@@ -1,5 +1,5 @@
 /*
- * Copyright 2018-2025, Andrew Lindesay
+ * Copyright 2018-2026, Andrew Lindesay
  * Distributed under the terms of the MIT License.
  */
 
@@ -8,33 +8,23 @@ package org.haiku.haikudepotserver.config;
 import io.micrometer.core.instrument.MeterRegistry;
 import io.micrometer.core.instrument.simple.SimpleMeterRegistry;
 import org.haiku.haikudepotserver.CapturingMailSender;
+import org.springframework.boot.flyway.autoconfigure.FlywayAutoConfiguration;
+import org.springframework.boot.jdbc.autoconfigure.DataSourceAutoConfiguration;
 import org.springframework.context.annotation.Bean;
-import org.springframework.context.annotation.PropertySource;
+import org.springframework.context.annotation.Import;
 import org.springframework.mail.MailSender;
 
-import java.util.List;
+/**
+ * Most tests will include this through {@link TestConfig} or other
+ * test configuration classes.
+ */
 
-@PropertySource(
-        value = {
-                "classpath:test-local.properties",
-                "${config.properties:file-not-found.properties}"},
-        ignoreResourceNotFound = true
-)
+@Import({
+        DataSourceAutoConfiguration.class,
+        FlywayAutoConfiguration.class,
+        BasicConfig.class,
+})
 public class TestBasicConfig {
-
-    @Bean("messageSourceBaseNames")
-    public List<String> messageSourceBaseNames() {
-        return List.of(
-                "classpath:messages",
-                "classpath:webmessages",
-                "classpath:naturallanguagemessages"
-        );
-    }
-
-    @Bean
-    public MailSender mailSender() {
-        return new CapturingMailSender();
-    }
 
     /**
      * <p>This instance of {@link MeterRegistry} would be created by the
@@ -46,6 +36,11 @@ public class TestBasicConfig {
     @Bean
     public MeterRegistry meterRegistry() {
         return new SimpleMeterRegistry();
+    }
+
+    @Bean
+    public MailSender mailSender() {
+        return new CapturingMailSender();
     }
 
 }

@@ -13,6 +13,7 @@ import java.util.Set;
  * <p>Responsible for creating an instance of {@link ExpressionObject}.</p>
  */
 
+@Deprecated
 public class ExpressionObjectFactory implements IExpressionObjectFactory {
 
     private final static String OBJECT_NAME = "hds";

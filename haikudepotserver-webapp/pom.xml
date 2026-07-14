@@ -87,11 +87,38 @@
             <scope>test</scope>
         </dependency>
 
+        <dependency>
+            <groupId>org.htmlunit</groupId>
+            <artifactId>htmlunit</artifactId>
+            <scope>test</scope>
+        </dependency>
+
     </dependencies>
 
     <build>
 
         <plugins>
+
+            <plugin>
+                <groupId>gg.jte</groupId>
+                <artifactId>jte-maven-plugin</artifactId>
+                <version>${jte.version}</version>
+                <executions>
+                    <execution>
+                        <id>jte-generate</id>
+                        <phase>generate-sources</phase>
+                        <goals>
+                            <goal>generate</goal>
+                        </goals>
+                        <configuration>
+                            <sourceDirectory>${project.basedir}/src/main/jte</sourceDirectory>
+                            <binaryStaticContent>true</binaryStaticContent>
+                            <targetResourceDirectory>${project.build.outputDirectory}</targetResourceDirectory>
+                            <contentType>Html</contentType>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
 
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>

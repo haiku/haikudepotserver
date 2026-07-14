@@ -315,6 +315,8 @@ components:
           $ref: "./error.yaml#/components/schemas/error"
     getAllPkgCategoriesResult:
       type: object
+      required:
+        - pkgCategories
       properties:
         pkgCategories:
           type: array
@@ -384,6 +386,8 @@ components:
           $ref: "./error.yaml#/components/schemas/error"
     getRuntimeInformationResult:
       type: object
+      required:
+        - defaults
       properties:
         projectVersion:
           type: string
@@ -410,6 +414,9 @@ components:
             Indicates to the client that it's OK to use username + password authentication.
         defaults:
           type: object
+          required:
+            - architectureCode
+            - repositoryCode
           properties:
             architectureCode:
               type: string
@@ -457,6 +464,8 @@ components:
           $ref: "./error.yaml#/components/schemas/error"
     getAllArchitecturesResult:
       type: object
+      required:
+        - architectures
       properties:
         architectures:
           type: array
@@ -464,6 +473,8 @@ components:
             $ref: "#/components/schemas/architecture"
     architecture:
       type: object
+      required:
+        - code
       properties:
         code:
           type: string
@@ -610,6 +621,8 @@ components:
           $ref: "./error.yaml#/components/schemas/error"
     getAllContributorsResult:
       type: object
+      required:
+        - contributors
       properties:
         contributors:
           type: array

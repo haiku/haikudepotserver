@@ -557,6 +557,9 @@ components:
           $ref: "./error.yaml#/components/schemas/error"
     searchPkgsResult:
       type: object
+      required:
+        - total
+        - items
       properties:
         total:
           type: integer
@@ -573,6 +576,11 @@ components:
         - VERSIONVIEWCOUNTER
     searchPkgsPkgVersion:
       type: object
+      required:
+        - major
+        - createTimestamp
+        - repositoryCode
+        - repositorySourceCode
       properties:
         major:
           type: string
@@ -616,6 +624,8 @@ components:
         - isNativeDesktop
         - modifyTimestamp
         - hasAnyPkgIcons
+        - modifyTimestamp
+        - versions
       properties:
         name:
           type: string
@@ -697,6 +707,8 @@ components:
         - name
         - isNativeDesktop
         - modifyTimestamp
+        - versions
+        - hasChangelog
       properties:
         name:
           type: string
@@ -734,6 +746,9 @@ components:
           type: boolean
     getPkgPkgVersionUrl:
       type: object
+      required:
+        - url
+        - urlTypeCode
       properties:
         url:
           type: string
@@ -741,6 +756,13 @@ components:
           type: string
     getPkgPkgVersion:
       type: object
+      required:
+        - active
+        - major
+        - repositorySourceCode
+        - isLatest
+        - createTimestamp
+        - hasSource
       properties:
         active:
           type: boolean
@@ -914,6 +936,8 @@ components:
           $ref: "./error.yaml#/components/schemas/error"
     getPkgScreenshotsResult:
       type: object
+      required:
+        - items
       properties:
         items:
           type: array

@@ -1,0 +1,7 @@
+#pkg-changelog-content-container {
+    background-color: #EEEEEE;
+    padding: 16px;
+    margin-bottom: 4px;
+    border: 1px lightgray solid;
+    font-family: monospace;
+}
