@@ -91,9 +91,10 @@ public class UserApiServiceIT extends AbstractIntegrationTest {
                 .captchaToken(captcha.getToken())
                 .captchaResponse(captcha.getResponse())
                 .nickname("testuser")
+                .email("testuser@example.com")
                 .passwordClear("Ue4nI92Rw")
                 .naturalLanguageCode("en")
-                .userUsageConditionsCode("UUC2024V01");
+                .userUsageConditionsCode("UUC2026V01");
 
         // ------------------------------------
         userApiService.createUser(request);
@@ -105,10 +106,11 @@ public class UserApiServiceIT extends AbstractIntegrationTest {
         Assertions.assertThat(user.getActive()).isTrue();
         Assertions.assertThat(user.getIsRoot()).isFalse();
         Assertions.assertThat(user.getNickname()).isEqualTo("testuser");
+        Assertions.assertThat(user.getEmail()).isEqualTo("testuser@example.com");
         Assertions.assertThat(user.getNaturalLanguage().getCode()).isEqualTo("en");
         Assertions.assertThat(user.getLastAuthenticationTimestamp()).isNull();
         Assertions.assertThat(user.tryGetUserUsageConditionsAgreement().get().getUserUsageConditions().getCode())
-                .isEqualTo("UUC2024V01");
+                .isEqualTo("UUC2026V01");
 
         Assertions
                 .assertThat(userAuthenticationService.authenticateByNicknameAndPassword("testuser", "Ue4nI92Rw").get())
@@ -153,7 +155,7 @@ public class UserApiServiceIT extends AbstractIntegrationTest {
 
         // just check the few things that come with the additional user usage agreement
         Assertions.assertThat(result.getUserUsageConditionsAgreement().getTimestampAgreed()).isNotNull();
-        Assertions.assertThat(result.getUserUsageConditionsAgreement().getUserUsageConditionsCode()).isEqualTo("UUC2024V01");
+        Assertions.assertThat(result.getUserUsageConditionsAgreement().getUserUsageConditionsCode()).isEqualTo("UUC2026V01");
     }
 
     @Test
