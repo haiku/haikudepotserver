@@ -53,10 +53,9 @@ public class UserApiIT extends AbstractIntegrationTest {
         request.captchaToken = captcha.getToken();
         request.captchaResponse = captcha.getResponse();
         request.nickname = "testuser";
-        request.email = "testuser@example.com";
         request.passwordClear = "Ue4nI92Rw";
         request.naturalLanguageCode = "en";
-        request.userUsageConditionsCode = "UUC2026V01";
+        request.userUsageConditionsCode = "UUC2024V01";
 
         // ------------------------------------
         CreateUserResult result = userApi.createUser(request);
@@ -75,7 +74,7 @@ public class UserApiIT extends AbstractIntegrationTest {
         Assertions.assertThat(user.getNaturalLanguage().getCode()).isEqualTo("en");
         Assertions.assertThat(user.getLastAuthenticationTimestamp()).isNull();
         Assertions.assertThat(user.tryGetUserUsageConditionsAgreement().get().getUserUsageConditions().getCode())
-                .isEqualTo("UUC2026V01");
+                .isEqualTo("UUC2024V01");
 
         Assertions.assertThat(userAuthenticationService.authenticateByNicknameAndPassword("testuser", "Ue4nI92Rw").get()).isEqualTo(userOptional.get().getObjectId());
     }
@@ -112,7 +111,7 @@ public class UserApiIT extends AbstractIntegrationTest {
 
         // just check the few things that come with the additional user usage agreement
         Assertions.assertThat(result.userUsageConditionsAgreement.timestampAgreed).isNotNull();
-        Assertions.assertThat(result.userUsageConditionsAgreement.userUsageConditionsCode).isEqualTo("UUC2026V01");
+        Assertions.assertThat(result.userUsageConditionsAgreement.userUsageConditionsCode).isEqualTo("UUC2024V01");
     }
 
     @Test

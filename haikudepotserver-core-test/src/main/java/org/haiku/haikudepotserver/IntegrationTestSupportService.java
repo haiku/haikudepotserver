@@ -368,7 +368,6 @@ public class IntegrationTestSupportService {
     public User createBasicUser(ObjectContext context, String nickname, String passwordClear) {
         User user = context.newObject(User.class);
         user.setNickname(nickname);
-        user.setEmail("%s@example.com".formatted(nickname));
         userAuthenticationService.setPassword(user, passwordClear);
         user.setNaturalLanguage(NaturalLanguage.getByCode(context, NaturalLanguageCoordinates.LANGUAGE_CODE_ENGLISH));
         context.commitChanges();
@@ -379,7 +378,7 @@ public class IntegrationTestSupportService {
         UserUsageConditionsAgreement agreement = context.newObject(UserUsageConditionsAgreement.class);
         agreement.setUser(user);
         agreement.setTimestampAgreed();
-        agreement.setUserUsageConditions(UserUsageConditions.getByCode(context, "UUC2026V01"));
+        agreement.setUserUsageConditions(UserUsageConditions.getByCode(context, "UUC2024V01"));
         context.commitChanges();
     }
 

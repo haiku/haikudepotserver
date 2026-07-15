@@ -24,8 +24,7 @@
                     name="email"
                     valid-email=""
                     autocomplete="off"
-                    ng-model="newUser.email"
-                    ng-required="true">
+                    ng-model="newUser.email">
             <error-messages key-prefix="createUser.email" error="createUserForm.email.$error"></error-messages>
             <div class="text-warning" ng-show="!newUser.email||!newUser.email.length">
                 <small><message key="createUser.email.emptyNote"></message></small>

@@ -229,19 +229,11 @@ public class UserApiService extends AbstractApiService {
         }
 
         // we need to check the nickname even before we create the user because we have to
-        // check for uniqueness of the nickname across all users.
+        // check for uniqueness of the nickname across all of the users.
 
         if (Strings.isNullOrEmpty(request.getNickname())) {
             throw new ValidationException(
                     new ValidationFailure(User.NICKNAME.getName(), "required")
-            );
-        }
-
-        // as of 2026V01 user usage conditions, the email is required.
-
-        if (Strings.isNullOrEmpty(request.getEmail())) {
-            throw new ValidationException(
-                    new ValidationFailure(User.EMAIL.getName(), "required")
             );
         }
 
@@ -264,12 +256,6 @@ public class UserApiService extends AbstractApiService {
         if (User.tryGetByNickname(context, request.getNickname()).isPresent()) {
             throw new ValidationException(
                     new ValidationFailure(User.NICKNAME.getName(), "notunique")
-            );
-        }
-
-        if (User.tryGetActiveByEmail(context, request.getEmail()).isPresent()) {
-            throw new ValidationException(
-                    new ValidationFailure(User.EMAIL.getName(), "notunique")
             );
         }
 

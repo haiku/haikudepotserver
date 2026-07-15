@@ -35,10 +35,10 @@ public class User extends _User implements MutableCreateAndModifyTimestamped {
     private final static Pattern PASSWORDHASH_PATTERN = Pattern.compile("^[a-f0-9]{64}$");
     private final static Pattern PASSWORDSALT_PATTERN = Pattern.compile("^[a-f0-9]{10,32}$");
 
-    public static List<User> findActiveByEmail(ObjectContext context, String email) {
+    public static List<User> findByEmail(ObjectContext context, String email) {
         Preconditions.checkArgument(null != context, "the context must be supplied");
         Preconditions.checkArgument(!Strings.isNullOrEmpty(email), "the email must be supplied");
-        return ObjectSelect.query(User.class).where(EMAIL.eq(email)).and(ACTIVE.isTrue()).select(context);
+        return ObjectSelect.query(User.class).where(EMAIL.eq(email)).select(context);
     }
 
     public static User getByObjectId(ObjectContext context, ObjectId objectId) {
@@ -75,16 +75,6 @@ public class User extends _User implements MutableCreateAndModifyTimestamped {
                 .selectOne(context));
     }
 
-    public static Optional<User> tryGetActiveByEmail(ObjectContext context, String email) {
-        Preconditions.checkNotNull(context);
-        Preconditions.checkState(!Strings.isNullOrEmpty(email));
-
-        return Optional.ofNullable(ObjectSelect.query(User.class).where(EMAIL.eq(email)).and(ACTIVE.isTrue())
-                .sharedCache()
-                .cacheGroup(HaikuDepot.CacheGroup.USER.name())
-                .selectOne(context));
-    }
-
     // configured as a listener method in the model.
 
     public void onPostAdd() {
@@ -103,18 +93,6 @@ public class User extends _User implements MutableCreateAndModifyTimestamped {
 
         // create and modify timestamp handled by listener.
     }
-
-    @Override
-    public void validateForInsert(ValidationResult validationResult) {
-        super.validateForInsert(validationResult);
-
-        // email is now required for new users since 2026V01 user usage conditions.
-
-        if (null == getEmail()) {
-            validationResult.addFailure(new BeanValidationFailure(this, EMAIL.getName(), "required"));
-        }
-    }
-
 
     @Override
     protected void validateForSave(ValidationResult validationResult) {
