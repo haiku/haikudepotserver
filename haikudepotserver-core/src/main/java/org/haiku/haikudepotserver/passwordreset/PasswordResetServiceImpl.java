@@ -98,7 +98,7 @@ public class PasswordResetServiceImpl implements PasswordResetService {
 
         ObjectContext context = serverRuntime.newContext();
 
-        List<User> users = User.findByEmail(context, email);
+        List<User> users = User.findActiveByEmail(context, email);
 
         if (users.isEmpty()) {
             LOGGER.warn("attempt to send password reset token to {}, but there are no users associated with this email address", email);
