@@ -1,1 +1,1 @@
-Haiku Depo Sunucusu; Parola Sıfırlama İşlemi
+Haiku Depo Parola Sıfırlama İşlemi

@@ -12,5 +12,5 @@ kullanıcısı için parola sıfırlama isteğinde bulundunuz. Sürdürmek için
 
 Böylece kullanıcınız için yeni bir parola belirleyebileceksiniz.
 
-Saygılarımızla
+Saygılarımızla,
 Haiku Depo Sunucusu
