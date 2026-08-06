@@ -7,6 +7,7 @@ package org.haiku.haikudepotserver.pkg.job;
 
 import com.google.common.collect.Sets;
 import com.google.common.io.ByteSource;
+import jakarta.annotation.Resource;
 import org.apache.commons.compress.archivers.ArchiveEntry;
 import org.apache.commons.compress.archivers.tar.TarArchiveInputStream;
 import org.fest.assertions.Assertions;
@@ -18,13 +19,11 @@ import org.haiku.haikudepotserver.job.model.JobDataWithByteSource;
 import org.haiku.haikudepotserver.job.model.JobService;
 import org.haiku.haikudepotserver.job.model.JobSnapshot;
 import org.haiku.haikudepotserver.pkg.model.PkgIconExportArchiveJobSpecification;
-import org.junit.Assert;
 import org.junit.jupiter.api.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.test.context.ContextConfiguration;
 
-import jakarta.annotation.Resource;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.Optional;
@@ -90,7 +89,9 @@ public class PkgIconExportArchiveJobRunnerIT extends AbstractIntegrationTest {
 
                 if(tarEntry.getName().contains("/pkg1/")) {
                     if (tarEntry.getName().endsWith("/pkg1/icon.hvif")) {
-                        Assert.assertTrue(getResourceByteSource("sample.hvif").contentEquals(zipNoCloseInputStreamByteSource));
+                        Assertions
+                                .assertThat(getResourceByteSource("sample.hvif").contentEquals(zipNoCloseInputStreamByteSource))
+                                        .isTrue();
                         foundPkg1Filenames.add("icon.hvif");
                     }
                     else {
@@ -99,7 +100,9 @@ public class PkgIconExportArchiveJobRunnerIT extends AbstractIntegrationTest {
 
                         if (matcher.matches()) {
                             String expectedPath = "sample-" + matcher.group(1) + "x" + matcher.group(1) + ".png";
-                            Assert.assertTrue(getResourceByteSource(expectedPath).contentEquals(zipNoCloseInputStreamByteSource));
+                            Assertions
+                                    .assertThat(getResourceByteSource(expectedPath).contentEquals(zipNoCloseInputStreamByteSource))
+                                            .isTrue();
                             foundPkg1Filenames.add(matcher.group(1) + ".png");
                         }
                         else {

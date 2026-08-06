@@ -49,14 +49,14 @@
 
         <!-- runtime dependencies -->
 
-        <spring-boot.version>4.0.6</spring-boot.version>
+        <spring-boot.version>4.1.0</spring-boot.version>
 
-        <postgresql.version>42.7.11</postgresql.version>
+        <postgresql.version>42.7.13</postgresql.version>
         <cayenne.version>4.2.3</cayenne.version>
 
         <flexmark.version>0.64.8</flexmark.version>
         <freemarker.version>2.3.34</freemarker.version>
-        <aircompressor.version>3.6</aircompressor.version>
+        <aircompressor.version>3.7</aircompressor.version>
         <guava.version>33.6.0-jre</guava.version>
         <springfox.version>3.0.0</springfox.version>
         <nimbus-jose-jwt.version>10.9</nimbus-jose-jwt.version>
@@ -68,12 +68,12 @@
         <commons-csv.version>1.14.1</commons-csv.version>
         <commons-text.version>1.15.0</commons-text.version>
 
-        <avaje-http.version>3.8</avaje-http.version>
-        <avaje-inject.version>12.5</avaje-inject.version>
-        <avaje-http-inject-plugin.version>3.8</avaje-http-inject-plugin.version>
-        <avaje-config.version>5.1</avaje-config.version>
-        <avaje-simple-logger.version>1.5</avaje-simple-logger.version>
-        <avaje-jex.version>3.5</avaje-jex.version>
+        <avaje-http.version>3.10</avaje-http.version>
+        <avaje-inject.version>12.6</avaje-inject.version>
+        <avaje-http-inject-plugin.version>3.10</avaje-http-inject-plugin.version>
+        <avaje-config.version>5.2</avaje-config.version>
+        <avaje-simple-logger.version>2.0</avaje-simple-logger.version>
+        <avaje-jex.version>3.6</avaje-jex.version>
         <avaje-applog-slf4j.version>1.2</avaje-applog-slf4j.version>
 
         <!-- test time dependencies -->
@@ -86,11 +86,11 @@
         <mockito.version>5.23.0</mockito.version>
         <bytebuddy.version>1.18.8</bytebuddy.version>
 
-        <junit-jupiter.version>6.0.3</junit-jupiter.version>
+        <junit-jupiter.version>6.1.2</junit-jupiter.version>
         <fest-assert.artifactId>fest-assert</fest-assert.artifactId>
         <fest-assert.version>1.4</fest-assert.version>
         <awaitility.version>4.3.0</awaitility.version>
-        <testcontainers.version>1.21.4</testcontainers.version>
+        <testcontainers.version>2.0.5</testcontainers.version>
 
     </properties>
 
@@ -268,22 +268,28 @@
                 </exclusions>
             </dependency>
 
+            <!--
+            Test Containers has plugins for things like Postgres. This BOM will setup
+            the versions will work together.
+            -->
             <dependency>
                 <groupId>org.testcontainers</groupId>
-                <artifactId>testcontainers</artifactId>
+                <artifactId>testcontainers-bom</artifactId>
                 <version>${testcontainers.version}</version>
-                <exclusions>
-                    <exclusion>
-                        <groupId>com.fasterxml.jackson.core</groupId>
-                        <artifactId>jackson-annotations</artifactId>
-                    </exclusion>
-                </exclusions>
+                <type>pom</type>
+                <scope>import</scope>
             </dependency>
-            <dependency>
-                <groupId>org.testcontainers</groupId>
-                <artifactId>postgresql</artifactId>
-                <version>${testcontainers.version}</version>
-            </dependency>
+<!--            <dependency>-->
+<!--                <groupId>org.testcontainers</groupId>-->
+<!--                <artifactId>testcontainers</artifactId>-->
+<!--                <exclusions>-->
+<!--                    <exclusion>-->
+<!--                        <groupId>com.fasterxml.jackson.core</groupId>-->
+<!--                        <artifactId>jackson-annotations</artifactId>-->
+<!--                    </exclusion>-->
+<!--                </exclusions>-->
+<!--                <scope>test</scope>-->
+<!--            </dependency>-->
 
             <dependency>
                 <groupId>org.awaitility</groupId>

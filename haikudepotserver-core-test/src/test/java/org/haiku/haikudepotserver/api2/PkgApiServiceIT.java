@@ -24,7 +24,6 @@ import org.haiku.haikudepotserver.naturallanguage.model.NaturalLanguageCoordinat
 import org.haiku.haikudepotserver.support.VersionCoordinates;
 import org.haiku.haikudepotserver.support.exception.BadPkgIconException;
 import org.haiku.haikudepotserver.support.exception.ObjectNotFoundException;
-import org.junit.Assert;
 import org.junit.jupiter.api.Test;
 import org.springframework.test.context.ContextConfiguration;
 
@@ -258,7 +257,8 @@ public class PkgApiServiceIT extends AbstractIntegrationTest {
                 .naturalLanguageCode("de");
 
         // ------------------------------------
-        ObjectNotFoundException onfe = Assert.assertThrows(ObjectNotFoundException.class, () -> pkgApiService.getPkg(request));
+        ObjectNotFoundException onfe = org.junit.jupiter.api.Assertions
+                .assertThrows(ObjectNotFoundException.class, () -> pkgApiService.getPkg(request));
         // ------------------------------------
 
         Assertions.assertThat(onfe.getEntityName()).isEqualTo(Pkg.class.getSimpleName());
@@ -331,7 +331,8 @@ public class PkgApiServiceIT extends AbstractIntegrationTest {
                         ));
 
         // ------------------------------------
-        BadPkgIconException bpie = Assert.assertThrows(BadPkgIconException.class, () -> pkgApiService.configurePkgIcon(request));
+        BadPkgIconException bpie = org.junit.jupiter.api.Assertions
+                .assertThrows(BadPkgIconException.class, () -> pkgApiService.configurePkgIcon(request));
         // ------------------------------------
 
         Assertions.assertThat(bpie.getSize()).isEqualTo(16);

@@ -8,7 +8,7 @@ package org.haiku.haikudepotserver.pkg;
 import com.google.common.collect.Iterables;
 import com.google.common.io.Files;
 import com.google.common.io.Resources;
-import junit.framework.AssertionFailedError;
+import jakarta.annotation.Resource;
 import org.apache.cayenne.ObjectContext;
 import org.apache.cayenne.ObjectId;
 import org.apache.cayenne.query.ObjectSelect;
@@ -18,8 +18,8 @@ import org.haiku.haikudepotserver.AbstractIntegrationTest;
 import org.haiku.haikudepotserver.IntegrationTestSupportService;
 import org.haiku.haikudepotserver.config.TestConfig;
 import org.haiku.haikudepotserver.dataobjects.*;
-import org.haiku.haikudepotserver.pkg.model.*;
 import org.haiku.haikudepotserver.naturallanguage.model.NaturalLanguageCoordinates;
+import org.haiku.haikudepotserver.pkg.model.*;
 import org.haiku.haikudepotserver.support.ExposureType;
 import org.haiku.haikudepotserver.support.FileHelper;
 import org.haiku.pkg.model.Pkg;
@@ -28,7 +28,6 @@ import org.haiku.pkg.model.PkgVersion;
 import org.junit.jupiter.api.Test;
 import org.springframework.test.context.ContextConfiguration;
 
-import jakarta.annotation.Resource;
 import java.io.File;
 import java.io.InputStream;
 import java.util.Collections;
@@ -146,7 +145,7 @@ public class PkgImportServiceImplIT extends AbstractIntegrationTest {
             PkgSupplement persistedDevelPkgSupplement = persistedDevelPkg.getPkgSupplement();
 
             Assertions.assertThat(persistedDevelPkgSupplement.getPkgIcons().size()).isEqualTo(1);
-            Assertions.assertThat(persistedDevelPkgSupplement.getPkgIcons().get(0).getSize()).isEqualTo(32);
+            Assertions.assertThat(persistedDevelPkgSupplement.getPkgIcons().getFirst().getSize()).isEqualTo(32);
 
             PkgLocalization pkgLocalization = persistedDevelPkgSupplement.getPkgLocalization(
                     NaturalLanguageCoordinates.fromCode(NaturalLanguageCoordinates.LANGUAGE_CODE_GERMAN)).get();
@@ -245,7 +244,7 @@ public class PkgImportServiceImplIT extends AbstractIntegrationTest {
                         .select(context);
                 Assertions.assertThat(pkgSupplementModifications).hasSize(1);
 
-                PkgSupplementModification pkgSupplementModification = pkgSupplementModifications.get(0);
+                PkgSupplementModification pkgSupplementModification = pkgSupplementModifications.getFirst();
                 Assertions.assertThat(pkgSupplementModification.getUserDescription()).isNull();
                 Assertions.assertThat(pkgSupplementModification.getUser()).isNull();
                 Assertions.assertThat(pkgSupplementModification.getOriginSystemDescription()).isEqualTo("hds-hpkg");
@@ -444,7 +443,7 @@ public class PkgImportServiceImplIT extends AbstractIntegrationTest {
                 java.sql.Timestamp importTimestamp = pkgVersion.getImportTimestamp();
 
                 if (importTimestamp != null && importTimestamp.getTime() >= nowMillis) {
-                    throw new AssertionFailedError("expected the import timestamp not be updated");
+                    org.junit.jupiter.api.Assertions.fail("expected the import timestamp not be updated");
                 }
             }
 

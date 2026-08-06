@@ -1,7 +1,7 @@
 package org.haiku.haikudepotserver.support.progress;
 
 import org.fest.assertions.Assertions;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import java.util.List;
 
