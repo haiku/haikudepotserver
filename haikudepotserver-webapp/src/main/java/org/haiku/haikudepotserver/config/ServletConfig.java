@@ -39,7 +39,7 @@ public class ServletConfig {
         ServletRegistrationBean<HttpServlet> servletRegistration = new ServletRegistrationBean<>();
         servletRegistration.setServlet(new ErrorServlet());
         servletRegistration.setLoadOnStartup(1);
-        servletRegistration.addUrlMappings("/__error");
+        servletRegistration.addUrlMappings("/__error", "/error");
         servletRegistration.setAsyncSupported(true);
         servletRegistration.setName("error-servlet");
         return servletRegistration;

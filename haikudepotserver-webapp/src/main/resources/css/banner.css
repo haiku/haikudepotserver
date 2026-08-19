@@ -1,0 +1,121 @@
+#header-banner-container {
+    display: flex;
+    background-color: #336698;
+    color: white;
+    justify-content: space-between;
+    align-items: center;
+    border-bottom: 1px solid black;
+    height: 38px;
+}
+
+#header-banner-logo-and-title-container {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+#header-banner-menu-toggle {
+    float: left;
+    height: 38px;
+    width: 38px;
+    text-align: center;
+    background-color: #336698;
+    border-right: 1px solid #336698;
+    border-bottom: 1px solid black;
+}
+
+#header-banner-menu-toggle-off-icon {
+    margin-top: 6px;
+    color: white;
+}
+
+#header-banner-menu-toggle:hover #header-banner-menu-toggle-off-icon {
+    margin-top: 6px;
+    color: black;
+}
+
+#header-banner-menu-toggle-on-icon {
+    margin-top: 6px;
+}
+
+#header-banner-search-and-auth-container {
+    margin-right: 8px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 12px;
+}
+
+#header-banner-search {
+}
+
+#header-banner-user {
+    margin-top: 3px;
+}
+
+#header-banner-menu-toggle.selected {
+    background-color: #ffd430;
+    border-bottom: 1px solid #ffd430;
+    border-right: 1px solid #ffd430;
+}
+
+#header-banner-menu-toggle:hover {
+    background-color: #ffd430;
+    border-bottom: 1px solid #756017;
+    border-right: 1px solid #ffd430;
+}
+
+#header-banner-menu-toggle-on-icon {
+    display: none;
+}
+
+body.menu-modal #header-banner-menu-toggle-off-icon {
+    display: none;
+}
+
+body.menu-modal #header-banner-menu-toggle-on-icon {
+    display: inline;
+}
+
+body.menu-modal #header-banner-menu-toggle {
+    background-color: #ffd430;
+    border-bottom: 1px solid #ffd430;
+    border-right: 1px solid #ffd430;
+}
+
+#header-banner-logo {
+    margin-left: 8px;
+    margin-right: 8px;
+}
+
+#header-banner-title a {
+    color: white;
+    text-decoration: none;
+}
+
+#header-banner-title a:hover {
+    text-decoration: underline;
+}
+
+#header-banner-title {
+    font-weight: bold;
+}
+
+#header-banner-title .title-short {
+    display: none;
+}
+
+@media (width < 640px) {
+    #header-banner-title .title {
+        display: none;
+    }
+
+    #header-banner-title .title-short {
+        display: inline;
+    }
+}
+
+#header-banner-logo {
+    margin-right: 8px;
+    font-weight: bold;
+}

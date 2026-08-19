@@ -183,7 +183,7 @@ public class ErrorServlet extends HttpServlet {
         out.append("</head>\n");
         out.append("<body>\n");
         out.append("<div id=\"error-container\">\n");
-        out.append("<div id=\"error-image\"><img src=\"/__img/haikudepot-error.svg\"></div>\n");
+        out.append("<div id=\"error-image\"><img src=\"/__img/haikudepot-gray.svg\"></div>\n");
         out.append("<h1>Haiku Depot Server</h1>\n");
 
         renderTextualMessages(

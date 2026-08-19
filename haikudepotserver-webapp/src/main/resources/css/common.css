@@ -1,0 +1,151 @@
+
+.common-muted {
+    color: grey;
+}
+
+.common-hidden {
+    display: none;
+}
+
+/* ================= */
+
+body {
+    font-family: sans-serif;
+    padding: 0;
+    margin: 0;
+}
+
+#common-main-content-container {
+    padding: 8px;
+    width: auto;
+    padding-top: 24px;
+    padding-right: 24px;
+    padding-bottom: 24px;
+    padding-left: 24px;
+}
+
+/* == DISCLOSURE ================== */
+
+.common-disclosure {
+    display: flex;
+}
+
+.common-disclosure > img {
+    margin-right: 8px;
+}
+
+.common-disclosure > div.common-disclosure-content {
+    flex: 1;
+    border: 1px dotted gray;
+    padding: 8px;
+    display: none;
+}
+
+.common-disclosure > svg.common-disclosure-toggle-on {
+    display: none;
+}
+
+.common-disclosure.shown > div.common-disclosure-content {
+    display: block;
+}
+
+.common-disclosure.shown > div.common-disclosure-placeholder {
+    display: none;
+}
+
+.common-disclosure.shown > svg.common-disclosure-toggle-on {
+    display: inline;
+}
+
+.common-disclosure.shown > svg.common-disclosure-toggle-off {
+    display: none;
+}
+
+/* == PKG ICON ================== */
+
+div.common-pkg-icon-container {
+    display:inline-block;
+}
+
+div.common-pkg-icon-badge {
+    float: right;
+}
+
+/* == TABLE ================== */
+
+table.common-table {
+    width: 100%;
+}
+
+table.common-table {
+    border-collapse: collapse;
+    border: 1px solid gray;
+}
+
+table.common-table th {
+    text-align: left;
+    background-color: #444;
+    color: white;
+    font-weight: normal;
+}
+
+table.common-table td {
+    text-align: left;
+    padding-left: 4px;
+    padding-right: 4px;
+}
+
+table.common-table td:not(:last-child) {
+    border-right: 1px dotted gray;
+}
+
+table.common-table tr:nth-child(2n) {
+    background-color: #EEE;
+}
+
+/* align the size column to the right */
+table.common-table td:nth-child(3) {
+    text-align: right;
+}
+table.common-table th:nth-child(3) {
+    text-align: right;
+}
+
+/* align the rating column to the middle */
+table.common-table td:nth-child(4) {
+    text-align: center;
+}
+table.common-table th:nth-child(4) {
+    text-align: center;
+}
+
+/* align the views column to the right */
+table.common-table td:nth-child(6) {
+    text-align: right;
+}
+table.common-table th:nth-child(6) {
+    text-align: right;
+}
+
+/* == PAGINATION ================== */
+
+.common-pagination {
+    display: flex;
+    gap: 8px;
+}
+
+.common-pagination > div {
+    text-align: center;
+    min-width: 1.5em;
+}
+
+.common-pagination > div.common-pagination-selected {
+    font-weight: bold;
+}
+
+/* == HIGHLIGHTING ================== */
+
+.common-highlight {
+    background-color: #ffc8fe;
+    border: 1px solid rgb(255, 149, 255);
+}

@@ -12,3 +12,5 @@ Dockerfile_server_graphics
 Dockerfile_webapp
 
 support/client-tools/hds_*_client/**
+
+jte-classes

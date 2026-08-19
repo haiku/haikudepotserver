@@ -1,5 +1,5 @@
 /*
- * Copyright 2018-2027, Andrew Lindesay
+ * Copyright 2018-2026, Andrew Lindesay
  * Distributed under the terms of the MIT License.
  */
 
@@ -193,6 +193,7 @@ public class IntegrationTestSupportService {
         nonPrimaryMirror.setCode("testreposrc_xyz_m_notpri");
 
         result.pkg1 = createPkg(context, "pkg1");
+        result.pkg1.setIsDesktop(true);
 
         pkgService.ensurePkgProminence(context, result.pkg1, result.repository, prominence.getOrdering());
         pkgService.updatePkgChangelog(

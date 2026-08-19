@@ -1,0 +1,167 @@
+#pkg-view-banner-container {
+    display:flex;
+    background-color: #EEEEEE;
+    padding-left:32px;
+    padding-top: 8px;
+    padding-bottom: 8px;
+    border-bottom: 1px solid gray;
+}
+
+#pkg-view-banner-container .icon {
+    padding-right: 32px;
+}
+
+#pkg-view-banner-container h3 {
+    margin-top: 0px;
+    margin-bottom: 4px;
+}
+
+#pkg-view-banner-container-details {
+    margin-left: 16px;
+}
+
+#pkg-view-banner-container-copyright {
+    font-size: small;
+}
+
+#pkg-view-banner-container-summary {
+    margin-top: 4px;
+}
+
+#pkg-view-infoblocks-container {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: space-around;
+    padding-left:16px;
+    padding-top: 8px;
+    padding-bottom: 8px;
+    border-bottom: 1px solid lightgrey;
+}
+
+#pkg-view-infoblocks-container > div {
+    text-align: center;
+    min-width: 128px;
+    margin-top: 8px;
+    margin-bottom: 8px;
+}
+
+#pkg-view-infoblocks-container h4 {
+    margin-top: 4px;
+    margin-bottom: 4px;
+    text-transform: capitalize;
+}
+
+#pkg-view-infoblocks-container h2 {
+    margin-top: 4px;
+    margin-bottom: 4px;
+}
+
+#pkg-view-description-and-screenshots-container {
+    display: flex;
+    padding-top: 16px;
+    padding-left: 16px;
+    padding-right: 16px;
+    padding-bottom: 16px;
+    gap: 16px;
+    flex-wrap: wrap;
+    border-bottom: 1px solid lightgrey;
+}
+
+#pkg-view-description-and-screenshots-container > div {
+    flex-grow: 1;
+    flex-basis: 0;
+    min-width: 240px;
+}
+
+#pkg-view-description {
+    padding-left: 8px;
+}
+
+#pkg-view-screenshots {
+    text-align: center;
+    position: relative;
+}
+
+#pkg-view-screenshots > img {
+    vertical-align: middle;
+    margin: 16px;
+    width: 50%;
+}
+
+#pkg-view-screenshots-description {
+    float: right;
+    opacity: 0.5;
+    font-size: small;
+    padding: 2px 2px;
+}
+
+#pkg-view-screenshots-nav {
+    background-color: rgb(255,255,255,0.5);
+    padding: 2px 2px;
+    float:left
+}
+
+#pkg-view-screenshots-image {
+    padding: 4px 4px;
+}
+
+#pkg-view-screenshots-image > a > img {
+    max-width: 100%;
+}
+
+#pkg-view-user-ratings-container {
+    padding: 16px;
+    margin-bottom: 16px;
+}
+
+#pkg-view-user-ratings-title {
+    float:left;
+}
+
+#pkg-view-user-ratings-nav {
+    float:right;
+}
+
+#pkg-view-user-ratings {
+    column-count: auto;
+    column-width: 320px;
+    gap: 24px;
+    clear:both;
+}
+
+#pkg-view-user-ratings div.pkg-view-user-rating-item {
+    width: 320px;
+    min-height: 48px;
+    padding: 4px;
+    background-color: #EEEEEE;
+    position: relative;
+    margin-bottom: 16px;
+    break-inside: avoid;
+}
+
+#pkg-view-user-ratings-container div.pkg-view-user-rating-item div.pkg-view-user-rating-rating-and-user {
+    float: left;
+}
+
+#pkg-view-user-ratings-container div.pkg-view-user-rating-item div.pkg-view-user-rating-date-and-nav {
+    float: right;
+}
+
+#pkg-view-user-ratings-container div.pkg-view-user-rating-item div.pkg-view-user-rating-comment {
+    clear: both;
+    color: gray;
+    padding-top: 8px;
+    padding-bottom: 8px;
+    padding-left: 4px;
+    padding-right: 4px;
+}
+
+#pkg-view-user-ratings-container div.pkg-view-user-rating-item div.pkg-view-user-rating-different-version {
+    position: absolute;
+    bottom: 0;
+    right: 0;
+    background-color: rgba(255,0,0,0.5);
+    color: white;
+    padding-left: 2px;
+    padding-right: 2px;
+}

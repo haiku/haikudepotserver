@@ -48,7 +48,7 @@ public class PkgScreenshotController extends AbstractController {
 
     protected final static Logger LOGGER = LoggerFactory.getLogger(PkgScreenshotController.class);
 
-    final static String SEGMENT_SCREENSHOT = "__pkgscreenshot";
+    public final static String SEGMENT_SCREENSHOT = "__pkgscreenshot";
     final static String SEGMENT_SCREENSHOT_LEGACY = "pkgscreenshot";
 
     final static String HEADER_SCREENSHOTCODE = "X-HaikuDepotServer-ScreenshotCode";
@@ -56,10 +56,10 @@ public class PkgScreenshotController extends AbstractController {
     private final static String KEY_PKGNAME = "pkgname";
     private final static String KEY_SCREENSHOTCODE = "code";
     private final static String KEY_FORMAT = "format";
-    private final static String KEY_TARGETWIDTH = "tw";
-    private final static String KEY_TARGETHEIGHT = "th";
+    public final static String KEY_TARGETWIDTH = "tw";
+    public final static String KEY_TARGETHEIGHT = "th";
 
-    private final static int SCREENSHOT_SIDE_LIMIT = 1500;
+    public final static int SCREENSHOT_SIDE_LIMIT = 1500;
 
     private final ServerRuntime serverRuntime;
     private final PkgScreenshotService pkgScreenshotService;

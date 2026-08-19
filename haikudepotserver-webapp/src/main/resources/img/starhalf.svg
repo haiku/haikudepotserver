@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<svg
+   xmlns="http://www.w3.org/2000/svg"
+   version="1.1"
+   width="16"
+   height="16">
+<path fill="rgba(51,102,152,0.25)" stroke="none" d="M 14.657 5.836 L 10.853 8.927 L 12.114 13.663 L 8 11 L 3.885 13.663 L 5.146 8.927 L 1.342 5.836 L 6.236 5.572 L 7.999 1 L 9.763 5.572 Z"/>
+<path fill="rgba(51,102,152,1.0)" stroke="none" d="M 8 11 L 3.885 13.663 L 5.146 8.927 L 1.342 5.836 L 6.236 5.572 L 7.999 1 Z"/>
+</svg>

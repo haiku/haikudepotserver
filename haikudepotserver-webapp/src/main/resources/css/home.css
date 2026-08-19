@@ -1,0 +1,40 @@
+#home-pkgs-container {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 16px;
+}
+
+.home-pkg-container {
+    width: 250px;
+    padding: 4px;
+    text-align: center;
+    margin-bottom: 12px;
+    flex-grow: 1;
+}
+
+.home-pkg-container:hover {
+    background-color: #FFFFFF;
+}
+
+.home-pkg-title {
+    font-weight: bold;
+}
+
+.home-pkg-summary {
+    margin-top: 4px;
+    margin-bottom: 12px;
+    color: grey;
+    font-size: 10pt;
+}
+
+#home-filters {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: space-between;
+    padding-bottom: 8px;
+    padding-left: 8px;
+    padding-right: 8px;
+    border-bottom: 1px dotted black;
+    margin-bottom: 16px;
+    gap: 16px;
+}

@@ -321,6 +321,8 @@ components:
           $ref: "./error.yaml#/components/schemas/error"
     getRepositoriesResult:
       type: object
+      required:
+        - repositories
       properties:
         repositories:
           type: array
@@ -384,6 +386,13 @@ components:
           $ref: "./error.yaml#/components/schemas/error"
     getRepositoryResult:
       type: object
+      required:
+        - active
+        - name
+        - code
+        - createTimestamp
+        - modifyTimestamp
+        - repositorySources
       properties:
         active:
           type: boolean
@@ -407,6 +416,10 @@ components:
             $ref: "#/components/schemas/getRepositoryRepositorySource"
     getRepositoryRepositorySource:
       type: object
+      required:
+        - active
+        - code
+        - architectureCode
       properties:
         active:
           type: boolean

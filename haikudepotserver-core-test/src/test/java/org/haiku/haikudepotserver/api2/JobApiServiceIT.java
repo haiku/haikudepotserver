@@ -5,17 +5,14 @@
 
 package org.haiku.haikudepotserver.api2;
 
+import jakarta.annotation.Resource;
 import org.apache.cayenne.ObjectContext;
 import org.fest.assertions.Assertions;
 import org.haiku.haikudepotserver.AbstractIntegrationTest;
-import org.haiku.haikudepotserver.api2.model.GetJobRequestEnvelope;
-import org.haiku.haikudepotserver.api2.model.GetJobResult;
-import org.haiku.haikudepotserver.api2.model.JobStatus;
-import org.haiku.haikudepotserver.api2.model.SearchJobsRequestEnvelope;
-import org.haiku.haikudepotserver.api2.model.SearchJobsResult;
-import org.haiku.haikudepotserver.api2.model.SearchJobsResultItem;
-import org.haiku.haikudepotserver.config.BasicConfig;
+import org.haiku.haikudepotserver.api2.model.*;
 import org.haiku.haikudepotserver.config.TestBasicConfig;
+import org.haiku.haikudepotserver.config.TestMessageSourceConfig;
+import org.haiku.haikudepotserver.config.TestPropertySourceConfig;
 import org.haiku.haikudepotserver.dataobjects.User;
 import org.haiku.haikudepotserver.job.TestJobServiceImpl;
 import org.haiku.haikudepotserver.job.model.BulkDataJobCoordinatorService;
@@ -23,14 +20,10 @@ import org.haiku.haikudepotserver.job.model.JobService;
 import org.haiku.haikudepotserver.storage.model.DataStorageService;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
-import org.springframework.boot.flyway.autoconfigure.FlywayAutoConfiguration;
-import org.springframework.boot.jdbc.autoconfigure.DataSourceAutoConfiguration;
-import org.springframework.boot.jdbc.autoconfigure.DataSourceTransactionManagerAutoConfiguration;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Import;
 import org.springframework.test.context.ContextConfiguration;
 
-import jakarta.annotation.Resource;
 import java.util.List;
 
 @ContextConfiguration(classes = JobApiServiceIT.SpecificTestConfig.class)
@@ -123,11 +116,9 @@ public class JobApiServiceIT extends AbstractIntegrationTest {
     }
 
     @Import({
-            DataSourceAutoConfiguration.class,
-            DataSourceTransactionManagerAutoConfiguration.class,
-            FlywayAutoConfiguration.class,
             TestBasicConfig.class,
-            BasicConfig.class
+            TestMessageSourceConfig.class,
+            TestPropertySourceConfig.class
     })
     public final static class SpecificTestConfig {
 

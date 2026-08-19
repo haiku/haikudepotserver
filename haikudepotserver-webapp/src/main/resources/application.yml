@@ -15,6 +15,7 @@ logging:
   pattern:
     console: "%d{HH:mm:ss.SSS} [%thread] %-5level %logger{36} - %msg%n"
 
+
 spring:
   mail:
     host: stmp
@@ -167,3 +168,9 @@ hds:
         # How many versions to go back from the latest version in order
         # to find user ratings to aggregate.
         versions-back: 2
+
+# JTE is the templating engine used to render HDS's web front end.
+gg:
+  jte:
+    development-mode: false
+    use-precompiled-templates: true

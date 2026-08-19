@@ -23,7 +23,7 @@ import org.springframework.web.filter.CompositeFilter;
 import java.util.List;
 
 /**
- * <p>This will setup the security filters that are used by Spring Security.</p>
+ * <p>This will configure the security filters that are used by Spring Security.</p>
  */
 
 @Configuration

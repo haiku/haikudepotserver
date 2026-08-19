@@ -1,0 +1,50 @@
+#menu-container {
+    display: none;
+}
+
+body.menu-modal main {
+    display: none;
+}
+
+body.menu-modal section#menu-container {
+    display: block;
+}
+
+body.menu-modal section#menu-container {
+    display: block;
+}
+
+#menu-container {
+    background-color: #ffd430;
+    padding: 8px;
+    width: auto;
+    padding-top: 24px;
+    padding-right: 8px;
+    padding-bottom: 24px;
+    padding-left: 8px;
+}
+
+#menu-groups-container {
+    column-count: auto;
+    column-width: 320px;
+    column-rule: 1px dotted #756017;
+    gap: 24px;
+}
+
+.menu-group-item {
+    break-inside: avoid;
+}
+
+.menu-group-item > h3 {
+    margin-bottom: 2px;
+}
+
+.menu-group-item > ul {
+    margin-top: 2px;
+    padding-left: 0;
+}
+
+.menu-group-item > ul > li {
+    list-style: none;
+}
+
