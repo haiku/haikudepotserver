@@ -285,7 +285,7 @@ public class PkgViewController {
                         pkgVersion.getRevision()
                 ),
                 !viewedVersionCoordinates.equals(userRatingVersionCoordinates),
-                referenceData.architectureForCode(pkgVersion.getArchitectureCode())
+                referenceData.tryArchitectureForCode(pkgVersion.getArchitectureCode()).orElse(null)
         );
     }
 
@@ -337,6 +337,10 @@ public class PkgViewController {
                 referenceData.repositoryForCode(result.getRepositoryCode()));
     }
 
+    /**
+     * @param architecture if the architecture is real; some packages don't have an architecture if they are a package
+     *                     that is not dependent on a specific target architecture.
+     */
     public record UserRating(
             String code,
             String comment,
@@ -345,7 +349,7 @@ public class PkgViewController {
             String userNickname,
             VersionCoordinates pkgVersion,
             boolean pkgVersionDiffersFromViewed,
-            Architecture architecture
+            @Nullable Architecture architecture
     ) {
     }
 
