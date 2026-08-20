@@ -2,14 +2,17 @@
 @import org.haiku.haikudepotserver.multipage.controller.AboutController
 @import org.haiku.haikudepotserver.multipage.controller.AboutController.Contributor
 @import org.haiku.haikudepotserver.multipage.internationalization.InternationalizationSupplier
+@import org.haiku.haikudepotserver.multipage.model.WebResourcePathPrefixes
 
 @param org.haiku.haikudepotserver.multipage.controller.AboutController.AboutData data
 @param InternationalizationSupplier internationalizationSupplier
+@param WebResourcePathPrefixes webResourcePathPrefixes
 
 @template.multipage.common.common-page-mantle(
 title = internationalizationSupplier.getMessage("mp.about.title"),
 menuGroups = data.menuGroups(),
 internationalizationSupplier = internationalizationSupplier,
+webResourcePathPrefixes = webResourcePathPrefixes,
 cssLeafnames = List.<String>of(),
 jsLeafnames = List.<String>of(),
 content = @`

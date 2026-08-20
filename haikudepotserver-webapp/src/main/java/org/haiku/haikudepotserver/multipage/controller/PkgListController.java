@@ -14,13 +14,14 @@ import org.apache.commons.lang3.BooleanUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.haiku.haikudepotserver.api2.PkgApiService;
 import org.haiku.haikudepotserver.api2.model.*;
+import org.haiku.haikudepotserver.multipage.MultipageWebResourceService;
 import org.haiku.haikudepotserver.multipage.internationalization.InternationalizationSupplierFactory;
 import org.haiku.haikudepotserver.multipage.MultipageConstants;
 import org.haiku.haikudepotserver.multipage.ReferenceDataRepository;
 import org.haiku.haikudepotserver.multipage.model.*;
 import org.haiku.haikudepotserver.multipage.model.Architecture;
 import org.haiku.haikudepotserver.multipage.model.PkgCategory;
-import org.haiku.haikudepotserver.multipage.navigation.MultipageNavigationService;
+import org.haiku.haikudepotserver.multipage.MultipageNavigationService;
 import org.haiku.haikudepotserver.naturallanguage.model.NaturalLanguageCoordinates;
 import org.haiku.haikudepotserver.support.VersionCoordinates;
 import org.haiku.haikudepotserver.support.data.DataQuantity;
@@ -81,16 +82,19 @@ public class PkgListController {
     private final ReferenceDataRepository referenceDataRepository;
     private final MultipageNavigationService navigationService;
     private final PkgApiService pkgApiService;
+    private final MultipageWebResourceService multipageWebResourceService;
 
     public PkgListController(
             InternationalizationSupplierFactory internationalizationSupplierFactory,
             ReferenceDataRepository referenceDataRepository,
             MultipageNavigationService navigationService,
+            MultipageWebResourceService multipageWebResourceService,
             PkgApiService pkgApiService) {
         this.internationalizationSupplierFactory = Preconditions.checkNotNull(internationalizationSupplierFactory);
         this.referenceDataRepository = referenceDataRepository;
         this.navigationService = navigationService;
         this.pkgApiService = pkgApiService;
+        this.multipageWebResourceService = Preconditions.checkNotNull(multipageWebResourceService);
     }
 
     /**
@@ -130,7 +134,8 @@ public class PkgListController {
                                 BooleanUtils.isTrue(onlyNativeDesktop),
                                 BooleanUtils.isTrue(showFilters)
                         ),
-                        MultipageConstants.KEY_INTERNATIONALIZATION_SUPPLIER, internationalizationSupplierFactory.create(locale)
+                        MultipageConstants.KEY_INTERNATIONALIZATION_SUPPLIER, internationalizationSupplierFactory.create(locale),
+                        MultipageConstants.KEY_WEB_RESOURCE_PATH_PREFIXES, multipageWebResourceService.getPathPrefixes()
                 )
         );
     }

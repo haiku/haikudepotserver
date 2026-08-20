@@ -8,15 +8,18 @@
 @import org.haiku.haikudepotserver.multipage.jte.TextHelper
 @import org.haiku.haikudepotserver.multipage.jte.TimestampHelper
 @import org.haiku.haikudepotserver.multipage.model.PkgCategory
+@import org.haiku.haikudepotserver.multipage.model.WebResourcePathPrefixes
 @import org.springframework.web.util.UriComponentsBuilder
 
 @param org.haiku.haikudepotserver.multipage.controller.PkgViewController.PkgViewData data
 @param InternationalizationSupplier internationalizationSupplier
+@param WebResourcePathPrefixes webResourcePathPrefixes
 
 @template.multipage.common.common-page-mantle(
 title = internationalizationSupplier.getMessage("mp.pkg_view.title", data.pkgName(), data.version().toString()),
 menuGroups = data.menuGroups(),
 internationalizationSupplier = internationalizationSupplier,
+webResourcePathPrefixes = webResourcePathPrefixes,
 cssLeafnames = List.of("pkg-view"),
 jsLeafnames = List.<String>of(),
 content = @`
@@ -28,7 +31,8 @@ content = @`
                 @template.multipage.common.common-pkg-icon(
                 pkgName = data.pkgName(),
                 size = 64,
-                versionDifferentiator = data.version())
+                versionDifferentiator = data.version(),
+                webResourcePathPrefixes = webResourcePathPrefixes)
             </div>
 
             <div id="pkg-view-banner-container-details">
@@ -38,7 +42,7 @@ content = @`
                     @else
                         ${data.pkgName()}
                     @endif
-                    @if (data.isNativeDesktop())<img src="/__img/native.svg" width="16" height="16">@endif
+                    @if (data.isNativeDesktop())<img src="${webResourcePathPrefixes.img()}native.svg" width="16" height="16">@endif
                 </h3>
                 <div id="pkg-view-banner-container-copyright">
                     @for (ForSupport<String> copyrightForSupport : ForSupport.of(data.copyrights()))
@@ -140,7 +144,8 @@ content = @`
                                 internationalizationSupplier = internationalizationSupplier,
                                 uriComponents = data.uriComponents(),
                                 offsetQueryParameter = PkgViewController.KEY_SCREENSHOTINDEX,
-                                pagination = data.screenshotInfo().screenshotsPagination()
+                                pagination = data.screenshotInfo().screenshotsPagination(),
+                                webResourcePathPrefixes = webResourcePathPrefixes
                                 )
                             </small>
                         </div>
@@ -170,7 +175,8 @@ content = @`
                     internationalizationSupplier = internationalizationSupplier,
                     uriComponents = UriComponentsBuilder.newInstance().uriComponents(data.uriComponents()).fragment("pkg-view-user-ratings-container").build(),
                     offsetQueryParameter = PkgViewController.KEY_USERRATINGOFFSET,
-                    pagination = data.userRatingInfo().pagination()
+                    pagination = data.userRatingInfo().pagination(),
+                    webResourcePathPrefixes = webResourcePathPrefixes
                     )
                 </small>
                 </div>

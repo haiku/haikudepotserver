@@ -10,14 +10,17 @@
 @import org.haiku.haikudepotserver.multipage.MultipageConstants
 @import java.util.List
 @import org.haiku.haikudepotserver.multipage.internationalization.InternationalizationSupplier
+@import org.haiku.haikudepotserver.multipage.model.WebResourcePathPrefixes
 
 @param org.haiku.haikudepotserver.multipage.controller.PkgListController.PkgListData data
 @param InternationalizationSupplier internationalizationSupplier
+@param WebResourcePathPrefixes webResourcePathPrefixes
 
 @template.multipage.common.common-page-mantle(
 title = internationalizationSupplier.getMessage("mp.pkg_list.title"),
 menuGroups = data.menuGroups(),
 internationalizationSupplier = internationalizationSupplier,
+webResourcePathPrefixes = webResourcePathPrefixes,
 cssLeafnames = List.of("pkg-list"),
 jsLeafnames = List.of("pkg-list"),
 content = @`
@@ -121,7 +124,8 @@ content = @`
                     internationalizationSupplier = internationalizationSupplier,
                     uriComponents = data.uriComponents(),
                     offsetQueryParameter = MultipageConstants.KEY_OFFSET,
-                    pagination = data.pagination()
+                    pagination = data.pagination(),
+                    webResourcePathPrefixes = webResourcePathPrefixes
                 )
                 </div>
             </div>
@@ -144,7 +148,8 @@ content = @`
                             @template.multipage.common.common-pkg-icon(
                                 pkgName = pkgVersion.pkgName(),
                                 size = 32,
-                                versionDifferentiator = pkgVersion.versionCreateTimestamp())
+                                versionDifferentiator = pkgVersion.versionCreateTimestamp(),
+                                webResourcePathPrefixes = webResourcePathPrefixes)
                         </td>
                         <td>
                             <div>
@@ -156,7 +161,7 @@ content = @`
                                 @endif
                                 </a>
                                 @if (pkgVersion.isNativeDesktop())
-                                    <img src="/__img/native.svg" width="16px" height="16px">
+                                    <img src="${webResourcePathPrefixes.img()}native.svg" width="16px" height="16px">
                                 @endif
                             </div>
                             <div class="common-muted">

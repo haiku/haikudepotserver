@@ -4,12 +4,14 @@
 @import java.util.Collection
 @import org.haiku.haikudepotserver.multipage.internationalization.InternationalizationSupplier
 @import org.haiku.haikudepotserver.multipage.MultipageConstants
+@import org.haiku.haikudepotserver.multipage.model.WebResourcePathPrefixes
 
 @param Collection<MenuGroup> menuGroups
 @param Collection<String> cssLeafnames
 @param Collection<String> jsLeafnames
 @param Content content
 @param InternationalizationSupplier internationalizationSupplier
+@param WebResourcePathPrefixes webResourcePathPrefixes
 @param String title
 
 <!DOCTYPE html>
@@ -20,26 +22,26 @@
 
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-    <link rel="icon" type="image/png" href="/__img/haikudepot16.png" sizes="16x16">
-    <link rel="icon" type="image/png" href="/__img/haikudepot32.png" sizes="32x32">
-    <link rel="icon" type="image/png" href="/__img/haikudepot64.png" sizes="64x64">
-    <link rel="icon" type="image/svg" href="/__img/haikudepot.svg">
+    <link rel="icon" type="image/png" href="${webResourcePathPrefixes.img()}haikudepot16.png" sizes="16x16">
+    <link rel="icon" type="image/png" href="${webResourcePathPrefixes.img()}haikudepot32.png" sizes="32x32">
+    <link rel="icon" type="image/png" href="${webResourcePathPrefixes.img()}haikudepot64.png" sizes="64x64">
+    <link rel="icon" type="image/svg" href="${webResourcePathPrefixes.img()}haikudepot.svg">
 
     <link rel="search" type="application/opensearchdescription+xml" title="Haiku Depot" href="/__pkgsearch/opensearch.xml">
 
-    <link rel="stylesheet" type="text/css" href="/__css/common.css">
-    <link rel="stylesheet" type="text/css" href="/__css/banner.css">
-    <link rel="stylesheet" type="text/css" href="/__css/menu.css">
+    <link rel="stylesheet" type="text/css" href="${webResourcePathPrefixes.css()}common.css">
+    <link rel="stylesheet" type="text/css" href="${webResourcePathPrefixes.css()}banner.css">
+    <link rel="stylesheet" type="text/css" href="${webResourcePathPrefixes.css()}menu.css">
 
     @for (String cssLeafname : cssLeafnames)
-        <link rel="stylesheet" type="text/css" href="/__css/${cssLeafname}.css">
+        <link rel="stylesheet" type="text/css" href="${webResourcePathPrefixes.css()}${cssLeafname}.css">
     @endfor
 
-    <script src="/__js/common.js"></script>
-    <script src="/__js/menu.js"></script>
+    <script src="${webResourcePathPrefixes.js()}common.js"></script>
+    <script src="${webResourcePathPrefixes.js()}menu.js"></script>
 
     @for (String jsLeafname : jsLeafnames)
-        <script src="/__js/${jsLeafname}.js"></script>
+        <script src="${webResourcePathPrefixes.js()}${jsLeafname}.js"></script>
     @endfor
 
 </head>
@@ -57,7 +59,7 @@
         <div id="header-banner-logo-and-title-container">
             <div id="header-banner-logo">
                 <a href="/${MultipageConstants.SEGMENT_MULTIPAGE}">
-                    <img src="/__img/haikudepot-gray.svg" width="32" height="32">
+                    <img src="${webResourcePathPrefixes.img()}haikudepot-gray.svg" width="32" height="32">
                 </a>
             </div>
             <div id="header-banner-title">

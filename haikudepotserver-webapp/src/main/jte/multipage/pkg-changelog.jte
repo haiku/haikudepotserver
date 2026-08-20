@@ -2,14 +2,17 @@
 @import org.haiku.haikudepotserver.multipage.controller.PkgChangelogController
 @import org.haiku.haikudepotserver.multipage.internationalization.InternationalizationSupplier
 @import org.haiku.haikudepotserver.multipage.jte.TextHelper
+@import org.haiku.haikudepotserver.multipage.model.WebResourcePathPrefixes
 
 @param PkgChangelogController.PkgChangelogData data
 @param InternationalizationSupplier internationalizationSupplier
+@param WebResourcePathPrefixes webResourcePathPrefixes
 
 @template.multipage.common.common-page-mantle(
 title = internationalizationSupplier.getMessage("mp.pkg_changlelog.title", data.pkgName()),
 menuGroups = data.menuGroups(),
 internationalizationSupplier = internationalizationSupplier,
+webResourcePathPrefixes = webResourcePathPrefixes,
 cssLeafnames = List.of("pkg-changelog"),
 jsLeafnames = List.<String>of(),
 content = @`

@@ -15,8 +15,4 @@ public class WebConstants {
 
     public final static String PATH_COMPONENT_SECURED = "__secured";
 
-    public final static String ANT_PATTERN_JS = String.format("/%s/**", SEGMENT_JS);
-    public final static String ANT_PATTERN_CSS = String.format("/%s/**", SEGMENT_CSS);
-    public final static String ANT_PATTERN_IMG = String.format("/%s/**", SEGMENT_IMG);
-
 }

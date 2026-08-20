@@ -10,10 +10,11 @@ import org.haiku.haikudepotserver.api2.PkgApiService;
 import org.haiku.haikudepotserver.api2.model.GetPkgChangelogRequestEnvelope;
 import org.haiku.haikudepotserver.api2.model.GetPkgChangelogResult;
 import org.haiku.haikudepotserver.multipage.MultipageConstants;
+import org.haiku.haikudepotserver.multipage.MultipageWebResourceService;
 import org.haiku.haikudepotserver.multipage.internationalization.InternationalizationSupplierFactory;
 import org.haiku.haikudepotserver.multipage.model.MenuGroup;
 import org.haiku.haikudepotserver.multipage.model.NavigationDestination;
-import org.haiku.haikudepotserver.multipage.navigation.MultipageNavigationService;
+import org.haiku.haikudepotserver.multipage.MultipageNavigationService;
 import org.springframework.http.MediaType;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -37,14 +38,17 @@ public class PkgChangelogController {
     private final InternationalizationSupplierFactory internationalizationSupplierFactory;
     private final PkgApiService pkgApiService;
     private final MultipageNavigationService navigationService;
+    private final MultipageWebResourceService multipageWebResourceService;
 
     public PkgChangelogController(
             InternationalizationSupplierFactory internationalizationSupplierFactory,
             PkgApiService pkgApiService,
-            MultipageNavigationService navigationService) {
+            MultipageNavigationService navigationService,
+            MultipageWebResourceService multipageWebResourceService) {
         this.internationalizationSupplierFactory = Preconditions.checkNotNull(internationalizationSupplierFactory);
         this.pkgApiService = Preconditions.checkNotNull(pkgApiService);
         this.navigationService = Preconditions.checkNotNull(navigationService);
+        this.multipageWebResourceService = Preconditions.checkNotNull(multipageWebResourceService);
     }
 
     @RequestMapping(value = "{pkgName}/changelog", method = RequestMethod.GET, produces = MediaType.TEXT_HTML_VALUE)
@@ -74,7 +78,9 @@ public class PkgChangelogController {
                                 viewPkgComponents
                         ),
                         MultipageConstants.KEY_INTERNATIONALIZATION_SUPPLIER,
-                        internationalizationSupplierFactory.create(locale)
+                        internationalizationSupplierFactory.create(locale),
+                        MultipageConstants.KEY_WEB_RESOURCE_PATH_PREFIXES,
+                        multipageWebResourceService.getPathPrefixes()
                 )
         );
     }

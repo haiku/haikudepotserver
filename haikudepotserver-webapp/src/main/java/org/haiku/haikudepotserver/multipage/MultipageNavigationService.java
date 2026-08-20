@@ -2,14 +2,13 @@
  * Copyright 2026, Andrew Lindesay
  * Distributed under the terms of the MIT License.
  */
-package org.haiku.haikudepotserver.multipage.navigation;
+package org.haiku.haikudepotserver.multipage;
 
 import com.google.common.base.Preconditions;
 import jakarta.annotation.Nullable;
 import jakarta.servlet.http.HttpServletRequest;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.tuple.Pair;
-import org.haiku.haikudepotserver.multipage.MultipageConstants;
 import org.haiku.haikudepotserver.multipage.controller.AboutController;
 import org.haiku.haikudepotserver.multipage.controller.PkgViewController;
 import org.haiku.haikudepotserver.multipage.model.MenuGroup;

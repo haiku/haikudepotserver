@@ -19,6 +19,7 @@ public class MultipageConstants {
     // Model parameters
     public final static String KEY_DATA = "data";
     public final static String KEY_INTERNATIONALIZATION_SUPPLIER = "internationalizationSupplier";
+    public final static String KEY_WEB_RESOURCE_PATH_PREFIXES = "webResourcePathPrefixes";
 
     // Query parameters
     public final static String KEY_ARCHITECTURECODE = "arch";

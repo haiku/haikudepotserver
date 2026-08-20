@@ -12,11 +12,12 @@ import org.apache.commons.lang3.StringUtils;
 import org.haiku.haikudepotserver.api2.PkgApiService;
 import org.haiku.haikudepotserver.api2.model.*;
 import org.haiku.haikudepotserver.multipage.MultipageConstants;
+import org.haiku.haikudepotserver.multipage.MultipageWebResourceService;
 import org.haiku.haikudepotserver.multipage.ReferenceDataRepository;
 import org.haiku.haikudepotserver.multipage.internationalization.InternationalizationSupplierFactory;
 import org.haiku.haikudepotserver.multipage.model.*;
 import org.haiku.haikudepotserver.multipage.model.PkgCategory;
-import org.haiku.haikudepotserver.multipage.navigation.MultipageNavigationService;
+import org.haiku.haikudepotserver.multipage.MultipageNavigationService;
 import org.haiku.haikudepotserver.naturallanguage.model.NaturalLanguageCoordinates;
 import org.haiku.haikudepotserver.support.VersionCoordinates;
 import org.springframework.http.MediaType;
@@ -48,17 +49,20 @@ public class HomeController {
     private final MultipageNavigationService navigationService;
     private final PkgApiService pkgApiService;
     private final HttpServletRequest httpServletRequest;
+    private final MultipageWebResourceService multipageWebResourceService;
 
     public HomeController(
             InternationalizationSupplierFactory internationalizationSupplierFactory,
             ReferenceDataRepository referenceDataRepository,
             MultipageNavigationService navigationService,
+            MultipageWebResourceService multipageWebResourceService,
             PkgApiService pkgApiService, HttpServletRequest httpServletRequest) {
         this.internationalizationSupplierFactory = Preconditions.checkNotNull(internationalizationSupplierFactory);
         this.referenceDataRepository = referenceDataRepository;
         this.navigationService = navigationService;
         this.pkgApiService = pkgApiService;
         this.httpServletRequest = httpServletRequest;
+        this.multipageWebResourceService = Preconditions.checkNotNull(multipageWebResourceService);
     }
 
     @RequestMapping(method = RequestMethod.GET, produces = MediaType.TEXT_HTML_VALUE)
@@ -71,7 +75,8 @@ public class HomeController {
         return new ModelAndView(NavigationDestination.HOME.template(),
                 Map.of(
                         MultipageConstants.KEY_DATA, createData(httpServletRequest, locale, offset, pkgCategoryCode),
-                        MultipageConstants.KEY_INTERNATIONALIZATION_SUPPLIER, internationalizationSupplierFactory.create(locale)
+                        MultipageConstants.KEY_INTERNATIONALIZATION_SUPPLIER, internationalizationSupplierFactory.create(locale),
+                        MultipageConstants.KEY_WEB_RESOURCE_PATH_PREFIXES, multipageWebResourceService.getPathPrefixes()
                 )
         );
     }

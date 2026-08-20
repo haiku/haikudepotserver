@@ -30,6 +30,7 @@ import org.springframework.web.bind.annotation.*;
 
 import java.io.IOException;
 import java.io.OutputStream;
+import java.time.Duration;
 import java.util.Optional;
 
 /**
@@ -54,6 +55,8 @@ public class PkgIconController extends AbstractController {
     private final static String KEY_FORMAT = "format";
     public final static String KEY_SIZE = "s";
     public final static String KEY_FALLBACK = "f";
+
+    public final static String HEADER_VALUE_CACHE_CONTROL = "max-age=%d, public".formatted(Duration.ofHours(1).toSeconds());
 
     private final ServerRuntime serverRuntime;
     private final BulkDataJobCoordinatorService bulkDataJobCoordinatorService;
@@ -243,6 +246,7 @@ public class PkgIconController extends AbstractController {
                 if (hvifPkgIcon.isPresent()) {
                     byte[] data = hvifPkgIcon.get().getPkgIconImage().getData();
                     response.setContentType(org.haiku.haikudepotserver.dataobjects.MediaType.MEDIATYPE_HAIKUVECTORICONFILE);
+                    response.setHeader(HttpHeaders.CACHE_CONTROL, HEADER_VALUE_CACHE_CONTROL);
                     outputToResponse(response, pkgSupplement, data, requestMethod == RequestMethod.GET);
                 } else {
                     throw new PkgIconNotFound();
@@ -264,6 +268,7 @@ public class PkgIconController extends AbstractController {
                 } else {
                     byte[] data = pngImageData.get();
                     response.setContentType(MediaType.PNG.toString());
+                    response.setHeader(HttpHeaders.CACHE_CONTROL, HEADER_VALUE_CACHE_CONTROL);
                     outputToResponse(response, pkgSupplement, data, requestMethod == RequestMethod.GET);
                 }
             }

@@ -16,7 +16,7 @@ import org.haiku.haikudepotserver.dataobjects.Pkg;
 import org.haiku.haikudepotserver.multipage.MultipageConstants;
 import org.haiku.haikudepotserver.multipage.ReferenceDataRepository;
 import org.haiku.haikudepotserver.multipage.model.Defaults;
-import org.haiku.haikudepotserver.multipage.navigation.MultipageNavigationService;
+import org.haiku.haikudepotserver.multipage.MultipageNavigationService;
 import org.haiku.haikudepotserver.support.VersionCoordinates;
 import org.haiku.haikudepotserver.support.exception.ObjectNotFoundException;
 import org.slf4j.Logger;

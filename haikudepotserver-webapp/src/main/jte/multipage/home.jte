@@ -5,14 +5,17 @@
 @import org.haiku.haikudepotserver.multipage.MultipageConstants
 @import java.util.List
 @import org.haiku.haikudepotserver.multipage.internationalization.InternationalizationSupplier
+@import org.haiku.haikudepotserver.multipage.model.WebResourcePathPrefixes
 
 @param org.haiku.haikudepotserver.multipage.controller.HomeController.HomeData data
 @param InternationalizationSupplier internationalizationSupplier
+@param WebResourcePathPrefixes webResourcePathPrefixes
 
 @template.multipage.common.common-page-mantle(
-    title = internationalizationSupplier.getMessage("mp.home.title"),
+title = internationalizationSupplier.getMessage("mp.home.title"),
 menuGroups = data.menuGroups(),
 internationalizationSupplier = internationalizationSupplier,
+webResourcePathPrefixes = webResourcePathPrefixes,
 cssLeafnames = List.of("home"),
 jsLeafnames = List.of("home"),
 content = @`
@@ -43,7 +46,8 @@ content = @`
                 internationalizationSupplier = internationalizationSupplier,
                 uriComponents = data.uriComponents(),
                 offsetQueryParameter = MultipageConstants.KEY_OFFSET,
-                pagination = data.pagination()
+                pagination = data.pagination(),
+                webResourcePathPrefixes = webResourcePathPrefixes
             )
         </div>
     </div>
@@ -64,7 +68,8 @@ content = @`
                     pkgName = pkgVersion.pkgName(),
                     size = 64,
                     versionDifferentiator = pkgVersion.versionCreateTimestamp(),
-                    isNativeDesktop = pkgVersion.isNativeDesktop())
+                    isNativeDesktop = pkgVersion.isNativeDesktop(),
+                    webResourcePathPrefixes = webResourcePathPrefixes)
 
                     <div class="home-pkg-title">
                         <a href="${pkgVersion.viewUriComponents().toUriString()}">

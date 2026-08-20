@@ -15,14 +15,11 @@ import org.haiku.haikudepotserver.api2.PkgApiService;
 import org.haiku.haikudepotserver.api2.RepositoryApiService;
 import org.haiku.haikudepotserver.api2.UserRatingApiService;
 import org.haiku.haikudepotserver.api2.model.*;
+import org.haiku.haikudepotserver.multipage.*;
 import org.haiku.haikudepotserver.multipage.internationalization.InternationalizationSupplierFactory;
-import org.haiku.haikudepotserver.multipage.MultipageConstants;
-import org.haiku.haikudepotserver.multipage.MultipageObjectNotFoundException;
-import org.haiku.haikudepotserver.multipage.ReferenceDataRepository;
 import org.haiku.haikudepotserver.multipage.model.*;
 import org.haiku.haikudepotserver.multipage.model.Architecture;
 import org.haiku.haikudepotserver.multipage.model.PkgCategory;
-import org.haiku.haikudepotserver.multipage.navigation.MultipageNavigationService;
 import org.haiku.haikudepotserver.pkg.controller.PkgScreenshotController;
 import org.haiku.haikudepotserver.support.VersionCoordinates;
 import org.haiku.haikudepotserver.support.data.DataQuantity;
@@ -62,6 +59,7 @@ public class PkgViewController {
     private final RepositoryApiService repositoryApiService;
     private final ReferenceDataRepository referenceDataRepository;
     private final MultipageNavigationService navigationService;
+    private final MultipageWebResourceService multipageWebResourceService;
 
     public final static String KEY_REPOSITORYSOURCECODE = "reposrc";
     public final static String KEY_ARCHITECTURECODE = "arch";
@@ -74,13 +72,15 @@ public class PkgViewController {
             UserRatingApiService userRatingApiService,
             RepositoryApiService repositoryApiService,
             ReferenceDataRepository referenceDataRepository,
-            MultipageNavigationService navigationService) {
+            MultipageNavigationService navigationService,
+            MultipageWebResourceService multipageWebResourceService) {
         this.internationalizationSupplierFactory = Preconditions.checkNotNull(internationalizationSupplierFactory);
         this.pkgApiService = Preconditions.checkNotNull(pkgApiService);
         this.userRatingApiService = Preconditions.checkNotNull(userRatingApiService);
         this.repositoryApiService = Preconditions.checkNotNull(repositoryApiService);
         this.referenceDataRepository = Preconditions.checkNotNull(referenceDataRepository);
         this.navigationService = Preconditions.checkNotNull(navigationService);
+        this.multipageWebResourceService = Preconditions.checkNotNull(multipageWebResourceService);
     }
 
     @RequestMapping(value = "{pkgName}", method = RequestMethod.GET, produces = MediaType.TEXT_HTML_VALUE)
@@ -122,7 +122,8 @@ public class PkgViewController {
                                 screenshotIndex,
                                 userRatingOffset
                         ),
-                        MultipageConstants.KEY_INTERNATIONALIZATION_SUPPLIER, internationalizationSupplierFactory.create(locale)
+                        MultipageConstants.KEY_INTERNATIONALIZATION_SUPPLIER, internationalizationSupplierFactory.create(locale),
+                        MultipageConstants.KEY_WEB_RESOURCE_PATH_PREFIXES, multipageWebResourceService.getPathPrefixes()
                 )
         );
     }

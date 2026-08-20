@@ -4,11 +4,13 @@
 @import java.util.List
 @import org.haiku.haikudepotserver.multipage.internationalization.InternationalizationSupplier
 @import org.haiku.haikudepotserver.multipage.model.Pagination
+@import org.haiku.haikudepotserver.multipage.model.WebResourcePathPrefixes
 @import org.springframework.web.util.UriComponents
 
 @param UriComponents uriComponents
 @param String offsetQueryParameter
 @param InternationalizationSupplier internationalizationSupplier
+@param WebResourcePathPrefixes webResourcePathPrefixes
 @param Pagination pagination
 
 <div class="common-pagination">
