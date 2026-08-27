@@ -40,15 +40,7 @@ public abstract class AbstractUserAuthenticationAware {
 
     protected Optional<User> tryObtainAuthenticatedUser(ObjectContext objectContext) {
         Preconditions.checkArgument(null != objectContext, "the object context must be provided");
-        return tryGetAuthenticatedUserObjectId().map((oid) -> User.getByObjectId(objectContext, oid));
-    }
-
-    private static Optional<ObjectId> tryGetAuthenticatedUserObjectId() {
-        return Optional.ofNullable(SecurityContextHolder.getContext().getAuthentication())
-                .filter(Authentication::isAuthenticated)
-                .map(Authentication::getPrincipal)
-                .filter(p -> p instanceof ObjectId)
-                .map(p -> (ObjectId) p);
+        return AuthenticationHelper.tryGetUserForAuthentication(objectContext, SecurityContextHolder.getContext().getAuthentication());
     }
 
 }

@@ -1,5 +1,5 @@
 /*
- * Copyright 2013-2022, Andrew Lindesay
+ * Copyright 2013-2026, Andrew Lindesay
  * Distributed under the terms of the MIT License.
  */
 
@@ -8,11 +8,11 @@ angular.module('haikudepotserver').controller(
     [
         '$scope','$log','$location',
         'remoteProcedureCall','constants','errorHandling','referenceData','userState',
-        'messageSource','breadcrumbs','breadcrumbFactory',
+        'messageSource','breadcrumbs','breadcrumbFactory','webSession',
         function(
             $scope, $log, $location,
             remoteProcedureCall, constants, errorHandling, referenceData, userState,
-            messageSource, breadcrumbs, breadcrumbFactory) {
+            messageSource, breadcrumbs, breadcrumbFactory,webSession) {
 
             // TODO: use the data from the server rather than hard code it here
             $scope.userNicknamePattern = ('' + constants.PATTERN_USER_NICKNAME).replace(/^\//,'').replace(/\/$/,'');
@@ -142,21 +142,8 @@ angular.module('haikudepotserver').controller(
                             );
                         }
                         else {
-
-                            // get rid of the breadcrumb for creating the user as there is no sense in that any more
-                            // and push the authenticate user so the user can then login with their nickname and
-                            // password that they have just nominated.
-
-                            breadcrumbs.resetAndNavigate([
-                                breadcrumbFactory.createHome(),
-                                breadcrumbFactory.applySearch(
-                                    breadcrumbFactory.createAuthenticate(),
-                                    {
-                                        nickname: $scope.newUser.nickname,
-                                        didCreate: true
-                                    }
-                                )
-                            ]);
+                            // go to the login page so the new user is able to login.
+                            webSession.navigateToLogin();
                         }
                     },
                     function (err) {

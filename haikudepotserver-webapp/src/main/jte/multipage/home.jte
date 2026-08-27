@@ -1,3 +1,7 @@
+<%--
+Copyright 2026, Andrew Lindesay
+Distributed under the terms of the MIT License.
+--%>
 @import org.apache.commons.lang3.StringUtils
 @import org.haiku.haikudepotserver.multipage.controller.HomeController
 @import org.haiku.haikudepotserver.multipage.jte.*
@@ -14,6 +18,7 @@
 @template.multipage.common.common-page-mantle(
 title = internationalizationSupplier.getMessage("mp.home.title"),
 menuGroups = data.menuGroups(),
+userAndNavigation = data.userAndNavigation(),
 internationalizationSupplier = internationalizationSupplier,
 webResourcePathPrefixes = webResourcePathPrefixes,
 cssLeafnames = List.of("home"),

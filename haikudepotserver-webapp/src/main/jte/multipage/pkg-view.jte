@@ -1,3 +1,7 @@
+<%--
+Copyright 2026, Andrew Lindesay
+Distributed under the terms of the MIT License.
+--%>
 @import java.util.List
 @import gg.jte.support.ForSupport
 @import org.apache.commons.collections4.CollectionUtils
@@ -18,6 +22,7 @@
 @template.multipage.common.common-page-mantle(
 title = internationalizationSupplier.getMessage("mp.pkg_view.title", data.pkgName(), data.version().toString()),
 menuGroups = data.menuGroups(),
+userAndNavigation = data.userAndNavigation(),
 internationalizationSupplier = internationalizationSupplier,
 webResourcePathPrefixes = webResourcePathPrefixes,
 cssLeafnames = List.of("pkg-view"),

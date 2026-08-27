@@ -38,6 +38,14 @@ spring:
     # password
   flyway:
     enabled: true
+  servlet:
+    session:
+      timeout: 30
+  session:
+    jdbc:
+      table-name: "websession.SPRING_SESSION"
+      # The schema initialization is handled by Flyway as part of the main migration.
+      initialize-schema: never
 
 management:
   health:

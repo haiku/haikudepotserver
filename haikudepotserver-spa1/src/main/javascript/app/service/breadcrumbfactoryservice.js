@@ -1,5 +1,5 @@
 /*
- * Copyright 2014-2024, Andrew Lindesay
+ * Copyright 2014-2026, Andrew Lindesay
  * Distributed under the terms of the MIT License.
  */
 
@@ -253,13 +253,6 @@ angular.module('haikudepotserver').factory('breadcrumbFactory',
                     return applyDefaults({
                         titleKey : 'breadcrumb.completePasswordReset.title',
                         path : '/completepasswordreset/'+token
-                    });
-                },
-
-                createAuthenticate : function() {
-                    return applyDefaults({
-                        titleKey : 'breadcrumb.authenticateUser.title',
-                        path : '/authenticateuser'
                     });
                 },
 

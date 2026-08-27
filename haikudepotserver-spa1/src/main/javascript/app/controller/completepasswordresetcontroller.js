@@ -1,5 +1,5 @@
 /*
- * Copyright 2014-2025, Andrew Lindesay
+ * Copyright 2014-2026, Andrew Lindesay
  * Distributed under the terms of the MIT License.
  */
 
@@ -7,10 +7,10 @@ angular.module('haikudepotserver').controller(
     'CompletePasswordResetController',
     [
         '$scope','$log','$location','$routeParams',
-        'remoteProcedureCall','constants','breadcrumbs','breadcrumbFactory','userState','errorHandling',
+        'remoteProcedureCall','constants','breadcrumbs','breadcrumbFactory','userState','errorHandling','webSession',
         function(
             $scope,$log,$location,$routeParams,
-            remoteProcedureCall,constants,breadcrumbs,breadcrumbFactory,userState,errorHandling) {
+            remoteProcedureCall,constants,breadcrumbs,breadcrumbFactory,userState,errorHandling,webSession) {
 
             if (userState.user()) {
                 throw Error('it is not possible to complete password reset with an authenticated user');
@@ -41,10 +41,7 @@ angular.module('haikudepotserver').controller(
             };
 
             $scope.goAuthenticate = function () {
-                breadcrumbs.resetAndNavigate([
-                    breadcrumbFactory.createHome(),
-                    breadcrumbFactory.createAuthenticate()
-                ]);
+                webSession.navigateToLogin();
             };
 
             regenerateCaptcha();

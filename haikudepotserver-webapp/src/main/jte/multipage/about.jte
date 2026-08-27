@@ -1,3 +1,7 @@
+<%--
+Copyright 2026, Andrew Lindesay
+Distributed under the terms of the MIT License.
+--%>
 @import java.util.List
 @import org.haiku.haikudepotserver.multipage.controller.AboutController
 @import org.haiku.haikudepotserver.multipage.controller.AboutController.Contributor
@@ -11,6 +15,7 @@
 @template.multipage.common.common-page-mantle(
 title = internationalizationSupplier.getMessage("mp.about.title"),
 menuGroups = data.menuGroups(),
+userAndNavigation = data.userAndNavigation(),
 internationalizationSupplier = internationalizationSupplier,
 webResourcePathPrefixes = webResourcePathPrefixes,
 cssLeafnames = List.<String>of(),
@@ -19,7 +24,7 @@ content = @`
 
     <main id="common-main-content-container">
 
-        ${internationalizationSupplier.getPassiveContext("aboutcontent.html")}
+        ${internationalizationSupplier.getPassiveContext("about-content.html")}
 
         <h3>${internationalizationSupplier.getMessage("mp.about.information.title")}</h3>
 

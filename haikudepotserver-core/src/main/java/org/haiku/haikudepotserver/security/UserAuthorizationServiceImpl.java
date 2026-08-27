@@ -21,6 +21,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
+import java.util.EnumSet;
 import java.util.List;
 import java.util.Optional;
 
@@ -30,26 +31,26 @@ public class UserAuthorizationServiceImpl implements UserAuthorizationService {
     protected static Logger LOGGER = LoggerFactory.getLogger(UserAuthorizationServiceImpl.class);
 
     private TargetType deriveTargetType(DataObject dataObject) {
-        if(null==dataObject)
+        if (null == dataObject)
             return null;
 
-        if(User.class.isAssignableFrom(dataObject.getClass())) {
+        if (User.class.isAssignableFrom(dataObject.getClass())) {
             return TargetType.USER;
         }
 
-        if(Pkg.class.isAssignableFrom(dataObject.getClass())) {
+        if (Pkg.class.isAssignableFrom(dataObject.getClass())) {
             return TargetType.PKG;
         }
 
-        if(Repository.class.isAssignableFrom(dataObject.getClass())) {
+        if (Repository.class.isAssignableFrom(dataObject.getClass())) {
             return TargetType.REPOSITORY;
         }
 
-        if(UserRating.class.isAssignableFrom(dataObject.getClass())) {
+        if (UserRating.class.isAssignableFrom(dataObject.getClass())) {
             return TargetType.USERRATING;
         }
 
-        throw new IllegalStateException("the data object type '"+dataObject.getClass().getSimpleName()+"' is not handled");
+        throw new IllegalStateException("the data object type '" + dataObject.getClass().getSimpleName() + "' is not handled");
     }
 
     /**
@@ -85,14 +86,13 @@ public class UserAuthorizationServiceImpl implements UserAuthorizationService {
             // if the object was not able to be found then we should bail-out and say that the permission
             // does not apply.
 
-            if(targetOptional.isEmpty()) {
+            if (targetOptional.isEmpty()) {
                 return false;
             }
 
             target = targetOptional.get();
-        }
-        else {
-            if(!Strings.isNullOrEmpty(targetIdentifier)) {
+        } else {
+            if (!Strings.isNullOrEmpty(targetIdentifier)) {
                 throw new IllegalStateException("the target type was supplied, but not the target identifier");
             }
         }
@@ -108,7 +108,7 @@ public class UserAuthorizationServiceImpl implements UserAuthorizationService {
         }
 
         if ((target instanceof User)
-            && ((User) target).getNickname()
+                && ((User) target).getNickname()
                 .equals(authenticatedUser.getNickname())) {
             return true;
         }
@@ -136,13 +136,13 @@ public class UserAuthorizationServiceImpl implements UserAuthorizationService {
         Preconditions.checkArgument(null != objectContext, "the object context must be provided");
         Preconditions.checkArgument(
                 deriveTargetType(target) == permission.getRequiredTargetType(),
-                "during checking authorization, the target object type " + deriveTargetType(target) + " does not match the expected type "  + permission.getRequiredTargetType() + " for permission " + permission);
+                "during checking authorization, the target object type " + deriveTargetType(target) + " does not match the expected type " + permission.getRequiredTargetType() + " for permission " + permission);
 
         // if the authenticated user is not active then there should not be a situation arising where
         // an authorization check is being made.
 
         if (null != authenticatedUser && !authenticatedUser.getActive()) {
-            throw new IllegalStateException("the authenticated user '"+authenticatedUser.getNickname()+"' is not active and so authorization queries cannot be resolved for them");
+            throw new IllegalStateException("the authenticated user '" + authenticatedUser.getNickname() + "' is not active and so authorization queries cannot be resolved for them");
         }
 
         // check permissions for which there is no need to have a UUC when the
@@ -152,10 +152,10 @@ public class UserAuthorizationServiceImpl implements UserAuthorizationService {
         if (isAuthenticatedUserTarget(authenticatedUser, target)) {
             switch (permission) {
                 case USER_CHANGEPASSWORD,
-                        USER_VIEW,
-                        USER_AGREE_USAGE_CONDITIONS,
-                        USER_EDIT,
-                        USERRATING_REMOVE -> { // note; checks the user of the user rating
+                     USER_VIEW,
+                     USER_AGREE_USAGE_CONDITIONS,
+                     USER_EDIT,
+                     USERRATING_REMOVE -> { // note; checks the user of the user rating
                     return true;
                 }
             }
@@ -166,7 +166,10 @@ public class UserAuthorizationServiceImpl implements UserAuthorizationService {
 
         boolean authenticatedUserIsRoot = null != authenticatedUser && authenticatedUser.getIsRoot();
 
-        if (null != authenticatedUser && !authenticatedUserIsRoot) {
+        if (
+                null != authenticatedUser
+                        && !authenticatedUserIsRoot
+                        && !EnumSet.of(Permission.REPOSITORY_LIST, Permission.REPOSITORY_VIEW).contains(permission)) {
             String latestUserUsageConditionsCode = UserUsageConditions.getLatest(objectContext).getCode();
             String userLatestUserUsageConditionsCode = authenticatedUser.tryGetUserUsageConditionsAgreement()
                     .map(_UserUsageConditionsAgreement::getUserUsageConditions)
@@ -187,12 +190,12 @@ public class UserAuthorizationServiceImpl implements UserAuthorizationService {
         if (null != authenticatedUser) {
             switch (permission) {
                 case PKG_EDITICON,
-                        PKG_EDITSCREENSHOT,
-                        PKG_EDITCATEGORIES,
-                        PKG_EDITPROMINENCE,
-                        PKG_EDITCHANGELOG,
-                        PKG_EDITNATIVEDESKTOP,
-                        PKG_EDITLOCALIZATION -> {
+                     PKG_EDITSCREENSHOT,
+                     PKG_EDITCATEGORIES,
+                     PKG_EDITPROMINENCE,
+                     PKG_EDITCHANGELOG,
+                     PKG_EDITNATIVEDESKTOP,
+                     PKG_EDITLOCALIZATION -> {
                     List<? extends AuthorizationPkgRule> rules = authenticatedUser.getAuthorizationPkgRules((Pkg) target);
                     if (rules
                             .stream()

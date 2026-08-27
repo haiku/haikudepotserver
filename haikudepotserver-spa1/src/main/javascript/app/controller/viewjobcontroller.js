@@ -102,9 +102,7 @@ angular.module('haikudepotserver').controller(
                     throw Error('am not able to find the \'download-iframe\'');
                 }
 
-                iframeEl.src = '/__secured/jobdata/'+jobData.guid+'/download?hdsbtok=' +
-                userState.token() +
-                '&rnd=' +
+                iframeEl.src = '/__secured/jobdata/'+jobData.guid+'/download?rnd=' +
                 _.random(0,1000);
 
             };

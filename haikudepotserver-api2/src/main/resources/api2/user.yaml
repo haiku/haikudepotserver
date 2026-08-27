@@ -106,6 +106,28 @@ paths:
               schema:
                 $ref: "#/components/schemas/getUserResponseEnvelope"
 
+  /__api/v2/user/current-user:
+    description: >
+      This method will get details of the current user.
+    post:
+      tags:
+        - user
+      operationId: getCurrentUser
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/getCurrentUserRequestEnvelope"
+      responses:
+        200:
+          description: >
+            Limited data detailing the user.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/getCurrentUserResponseEnvelope"
+
   /__api/v2/user/authenticate-user:
     description: >
       This endpoint will allow a client to authenticate against the server.  If this is
@@ -405,6 +427,8 @@ components:
 
     getUserRequestEnvelope:
       type: object
+      required:
+        - nickname
       properties:
         nickname:
           type: string
@@ -417,6 +441,12 @@ components:
           $ref: "./error.yaml#/components/schemas/error"
     getUserResult:
       type: object
+      required:
+        - nickname
+        - active
+        - isRoot
+        - createTimestamp
+        - modifyTimestamp
       properties:
         nickname:
           type: string
@@ -442,6 +472,10 @@ components:
             This relates to the user's required understanding of the terms of
             use.
           type: object
+          required:
+            - timestampAgreed
+            - userUsageConditionsCode
+            - isLatest
           properties:
             timestampAgreed:
               type: integer
@@ -455,6 +489,29 @@ components:
                 Are the terms that the user agreed to current with the most
                 recent wording.
               type: boolean
+
+    getCurrentUserRequestEnvelope:
+      type: object
+    getCurrentUserResponseEnvelope:
+      type: object
+      properties:
+        result:
+          $ref: "#/components/schemas/getCurrentUserResult"
+        error:
+          $ref: "./error.yaml#/components/schemas/error"
+    getCurrentUserResult:
+      type: object
+      required:
+        - nickname
+        - active
+        - isRoot
+      properties:
+        nickname:
+          type: string
+        active:
+          type: boolean
+        isRoot:
+          type: boolean
 
     authenticateUserRequestEnvelope:
       type: object

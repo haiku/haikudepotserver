@@ -11,13 +11,10 @@ import jakarta.servlet.http.HttpServletRequest;
 import org.apache.commons.lang3.StringUtils;
 import org.haiku.haikudepotserver.api2.PkgApiService;
 import org.haiku.haikudepotserver.api2.model.*;
-import org.haiku.haikudepotserver.multipage.MultipageConstants;
-import org.haiku.haikudepotserver.multipage.MultipageWebResourceService;
-import org.haiku.haikudepotserver.multipage.ReferenceDataRepository;
+import org.haiku.haikudepotserver.multipage.*;
 import org.haiku.haikudepotserver.multipage.internationalization.InternationalizationSupplierFactory;
 import org.haiku.haikudepotserver.multipage.model.*;
 import org.haiku.haikudepotserver.multipage.model.PkgCategory;
-import org.haiku.haikudepotserver.multipage.MultipageNavigationService;
 import org.haiku.haikudepotserver.naturallanguage.model.NaturalLanguageCoordinates;
 import org.haiku.haikudepotserver.support.VersionCoordinates;
 import org.springframework.http.MediaType;
@@ -50,19 +47,22 @@ public class HomeController {
     private final PkgApiService pkgApiService;
     private final HttpServletRequest httpServletRequest;
     private final MultipageWebResourceService multipageWebResourceService;
+    private final MultipageSecurityService multipageSecurityService;
 
     public HomeController(
             InternationalizationSupplierFactory internationalizationSupplierFactory,
             ReferenceDataRepository referenceDataRepository,
             MultipageNavigationService navigationService,
             MultipageWebResourceService multipageWebResourceService,
-            PkgApiService pkgApiService, HttpServletRequest httpServletRequest) {
+            PkgApiService pkgApiService, HttpServletRequest httpServletRequest,
+            MultipageSecurityService multipageSecurityService) {
         this.internationalizationSupplierFactory = Preconditions.checkNotNull(internationalizationSupplierFactory);
         this.referenceDataRepository = referenceDataRepository;
         this.navigationService = navigationService;
         this.pkgApiService = pkgApiService;
         this.httpServletRequest = httpServletRequest;
         this.multipageWebResourceService = Preconditions.checkNotNull(multipageWebResourceService);
+        this.multipageSecurityService = Preconditions.checkNotNull(multipageSecurityService);
     }
 
     @RequestMapping(method = RequestMethod.GET, produces = MediaType.TEXT_HTML_VALUE)
@@ -72,7 +72,8 @@ public class HomeController {
             @RequestParam(value = MultipageConstants.KEY_OFFSET, defaultValue = "0") Integer offset,
             @RequestParam(value = MultipageConstants.KEY_PKGCATEGORYCODE, required = false) String pkgCategoryCode
     ) {
-        return new ModelAndView(NavigationDestination.HOME.template(),
+        return new ModelAndView(
+                "multipage/home",
                 Map.of(
                         MultipageConstants.KEY_DATA, createData(httpServletRequest, locale, offset, pkgCategoryCode),
                         MultipageConstants.KEY_INTERNATIONALIZATION_SUPPLIER, internationalizationSupplierFactory.create(locale),
@@ -118,7 +119,7 @@ public class HomeController {
                         navigationService.deriveMenuGroups(httpServletRequest),
                         EnumSet.of(NavigationDestination.HOME)
                 ),
-
+                navigationService.getUserAndNavigation(httpServletRequest),
                 NaturalLanguageCoordinates.fromLocale(locale),
                 navigationService.homeUri(httpServletRequest).build().toUriString(),
                 navigationService.createRelayParameters(httpServletRequest),
@@ -168,6 +169,7 @@ public class HomeController {
     public record HomeData(
             UriComponents uriComponents,
             List<MenuGroup> menuGroups,
+            UserAndNavigation userAndNavigation,
 
             NaturalLanguageCoordinates naturalLanguage,
             String searchUrl,

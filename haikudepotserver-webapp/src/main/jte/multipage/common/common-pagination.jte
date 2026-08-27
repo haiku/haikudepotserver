@@ -1,3 +1,7 @@
+<%--
+Copyright 2026, Andrew Lindesay
+Distributed under the terms of the MIT License.
+--%>
 @import org.haiku.haikudepotserver.multipage.jte.PaginationHelper
 @import org.haiku.haikudepotserver.multipage.model.Page
 @import gg.jte.support.ForSupport

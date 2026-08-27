@@ -310,6 +310,17 @@ public class UserApiService extends AbstractApiService {
                         .orElse(null));
     }
 
+    public GetCurrentUserResult getCurrentUser() {
+        final ObjectContext context = serverRuntime.newContext();
+        return tryObtainAuthenticatedUser(context)
+                .map(u -> new GetCurrentUserResult(
+                        u.getNickname(),
+                        u.getActive(),
+                        u.getIsRoot()
+                ))
+                .orElseThrow(() -> new ObjectNotFoundException(User.class.getSimpleName(), null));
+    }
+
     public GetUserUsageConditionsResult getUserUsageConditions(GetUserUsageConditionsRequestEnvelope request) {
         Preconditions.checkNotNull(request);
 

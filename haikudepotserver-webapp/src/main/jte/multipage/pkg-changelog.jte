@@ -1,3 +1,7 @@
+<%--
+Copyright 2026, Andrew Lindesay
+Distributed under the terms of the MIT License.
+--%>
 @import java.util.List
 @import org.haiku.haikudepotserver.multipage.controller.PkgChangelogController
 @import org.haiku.haikudepotserver.multipage.internationalization.InternationalizationSupplier
@@ -11,6 +15,7 @@
 @template.multipage.common.common-page-mantle(
 title = internationalizationSupplier.getMessage("mp.pkg_changlelog.title", data.pkgName()),
 menuGroups = data.menuGroups(),
+userAndNavigation = data.userAndNavigation(),
 internationalizationSupplier = internationalizationSupplier,
 webResourcePathPrefixes = webResourcePathPrefixes,
 cssLeafnames = List.of("pkg-changelog"),

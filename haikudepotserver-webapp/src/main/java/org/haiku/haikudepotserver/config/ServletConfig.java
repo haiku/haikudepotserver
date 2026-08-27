@@ -1,5 +1,5 @@
 /*
- * Copyright 2018-2023, Andrew Lindesay
+ * Copyright 2018-2026, Andrew Lindesay
  * Distributed under the terms of the MIT License.
  */
 
@@ -8,7 +8,6 @@ package org.haiku.haikudepotserver.config;
 import io.micrometer.core.instrument.MeterRegistry;
 import jakarta.servlet.Filter;
 import jakarta.servlet.http.HttpServlet;
-import jakarta.servlet.http.HttpSessionListener;
 import org.apache.cayenne.configuration.server.ServerRuntime;
 import org.haiku.haikudepotserver.support.desktopapplication.DesktopApplicationMetricsFilter;
 import org.haiku.haikudepotserver.support.desktopapplication.DesktopApplicationMinimumVersionFilter;
@@ -16,7 +15,6 @@ import org.haiku.haikudepotserver.support.logging.LoggingFilter;
 import org.haiku.haikudepotserver.support.web.DelayFilter;
 import org.haiku.haikudepotserver.support.web.ErrorServlet;
 import org.haiku.haikudepotserver.support.web.RemoteLogCaptureServlet;
-import org.haiku.haikudepotserver.support.web.SessionListener;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.web.servlet.FilterRegistrationBean;
 import org.springframework.boot.web.servlet.ServletRegistrationBean;
@@ -28,11 +26,6 @@ import org.springframework.web.filter.ForwardedHeaderFilter;
 @Configuration
 @Import(WebConfig.class)
 public class ServletConfig {
-
-    @Bean
-    public HttpSessionListener httpSessionListener() {
-        return new SessionListener();
-    }
 
     @Bean
     public ServletRegistrationBean<HttpServlet> errorServlet() {

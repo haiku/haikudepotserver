@@ -24,6 +24,95 @@ body {
     padding-left: 24px;
 }
 
+/* == VALIDATION ================== */
+
+ul.common-validation-failure-container > li {
+    color: red;
+}
+
+/* == FORMS ================== */
+
+form.common-form {
+    padding-top: 8px;
+}
+
+form.common-form > div.common-form-input-container {
+    padding-top: 4px;
+    padding-bottom: 4px;
+}
+
+form.common-form > div.common-form-input-container > label {
+    color: grey;
+    font-size: small;
+    display: block;
+}
+
+form.common-form > div.common-form-submit {
+    border-top: 1px solid gray;
+    padding-top: 6px;
+    margin-top: 8px;
+    text-align: right;
+}
+
+form.common-form span.common-form-required-mark {
+    color: red;
+    font-weight: bold;
+}
+
+/* == ACTIVE INDICATOR ================== */
+
+.common-active-indicator-unknown {
+    color: grey;
+}
+
+.common-active-indicator-true {
+    color: #47c547;
+}
+
+.common-active-indicator-false {
+    color: red;
+}
+
+/* == ALERT ================== */
+
+div.common-alert-container {
+    border: 1px solid;
+    border-radius: 4px;
+    padding: 6px;
+}
+
+div.common-alert-info-container {
+    background-color: #d2f4d2;
+    border-color: #47c547;
+}
+
+div.common-alert-info-container div.common-alert-icon {
+    color: #47c547;
+}
+
+div.common-alert-warning-container {
+    background-color: #ffda93;
+    border-color: #ffb421;
+}
+
+div.common-alert-warning-container div.common-alert-icon {
+    color: #ffb421;
+}
+
+div.common-alert-error-container {
+    background-color: #ffeaea;
+    border-color: red;
+}
+
+div.common-alert-error-container div.common-alert-icon {
+    color: red;
+}
+
+div.common-alert-container div.common-alert-icon {
+    float: left;
+    margin-right: 8px;
+}
+
 /* == DISCLOSURE ================== */
 
 .common-disclosure {
@@ -64,11 +153,25 @@ body {
 /* == PKG ICON ================== */
 
 div.common-pkg-icon-container {
-    display:inline-block;
+    display: inline-block;
 }
 
 div.common-pkg-icon-badge {
     float: right;
+}
+
+/* == DATA LIST ================== */
+
+dl > dt {
+    color: grey;
+    font-size: small;
+    display: block;
+}
+
+dl > dd {
+    display: block;
+    margin-left : 0;
+    margin-bottom: 6px;
 }
 
 /* == TABLE ================== */
@@ -107,6 +210,7 @@ table.common-table tr:nth-child(2n) {
 table.common-table td:nth-child(3) {
     text-align: right;
 }
+
 table.common-table th:nth-child(3) {
     text-align: right;
 }
@@ -115,6 +219,7 @@ table.common-table th:nth-child(3) {
 table.common-table td:nth-child(4) {
     text-align: center;
 }
+
 table.common-table th:nth-child(4) {
     text-align: center;
 }
@@ -123,6 +228,7 @@ table.common-table th:nth-child(4) {
 table.common-table td:nth-child(6) {
     text-align: right;
 }
+
 table.common-table th:nth-child(6) {
     text-align: right;
 }

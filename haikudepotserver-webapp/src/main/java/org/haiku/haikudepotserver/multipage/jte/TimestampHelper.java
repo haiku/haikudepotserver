@@ -14,6 +14,10 @@ import java.time.format.DateTimeFormatter;
 
 public class TimestampHelper {
 
+    private static final DateTimeFormatter TIMESTAMP_HOUR_ACCURATE_FORMAT = DateTimeFormatter
+            .ofPattern("yyyy-MM-dd HH:'__:__'")
+            .withZone(ZoneOffset.UTC);
+
     private static final DateTimeFormatter TIMESTAMP_FORMAT = DateTimeFormatter
             .ofPattern("yyyy-MM-dd HH:mm:ss")
             .withZone(ZoneOffset.UTC);
@@ -21,6 +25,18 @@ public class TimestampHelper {
     private static final DateTimeFormatter DATE_FORMAT = DateTimeFormatter
             .ofPattern("yyyy-MM-dd")
             .withZone(ZoneOffset.UTC);
+
+    /**
+     * <p>This formatter displays a timestamp which only renders hour-level
+     * accuracy.</p>
+     */
+    public static Content formatTimestampHourAccurate(@Nullable Instant instant) {
+        return (HtmlContent) output -> {
+            if (null != instant) {
+                output.writeContent(TIMESTAMP_HOUR_ACCURATE_FORMAT.format(instant));
+            }
+        };
+    }
 
    public static Content formatTimestamp(@Nullable Instant instant) {
        return (HtmlContent) output -> {

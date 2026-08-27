@@ -1,5 +1,5 @@
 /*
- * Copyright 2013-2024, Andrew Lindesay
+ * Copyright 2013-2026, Andrew Lindesay
  * Distributed under the terms of the MIT License.
  */
 
@@ -35,7 +35,6 @@ angular.module('haikudepotserver').config(
                 .when('/repositories', {controller:'ListRepositoriesController', templateUrl:controllerTemplatePathPrefix + '/listrepositories.html'})
                 .when('/runtimeinformation', {controller:'RuntimeInformationController', templateUrl:controllerTemplatePathPrefix + '/runtimeinformation.html'})
                 .when('/about', {controller:'AboutController', templateUrl:controllerTemplatePathPrefix + '/about.html'})
-                .when('/authenticateuser', {controller:'AuthenticateUserController', templateUrl:controllerTemplatePathPrefix + '/authenticateuser.html'})
                 .when('/initiatepasswordreset', {controller:'InitiatePasswordResetController', templateUrl:controllerTemplatePathPrefix + '/initiatepasswordreset.html'})
                 .when('/completepasswordreset/:token', {controller:'CompletePasswordResetController', templateUrl:controllerTemplatePathPrefix + '/completepasswordreset.html'})
                 .when('/authorizationpkgrules', {controller:'ListAuthorizationPkgRulesController', templateUrl:controllerTemplatePathPrefix + '/listauthorizationpkgrules.html'})

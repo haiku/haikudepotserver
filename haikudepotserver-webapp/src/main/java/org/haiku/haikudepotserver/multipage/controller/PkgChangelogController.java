@@ -10,11 +10,12 @@ import org.haiku.haikudepotserver.api2.PkgApiService;
 import org.haiku.haikudepotserver.api2.model.GetPkgChangelogRequestEnvelope;
 import org.haiku.haikudepotserver.api2.model.GetPkgChangelogResult;
 import org.haiku.haikudepotserver.multipage.MultipageConstants;
+import org.haiku.haikudepotserver.multipage.MultipageNavigationService;
+import org.haiku.haikudepotserver.multipage.MultipageSecurityService;
 import org.haiku.haikudepotserver.multipage.MultipageWebResourceService;
 import org.haiku.haikudepotserver.multipage.internationalization.InternationalizationSupplierFactory;
 import org.haiku.haikudepotserver.multipage.model.MenuGroup;
-import org.haiku.haikudepotserver.multipage.model.NavigationDestination;
-import org.haiku.haikudepotserver.multipage.MultipageNavigationService;
+import org.haiku.haikudepotserver.multipage.model.UserAndNavigation;
 import org.springframework.http.MediaType;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -39,16 +40,19 @@ public class PkgChangelogController {
     private final PkgApiService pkgApiService;
     private final MultipageNavigationService navigationService;
     private final MultipageWebResourceService multipageWebResourceService;
+    private final MultipageSecurityService multipageSecurityService;
 
     public PkgChangelogController(
             InternationalizationSupplierFactory internationalizationSupplierFactory,
             PkgApiService pkgApiService,
             MultipageNavigationService navigationService,
-            MultipageWebResourceService multipageWebResourceService) {
+            MultipageWebResourceService multipageWebResourceService,
+            MultipageSecurityService multipageSecurityService) {
         this.internationalizationSupplierFactory = Preconditions.checkNotNull(internationalizationSupplierFactory);
         this.pkgApiService = Preconditions.checkNotNull(pkgApiService);
         this.navigationService = Preconditions.checkNotNull(navigationService);
         this.multipageWebResourceService = Preconditions.checkNotNull(multipageWebResourceService);
+        this.multipageSecurityService = Preconditions.checkNotNull(multipageSecurityService);
     }
 
     @RequestMapping(value = "{pkgName}/changelog", method = RequestMethod.GET, produces = MediaType.TEXT_HTML_VALUE)
@@ -68,11 +72,12 @@ public class PkgChangelogController {
         GetPkgChangelogResult result = pkgApiService.getPkgChangelog(request);
 
         return new ModelAndView(
-                NavigationDestination.PKG_CHANGELOG.template(),
+                "multipage/pkg-changelog",
                 Map.of(
                         MultipageConstants.KEY_DATA,
                         new PkgChangelogData(
                                 navigationService.deriveMenuGroups(httpServletRequest),
+                                navigationService.getUserAndNavigation(httpServletRequest),
                                 pkgName,
                                 result.getContent(),
                                 viewPkgComponents
@@ -87,6 +92,7 @@ public class PkgChangelogController {
 
     public record PkgChangelogData(
             List<MenuGroup> menuGroups,
+            UserAndNavigation userAndNavigation,
 
             String pkgName,
             String changelog,

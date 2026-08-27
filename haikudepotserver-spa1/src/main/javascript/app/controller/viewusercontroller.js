@@ -1,5 +1,5 @@
 /*
- * Copyright 2013-2025, Andrew Lindesay
+ * Copyright 2013-2026, Andrew Lindesay
  * Distributed under the terms of the MIT License.
  */
 
@@ -8,11 +8,11 @@ angular.module('haikudepotserver').controller(
     [
         '$scope','$log','$location','$routeParams','$window',
         'remoteProcedureCall','constants','errorHandling','messageSource','userState','breadcrumbs',
-        'breadcrumbFactory',
+        'breadcrumbFactory','webSession',
         function(
             $scope,$log,$location,$routeParams,$window,
             remoteProcedureCall,constants,errorHandling,messageSource,userState,breadcrumbs,
-            breadcrumbFactory) {
+            breadcrumbFactory,webSession) {
 
             $scope.breadcrumbItems = undefined;
             $scope.user = undefined;
@@ -81,8 +81,8 @@ angular.module('haikudepotserver').controller(
              */
 
             $scope.goLogout = function () {
-                userState.token(null);
-                breadcrumbs.resetAndNavigate([breadcrumbFactory.createHome()]);
+                // logout -> login -> home
+                webSession.navigateToLogout();
             };
 
             $scope.canDeactivate = function () {

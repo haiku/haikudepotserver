@@ -1,3 +1,7 @@
+<%--
+Copyright 2026, Andrew Lindesay
+Distributed under the terms of the MIT License.
+--%>
 @import org.apache.commons.lang3.StringUtils
 @import org.haiku.haikudepotserver.multipage.model.MenuGroup
 @import org.haiku.haikudepotserver.multipage.model.MenuItem

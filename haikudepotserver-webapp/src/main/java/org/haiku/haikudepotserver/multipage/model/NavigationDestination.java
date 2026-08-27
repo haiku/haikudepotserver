@@ -10,6 +10,10 @@ public enum NavigationDestination {
 
     HOME,
 
+    LOGIN,
+    LOGOUT,
+    USER_CURRENT,
+
     ABOUT,
     ABOUT_HAIKU,
 
@@ -17,17 +21,6 @@ public enum NavigationDestination {
 
     PKG_CHANGELOG,
     PKG_VIEW,
-    PKG_LIST;
-
-    private final String template;
-
-    NavigationDestination() {
-        this.template = "multipage/%s"
-                .formatted(CaseFormat.UPPER_UNDERSCORE.to(CaseFormat.LOWER_HYPHEN, name()));
-    }
-
-    public String template() {
-        return template;
-    }
+    PKG_LIST
 
 }

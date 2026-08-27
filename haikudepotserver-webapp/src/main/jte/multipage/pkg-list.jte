@@ -1,3 +1,7 @@
+<%--
+Copyright 2026, Andrew Lindesay
+Distributed under the terms of the MIT License.
+--%>
 @import org.apache.commons.lang3.StringUtils
 @import org.haiku.haikudepotserver.multipage.controller.PkgListController.PkgVersion
 @import org.haiku.haikudepotserver.multipage.controller.PkgListController
@@ -19,6 +23,7 @@
 @template.multipage.common.common-page-mantle(
 title = internationalizationSupplier.getMessage("mp.pkg_list.title"),
 menuGroups = data.menuGroups(),
+userAndNavigation = data.userAndNavigation(),
 internationalizationSupplier = internationalizationSupplier,
 webResourcePathPrefixes = webResourcePathPrefixes,
 cssLeafnames = List.of("pkg-list"),

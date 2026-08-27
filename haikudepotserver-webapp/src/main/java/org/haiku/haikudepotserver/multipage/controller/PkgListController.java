@@ -14,14 +14,11 @@ import org.apache.commons.lang3.BooleanUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.haiku.haikudepotserver.api2.PkgApiService;
 import org.haiku.haikudepotserver.api2.model.*;
-import org.haiku.haikudepotserver.multipage.MultipageWebResourceService;
+import org.haiku.haikudepotserver.multipage.*;
 import org.haiku.haikudepotserver.multipage.internationalization.InternationalizationSupplierFactory;
-import org.haiku.haikudepotserver.multipage.MultipageConstants;
-import org.haiku.haikudepotserver.multipage.ReferenceDataRepository;
 import org.haiku.haikudepotserver.multipage.model.*;
 import org.haiku.haikudepotserver.multipage.model.Architecture;
 import org.haiku.haikudepotserver.multipage.model.PkgCategory;
-import org.haiku.haikudepotserver.multipage.MultipageNavigationService;
 import org.haiku.haikudepotserver.naturallanguage.model.NaturalLanguageCoordinates;
 import org.haiku.haikudepotserver.support.VersionCoordinates;
 import org.haiku.haikudepotserver.support.data.DataQuantity;
@@ -83,18 +80,21 @@ public class PkgListController {
     private final MultipageNavigationService navigationService;
     private final PkgApiService pkgApiService;
     private final MultipageWebResourceService multipageWebResourceService;
+    private final MultipageSecurityService multipageSecurityService;
 
     public PkgListController(
             InternationalizationSupplierFactory internationalizationSupplierFactory,
             ReferenceDataRepository referenceDataRepository,
             MultipageNavigationService navigationService,
             MultipageWebResourceService multipageWebResourceService,
-            PkgApiService pkgApiService) {
+            PkgApiService pkgApiService,
+            MultipageSecurityService multipageSecurityService) {
         this.internationalizationSupplierFactory = Preconditions.checkNotNull(internationalizationSupplierFactory);
         this.referenceDataRepository = referenceDataRepository;
         this.navigationService = navigationService;
         this.pkgApiService = pkgApiService;
         this.multipageWebResourceService = Preconditions.checkNotNull(multipageWebResourceService);
+        this.multipageSecurityService = Preconditions.checkNotNull(multipageSecurityService);
     }
 
     /**
@@ -118,7 +118,7 @@ public class PkgListController {
             @RequestParam(value = KEY_SHOWFILTERS, required = false) Boolean showFilters
             ) {
         return new ModelAndView(
-                NavigationDestination.PKG_LIST.template(),
+                "multipage/pkg-list",
                 Map.of(
                         MultipageConstants.KEY_DATA, createData(
                                 httpServletRequest,
@@ -206,7 +206,7 @@ public class PkgListController {
                         navigationService.deriveMenuGroups(httpServletRequest),
                         EnumSet.of(NavigationDestination.PKG_LIST)
                 ),
-
+                navigationService.getUserAndNavigation(httpServletRequest),
                 NaturalLanguageCoordinates.fromLocale(locale),
                 navigationService.pkgListUri(httpServletRequest, null).build().toUriString(),
                 navigationService.createRelayParameters(httpServletRequest),
@@ -290,6 +290,7 @@ public class PkgListController {
     public record PkgListData(
             UriComponents uriComponents,
             List<MenuGroup> menuGroups,
+            UserAndNavigation userAndNavigation,
 
             NaturalLanguageCoordinates naturalLanguage,
             String searchUrl,

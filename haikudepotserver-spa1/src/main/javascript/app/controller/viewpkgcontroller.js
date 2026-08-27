@@ -1,5 +1,5 @@
 /*
- * Copyright 2013-2025, Andrew Lindesay
+ * Copyright 2013-2026, Andrew Lindesay
  * Distributed under the terms of the MIT License.
  */
 
@@ -9,12 +9,12 @@ angular.module('haikudepotserver').controller(
         '$scope','$log','$location','$routeParams','$rootScope','$timeout',
         'remoteProcedureCall','constants','userState','errorHandling',
         'pkgScreenshot','pkgIcon','referenceData','breadcrumbs',
-        'pkg','breadcrumbFactory','repositoryService',
+        'pkg','breadcrumbFactory','repositoryService','webSession',
         function(
             $scope,$log,$location,$routeParams,$rootScope,$timeout,
             remoteProcedureCall,constants,userState,errorHandling,
             pkgScreenshot,pkgIcon,referenceData,breadcrumbs,
-            pkg,breadcrumbFactory,repositoryService) {
+            pkg,breadcrumbFactory,repositoryService,webSession) {
 
             var MAXCHARS_USERRATING_COMMENT = 256;
             var MAXLINES_USERRATING_COMMENT = 4;
@@ -368,7 +368,7 @@ angular.module('haikudepotserver').controller(
 
             // this is used to cause an authentication in relation to adding a user rating
             $scope.goAuthenticate = function () {
-                breadcrumbs.pushAndNavigate(breadcrumbFactory.createAuthenticate());
+                webSession.navigateToLogin(breadcrumbs.peek());
             };
 
             // This is a bit strange; we're cycling through a list of package versions, but

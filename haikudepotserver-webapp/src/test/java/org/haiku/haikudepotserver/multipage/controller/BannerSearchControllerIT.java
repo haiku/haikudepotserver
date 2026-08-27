@@ -39,11 +39,10 @@ public class BannerSearchControllerIT extends AbstractIntegrationTest {
      */
     @Test
     public void testPkgHit() throws Exception {
-        // GIVEN
         integrationTestSupportService.createStandardTestData();
         String expectedLocation = "/__multipage/pkg/pkg1?reposrc=testreposrc_xyz&arch=x86_64&vmajor=1&vmicro=2&vrev=4";
 
-        // WHEN + THEN
+        // ------------------------------------
         mockMvc.perform(MockMvcRequestBuilders
                         .get("/__multipage/banner-search")
                         .queryParam("srchexpr", "pkg1")
@@ -51,6 +50,8 @@ public class BannerSearchControllerIT extends AbstractIntegrationTest {
                 )
                 .andExpect(MockMvcResultMatchers.header().string("Location", expectedLocation))
                 .andExpect(MockMvcResultMatchers.status().isFound());
+        // ------------------------------------
+
     }
 
     /**
@@ -58,11 +59,10 @@ public class BannerSearchControllerIT extends AbstractIntegrationTest {
      */
     @Test
     public void testPkgMiss() throws Exception {
-        // GIVEN
         integrationTestSupportService.createStandardTestData();
         String expectedLocation = "/__multipage/pkg?srchexpr=bananas";
 
-        // WHEN + THEN
+        // ------------------------------------
         mockMvc.perform(MockMvcRequestBuilders
                         .get("/__multipage/banner-search")
                         .queryParam("srchexpr", "bananas")
@@ -70,6 +70,8 @@ public class BannerSearchControllerIT extends AbstractIntegrationTest {
                 )
                 .andExpect(MockMvcResultMatchers.header().string("Location", expectedLocation))
                 .andExpect(MockMvcResultMatchers.status().isFound());
+        // ------------------------------------
+
     }
 
 }

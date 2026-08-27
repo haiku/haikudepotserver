@@ -1,5 +1,5 @@
 /*
- * Copyright 2014-2025, Andrew Lindesay
+ * Copyright 2014-2026, Andrew Lindesay
  * Distributed under the terms of the MIT License.
  */
 
@@ -7,10 +7,10 @@ angular.module('haikudepotserver').controller(
     'ChangePasswordController',
     [
         '$scope','$log','$location','$routeParams',
-        'remoteProcedureCall','constants','breadcrumbs','breadcrumbFactory','userState','errorHandling',
+        'remoteProcedureCall','constants','breadcrumbs','breadcrumbFactory','userState','errorHandling','webSession',
         function(
             $scope,$log,$location,$routeParams,
-            remoteProcedureCall,constants,breadcrumbs,breadcrumbFactory,userState,errorHandling) {
+            remoteProcedureCall,constants,breadcrumbs,breadcrumbFactory,userState,errorHandling,webSession) {
 
             $scope.user = undefined;
             $scope.captchaToken = undefined;
@@ -126,17 +126,8 @@ angular.module('haikudepotserver').controller(
                         $log.info('did change password for user; '+$scope.user.nickname);
 
                         if(userState.user().nickname === $scope.user.nickname) {
-                            userState.token(null); // logout
-                            breadcrumbs.resetAndNavigate([
-                                breadcrumbFactory.createHome(),
-                                breadcrumbFactory.applySearch(
-                                    breadcrumbFactory.createAuthenticate(),
-                                    {
-                                        nickname: $scope.user.nickname,
-                                        didChangePassword: 'true'
-                                    }
-                                )
-                            ]);
+                            // logout -> login -> back to home
+                            webSession.navigateToLogoutLogin();
                         }
                         else {
                             breadcrumbs.popAndNavigate();

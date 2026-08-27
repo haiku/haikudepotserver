@@ -152,6 +152,10 @@ UPDATE haikudepot.pkg_supplement_modification SET
 
 TRUNCATE job2.job, job2.job_assignment, job2.job_data, job2.job_type, job2.job_tag;
 
+-- remove any stored web sessions
+
+TRUNCATE websession.SPRING_SESSION, websession.SPRING_SESSION_ATTRIBUTES;
+
 -- remove any stored data
 
 TRUNCATE datastore.object_head, datastore.object_part;

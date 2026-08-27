@@ -13,13 +13,12 @@ import org.haiku.haikudepotserver.api2.MiscellaneousApiService;
 import org.haiku.haikudepotserver.api2.model.GetAllContributorsResult;
 import org.haiku.haikudepotserver.api2.model.GetRuntimeInformationResult;
 import org.haiku.haikudepotserver.multipage.MultipageConstants;
+import org.haiku.haikudepotserver.multipage.MultipageSecurityService;
 import org.haiku.haikudepotserver.multipage.MultipageWebResourceService;
 import org.haiku.haikudepotserver.multipage.internationalization.InternationalizationSupplier;
 import org.haiku.haikudepotserver.multipage.internationalization.InternationalizationSupplierFactory;
-import org.haiku.haikudepotserver.multipage.model.MenuGroup;
-import org.haiku.haikudepotserver.multipage.model.NavigationDestination;
+import org.haiku.haikudepotserver.multipage.model.*;
 import org.haiku.haikudepotserver.multipage.MultipageNavigationService;
-import org.haiku.haikudepotserver.multipage.model.WebResourcePathPrefixes;
 import org.springframework.http.MediaType;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -42,16 +41,19 @@ public class AboutController {
     private final MiscellaneousApiService miscellaneousApiService;
     private final MultipageNavigationService navigationService;
     private final MultipageWebResourceService multipageWebResourceService;
+    private final MultipageSecurityService multipageSecurityService;
 
     public AboutController(
             InternationalizationSupplierFactory internationalizationSupplierFactory,
             MiscellaneousApiService miscellaneousApiService,
             MultipageNavigationService navigationService,
-            MultipageWebResourceService multipageWebResourceService) {
+            MultipageWebResourceService multipageWebResourceService,
+            MultipageSecurityService multipageSecurityService) {
         this.internationalizationSupplierFactory = Preconditions.checkNotNull(internationalizationSupplierFactory);
         this.miscellaneousApiService = Preconditions.checkNotNull(miscellaneousApiService);
         this.navigationService = Preconditions.checkNotNull(navigationService);
         this.multipageWebResourceService = Preconditions.checkNotNull(multipageWebResourceService);
+        this.multipageSecurityService = Preconditions.checkNotNull(multipageSecurityService);
     }
 
     @RequestMapping(method = RequestMethod.GET, produces = MediaType.TEXT_HTML_VALUE)
@@ -62,7 +64,7 @@ public class AboutController {
         InternationalizationSupplier internationalizationSupplier = internationalizationSupplierFactory.create(locale);
 
         return new ModelAndView(
-                NavigationDestination.ABOUT.template(),
+                "multipage/about",
                 Map.of(
                        MultipageConstants.KEY_DATA, createData(
                                 httpServletRequest,
@@ -82,6 +84,7 @@ public class AboutController {
                         navigationService.deriveMenuGroups(httpServletRequest),
                         EnumSet.of(NavigationDestination.ABOUT)
                 ),
+                navigationService.getUserAndNavigation(httpServletRequest),
                 getContributors(internationalizationSupplier),
                 getRuntimeInformation()
         );
@@ -124,6 +127,7 @@ public class AboutController {
 
     public record AboutData(
             List<MenuGroup> menuGroups,
+            UserAndNavigation userAndNavigation,
 
             List<Contributor> contributors,
             RuntimeInformation runtimeInformation

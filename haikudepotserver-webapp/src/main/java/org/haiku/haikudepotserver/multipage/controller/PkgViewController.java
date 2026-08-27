@@ -53,6 +53,11 @@ public class PkgViewController {
 
     public final static int SCREENSHOT_THUMBNAIL_SIDE_LIMIT = 640;
 
+    public final static String KEY_REPOSITORYSOURCECODE = "reposrc";
+    public final static String KEY_ARCHITECTURECODE = "arch";
+    public final static String KEY_SCREENSHOTINDEX = "sshidx";
+    public final static String KEY_USERRATINGOFFSET = "ratoff";
+
     private final InternationalizationSupplierFactory internationalizationSupplierFactory;
     private final PkgApiService pkgApiService;
     private final UserRatingApiService userRatingApiService;
@@ -60,11 +65,7 @@ public class PkgViewController {
     private final ReferenceDataRepository referenceDataRepository;
     private final MultipageNavigationService navigationService;
     private final MultipageWebResourceService multipageWebResourceService;
-
-    public final static String KEY_REPOSITORYSOURCECODE = "reposrc";
-    public final static String KEY_ARCHITECTURECODE = "arch";
-    public final static String KEY_SCREENSHOTINDEX = "sshidx";
-    public final static String KEY_USERRATINGOFFSET = "ratoff";
+    private final MultipageSecurityService multipageSecurityService;
 
     public PkgViewController(
             InternationalizationSupplierFactory internationalizationSupplierFactory,
@@ -73,7 +74,8 @@ public class PkgViewController {
             RepositoryApiService repositoryApiService,
             ReferenceDataRepository referenceDataRepository,
             MultipageNavigationService navigationService,
-            MultipageWebResourceService multipageWebResourceService) {
+            MultipageWebResourceService multipageWebResourceService,
+            MultipageSecurityService multipageSecurityService) {
         this.internationalizationSupplierFactory = Preconditions.checkNotNull(internationalizationSupplierFactory);
         this.pkgApiService = Preconditions.checkNotNull(pkgApiService);
         this.userRatingApiService = Preconditions.checkNotNull(userRatingApiService);
@@ -81,6 +83,7 @@ public class PkgViewController {
         this.referenceDataRepository = Preconditions.checkNotNull(referenceDataRepository);
         this.navigationService = Preconditions.checkNotNull(navigationService);
         this.multipageWebResourceService = Preconditions.checkNotNull(multipageWebResourceService);
+        this.multipageSecurityService = Preconditions.checkNotNull(multipageSecurityService);
     }
 
     @RequestMapping(value = "{pkgName}", method = RequestMethod.GET, produces = MediaType.TEXT_HTML_VALUE)
@@ -110,7 +113,7 @@ public class PkgViewController {
         }
 
         return new ModelAndView(
-                NavigationDestination.PKG_VIEW.template(),
+                "multipage/pkg-view",
                 Map.of(
                         MultipageConstants.KEY_DATA, createData(
                                 httpServletRequest,
@@ -177,6 +180,7 @@ public class PkgViewController {
         return new PkgViewData(
                 ServletUriComponentsBuilder.fromRequest(httpServletRequest).build(),
                 navigationService.deriveMenuGroups(httpServletRequest),
+                navigationService.getUserAndNavigation(httpServletRequest),
                 getPkgResponse.getName(),
                 new LocalizedText(
                     pkgVersion0.getTitle(),
@@ -419,6 +423,7 @@ public class PkgViewController {
 
             UriComponents uriComponents,
             List<MenuGroup> menuGroups,
+            UserAndNavigation userAndNavigation,
 
             String pkgName,
 

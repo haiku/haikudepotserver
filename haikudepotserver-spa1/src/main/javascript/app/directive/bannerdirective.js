@@ -1,5 +1,5 @@
 /*
- * Copyright 2013-2022, Andrew Lindesay
+ * Copyright 2013-2026, Andrew Lindesay
  * Distributed under the terms of the MIT License.
  */
 
@@ -20,12 +20,12 @@ angular.module('haikudepotserver').directive('banner',function() {
                 '$rootScope', '$scope', '$log', '$location', '$route', '$window',
                 'userState', 'referenceData', 'messageSource', 'breadcrumbs',
                 'errorHandling', 'breadcrumbFactory', 'constants',
-                'runtimeInformation', 'localStorageProxy',
+                'runtimeInformation', 'localStorageProxy','webSession',
                 function(
                     $rootScope, $scope, $log, $location, $route, $window,
                     userState, referenceData, messageSource, breadcrumbs,
                     errorHandling, breadcrumbFactory, constants,
-                    runtimeInformation, localStorageProxy) {
+                    runtimeInformation, localStorageProxy,webSession) {
 
                     $scope.showActions = false;
                     $scope.showWarnNonProduction = undefined;
@@ -50,7 +50,6 @@ angular.module('haikudepotserver').directive('banner',function() {
                         }
 
                         return _.contains([
-                                '/authenticateuser',
                                 '/createuser',
                                 '/initiatepasswordreset'
                             ],
@@ -191,9 +190,8 @@ angular.module('haikudepotserver').directive('banner',function() {
                     };
 
                     $scope.goLogout = function() {
-                        $scope.showActions = false;
-                        userState.token(null);
-                        breadcrumbs.resetAndNavigate([breadcrumbFactory.createHome()]);
+                        // logout -> login -> home
+                        webSession.navigateToLogout();
                     };
 
                     $scope.canDisallowLocalStorage = function() {
@@ -212,8 +210,7 @@ angular.module('haikudepotserver').directive('banner',function() {
                     };
 
                     $scope.goAuthenticate = function() {
-                        breadcrumbs.pushAndNavigate(breadcrumbFactory.createAuthenticate());
-                        $scope.showActions = false;
+                        webSession.navigateToLogin();
                     };
 
                     $scope.goCreateUser = function() {

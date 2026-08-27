@@ -27,7 +27,7 @@ import java.util.regex.Pattern;
  */
 public class PassiveContentRepository {
 
-    private final Pattern PATTERN_LEAF = Pattern.compile("^([a-z0-9_]+)(\\.[a-z0-9]+)$");
+    private final Pattern PATTERN_LEAF = Pattern.compile("^([a-z0-9-]+)(\\.[a-z0-9]+)$");
 
     private final ResourceLoader resourceLoader;
     private final String baseUrl;

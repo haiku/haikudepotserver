@@ -62,7 +62,6 @@ public class BulkDataJobCoordinatorServiceImplIT extends AbstractIntegrationTest
 
         // THEN
         {
-            ObjectContext context = serverRuntime.newContext();
             List<? extends JobSnapshot> jobs = jobService.findJobs(
                     new JobFindRequest(null, "repositorydumpexport", null),
                     0,
@@ -123,6 +122,8 @@ public class BulkDataJobCoordinatorServiceImplIT extends AbstractIntegrationTest
             Job job = Job.getByCode(context, jobCode);
             job.setQueueTimestamp(new java.sql.Timestamp(queueTimestampInstant.toEpochMilli()));
             context.commitChanges();
+
+            clearCaches();
         }
 
         // WHEN

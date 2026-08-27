@@ -53,6 +53,14 @@
     margin-top: 3px;
 }
 
+#header-banner-user-view-anchor {
+    color: white;
+}
+
+#header-banner-user-login-anchor {
+    color: rgba(255,255,255,0.5);
+}
+
 #header-banner-menu-toggle.selected {
     background-color: #ffd430;
     border-bottom: 1px solid #ffd430;

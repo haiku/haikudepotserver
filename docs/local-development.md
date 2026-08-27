@@ -82,6 +82,15 @@ The [Intelli-J](https://www.jetbrains.com/idea/) IDE can be used to run the HDS 
 
 The application can be accessed using a web browser on `http://localhost:8080` on the development host. Login as `root` with password `zimmer`.
 
+### Debugging web-based integration tests in Intelli-J
+
+If you're running an integration test within the IDE, add the following command line parameters for the test-runner;
+
+```
+-Dgg.jte.use-precompiled-templates=false
+-Dgg.jte.development-mode=true
+```
+
 ## Run integration-tests
 
 The HDS application has a number of integration tests. Run the integration tests with;

@@ -1,5 +1,5 @@
 /*
- * Copyright 2013-2025, Andrew Lindesay
+ * Copyright 2013-2026, Andrew Lindesay
  * Distributed under the terms of the MIT License.
  */
 
@@ -15,22 +15,15 @@ angular.module('haikudepotserver').factory('userState',
     [
         '$log', '$q', '$rootScope', '$timeout', '$window', '$location', '$cacheFactory',
         'remoteProcedureCall', 'pkgScreenshot', 'errorHandling',
-        'constants', 'referenceData', 'jobs', 'jwt', 'localStorageProxy',
+        'constants', 'referenceData', 'jobs', 'localStorageProxy',
         function(
             $log, $q, $rootScope, $timeout, $window, $location, $cacheFactory,
             remoteProcedureCall, pkgScreenshot, errorHandling,
-            constants, referenceData, jobs, jwt, localStorageProxy) {
+            constants, referenceData, jobs, localStorageProxy) {
 
             var CHECKED_PERMISSION_CACHE_SIZE = 1000;
 
-            var SAMPLESIZE_TIMESTAMPS_OF_LAST_TOKEN_RENEWALS = 10;
-            var MIN_MILLIS_FOR_TIMESTAMPS_OF_LAST_TOKEN_RENEWALS = 60 * 1000; // 1 min.
-
-            var HDS_TOKEN_KEY = constants.STORAGE_TOKEN_KEY;
             var HDS_NATURALLANGUAGECODE_KEY = 'hds.userstate.naturallanguagecode';
-
-            var timestampsOfLastTokenRenewals = [];
-            var tokenRenewalTimeoutPromise = undefined;
 
             var authorizationData = undefined;
             resetAuthorization();
@@ -71,190 +64,14 @@ angular.module('haikudepotserver').factory('userState',
             }
 
             function user() {
-                var tokenValue = token();
+                const nickname = window.HDS_USER_NICKNAME;
 
-                if (tokenValue) {
-                    var nickname = jwt.tokenNickname(tokenValue);
-                    return { nickname : nickname };
+                if (nickname) {
+                    return {"nickname": nickname};
                 }
 
                 return undefined;
             }
-
-            function token(value) {
-
-                function setAuthorizationHeader(value) {
-                    _.each(
-                        [remoteProcedureCall, pkgScreenshot, jobs],
-                        function(svc) { svc.setHeader('Authorization', value); }
-                    );
-                }
-
-                if (undefined !== value) {
-                    if (null == value) {
-                        if (token()) {
-                            localStorageProxy.removeItem(HDS_TOKEN_KEY);
-                            $rootScope.$broadcast('userChangeStart', null);
-
-                            setAuthorizationHeader();
-                            cancelTokenRenewalTimeout();
-                            resetAuthorization();
-
-                            $rootScope.$broadcast('userChangeSuccess', null);
-                        }
-                    }
-                    else {
-
-                        if (jwt.millisUntilExpirationForToken(value) <= 0) {
-                            throw Error('at attempt has been made to set a token that has expired already');
-                        }
-
-                        var oldUser = user();
-                        var newUser = { nickname : jwt.tokenNickname(value) };
-                        var userChanging = !oldUser || oldUser.nickname !== newUser.nickname;
-
-                        if (userChanging) {
-                            $rootScope.$broadcast('userChangeStart', newUser);
-                        }
-
-                        localStorageProxy.setItem(HDS_TOKEN_KEY, value);
-                        setAuthorizationHeader('Bearer ' + value);
-                        configureTokenRenewal();
-
-                        if (userChanging) {
-                            resetAuthorization();
-                            $rootScope.$broadcast('userChangeSuccess', newUser);
-                        }
-                    }
-                }
-
-                return localStorageProxy.getItem(HDS_TOKEN_KEY);
-            }
-
-            // ------------------------------
-            // FOREGROUND / BACKGROUND JWT UPDATING
-            // The JWT will eventually expire.  This set of functions is for avoiding that in the case
-            // by always fetching a new one just before the old one expires.
-
-            function cancelTokenRenewalTimeout() {
-                if(tokenRenewalTimeoutPromise) {
-                    $timeout.cancel(tokenRenewalTimeoutPromise);
-                    tokenRenewalTimeoutPromise = undefined;
-                }
-            }
-
-            function configureTokenRenewal() {
-
-                cancelTokenRenewalTimeout();
-
-                if(token()) {
-
-                    var millisUntilExpiration = jwt.millisUntilExpirationForToken(token());
-
-                    if(millisUntilExpiration > 5000) {
-
-                        // the logic here is that the re-establishment of the token should happen before it will
-                        // expire.  If there are many windows open, it is undesirable that they all go and
-                        // re-establish their tokens at once.  To avoid this, some random aspect is introduced
-                        // to reduce the chance of this happening.
-
-                        var millisUntilRenewal = ((millisUntilExpiration - 5000) * 0.75) + (3000 * Math.random());
-
-                        $log.info('will schedule token renewal in ~' + Math.ceil(millisUntilRenewal / 1000) + "s");
-
-                        tokenRenewalTimeoutPromise = $timeout(function () {
-                                if (jwt.millisUntilExpirationForToken(token()) < 0) {
-                                    $log.info('am going to renew token, but it has already expired');
-                                    errorHandling.navigateToError(remoteProcedureCall.errorCodes.AUTHORIZATIONFAILURE); // simulates this happening
-                                }
-                                else {
-
-                                    // -------------
-                                    // START : EXCESSIVE TOKEN RENEWAL UPDATE CHECK
-                                    // as a safety measure (just in case) check to make sure that the renewal of the
-                                    // token is not happening too frequently.  This theoretically won't happen.
-
-                                    var nowMs = new Date().getTime();
-
-                                    if (timestampsOfLastTokenRenewals.length === SAMPLESIZE_TIMESTAMPS_OF_LAST_TOKEN_RENEWALS) {
-                                        var firstMs = timestampsOfLastTokenRenewals.shift();
-
-                                        if (nowMs - firstMs < MIN_MILLIS_FOR_TIMESTAMPS_OF_LAST_TOKEN_RENEWALS) {
-                                            throw Error('10 or more renewals of tokens in < ' + MIN_MILLIS_FOR_TIMESTAMPS_OF_LAST_TOKEN_RENEWALS + 'ms -- something wrong; failing');
-                                        }
-                                    }
-
-                                    timestampsOfLastTokenRenewals.push(nowMs);
-
-                                    // END : EXCESSIVE TOKEN RENEWAL UPDATE CHECK
-                                    // -------------
-
-                                    remoteProcedureCall.call(
-                                        constants.ENDPOINT_API_V2_USER,
-                                        'renew-token',
-                                        { token: token() }
-                                    ).then(
-                                        function (renewTokenResponse) {
-                                            if (renewTokenResponse.token) {
-                                                token(renewTokenResponse.token);
-                                                $log.info('did renew the authentication token');
-                                                configureTokenRenewal();
-                                            }
-                                            else {
-                                                $log.info('was not able to renew authentication token');
-                                                errorHandling.navigateToError(remoteProcedureCall.errorCodes.AUTHORIZATIONFAILURE); // simulates this happening
-                                            }
-                                        },
-                                        function (err) {
-                                            $log.info('failure to renew the authentication token');
-                                            errorHandling.handleRemoteProcedureCallError(err);
-                                        }
-                                    );
-                                }
-                            },
-                            millisUntilRenewal
-                        );
-
-                    }
-                    else {
-                        $log.warn('will not schedule token renewal as the token has ether already expired or is about to');
-                    }
-                }
-            }
-
-            // ------------------------------
-            // USER HANDLING
-
-            /**
-             * <p>This function will look to see if there is a token in the local storage.  If there is then
-             * it can load that into the state.</p>
-             */
-
-            function initToken() {
-                var t = token();
-
-                if (t) {
-                    var ms = jwt.millisUntilExpirationForToken(t);
-
-                    if (ms > 0) {
-                        token(t);
-                    }
-                    else {
-                        token(null);
-                    }
-                }
-            }
-
-            initToken();
-
-            // this event fires when another window has made a change to the token.
-
-            window.addEventListener('storage', function(e) {
-                if (e.key === HDS_TOKEN_KEY) {
-                    $log.info('did receive token storage change from another window');
-                    token(e.newValue);
-                }
-            });
 
             // ------------------------------
             // AUTHORIZATION
@@ -471,7 +288,6 @@ angular.module('haikudepotserver').factory('userState',
                 return authorizationData.isRootPromise;
             }
 
-
             // ------------------------------
             // NATURAL LANGUAGE HANDLING
 
@@ -552,15 +368,6 @@ angular.module('haikudepotserver').factory('userState',
                  */
 
                 user : user,
-
-                /**
-                 * <p>This function will either set or get the token.  Invoked
-                 * with no token value, the function will return the current
-                 * token value.  Invoked with a value will set the value and
-                 * will return it.</p>
-                 */
-
-                token : token,
 
                 /**
                  * <p>This function will check to make sure that the target and
