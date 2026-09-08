@@ -90,6 +90,7 @@ content = @`
         <ul>
             @if (data.isAuthenticatedUser())
                 <li><a href="${data.logoutUriComponents().toUriString()}">${internationalizationSupplier.getMessage("mp.user_view.action.logout.title")}</a></li>
+                <li><a href="${data.changePasswordUriComponents().toUriString()}">${internationalizationSupplier.getMessage("mp.user_view.action.change_password.title")}</a></li>
             @endif
         </ul>
 

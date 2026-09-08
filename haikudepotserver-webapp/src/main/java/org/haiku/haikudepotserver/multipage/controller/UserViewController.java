@@ -7,6 +7,7 @@ package org.haiku.haikudepotserver.multipage.controller;
 import com.google.common.base.Preconditions;
 import jakarta.annotation.Nullable;
 import jakarta.servlet.http.HttpServletRequest;
+import org.apache.commons.lang3.RandomStringUtils;
 import org.haiku.haikudepotserver.api2.UserApiService;
 import org.haiku.haikudepotserver.api2.model.*;
 import org.haiku.haikudepotserver.multipage.*;
@@ -22,6 +23,7 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.servlet.ModelAndView;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 import org.springframework.web.util.UriComponents;
+import org.springframework.web.util.UriComponentsBuilder;
 
 import java.time.Instant;
 import java.util.*;
@@ -99,6 +101,11 @@ public class UserViewController {
                         .orElse(null),
                 isAuthenticatedUser,
                 navigationService.logoutUri(httpServletRequest, null).build(),
+                UriComponentsBuilder
+                        .fromUriString("/#!/user/%s/changepassword?bcguid=%s".formatted(
+                                userResult.getNickname(),
+                                RandomStringUtils.insecure().nextAlphabetic(5)))
+                        .build(),
                 tryCreateUserUsageConditionsAgreement(userResult.getUserUsageConditionsAgreement()).orElse(null),
                 navigationService.agreeUserUsageConditionsUri(httpServletRequest).build()
         );
@@ -160,6 +167,7 @@ public class UserViewController {
             boolean isAuthenticatedUser,
 
             UriComponents logoutUriComponents,
+            UriComponents changePasswordUriComponents,
 
             @Nullable UserUsageConditionsAgreement userUsageConditionsAgreement,
 
