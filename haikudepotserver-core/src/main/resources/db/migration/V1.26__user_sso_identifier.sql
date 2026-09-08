@@ -1,0 +1,1 @@
+ALTER TABLE haikudepot."user" ADD COLUMN sso_identifier VARCHAR(255);
