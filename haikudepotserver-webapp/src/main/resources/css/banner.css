@@ -109,17 +109,21 @@ body.menu-modal #header-banner-menu-toggle {
     font-weight: bold;
 }
 
-#header-banner-title .title-short {
+#header-banner-title .title {
     display: none;
 }
 
-@media (width < 640px) {
+#header-banner-title .title-short {
+    display: inline;
+}
+
+@media (width > 640px) {
     #header-banner-title .title {
-        display: none;
+        display: inline;
     }
 
     #header-banner-title .title-short {
-        display: inline;
+        display: none;
     }
 }
 
