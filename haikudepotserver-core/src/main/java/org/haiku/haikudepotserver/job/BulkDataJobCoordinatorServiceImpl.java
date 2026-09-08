@@ -318,7 +318,7 @@ public class BulkDataJobCoordinatorServiceImpl implements BulkDataJobCoordinator
                 String renewedJobCode = jobService.submit(specification, Set.of());
                 LOGGER.info("pkg dump [{}] export renewed as [{}]", job.getGuid(), renewedJobCode);
             } else {
-                LOGGER.info("pkg dump export [{}] -> renew not necessary", job.getGuid());
+                LOGGER.debug("pkg dump export [{}] -> renew not necessary", job.getGuid());
             }
         } else {
             String newJobCode = jobService.submit(specification, Set.of());
