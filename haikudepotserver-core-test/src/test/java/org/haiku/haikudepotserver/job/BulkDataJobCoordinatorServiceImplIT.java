@@ -56,11 +56,13 @@ public class BulkDataJobCoordinatorServiceImplIT extends AbstractIntegrationTest
         // No jobs are present.
 
         // WHEN
-        coordinatorService.maybePerformRepositoryDumpExportRefresh(Instant.now());
+        boolean result = coordinatorService.maybePerformRepositoryDumpExportRefresh(Instant.now());
 
         awaitAllJobsFinishedUninterruptibly();
 
         // THEN
+        Assertions.assertThat(result).isTrue();
+
         {
             List<? extends JobSnapshot> jobs = jobService.findJobs(
                     new JobFindRequest(null, "repositorydumpexport", null),
@@ -81,12 +83,14 @@ public class BulkDataJobCoordinatorServiceImplIT extends AbstractIntegrationTest
         String jobCode = jobService.immediate(specification, true);
 
         // WHEN
-        coordinatorService.maybePerformRepositoryDumpExportRefresh(Instant.now());
+        boolean result = coordinatorService.maybePerformRepositoryDumpExportRefresh(Instant.now());
 
         awaitAllJobsFinishedUninterruptibly();
 
         // THEN
         // we expect to see only the existing job present and no new job added.
+
+        Assertions.assertThat(result).isFalse();
 
         {
             List<? extends JobSnapshot> jobs = jobService.findJobs(
@@ -127,12 +131,14 @@ public class BulkDataJobCoordinatorServiceImplIT extends AbstractIntegrationTest
         }
 
         // WHEN
-        coordinatorService.maybePerformRepositoryDumpExportRefresh(Instant.now());
+        boolean result = coordinatorService.maybePerformRepositoryDumpExportRefresh(Instant.now());
 
         awaitAllJobsFinishedUninterruptibly();
 
         // THEN
         // we expect to see the one that was added earlier, but also the new one from the renewal.
+
+        Assertions.assertThat(result).isTrue();
 
         {
             List<? extends JobSnapshot> jobs = jobService.findJobs(
@@ -171,12 +177,14 @@ public class BulkDataJobCoordinatorServiceImplIT extends AbstractIntegrationTest
         }
 
         // WHEN
-        coordinatorService.maybePerformRepositoryDumpExportRefresh(now);
+        boolean result = coordinatorService.maybePerformRepositoryDumpExportRefresh(now);
 
         awaitAllJobsFinishedUninterruptibly();
 
         // THEN
         // we expect to see the one that was added earlier, but also the new one from the renewal.
+
+        Assertions.assertThat(result).isTrue();
 
         {
             List<? extends JobSnapshot> jobs = jobService.findJobs(
@@ -213,12 +221,14 @@ public class BulkDataJobCoordinatorServiceImplIT extends AbstractIntegrationTest
         }
 
         // WHEN
-        coordinatorService.maybePerformRepositoryDumpExportRefresh(Instant.now());
+        boolean result = coordinatorService.maybePerformRepositoryDumpExportRefresh(Instant.now());
 
         awaitAllJobsFinishedUninterruptibly();
 
         // THEN
         // we expect to see the one that was added earlier, but also the new one from the renewal.
+
+        Assertions.assertThat(result).isFalse();
 
         {
             List<? extends JobSnapshot> jobs = jobService.findJobs(
@@ -263,9 +273,14 @@ public class BulkDataJobCoordinatorServiceImplIT extends AbstractIntegrationTest
         }
 
         // WHEN
-        coordinatorService.clearExpiredRepositoryDumpExport(Instant.now());
+        BulkDataJobCoordinatorServiceImpl.ActionCounts actionCounts = coordinatorService.clearExpiredRepositoryDumpExport(Instant.now());
 
         // THEN
+
+        // did delete 2 of 5
+        Assertions.assertThat(actionCounts).isEqualTo(
+                new BulkDataJobCoordinatorServiceImpl.ActionCounts(2, 5));
+
         List<? extends JobSnapshot> jobs = jobService.findJobs(
                 new JobFindRequest(null, "repositorydumpexport", null),
                 0,

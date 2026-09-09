@@ -8,6 +8,7 @@ import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Preconditions;
 import com.google.common.collect.Sets;
 import jakarta.annotation.Nullable;
+import jakarta.validation.constraints.NotNull;
 import org.apache.cayenne.ObjectContext;
 import org.apache.cayenne.configuration.server.ServerRuntime;
 import org.apache.cayenne.query.ObjectSelect;
@@ -153,28 +154,48 @@ public class BulkDataJobCoordinatorServiceImpl implements BulkDataJobCoordinator
                 Set<NaturalLanguageCoordinates> naturalLanguages = deriveNaturalLanguagesToRenewFor(now);
 
                 if (LOGGER.isInfoEnabled()) {
-                    LOGGER.info("found {} natural languages to refresh for; {}", naturalLanguages.size(),
-                            naturalLanguages.stream().map(NaturalLanguageCoordinates::getCode).collect(Collectors.joining(",")));
+                    LOGGER.info(
+                            "found {} natural languages to refresh for; {}",
+                            naturalLanguages.size(),
+                            naturalLanguages.stream()
+                                    .map(NaturalLanguageCoordinates::getCode)
+                                    .sorted()
+                                    .collect(Collectors.joining(",")));
                 }
 
                 Set<String> repositorySourceCodes = derivedRepositorySourceCodesToRenewFor();
                 LOGGER.info("found {} repository source codes to refresh for", repositorySourceCodes.size());
 
-                maybePerformRepositoryDumpExportRefresh(now);
+                boolean didRefreshRepositoryDumpExport = maybePerformRepositoryDumpExportRefresh(now);
 
-                maybePerformPkgIconExportArchiveRefresh(now);
+                boolean didRefreshPkgIconExportArchive = maybePerformPkgIconExportArchiveRefresh(now);
 
-                for (NaturalLanguageCoordinates naturalLanguage : naturalLanguages) {
-                    maybePerformReferenceDumpExportRefresh(now, naturalLanguage);
-                }
+                int countDidRefreshReferenceDumpExport = 0;
 
                 for (NaturalLanguageCoordinates naturalLanguage : naturalLanguages) {
-                    for (String repositorySourceCode : repositorySourceCodes) {
-                        maybePerformPkgDumpExportRefresh(now, naturalLanguage, repositorySourceCode);
+                    if (maybePerformReferenceDumpExportRefresh(now, naturalLanguage)) {
+                        countDidRefreshReferenceDumpExport++;
                     }
                 }
 
-                LOGGER.info("did refresh");
+                int countDidRefreshPkgDumpExport = 0;
+                int countMaybeRefreshPkgDumpExport = 0;
+
+                for (NaturalLanguageCoordinates naturalLanguage : naturalLanguages) {
+                    for (String repositorySourceCode : repositorySourceCodes) {
+                        countMaybeRefreshPkgDumpExport++;
+                        if (maybePerformPkgDumpExportRefresh(now, naturalLanguage, repositorySourceCode)) {
+                            countDidRefreshPkgDumpExport++;
+                        }
+                    }
+                }
+
+                logAllCounts("did refresh", new AllActionCounts(
+                        ActionCounts.singleton(didRefreshRepositoryDumpExport),
+                        ActionCounts.singleton(didRefreshPkgIconExportArchive),
+                        new ActionCounts(countDidRefreshReferenceDumpExport, naturalLanguages.size()),
+                        new ActionCounts(countDidRefreshPkgDumpExport, countMaybeRefreshPkgDumpExport)
+                ));
             }
             finally {
                 refreshLock.unlock();
@@ -196,31 +217,48 @@ public class BulkDataJobCoordinatorServiceImpl implements BulkDataJobCoordinator
         Set<String> repositorySourceCodes = derivedRepositorySourceCodesToRenewFor();
         LOGGER.info("found {} repository source codes to clear expired for", repositorySourceCodes.size());
 
-        clearExpiredRepositoryDumpExport(now);
+        ActionCounts repositoryDumpExportCounts = clearExpiredRepositoryDumpExport(now);
 
-        clearPkgIconExportArchive(now);
+        ActionCounts pkgIconExportCounts = clearPkgIconExportArchive(now);
+
+        ActionCounts expiredReferenceDumpCounts = ActionCounts.empty();
 
         for (NaturalLanguageCoordinates naturalLanguage : naturalLanguages) {
-            clearExpiredReferenceDumpExport(now, naturalLanguage);
+            expiredReferenceDumpCounts = expiredReferenceDumpCounts.add(
+                    clearExpiredReferenceDumpExport(now, naturalLanguage));
         }
+
+        ActionCounts expiredPkgDumpExportCounts = ActionCounts.empty();
 
         for (NaturalLanguageCoordinates naturalLanguage : naturalLanguages) {
             for (String repositorySourceCode : repositorySourceCodes) {
-                clearExpiredPkgDumpExport(now, naturalLanguage, repositorySourceCode);
+                expiredPkgDumpExportCounts = expiredPkgDumpExportCounts.add(
+                        clearExpiredPkgDumpExport(now, naturalLanguage, repositorySourceCode));
             }
         }
 
-        LOGGER.info("did clear expired");
+        logAllCounts(
+                "did clear expired",
+                new AllActionCounts(
+                        repositoryDumpExportCounts,
+                        pkgIconExportCounts,
+                        expiredReferenceDumpCounts,
+                        expiredPkgDumpExportCounts
+                )
+        );
     }
 
     @VisibleForTesting
-    void clearExpiredRepositoryDumpExport(Instant now) {
+    ActionCounts clearExpiredRepositoryDumpExport(Instant now) {
         RepositoryDumpExportJobSpecification specification = createRepositoryDumpExportJobSpecification();
-        clearExpiredJobsBySpecification(now, specification);
+        return clearExpiredJobsBySpecification(now, specification);
     }
 
+    /**
+     * @return true if it did do a refresh
+     */
     @VisibleForTesting
-    void maybePerformRepositoryDumpExportRefresh(Instant now) {
+    boolean maybePerformRepositoryDumpExportRefresh(Instant now) {
         RepositoryDumpExportJobSpecification specification = createRepositoryDumpExportJobSpecification();
 
         Optional<? extends JobSnapshot> jobOptional = jobService.tryGetLatestMatchingJob(
@@ -235,21 +273,28 @@ public class BulkDataJobCoordinatorServiceImpl implements BulkDataJobCoordinator
             if (shouldRenew(now, lastRepositoryModifyTimestamp, job)) {
                 String renewedJobCode = jobService.submit(specification, Set.of());
                 LOGGER.info("repository dump export [{}] renewed as [{}]", job.getGuid(), renewedJobCode);
+                return true;
             } else {
-                LOGGER.info("repository dump export [{}] -> renew not necessary", job.getGuid());
+                LOGGER.debug("repository dump export [{}] -> renew not necessary", job.getGuid());
             }
         } else {
             String newJobCode = jobService.submit(specification, Set.of());
             LOGGER.info("repository dump export not found -> will generate as [{}]", newJobCode);
+            return true;
         }
+
+        return false;
     }
 
-    private void clearPkgIconExportArchive(Instant now) {
+    private ActionCounts clearPkgIconExportArchive(Instant now) {
         PkgIconExportArchiveJobSpecification specification = createPkgIconExportArchiveJobSpecification();
-        clearExpiredJobsBySpecification(now, specification);
+        return clearExpiredJobsBySpecification(now, specification);
     }
 
-    private void maybePerformPkgIconExportArchiveRefresh(Instant now) {
+    /**
+     * @return true if the refresh was performed.
+     */
+    private boolean maybePerformPkgIconExportArchiveRefresh(Instant now) {
         PkgIconExportArchiveJobSpecification specification = createPkgIconExportArchiveJobSpecification();
         Optional<? extends JobSnapshot> jobOptional = jobService.tryGetLatestMatchingJob(
                 specification, STATUSES_QUEUED_STARTED_FINISHED);
@@ -260,21 +305,28 @@ public class BulkDataJobCoordinatorServiceImpl implements BulkDataJobCoordinator
             if (shouldRenew(now, null, job)) {
                 String renewedJobCode = jobService.submit(specification, Set.of());
                 LOGGER.info("pkg icon export archive [{}] renewed as [{}]", job.getGuid(), renewedJobCode);
+                return true;
             } else {
-                LOGGER.info("pkg icon export archive [{}] -> renew not necessary", job.getGuid());
+                LOGGER.debug("pkg icon export archive [{}] -> renew not necessary", job.getGuid());
             }
         } else {
             String newJobCode = jobService.submit(specification, Set.of());
             LOGGER.info("pkg icon export archive not found -> will generate as [{}]", newJobCode);
+            return true;
         }
+
+        return false;
     }
 
-    private void clearExpiredReferenceDumpExport(Instant now, NaturalLanguageCoordinates naturalLanguage) {
+    private ActionCounts clearExpiredReferenceDumpExport(Instant now, NaturalLanguageCoordinates naturalLanguage) {
         ReferenceDumpExportJobSpecification specification = createReferenceDumpExportJobSpecification(naturalLanguage);
-        clearExpiredJobsBySpecification(now, specification);
+        return clearExpiredJobsBySpecification(now, specification);
     }
 
-    private void maybePerformReferenceDumpExportRefresh(Instant now, NaturalLanguageCoordinates naturalLanguage) {
+    /**
+     * @return true if the data was refreshed
+     */
+    private boolean maybePerformReferenceDumpExportRefresh(Instant now, NaturalLanguageCoordinates naturalLanguage) {
         ReferenceDumpExportJobSpecification specification = createReferenceDumpExportJobSpecification(naturalLanguage);
         Optional<? extends JobSnapshot> jobOptional = jobService.tryGetLatestMatchingJob(
                 specification, STATUSES_QUEUED_STARTED_FINISHED);
@@ -285,24 +337,31 @@ public class BulkDataJobCoordinatorServiceImpl implements BulkDataJobCoordinator
             if (shouldRenew(now, null, job)) {
                 String renewedJobCode = jobService.submit(specification, Set.of());
                 LOGGER.info("reference dump export [{}] renewed as [{}]", job.getGuid(), renewedJobCode);
+                return true;
             } else {
-                LOGGER.info("reference dump export [{}] -> renew not necessary", job.getGuid());
+                LOGGER.debug("reference dump export [{}] -> renew not necessary", job.getGuid());
             }
         } else {
             String newJobCode = jobService.submit(specification, Set.of());
             LOGGER.info("reference dump export not found -> will generate as [{}]", newJobCode);
+            return true;
         }
+
+        return false;
     }
 
-    private void clearExpiredPkgDumpExport(
+    private ActionCounts clearExpiredPkgDumpExport(
             Instant now,
             NaturalLanguageCoordinates naturalLanguage,
             String repositorySourceCode) {
         PkgDumpExportJobSpecification specification = createPkgDumpExportJobSpecification(naturalLanguage, repositorySourceCode);
-        clearExpiredJobsBySpecification(now, specification);
+        return clearExpiredJobsBySpecification(now, specification);
     }
 
-    private void maybePerformPkgDumpExportRefresh(
+    /**
+     * @return true if the data was refreshed.
+     */
+    private boolean maybePerformPkgDumpExportRefresh(
             Instant now,
             NaturalLanguageCoordinates naturalLanguage,
             String repositorySourceCode) {
@@ -317,13 +376,17 @@ public class BulkDataJobCoordinatorServiceImpl implements BulkDataJobCoordinator
             if (shouldRenew(now, lastPkgModifiedTimestamp, job)) {
                 String renewedJobCode = jobService.submit(specification, Set.of());
                 LOGGER.info("pkg dump [{}] export renewed as [{}]", job.getGuid(), renewedJobCode);
+                return true;
             } else {
                 LOGGER.debug("pkg dump export [{}] -> renew not necessary", job.getGuid());
             }
         } else {
             String newJobCode = jobService.submit(specification, Set.of());
             LOGGER.info("pkg dump export not found -> will generate as [{}]", newJobCode);
+            return true;
         }
+
+        return false;
     }
 
     /**
@@ -373,7 +436,7 @@ public class BulkDataJobCoordinatorServiceImpl implements BulkDataJobCoordinator
         // from the publishing process.
 
         if (job.getStartTimestamp().toInstant().plus(renewStanddownSinceLastStartDuration).isAfter(now)) {
-            LOGGER.info("the job [{}] is too new --> won't consider renew", job.getGuid());
+            LOGGER.debug("the job [{}] is too new --> won't consider renew", job.getGuid());
             return false;
         }
 
@@ -420,7 +483,9 @@ public class BulkDataJobCoordinatorServiceImpl implements BulkDataJobCoordinator
                 .select(context));
     }
 
-    private void clearExpiredJobsBySpecification(Instant now, JobSpecification specification) {
+    private ActionCounts clearExpiredJobsBySpecification(Instant now, JobSpecification specification) {
+
+        int didClearCount = 0;
 
         // TODO (andponlin) this needs to be more efficient; can we somehow predicate the list on
         //  more of the information in the specification?
@@ -469,10 +534,13 @@ public class BulkDataJobCoordinatorServiceImpl implements BulkDataJobCoordinator
                     oldJobsToRemove.size(),
                     specification.getJobTypeCode());
 
+            didClearCount = oldJobsToRemove.size();
             oldJobsToRemove.forEach(js -> jobService.removeJob(js.getGuid()));
         } else {
             LOGGER.debug("there are no expired jobs to clear of type [{}]", specification.getJobTypeCode());
         }
+
+        return new ActionCounts(didClearCount, jobs.size());
     }
 
     private String getOrCreateBySpecification(JobSpecification specification) {
@@ -514,6 +582,52 @@ public class BulkDataJobCoordinatorServiceImpl implements BulkDataJobCoordinator
         specification.setNaturalLanguageCode(naturalLanguage.getCode());
         specification.setFilterForSimpleTwoCharLanguageCodes(false);
         return specification;
+    }
+
+    private void logAllCounts(String action, AllActionCounts allActionCounts) {
+        LOGGER.info(
+                "{}; {} repository dump exports, {} icon export archives, {} reference dump exports, {} pkg dump exports",
+                action,
+                allActionCounts.repositoryDumpExports(),
+                allActionCounts.pkgIconExportArchives(),
+                allActionCounts.referenceDumpExports(),
+                allActionCounts.pkgDumpExports());
+    }
+
+    /**
+     * <p>Records the count of actions taken against the categories of data. This is used for logging.</p>
+     */
+    record AllActionCounts(
+            ActionCounts repositoryDumpExports,
+            ActionCounts pkgIconExportArchives,
+            ActionCounts referenceDumpExports,
+            ActionCounts pkgDumpExports
+    ) {
+    }
+
+    record ActionCounts(
+            int refreshed,
+            int total
+    ) {
+
+        static ActionCounts singleton(boolean value) {
+            return new ActionCounts(value ? 1 : 0, 1);
+        }
+
+        static ActionCounts empty() {
+            return new ActionCounts(0, 0);
+        }
+
+        ActionCounts add(ActionCounts other) {
+            return new ActionCounts(refreshed + other.refreshed(), total + other.total());
+        }
+
+        @NotNull
+        @Override
+        public String toString() {
+            return "%d/%d".formatted(refreshed, total);
+        }
+
     }
 
 }
