@@ -81,6 +81,15 @@ div.common-alert-container {
     padding: 6px;
 }
 
+div.common-alert-muted-container {
+    background-color: #efefef;
+    border-color: lightgray;
+}
+
+div.common-alert-muted-container div.common-alert-icon {
+    color: lightgray;
+}
+
 div.common-alert-info-container {
     background-color: #d2f4d2;
     border-color: #47c547;

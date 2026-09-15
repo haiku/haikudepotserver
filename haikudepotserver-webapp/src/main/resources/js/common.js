@@ -104,6 +104,22 @@ const HDS = {
         }
     },
 
+    /**
+     * Remove a class name `klass` from an element.
+     * @param {Element} el
+     */
+    submitParentForm: function(el) {
+        while(el) {
+            if (el.tagName.toLowerCase() === "form") {
+                el.submit();
+            }
+
+            el = el.parentElement;
+        }
+
+        throw Error("unable to find the parent form");
+    }
+
 }
 
 document.addEventListener("DOMContentLoaded", HDS.initialize);

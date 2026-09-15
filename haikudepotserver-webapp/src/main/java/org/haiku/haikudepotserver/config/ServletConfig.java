@@ -9,12 +9,16 @@ import io.micrometer.core.instrument.MeterRegistry;
 import jakarta.servlet.Filter;
 import jakarta.servlet.http.HttpServlet;
 import org.apache.cayenne.configuration.server.ServerRuntime;
+import org.haiku.haikudepotserver.multipage.MultipageConstants;
+import org.haiku.haikudepotserver.multipage.MultipageDomainSessionAttributeFilter;
+import org.haiku.haikudepotserver.multipage.controller.LinkToSsoController;
 import org.haiku.haikudepotserver.support.desktopapplication.DesktopApplicationMetricsFilter;
 import org.haiku.haikudepotserver.support.desktopapplication.DesktopApplicationMinimumVersionFilter;
 import org.haiku.haikudepotserver.support.logging.LoggingFilter;
 import org.haiku.haikudepotserver.support.web.DelayFilter;
 import org.haiku.haikudepotserver.support.web.ErrorServlet;
 import org.haiku.haikudepotserver.support.web.RemoteLogCaptureServlet;
+import org.haiku.haikudepotserver.support.web.WebConstants;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.web.servlet.FilterRegistrationBean;
 import org.springframework.boot.web.servlet.ServletRegistrationBean;
@@ -97,6 +101,23 @@ public class ServletConfig {
         registrationBean.addUrlPatterns("/*");
         registrationBean.setOrder(25);
         registrationBean.setName("logging-filter");
+        return registrationBean;
+    }
+
+    /**
+     * <p>This filter will ensure that for the multipage system only the belonging data is
+     * retained in the {@link jakarta.servlet.http.HttpSession}.</p>
+     */
+    @Bean
+    public FilterRegistrationBean<Filter> multipageDomainSessionAttributeFilter(ServerRuntime serverRuntime) {
+        FilterRegistrationBean<Filter> registrationBean = new FilterRegistrationBean<>();
+        registrationBean.setFilter(new MultipageDomainSessionAttributeFilter());
+        registrationBean.addUrlPatterns(
+                "/%s".formatted(MultipageConstants.SEGMENT_MULTIPAGE),
+                "/%s/*".formatted(MultipageConstants.SEGMENT_MULTIPAGE)
+        );
+        registrationBean.setOrder(30);
+        registrationBean.setName("multipage-domain-session-attribute-filter");
         return registrationBean;
     }
 

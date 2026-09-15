@@ -60,6 +60,7 @@ content = @`
                 <div id="login-cookie-note">${internationalizationSupplier.getMessage("mp.login.cookies.description")}</div>
                 <input type="submit" name="submit" value="${internationalizationSupplier.getMessage("mp.login.action.login.title")}">
             </div>
+
         </form>
 
         <h3>${internationalizationSupplier.getMessage("mp.gen.actions")}</h3>

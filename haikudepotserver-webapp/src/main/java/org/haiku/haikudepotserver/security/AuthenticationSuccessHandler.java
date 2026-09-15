@@ -5,12 +5,12 @@
 package org.haiku.haikudepotserver.security;
 
 import com.google.common.base.Preconditions;
-import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import org.apache.cayenne.ObjectContext;
 import org.apache.cayenne.configuration.server.ServerRuntime;
 import org.apache.commons.lang3.StringUtils;
+import org.haiku.haikudepotserver.dataobjects.User;
 import org.haiku.haikudepotserver.multipage.MultipageConstants;
 import org.haiku.haikudepotserver.multipage.controller.UserUsageConditionsAgreeController;
 import org.haiku.haikudepotserver.support.web.WebConstants;
@@ -44,9 +44,9 @@ public class AuthenticationSuccessHandler implements org.springframework.securit
     public void onAuthenticationSuccess(
             HttpServletRequest request,
             HttpServletResponse response,
-            Authentication authentication) throws IOException, ServletException {
+            Authentication authentication) throws IOException {
 
-        if (hasAgreedToLatestUserUsageConditions(authentication)) {
+        if (hasAgreedToLatestUserUsageConditionsOrSkip(authentication)) {
             response.sendRedirect(deriveRedirectUri(request));
         } else {
             LOGGER.info("user has not agreed to user usage conditions -> redirect to agreement page");
@@ -64,20 +64,44 @@ public class AuthenticationSuccessHandler implements org.springframework.securit
     }
 
     private String deriveRedirectUri(HttpServletRequest request) {
-        return Optional.ofNullable(request.getParameter(WebConstants.KEY_REDIRECT_URI))
-                .filter(StringUtils::isNotBlank)
-                .orElseGet(() -> "/%s".formatted(MultipageConstants.SEGMENT_MULTIPAGE));
+        String uri = request.getParameter(WebConstants.KEY_REDIRECT_URI);
+
+        if (StringUtils.isBlank(uri)) {
+            uri = Optional.ofNullable(request.getSession(false))
+                    .map(s -> s.getAttribute(WebConstants.KEY_FINAL_REDIRECT_URI))
+                    .map(Object::toString)
+                    .filter(StringUtils::isNotBlank)
+                    .orElse(null);
+        }
+
+        if (StringUtils.isBlank(uri)) {
+            uri = "/%s".formatted(MultipageConstants.SEGMENT_MULTIPAGE);
+        }
+
+        return uri;
     }
 
     /**
      * <p>Check to make sure that the {@code authentication}'s user has agreed to the latest user usage
      * conditions.</p>
      */
-    private boolean hasAgreedToLatestUserUsageConditions(Authentication authentication) {
+    private boolean hasAgreedToLatestUserUsageConditionsOrSkip(Authentication authentication) {
         ObjectContext context = serverRuntime.newContext();
-        return AuthenticationHelper.tryGetUserForAuthentication(context, authentication)
-                .map(userService::isUserCurrentlyAgreeingToCurrentUserUsageConditions)
-                .orElse(false);
+        User user = AuthenticationHelper.tryGetUserForAuthentication(context, authentication).orElse(null);
+
+        if (null != user) {
+            if (!user.getActive()) {
+                throw new IllegalStateException("user [%s] authenticated but is not active".formatted(user));
+            }
+
+            if (user.getIsRoot()) {
+                return true;
+            }
+
+            return userService.isUserCurrentlyAgreeingToCurrentUserUsageConditions(user);
+        }
+
+        return true;
     }
 
 }

@@ -13,7 +13,8 @@ Distributed under the terms of the MIT License.
     <div class="common-alert-icon">
         @if (type == AlertType.INFO)
             @template.multipage.common.common-svg-sprite-use(width = 16, height = 16, symbolId = "bi-info-circle-fill")
-        @else
+        @endif
+        @if (type == AlertType.ERROR || type == AlertType.WARNING)
             @template.multipage.common.common-svg-sprite-use(width = 16, height = 16, symbolId = "bi-exclamation-circle-fill")
         @endif
     </div>

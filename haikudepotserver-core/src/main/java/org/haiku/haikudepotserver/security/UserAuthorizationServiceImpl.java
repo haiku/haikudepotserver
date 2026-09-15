@@ -80,10 +80,9 @@ public class UserAuthorizationServiceImpl implements UserAuthorizationService {
                 case REPOSITORY -> Repository.tryGetByCode(objectContext, targetIdentifier);
                 case USER -> User.tryGetByNickname(objectContext, targetIdentifier);
                 case USERRATING -> UserRating.tryGetByCode(objectContext, targetIdentifier);
-                default -> throw new IllegalStateException("the target type is not handled; " + targetType.name());
             };
 
-            // if the object was not able to be found then we should bail-out and say that the permission
+            // if the object was not found then we should bail-out and say that the permission
             // does not apply.
 
             if (targetOptional.isEmpty()) {

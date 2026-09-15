@@ -11,6 +11,8 @@ For local development, say in an IDE system, HDS can be launched as a SpringBoot
   - Postgres Database Server and Client 14+
   - Python 3
   - Podman
+1. Setup SSO (KeyCloak) server
+  - Listening on a TCP/IP socket
 1. Setup the database server
   - Listening on a TCP/IP socket
   - Empty database
@@ -28,6 +30,24 @@ For local development, say in an IDE system, HDS can be launched as a SpringBoot
   - `hds.graphics-server.base-uri`
 
   If you don't have an SMTP mail host this can be omitted for a development scenario unless you want to test those functions such as "forgot password".
+
+## SSO (KeyCloak)
+
+Start [KeyCloak](https://www.keycloak.org/) from a terminal.
+
+```shell
+KC_HTTP_PORT=7080 ./bin/kc.sh start-dev
+```
+
+- Create a Realm `haiku-dev`.
+- Create client `haikudepotserver-dev`.
+ - Authentication flow : "Standard flow"
+ - Client authentication : YES
+ - Root URL : `http://localhost:8080`
+ - Home URL : `http://localhost:8080`
+ - Valid redirect URL : `http://localhost:8080/__security/login/oauth2/code/haiku`
+ - Valid post logout redirect URIs : `http://localhost:8080`
+ - Web origins : `http://localhost:8080`
 
 ## Run from Maven
 
@@ -86,10 +106,9 @@ The application can be accessed using a web browser on `http://localhost:8080` o
 
 If you're running an integration test within the IDE, add the following command line parameters for the test-runner;
 
-```
--Dgg.jte.use-precompiled-templates=false
--Dgg.jte.development-mode=true
-```
+- `-Dgg.jte.template-location=haikudepotserver-webapp/src/main/jte`
+- `-Dgg.jte.use-precompiled-templates=false`
+- `-Dgg.jte.development-mode=true`
 
 ## Run integration-tests
 

@@ -12,6 +12,13 @@ import java.util.Set;
 
 public class MultipageConstants {
 
+    /**
+     * This string is a prefix of session attribute names which belong to the
+     * multipage domains.
+     */
+
+    public final static String MULTIPAGE_DOMAIN_SESSION_ATTRIBUTE_NAME_PREFIX = "hds.mp.domain.";
+
     public final static String SEGMENT_MULTIPAGE = "__multipage";
 
     public final static String PATH_MULTIPAGE = "/" + SEGMENT_MULTIPAGE;

@@ -40,6 +40,7 @@ public abstract class _User extends AbstractDataObject {
     public static final StringProperty<String> NICKNAME = PropertyFactory.createString("nickname", String.class);
     public static final StringProperty<String> PASSWORD_HASH = PropertyFactory.createString("passwordHash", String.class);
     public static final StringProperty<String> PASSWORD_SALT = PropertyFactory.createString("passwordSalt", String.class);
+    public static final StringProperty<String> SSO_IDENTIFIER = PropertyFactory.createString("ssoIdentifier", String.class);
     public static final EntityProperty<NaturalLanguage> NATURAL_LANGUAGE = PropertyFactory.createEntity("naturalLanguage", NaturalLanguage.class);
     public static final ListProperty<PermissionUserPkg> PERMISSION_USER_PKGS = PropertyFactory.createList("permissionUserPkgs", PermissionUserPkg.class);
     public static final ListProperty<UserPasswordResetToken> USER_PASSWORD_RESET_TOKENS = PropertyFactory.createList("userPasswordResetTokens", UserPasswordResetToken.class);
@@ -55,6 +56,7 @@ public abstract class _User extends AbstractDataObject {
     protected String nickname;
     protected String passwordHash;
     protected String passwordSalt;
+    protected String ssoIdentifier;
 
     protected Object naturalLanguage;
     protected Object permissionUserPkgs;
@@ -161,6 +163,16 @@ public abstract class _User extends AbstractDataObject {
         return this.passwordSalt;
     }
 
+    public void setSsoIdentifier(String ssoIdentifier) {
+        beforePropertyWrite("ssoIdentifier", this.ssoIdentifier, ssoIdentifier);
+        this.ssoIdentifier = ssoIdentifier;
+    }
+
+    public String getSsoIdentifier() {
+        beforePropertyRead("ssoIdentifier");
+        return this.ssoIdentifier;
+    }
+
     public void setNaturalLanguage(NaturalLanguage naturalLanguage) {
         setToOneTarget("naturalLanguage", naturalLanguage, true);
     }
@@ -237,6 +249,8 @@ public abstract class _User extends AbstractDataObject {
                 return this.passwordHash;
             case "passwordSalt":
                 return this.passwordSalt;
+            case "ssoIdentifier":
+                return this.ssoIdentifier;
             case "naturalLanguage":
                 return this.naturalLanguage;
             case "permissionUserPkgs":
@@ -287,6 +301,9 @@ public abstract class _User extends AbstractDataObject {
             case "passwordSalt":
                 this.passwordSalt = (String)val;
                 break;
+            case "ssoIdentifier":
+                this.ssoIdentifier = (String)val;
+                break;
             case "naturalLanguage":
                 this.naturalLanguage = val;
                 break;
@@ -325,6 +342,7 @@ public abstract class _User extends AbstractDataObject {
         out.writeObject(this.nickname);
         out.writeObject(this.passwordHash);
         out.writeObject(this.passwordSalt);
+        out.writeObject(this.ssoIdentifier);
         out.writeObject(this.naturalLanguage);
         out.writeObject(this.permissionUserPkgs);
         out.writeObject(this.userPasswordResetTokens);
@@ -344,6 +362,7 @@ public abstract class _User extends AbstractDataObject {
         this.nickname = (String)in.readObject();
         this.passwordHash = (String)in.readObject();
         this.passwordSalt = (String)in.readObject();
+        this.ssoIdentifier = (String)in.readObject();
         this.naturalLanguage = in.readObject();
         this.permissionUserPkgs = in.readObject();
         this.userPasswordResetTokens = in.readObject();

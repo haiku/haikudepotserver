@@ -428,6 +428,7 @@
 		<db-attribute name="nickname" type="VARCHAR" isMandatory="true" length="32"/>
 		<db-attribute name="password_hash" type="VARCHAR" isMandatory="true" length="255"/>
 		<db-attribute name="password_salt" type="VARCHAR" isMandatory="true" length="255"/>
+		<db-attribute name="sso_identifier" type="VARCHAR" length="255"/>
 		<db-key-generator>
 			<db-generator-type>ORACLE</db-generator-type>
 			<db-generator-name>haikudepot.user_seq</db-generator-name>
@@ -679,6 +680,7 @@
 		<obj-attribute name="nickname" type="java.lang.String" lock="true" db-attribute-path="nickname"/>
 		<obj-attribute name="passwordHash" type="java.lang.String" lock="true" db-attribute-path="password_hash"/>
 		<obj-attribute name="passwordSalt" type="java.lang.String" lock="true" db-attribute-path="password_salt"/>
+		<obj-attribute name="ssoIdentifier" type="java.lang.String" lock="true" db-attribute-path="sso_identifier"/>
 		<post-add method-name="onPostAdd"/>
 	</obj-entity>
 	<obj-entity name="UserPasswordResetToken" className="org.haiku.haikudepotserver.dataobjects.UserPasswordResetToken" lock-type="optimistic" dbEntityName="user_password_reset_token" superClassName="org.haiku.haikudepotserver.dataobjects.support.AbstractDataObject">

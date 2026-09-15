@@ -43,10 +43,11 @@ public class LoginController {
 
     public LoginController(
             InternationalizationSupplierFactory internationalizationSupplierFactory,
-            MultipageWebResourceService multipageWebResourceService, MultipageNavigationService multipageNavigationService) {
+            MultipageWebResourceService multipageWebResourceService,
+            MultipageNavigationService multipageNavigationService) {
         this.internationalizationSupplierFactory = Preconditions.checkNotNull(internationalizationSupplierFactory);
         this.multipageWebResourceService = Preconditions.checkNotNull(multipageWebResourceService);
-        this.multipageNavigationService = multipageNavigationService;
+        this.multipageNavigationService = Preconditions.checkNotNull(multipageNavigationService);
     }
 
     @RequestMapping(method = RequestMethod.GET, produces = MediaType.TEXT_HTML_VALUE)

@@ -5,6 +5,7 @@
 package org.haiku.haikudepotserver.multipage.model;
 
 public enum AlertType {
+    MUTED,
     INFO,
     WARNING,
     ERROR
