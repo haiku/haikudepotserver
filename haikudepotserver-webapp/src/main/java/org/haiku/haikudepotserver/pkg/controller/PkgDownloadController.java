@@ -46,7 +46,7 @@ public class PkgDownloadController {
     protected static final Logger LOGGER = LoggerFactory.getLogger(PkgDownloadController.class);
 
     // TODO; should be injected into the orchestration service.
-    private final static String SEGMENT_PKGDOWNLOAD = PkgServiceImpl.URL_SEGMENT_PKGDOWNLOAD;
+    public final static String SEGMENT_PKGDOWNLOAD = PkgServiceImpl.URL_SEGMENT_PKGDOWNLOAD;
 
     private final static String KEY_PKGNAME = "pkgName";
     private final static String KEY_REPOSITORYCODE = "repositoryCode";

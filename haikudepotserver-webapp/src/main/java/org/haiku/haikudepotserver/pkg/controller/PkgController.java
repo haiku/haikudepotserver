@@ -28,10 +28,12 @@ import java.io.IOException;
 import java.util.Optional;
 
 @Controller
-@RequestMapping(path = { "__pkg" })
+@RequestMapping(path = { PkgController.SEGMENT_PKG })
 public class PkgController {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(PkgController.class);
+
+    public final static String SEGMENT_PKG = "__pkg";
 
     private final static String KEY_REPOSITORYSOURCECODE = "repositorySourceCode";
     private final static String KEY_NATURALLANGUAGECODE = "naturalLanguageCode";
@@ -51,7 +53,7 @@ public class PkgController {
 
     /**
      * <p>This streams back a redirect to report data that contains a JSON stream gzip-compressed
-     * that describes all of the packages for a repository source.  This is used by clients to get
+     * that describes all the packages for a repository source.  This is used by clients to get
      * deep(ish) data on all pkgs without having to query each one.</p>
      *
      * <p>The primary client for this is the Haiku desktop application &quot;Haiku Depot&quot;.

@@ -32,6 +32,7 @@ import java.util.Optional;
 public class UserController {
 
     public final static String SEGMENT_USER = "__user";
+    public final static String SEGMENT_USAGE_CONDITIONS = "usageconditions";
 
     public final static String LATEST = "latest";
 
@@ -51,7 +52,8 @@ public class UserController {
     }
 
     @RequestMapping(
-            value = "/" + SEGMENT_USER + "/usageconditions/{" + KEY_CODE + "}/document.md",
+            // TODO (andponlin) better path formation required
+            value = "/" + SEGMENT_USER + "/" + SEGMENT_USAGE_CONDITIONS + "/{" + KEY_CODE + "}/document.md",
             method = RequestMethod.GET)
     public void handleGetUserUsageConditionsMarkdown(
             HttpServletResponse response,
@@ -73,7 +75,8 @@ public class UserController {
     }
 
     @RequestMapping(
-            value = "/" + SEGMENT_USER + "/usageconditions/{" + KEY_CODE + "}/document.html",
+            // TODO (andponlin) better path formation required
+            value = "/" + SEGMENT_USER + "/" + SEGMENT_USAGE_CONDITIONS + "/{" + KEY_CODE + "}/document.html",
             method = RequestMethod.GET)
     public void handleGetUserUsageConditionsHtml(
             HttpServletResponse response,

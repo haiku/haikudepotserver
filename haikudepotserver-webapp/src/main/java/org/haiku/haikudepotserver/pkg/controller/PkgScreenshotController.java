@@ -49,7 +49,7 @@ public class PkgScreenshotController extends AbstractController {
     protected final static Logger LOGGER = LoggerFactory.getLogger(PkgScreenshotController.class);
 
     public final static String SEGMENT_SCREENSHOT = "__pkgscreenshot";
-    final static String SEGMENT_SCREENSHOT_LEGACY = "pkgscreenshot";
+    public final static String SEGMENT_SCREENSHOT_LEGACY = "pkgscreenshot";
 
     final static String HEADER_SCREENSHOTCODE = "X-HaikuDepotServer-ScreenshotCode";
 

@@ -147,8 +147,8 @@ In order to prevent the possibility of this API causing undue load on the applic
 It is possible for an administrator to configure a password on the Repository.  If this is the case then this API will require a Basic authentication header to be sent to authenticate the request with the configured password.  The username provided in the Basic authentication header is ignored.
 
 ```
-curl -X --user ":{repo-password}" "${BASE_URL}/__repository/{repositorycode}/import"
-curl -X --user ":{repo-password}" "${BASE_URL}/__repository/{repositorycode}/source/{repositorysourcecode}/import"
+curl -X POST --user ":{repo-password}" "${BASE_URL}/__repository/{repositorycode}/import"
+curl -X POST --user ":{repo-password}" "${BASE_URL}/__repository/{repositorycode}/source/{repositorysourcecode}/import"
 ```
 
 The API will accept HTTP Basic authentication where the password has been set for the repository.

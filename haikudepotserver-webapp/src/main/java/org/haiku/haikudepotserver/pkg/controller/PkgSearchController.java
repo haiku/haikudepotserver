@@ -56,8 +56,8 @@ public class PkgSearchController {
 
     private final static String KEY_QUERY = "srchexpr";
 
-    final static String SEGMENT_SEARCH = "__pkgsearch";
-    final static String SEGMENT_SEARCH_LEGACY = "pkgsearch";
+    public final static String SEGMENT_SEARCH = "__pkgsearch";
+    public final static String SEGMENT_SEARCH_LEGACY = "pkgsearch";
 
     private final Configuration freemarkerConfiguration;
     private final ServerRuntime serverRuntime;

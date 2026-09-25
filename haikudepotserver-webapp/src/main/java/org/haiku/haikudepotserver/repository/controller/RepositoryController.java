@@ -7,6 +7,7 @@ package org.haiku.haikudepotserver.repository.controller;
 
 import com.google.common.base.Preconditions;
 import com.google.common.net.HttpHeaders;
+import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import org.apache.cayenne.ObjectContext;
 import org.apache.cayenne.configuration.server.ServerRuntime;
@@ -26,6 +27,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.access.PermissionEvaluator;
 import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.web.util.matcher.RequestMatcher;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestHeader;
@@ -198,6 +200,30 @@ public class RepositoryController extends AbstractController {
                 JobSnapshot.COALESCE_STATUSES_QUEUED);
 
         return ResponseEntity.ok("repository source import submitted");
+    }
+
+    /**
+     * <p>This is a simple {@link RequestMatcher} that will match the endpoints above that are for triggering the
+     * import of a repository or repository source. This is used in the security config because these endpoints
+     * can have specific Basic Authentication setup.</p>
+     */
+
+    public static class ImportRequestMatcher implements RequestMatcher {
+        @Override
+        public boolean matches(HttpServletRequest request) {
+            String url = getUrl(request);
+            return url.startsWith("/" + SEGMENT_REPOSITORY)
+                    && url.endsWith("/" + SEGMENT_IMPORT);
+        }
+
+        private String getUrl(HttpServletRequest request) {
+            String url = request.getServletPath();
+            String pathInfo = request.getPathInfo();
+            if (pathInfo != null) {
+                return url + pathInfo;
+            }
+            return url;
+        }
     }
 
 }

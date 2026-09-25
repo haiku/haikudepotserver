@@ -47,10 +47,12 @@ import java.util.Optional;
 import java.util.Set;
 
 @Controller
-@RequestMapping(path = {"__reference"})
+@RequestMapping(path = {ReferenceController.SEGMENT_REFERENCE})
 public class ReferenceController extends AbstractController {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(ReferenceController.class);
+
+    public final static String SEGMENT_REFERENCE = "__reference";
 
     private final static String KEY_NATURALLANGUAGECODE = "naturalLanguageCode";
 

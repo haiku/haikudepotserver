@@ -47,7 +47,7 @@ public class PkgIconController extends AbstractController {
 
     public final static String SEGMENT_PKGICON = "__pkgicon";
 
-    private final static String SEGMENT_GENERICPKGICON = "__genericpkgicon.png";
+    public final static String SEGMENT_GENERICPKGICON = "__genericpkgicon.png";
 
     private final static String SEGMENT_ALL_TAR_BALL = "all.tar.gz";
 
