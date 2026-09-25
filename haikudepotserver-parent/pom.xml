@@ -55,7 +55,7 @@
         <cayenne.version>4.2.3</cayenne.version>
 
         <flexmark.version>0.64.8</flexmark.version>
-        <freemarker.version>2.3.34</freemarker.version>
+        <freemarker.version>2.3.35</freemarker.version>
         <jte.version>3.2.4</jte.version>
         <aircompressor.version>3.7</aircompressor.version>
         <guava.version>33.6.0-jre</guava.version>
