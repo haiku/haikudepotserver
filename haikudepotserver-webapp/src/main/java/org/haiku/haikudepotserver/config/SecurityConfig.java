@@ -79,6 +79,15 @@ public class SecurityConfig {
 
     @Bean
     @Order(1)
+    public SecurityFilterChain filterChainActuator(HttpSecurity http) {
+        return http
+                .securityMatcher("/actuator/**")
+                .authorizeHttpRequests(ar -> ar.anyRequest().permitAll())
+                .build();
+    }
+
+    @Bean
+    @Order(2)
     public SecurityFilterChain filterChainRepositoryImport(HttpSecurity http) {
         http
                 .securityMatcher(new RepositoryController.ImportRequestMatcher())
@@ -105,7 +114,7 @@ public class SecurityConfig {
      * store.</p>
      */
     @Bean
-    @Order(2)
+    @Order(3)
     public SecurityFilterChain filterChainGeneralStateless(HttpSecurity http) {
 
         WebResourcePathPrefixes pathPrefixes = multipageWebResourceService.getPathPrefixes();
@@ -164,7 +173,7 @@ public class SecurityConfig {
      * <p>This is a security filter chain for stateful endpoints where somebody <em>might</em> be logged in.</p>
      */
     @Bean
-    @Order(3)
+    @Order(4)
     public SecurityFilterChain filterChain(HttpSecurity http) {
         AuthenticationEntryPoint authenticationEntryPoint = new AuthenticationEntryPoint(objectMapper);
         AccessDeniedHandler accessDeniedHandler = new AccessDeniedHandler(objectMapper);
@@ -251,7 +260,7 @@ public class SecurityConfig {
      * <p>This last security chain will deny anything else.</p>
      */
     @Bean
-    @Order(3)
+    @Order(5)
     public SecurityFilterChain filterChainLastResort(HttpSecurity http) {
         http.authorizeHttpRequests(ar -> ar.anyRequest().denyAll());
         return http.build();
