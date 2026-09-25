@@ -217,12 +217,7 @@ public class RepositoryController extends AbstractController {
         }
 
         private String getUrl(HttpServletRequest request) {
-            String url = request.getServletPath();
-            String pathInfo = request.getPathInfo();
-            if (pathInfo != null) {
-                return url + pathInfo;
-            }
-            return url;
+            return request.getRequestURI();
         }
     }
 
