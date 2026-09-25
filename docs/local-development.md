@@ -49,6 +49,23 @@ KC_HTTP_PORT=7080 ./bin/kc.sh start-dev
  - Valid post logout redirect URIs : `http://localhost:8080`
  - Web origins : `http://localhost:8080`
 
+Configure the following development properties;
+
+```
+spring:
+  security:
+    oauth2:
+      client:
+        provider:
+          haiku-dev:
+            issuer-uri: http://localhost:7080/realms/haiku-dev
+        registration:
+          haiku:
+            provider: haiku-dev
+            client-id: haikudepotserver-dev
+            client-secret: ABC123ABC123ABC123ABC
+```
+
 ## Run from Maven
 
 Build the applications with;

@@ -17,21 +17,23 @@ logging:
 
 
 spring:
-  security:
-    oauth2:
-      client:
-#        provider:
-#          haiku-xyz:
-#            issuer-uri: http://localhost:7080/realms/haiku-dev
-        registration:
-          haiku:
-#            provider: haiku-xyz
-            redirect-uri: "{baseUrl}/__security/login/oauth2/code/haiku"
-            authorization-grant-type: authorization_code
-#            client-id: haikudepotserver-dev
-#            client-secret: FyL...jDW
-            scope:
-              - openid
+
+# TODO (andponlin) uncomment one level once SSO is ready.
+#  security:
+#    oauth2:
+#      client:
+##        provider:
+##          haiku-xyz:
+##            issuer-uri: http://localhost:7080/realms/haiku-dev
+#        registration:
+#          haiku:
+##            provider: haiku-xyz
+#            redirect-uri: "{baseUrl}/__security/login/oauth2/code/haiku"
+#            authorization-grant-type: authorization_code
+##            client-id: haikudepotserver-dev
+##            client-secret: FyL...jDW
+#            scope:
+#              - openid
   mail:
     host: stmp
 #    port: 25
