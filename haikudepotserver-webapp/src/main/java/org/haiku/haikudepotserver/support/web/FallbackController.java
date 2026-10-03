@@ -1,5 +1,5 @@
 /*
- * Copyright 2018-2025, Andrew Lindesay
+ * Copyright 2018-2026, Andrew Lindesay
  * Distributed under the terms of the MIT License.
  */
 
@@ -9,6 +9,7 @@ import com.google.common.base.Preconditions;
 import com.google.common.net.HttpHeaders;
 import jakarta.mail.internet.MimeUtility;
 import jakarta.servlet.ServletContext;
+import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import org.apache.cayenne.ObjectContext;
 import org.apache.cayenne.configuration.server.ServerRuntime;
@@ -25,8 +26,8 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.io.Resource;
+import org.springframework.security.web.util.matcher.RequestMatcher;
 import org.springframework.stereotype.Controller;
-import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.util.UriComponents;
@@ -38,6 +39,7 @@ import java.io.PrintWriter;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Optional;
+import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 /**
@@ -45,12 +47,14 @@ import java.util.regex.Pattern;
  * and navigate to the user interface for it.</p>
  */
 
+// TODO (andponlin) This concept and way of responding is quite dated; it could be rewritten.
+
 @Controller
 public class FallbackController {
 
     private enum FallbackType {
         FAVICON,
-        APPLETOUCH,
+        APPLE_TOUCH,
         PKG
     }
 
@@ -58,7 +62,9 @@ public class FallbackController {
 
     private final static String KEY_TERM = "term";
 
-    private final static Pattern PATTERN_FAVICON = Pattern.compile("^favicon(\\.ico)?$");
+    private final static Pattern PATTERN_FAVICON = Pattern.compile("^/favicon(\\.ico)?$");
+    private final static Pattern PATTERN_PKG = Pattern.compile("^/([a-z0-9][a-z0-9._]{0,254})$");
+    private final static Pattern PATTERN_APPLE_TOUCH = Pattern.compile("^/apple-touch-icon-\\d+x\\d+.png$");
 
     private final ServerRuntime serverRuntime;
     private final PkgService pkgService;
@@ -138,16 +144,17 @@ public class FallbackController {
         }
     }
 
-    private FallbackType getFallbackType(String term) {
-        if(PATTERN_FAVICON.matcher(term).matches()) {
-            return FallbackType.FAVICON;
+    private static Optional<FallbackType> tryGetFallbackType(String term) {
+        if (PATTERN_FAVICON.matcher(term).matches()) {
+            return Optional.of(FallbackType.FAVICON);
         }
-
-        if(term.startsWith("apple-touch-icon")) {
-            return FallbackType.APPLETOUCH;
+        if (PATTERN_APPLE_TOUCH.matcher(term).matches()) {
+            return Optional.of(FallbackType.APPLE_TOUCH);
         }
-
-        return FallbackType.PKG;
+        if (PATTERN_PKG.matcher(term).matches()) {
+            return Optional.of(FallbackType.PKG);
+        }
+        return Optional.empty();
     }
 
     private Optional<PkgVersion> tryGetPkgVersion(ObjectContext context, String term) {
@@ -181,19 +188,44 @@ public class FallbackController {
     public void fallback(
             RequestMethod method,
             HttpServletResponse response,
-            @PathVariable(value = KEY_TERM) String term)
+            HttpServletRequest request)
             throws IOException {
 
-        switch (getFallbackType(term)) {
-            case APPLETOUCH -> {
-                LOGGER.debug("unhandled apple touch icon -> 404; {}", term);
-                response.setStatus(HttpServletResponse.SC_NOT_FOUND);
-            }
-            case FAVICON -> streamFavicon(method, response);
-            case PKG -> redirectToPkg(response, term);
-            default -> LOGGER.error("unable to handle the fallback; {}", term);
-        }
+                String requestUri = request.getRequestURI();
+        Optional<FallbackType> typeOptional = tryGetFallbackType(requestUri);
 
+        if (typeOptional.isPresent()) {
+            switch (typeOptional.get()) {
+                case APPLE_TOUCH -> {
+                    LOGGER.debug("unhandled apple touch icon -> 404; {}", requestUri);
+                    response.setStatus(HttpServletResponse.SC_NOT_FOUND);
+                }
+                case FAVICON -> streamFavicon(method, response);
+                case PKG -> {
+                    Matcher matcher = PATTERN_PKG.matcher(requestUri);
+
+                    if (!matcher.find()) {
+                        throw new IllegalStateException("bad request uri [%s]".formatted(requestUri));
+                    }
+
+                    redirectToPkg(response, matcher.group(1));
+                }
+            }
+        } else {
+            LOGGER.warn("unknown fallback [{}]", requestUri);
+            response.setStatus(HttpServletResponse.SC_NOT_FOUND);
+        }
+    }
+
+    /**
+     * <p>This is a simple {@link RequestMatcher} that will match the endpoints above that are for handling a fallback.</p>
+     */
+
+    public static class FallbackRequestMatcher implements RequestMatcher {
+        @Override
+        public boolean matches(HttpServletRequest request) {
+            return tryGetFallbackType(request.getRequestURI()).isPresent();
+        }
     }
 
 }

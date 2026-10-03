@@ -103,7 +103,7 @@ public class RepositoryServiceImpl implements RepositoryService {
                 .select(context);
 
         return ObjectSelect.query(Repository.class).where(
-                        ExpressionFactory.and(
+                        ExpressionFactory.or(
                                 repositoryCodes.stream()
                                         .map(Repository.CODE::eq)
                                         .toList()

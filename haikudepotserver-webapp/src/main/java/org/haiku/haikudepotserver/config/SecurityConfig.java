@@ -17,12 +17,16 @@ import org.haiku.haikudepotserver.repository.controller.RepositoryController;
 import org.haiku.haikudepotserver.repository.model.RepositoryService;
 import org.haiku.haikudepotserver.security.*;
 import org.haiku.haikudepotserver.security.model.UserAuthenticationService;
+import org.haiku.haikudepotserver.support.web.ExactPathRequestMatcher;
+import org.haiku.haikudepotserver.support.web.FallbackController;
+import org.haiku.haikudepotserver.support.web.PrefixPathRequestMatcher;
 import org.haiku.haikudepotserver.support.web.WebConstants;
 import org.haiku.haikudepotserver.user.controller.UserController;
 import org.haiku.haikudepotserver.user.model.UserService;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.core.annotation.Order;
+import org.springframework.http.HttpMethod;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
@@ -30,6 +34,9 @@ import org.springframework.security.config.annotation.web.configurers.HeadersCon
 import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.www.BasicAuthenticationFilter;
+import org.springframework.security.web.util.matcher.OrRequestMatcher;
+import org.springframework.security.web.util.matcher.RegexRequestMatcher;
+import org.springframework.security.web.util.matcher.RequestMatcher;
 import org.springframework.web.util.UriComponentsBuilder;
 
 /**
@@ -110,7 +117,7 @@ public class SecurityConfig {
 
     /**
      * <p>This is a security filter chain for stateless endpoints where no session should be in play.
-     * By configuring this, it will reduce the frequency of retreiving the session from the session
+     * By configuring this, it will reduce the frequency of retrieving the session from the session
      * store.</p>
      */
     @Bean
@@ -119,45 +126,50 @@ public class SecurityConfig {
 
         WebResourcePathPrefixes pathPrefixes = multipageWebResourceService.getPathPrefixes();
 
+        RequestMatcher requestMatcher = new OrRequestMatcher(
+
+                // errors
+                new ExactPathRequestMatcher("/error"),
+                new ExactPathRequestMatcher("/__error"),
+
+                // feed
+                PrefixPathRequestMatcher.withFirstSegment("feed"), // TODO (deprecated) be removed
+                new PrefixPathRequestMatcher("%s/".formatted(FeedService.PATH_ROOT)),
+                // pkg
+                PrefixPathRequestMatcher.withFirstSegment(PkgController.SEGMENT_PKG),
+                PrefixPathRequestMatcher.withFirstSegment(PkgDownloadController.SEGMENT_PKGDOWNLOAD),
+                PrefixPathRequestMatcher.withFirstSegment(PkgIconController.SEGMENT_PKGICON),
+                PrefixPathRequestMatcher.withFirstSegment(PkgIconController.SEGMENT_GENERICPKGICON),
+                PrefixPathRequestMatcher.withFirstSegment(PkgScreenshotController.SEGMENT_SCREENSHOT),
+                PrefixPathRequestMatcher.withFirstSegment(PkgScreenshotController.SEGMENT_SCREENSHOT_LEGACY), // TODO (deprecated) be removed
+                PrefixPathRequestMatcher.withFirstSegment(PkgSearchController.SEGMENT_SEARCH),
+                PrefixPathRequestMatcher.withFirstSegment(PkgSearchController.SEGMENT_SEARCH_LEGACY), // TODO (deprecated) be removed
+                // reference
+                PrefixPathRequestMatcher.withFirstSegment(ReferenceController.SEGMENT_REFERENCE),
+                // repository
+                // Rules from earlier security filter chains will catch the import case.
+                PrefixPathRequestMatcher.withFirstSegment(RepositoryController.SEGMENT_REPOSITORY),
+                // user
+                new PrefixPathRequestMatcher("/%s/%s/".formatted(UserController.SEGMENT_USER, UserController.SEGMENT_USAGE_CONDITIONS)),
+
+                // multipage support
+                new PrefixPathRequestMatcher(pathPrefixes.img()),
+                new PrefixPathRequestMatcher(pathPrefixes.js()),
+                new PrefixPathRequestMatcher(pathPrefixes.css()),
+                // SPA support
+                // TODO (andponlin) remove.
+                PrefixPathRequestMatcher.withFirstSegment(WebConstants.SEGMENT_JS),
+                PrefixPathRequestMatcher.withFirstSegment(WebConstants.SEGMENT_CSS),
+                PrefixPathRequestMatcher.withFirstSegment(WebConstants.SEGMENT_IMG),
+                PrefixPathRequestMatcher.withFirstSegment("log"),
+
+                // Fallback - handles favicon, simple link for a package
+                // TODO (andponlin) refactor
+                new FallbackController.FallbackRequestMatcher()
+        );
+
         http
-                .securityMatcher(
-
-                        // basic system
-                        "/error",
-                        "/_error",
-                        "/favicon.*",
-
-                        // feed
-                        "/feed/**", // TODO (deprecated) be removed
-                        "%s/**".formatted(FeedService.PATH_ROOT),
-                        // pkg
-                        "/%s/**".formatted(PkgController.SEGMENT_PKG),
-                        "/%s/**".formatted(PkgDownloadController.SEGMENT_PKGDOWNLOAD),
-                        "/%s/**".formatted(PkgIconController.SEGMENT_PKGICON),
-                        "/%s".formatted(PkgIconController.SEGMENT_GENERICPKGICON),
-                        "/%s/**".formatted(PkgScreenshotController.SEGMENT_SCREENSHOT),
-                        "/%s/**".formatted(PkgScreenshotController.SEGMENT_SCREENSHOT_LEGACY), // TODO (deprecated) be removed
-                        "/%s/**".formatted(PkgSearchController.SEGMENT_SEARCH),
-                        "/%s/**".formatted(PkgSearchController.SEGMENT_SEARCH_LEGACY), // TODO (deprecated) be removed
-                        // reference
-                        "/%s/**".formatted(ReferenceController.SEGMENT_REFERENCE),
-                        // repository
-                        // Rules from earlier security filter chains will catch the import case.
-                        "/%s/**".formatted(RepositoryController.SEGMENT_REPOSITORY),
-                        // user
-                        "/%s/%s/**".formatted(UserController.SEGMENT_USER, UserController.SEGMENT_USAGE_CONDITIONS),
-
-                        // multipage support
-                        "%s**".formatted(pathPrefixes.img()),
-                        "%s**".formatted(pathPrefixes.js()),
-                        "%s**".formatted(pathPrefixes.css()),
-                        // SPA support
-                        // TODO (andponlin) remove.
-                        "/%s/**".formatted(WebConstants.SEGMENT_JS),
-                        "/%s/**".formatted(WebConstants.SEGMENT_CSS),
-                        "/%s/**".formatted(WebConstants.SEGMENT_IMG),
-                        "/__log/**"
-                )
+                .securityMatcher(requestMatcher::matches)
                 .sessionManagement(session -> session
                         .sessionCreationPolicy(SessionCreationPolicy.STATELESS)
                 );
