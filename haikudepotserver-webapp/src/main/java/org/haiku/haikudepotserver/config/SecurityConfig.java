@@ -139,7 +139,7 @@ public class SecurityConfig {
                 PrefixPathRequestMatcher.withFirstSegment(PkgController.SEGMENT_PKG),
                 PrefixPathRequestMatcher.withFirstSegment(PkgDownloadController.SEGMENT_PKGDOWNLOAD),
                 PrefixPathRequestMatcher.withFirstSegment(PkgIconController.SEGMENT_PKGICON),
-                PrefixPathRequestMatcher.withFirstSegment(PkgIconController.SEGMENT_GENERICPKGICON),
+                new ExactPathRequestMatcher("/%s".formatted(PkgIconController.SEGMENT_GENERICPKGICON)),
                 PrefixPathRequestMatcher.withFirstSegment(PkgScreenshotController.SEGMENT_SCREENSHOT),
                 PrefixPathRequestMatcher.withFirstSegment(PkgScreenshotController.SEGMENT_SCREENSHOT_LEGACY), // TODO (deprecated) be removed
                 PrefixPathRequestMatcher.withFirstSegment(PkgSearchController.SEGMENT_SEARCH),
@@ -161,7 +161,7 @@ public class SecurityConfig {
                 PrefixPathRequestMatcher.withFirstSegment(WebConstants.SEGMENT_JS),
                 PrefixPathRequestMatcher.withFirstSegment(WebConstants.SEGMENT_CSS),
                 PrefixPathRequestMatcher.withFirstSegment(WebConstants.SEGMENT_IMG),
-                PrefixPathRequestMatcher.withFirstSegment("log"),
+                PrefixPathRequestMatcher.withFirstSegment("__log"),
 
                 // Fallback - handles favicon, simple link for a package
                 // TODO (andponlin) refactor
