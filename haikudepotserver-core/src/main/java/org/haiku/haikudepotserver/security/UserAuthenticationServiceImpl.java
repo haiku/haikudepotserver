@@ -136,7 +136,7 @@ public class UserAuthenticationServiceImpl implements UserAuthenticationService 
                 }
             }
             else {
-                LOGGER.info("unable to find the user; {}", nickname);
+                LOGGER.info("unable to find the user [{}]", nickname);
             }
         }
         else {
