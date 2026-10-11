@@ -1,0 +1,4 @@
+#repository-view-repository-source-table td:nth-child(1) {
+    width: 64px;
+    text-align: center;
+}

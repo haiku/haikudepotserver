@@ -80,21 +80,18 @@ public class PkgListController {
     private final MultipageNavigationService navigationService;
     private final PkgApiService pkgApiService;
     private final MultipageWebResourceService multipageWebResourceService;
-    private final MultipageSecurityService multipageSecurityService;
 
     public PkgListController(
             InternationalizationSupplierFactory internationalizationSupplierFactory,
             ReferenceDataRepository referenceDataRepository,
             MultipageNavigationService navigationService,
             MultipageWebResourceService multipageWebResourceService,
-            PkgApiService pkgApiService,
-            MultipageSecurityService multipageSecurityService) {
+            PkgApiService pkgApiService) {
         this.internationalizationSupplierFactory = Preconditions.checkNotNull(internationalizationSupplierFactory);
         this.referenceDataRepository = referenceDataRepository;
         this.navigationService = navigationService;
         this.pkgApiService = pkgApiService;
         this.multipageWebResourceService = Preconditions.checkNotNull(multipageWebResourceService);
-        this.multipageSecurityService = Preconditions.checkNotNull(multipageSecurityService);
     }
 
     /**

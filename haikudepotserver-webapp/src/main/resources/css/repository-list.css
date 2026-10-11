@@ -1,0 +1,15 @@
+/* == PAGINATION ================== */
+
+#repository-list-pagination {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: space-between;
+    gap: 16px;
+    margin-top: 16px;
+    margin-bottom: 16px;
+}
+
+#repository-list-table td:nth-child(1) {
+    width:64px;
+    text-align: center;
+}

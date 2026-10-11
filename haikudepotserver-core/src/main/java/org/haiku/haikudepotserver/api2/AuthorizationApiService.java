@@ -1,5 +1,5 @@
 /*
- * Copyright 2022, Andrew Lindesay
+ * Copyright 2022-2026, Andrew Lindesay
  * Distributed under the terms of the MIT License.
  */
 package org.haiku.haikudepotserver.api2;
@@ -10,25 +10,17 @@ import org.apache.cayenne.ObjectContext;
 import org.apache.cayenne.configuration.server.ServerRuntime;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
-import org.haiku.haikudepotserver.api2.model.AuthorizationTargetAndPermissionRequest;
-import org.haiku.haikudepotserver.api2.model.AuthorizationTargetAndPermissionResult;
-import org.haiku.haikudepotserver.api2.model.CheckAuthorizationRequestEnvelope;
-import org.haiku.haikudepotserver.api2.model.CheckAuthorizationResult;
-import org.haiku.haikudepotserver.api2.model.CreateAuthorizationPkgRuleRequestEnvelope;
-import org.haiku.haikudepotserver.api2.model.RemoveAuthorizationPkgRuleRequestEnvelope;
-import org.haiku.haikudepotserver.api2.model.SearchAuthorizationPkgRulesRequestEnvelope;
-import org.haiku.haikudepotserver.api2.model.SearchAuthorizationPkgRulesResult;
-import org.haiku.haikudepotserver.api2.model.SearchAuthorizationPkgRulesResultItem;
-import org.haiku.haikudepotserver.support.exception.AuthorizationRuleConflictException;
-import org.haiku.haikudepotserver.support.exception.ObjectNotFoundException;
-import org.haiku.haikudepotserver.support.exception.ValidationException;
-import org.haiku.haikudepotserver.support.exception.ValidationFailure;
+import org.haiku.haikudepotserver.api2.model.*;
 import org.haiku.haikudepotserver.dataobjects.Pkg;
 import org.haiku.haikudepotserver.dataobjects.User;
 import org.haiku.haikudepotserver.security.model.AuthorizationPkgRuleSearchSpecification;
 import org.haiku.haikudepotserver.security.model.AuthorizationPkgRuleService;
 import org.haiku.haikudepotserver.security.model.Permission;
 import org.haiku.haikudepotserver.security.model.TargetType;
+import org.haiku.haikudepotserver.support.exception.AuthorizationRuleConflictException;
+import org.haiku.haikudepotserver.support.exception.ObjectNotFoundException;
+import org.haiku.haikudepotserver.support.exception.ValidationException;
+import org.haiku.haikudepotserver.support.exception.ValidationFailure;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.security.access.AccessDeniedException;
@@ -36,6 +28,7 @@ import org.springframework.security.access.PermissionEvaluator;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Component;
 
+import java.util.Locale;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
@@ -65,7 +58,7 @@ public class AuthorizationApiService extends AbstractApiService {
                         CollectionUtils.emptyIfNull(request.getTargetAndPermissions())
                                 .stream()
                                 .map(tandp -> new AuthorizationTargetAndPermissionResult()
-                                        .permissionCode(tandp.getPermissionCode())
+                                        .permission(tandp.getPermission())
                                         .targetIdentifier(tandp.getTargetIdentifier())
                                         .targetType(tandp.getTargetType())
                                         .authorized(hasPermission(tandp)))
@@ -73,7 +66,7 @@ public class AuthorizationApiService extends AbstractApiService {
     }
 
     private boolean hasPermission(AuthorizationTargetAndPermissionRequest tandp) {
-        Object permission = Permission.valueOf(tandp.getPermissionCode());
+        Object permission = PermissionMapper.mapFromApiPermission(tandp.getPermission());
         String targetType = Optional.ofNullable(tandp.getTargetType())
                 .map(tt -> TargetType.valueOf(tt.name()))
                 .map(Object::toString)
@@ -87,9 +80,9 @@ public class AuthorizationApiService extends AbstractApiService {
 
     public void createAuthorizationPkgRule(CreateAuthorizationPkgRuleRequestEnvelope request) {
         Preconditions.checkNotNull(request);
-        Preconditions.checkState(!Strings.isNullOrEmpty(request.getPermissionCode()), "the permission code is required");
+        Preconditions.checkState(null != request.getPermission(), "the permission code is required");
         Preconditions.checkState(
-                Permission.valueOf(request.getPermissionCode().toUpperCase())
+                PermissionMapper.mapFromApiPermission(request.getPermission())
                         .getRequiredTargetType() == TargetType.PKG,
                 "the permission should have a target type of; " + TargetType.PKG);
         Preconditions.checkState(
@@ -100,7 +93,7 @@ public class AuthorizationApiService extends AbstractApiService {
 
         ObjectContext context = serverRuntime.newContext();
         org.haiku.haikudepotserver.dataobjects.Permission permission
-                = ensurePermission(context, request.getPermissionCode());
+                = ensurePermission(context, PermissionMapper.mapFromApiPermission(request.getPermission()));
         User user = ensureUser(context, request.getUserNickname());
 
         if (user.getIsRoot()) {
@@ -128,12 +121,14 @@ public class AuthorizationApiService extends AbstractApiService {
 
     void removeAuthorizationPkgRule(RemoveAuthorizationPkgRuleRequestEnvelope request) {
         Preconditions.checkNotNull(request);
-        Preconditions.checkState(!Strings.isNullOrEmpty(request.getPermissionCode()), "the permission code is required");
+        Preconditions.checkState(null != request.getPermission(), "the permission is required");
         Preconditions.checkState(!Strings.isNullOrEmpty(request.getUserNickname()),"the user nickname is required");
 
         ensureCanAuthorizationManipulate();
         ObjectContext context = serverRuntime.newContext();
-        org.haiku.haikudepotserver.dataobjects.Permission permission = ensurePermission(context, request.getPermissionCode());
+        org.haiku.haikudepotserver.dataobjects.Permission permission = ensurePermission(
+                context,
+                PermissionMapper.mapFromApiPermission(request.getPermission()));
 
         User user = Optional.ofNullable(request.getUserNickname())
                 .map(un -> ensureUser(context, un))
@@ -172,9 +167,10 @@ public class AuthorizationApiService extends AbstractApiService {
                 .orElse(null)
         );
         specification.setPermissions(
-                Optional.ofNullable(request.getPermissionCodes())
-                        .map(pcs -> CollectionUtils.emptyIfNull(request.getPermissionCodes())
+                Optional.ofNullable(request.getPermissions())
+                        .map(pcs -> CollectionUtils.emptyIfNull(request.getPermissions())
                                 .stream()
+                                .map(PermissionMapper::mapFromApiPermission)
                                 .map(pc -> ensurePermission(context, pc))
                                 .collect(Collectors.toList()))
                         .orElse(null));
@@ -188,7 +184,8 @@ public class AuthorizationApiService extends AbstractApiService {
                 .items(authorizationPkgRulesService.search(context, specification)
                         .stream()
                         .map(r -> new SearchAuthorizationPkgRulesResultItem()
-                                .permissionCode(r.getPermission().getCode())
+                                .permission(
+                                        PermissionMapper.mapToApiPermission(PermissionMapper.mapFromDataObjectPermission(r.getPermission())))
                                 .userNickname(
                                         Optional.ofNullable(r.getUser())
                                                 .map(User::getNickname)
@@ -204,11 +201,11 @@ public class AuthorizationApiService extends AbstractApiService {
                 );
     }
 
-    private org.haiku.haikudepotserver.dataobjects.Permission ensurePermission(ObjectContext context, String code) {
-        return org.haiku.haikudepotserver.dataobjects.Permission.tryGetByCode(context, code)
+    private org.haiku.haikudepotserver.dataobjects.Permission ensurePermission(ObjectContext context, Permission permission) {
+        return org.haiku.haikudepotserver.dataobjects.Permission.tryGetByCode(context, permission.name().toLowerCase())
                 .orElseThrow(() -> new ObjectNotFoundException(
                         org.haiku.haikudepotserver.dataobjects.Permission.class.getSimpleName(),
-                        code));
+                        permission.name()));
     }
 
     private Pkg ensurePkg(ObjectContext context, String name) {

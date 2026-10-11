@@ -1,5 +1,5 @@
 /*
- * Copyright 2018-2023, Andrew Lindesay
+ * Copyright 2018-2026, Andrew Lindesay
  * Distributed under the terms of the MIT License.
  */
 
@@ -36,7 +36,7 @@ public class AuthorizationApiServiceIT extends AbstractIntegrationTest {
             IntegrationTestSupportService.StandardTestData data,
             AuthorizationTargetAndPermissionResult targetAndPermission,
             boolean result) {
-        Assertions.assertThat(targetAndPermission.getPermissionCode()).isEqualTo(Permission.PKG_EDITICON.name());
+        Assertions.assertThat(targetAndPermission.getPermission()).isEqualTo(org.haiku.haikudepotserver.api2.model.Permission.PKG_EDITICON);
         Assertions.assertThat(targetAndPermission.getTargetIdentifier()).isEqualTo(data.pkg1.getName());
         Assertions.assertThat(targetAndPermission.getTargetType()).isEqualTo(AuthorizationTargetType.PKG);
         Assertions.assertThat(targetAndPermission.getAuthorized()).isEqualTo(result);
@@ -51,7 +51,7 @@ public class AuthorizationApiServiceIT extends AbstractIntegrationTest {
                         new AuthorizationTargetAndPermissionRequest()
                                 .targetType(AuthorizationTargetType.PKG)
                                 .targetIdentifier(data.pkg1.getName())
-                                .permissionCode(Permission.PKG_EDITICON.name())));
+                                .permission(org.haiku.haikudepotserver.api2.model.Permission.PKG_EDITICON)));
 
         // ------------------------------------
         CheckAuthorizationResult result = authorizationApiService.checkAuthorization(request);
@@ -73,7 +73,7 @@ public class AuthorizationApiServiceIT extends AbstractIntegrationTest {
                         new AuthorizationTargetAndPermissionRequest()
                                 .targetType(AuthorizationTargetType.PKG)
                                 .targetIdentifier(data.pkg1.getName())
-                                .permissionCode(Permission.PKG_EDITICON.name())));
+                                .permission(org.haiku.haikudepotserver.api2.model.Permission.PKG_EDITICON)));
 
         // ------------------------------------
         CheckAuthorizationResult result = authorizationApiService.checkAuthorization(request);
@@ -102,7 +102,7 @@ public class AuthorizationApiServiceIT extends AbstractIntegrationTest {
                         new AuthorizationTargetAndPermissionRequest()
                                 .targetType(AuthorizationTargetType.PKG)
                                 .targetIdentifier("pkg1")
-                                .permissionCode(Permission.PKG_EDITICON.name())));
+                                .permission(org.haiku.haikudepotserver.api2.model.Permission.PKG_EDITICON)));
 
         setAuthenticatedUser("testuser1");
 
@@ -146,7 +146,7 @@ public class AuthorizationApiServiceIT extends AbstractIntegrationTest {
                         new AuthorizationTargetAndPermissionRequest()
                                 .targetType(AuthorizationTargetType.PKG)
                                 .targetIdentifier("pkg1")
-                                .permissionCode(Permission.PKG_EDITICON.name())));
+                                .permission(org.haiku.haikudepotserver.api2.model.Permission.PKG_EDITICON)));
 
         setAuthenticatedUser("testuser1");
 
@@ -178,7 +178,7 @@ public class AuthorizationApiServiceIT extends AbstractIntegrationTest {
 
             CreateAuthorizationPkgRuleRequestEnvelope request = new CreateAuthorizationPkgRuleRequestEnvelope()
                     .userNickname("testuser")
-                    .permissionCode(Permission.PKG_EDITICON.name().toLowerCase())
+                    .permission(org.haiku.haikudepotserver.api2.model.Permission.PKG_EDITICON)
                     .pkgName("pkg1");
 
             // ------------------------------------
@@ -207,7 +207,7 @@ public class AuthorizationApiServiceIT extends AbstractIntegrationTest {
 
             CreateAuthorizationPkgRuleRequestEnvelope request = new CreateAuthorizationPkgRuleRequestEnvelope()
                     .userNickname("testuser")
-                    .permissionCode(Permission.PKG_EDITSCREENSHOT.name().toLowerCase())
+                    .permission(org.haiku.haikudepotserver.api2.model.Permission.PKG_EDITSCREENSHOT)
                     .pkgName("pkg1");
 
             // ------------------------------------
@@ -230,7 +230,7 @@ public class AuthorizationApiServiceIT extends AbstractIntegrationTest {
 
         CreateAuthorizationPkgRuleRequestEnvelope request = new CreateAuthorizationPkgRuleRequestEnvelope()
                 .userNickname("testuser")
-                .permissionCode(Permission.PKG_EDITSCREENSHOT.name().toLowerCase())
+                .permission(org.haiku.haikudepotserver.api2.model.Permission.PKG_EDITSCREENSHOT)
                 .pkgName("pkg1");
 
         // ------------------------------------
@@ -262,7 +262,7 @@ public class AuthorizationApiServiceIT extends AbstractIntegrationTest {
 
         CreateAuthorizationPkgRuleRequestEnvelope request = new CreateAuthorizationPkgRuleRequestEnvelope()
                 .userNickname("testuser")
-                .permissionCode(Permission.PKG_EDITSCREENSHOT.name().toLowerCase())
+                .permission(org.haiku.haikudepotserver.api2.model.Permission.PKG_EDITICON)
                 .pkgName("pkg1");
 
         // TODO; do this in another way outside the API!
@@ -287,7 +287,7 @@ public class AuthorizationApiServiceIT extends AbstractIntegrationTest {
 
         CreateAuthorizationPkgRuleRequestEnvelope request = new CreateAuthorizationPkgRuleRequestEnvelope()
                 .userNickname("testuser")
-                .permissionCode(Permission.REPOSITORY_VIEW.name().toLowerCase())
+                .permission(org.haiku.haikudepotserver.api2.model.Permission.REPOSITORY_VIEW)
                 .pkgName("pkg1");
 
         org.junit.jupiter.api.Assertions.assertThrows(
@@ -313,7 +313,7 @@ public class AuthorizationApiServiceIT extends AbstractIntegrationTest {
 
         RemoveAuthorizationPkgRuleRequestEnvelope request = new RemoveAuthorizationPkgRuleRequestEnvelope()
                 .userNickname("testuser")
-                .permissionCode(Permission.PKG_EDITICON.name().toLowerCase())
+                .permission(org.haiku.haikudepotserver.api2.model.Permission.PKG_EDITICON)
                 .pkgName("pkg1");
 
         // ------------------------------------

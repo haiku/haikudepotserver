@@ -416,7 +416,7 @@ public class RepositoryApiService extends AbstractApiService {
         }
 
         return new SearchRepositoriesResult()
-                .total(total)
+                .total((int) total)
                 .items(items);
     }
 

@@ -23,6 +23,8 @@ public class MultipageConstants {
 
     public final static String PATH_MULTIPAGE = "/" + SEGMENT_MULTIPAGE;
 
+    public final static String SEGMENT_REPOSITORY = "repository";
+
     // Model parameters
     public final static String KEY_DATA = "data";
     public final static String KEY_INTERNATIONALIZATION_SUPPLIER = "internationalizationSupplier";
@@ -38,6 +40,7 @@ public class MultipageConstants {
     public final static String KEY_VERSION_PRERELEASE = "vprel";
     public final static String KEY_VERSION_REVISION = "vrev";
     public final static String KEY_SEARCHEXPRESSION = "srchexpr";
+    public final static String KEY_INCLUDE_INACTIVE = "inac";
 
     /**
      * <p>These are query or form parameters that should be relayed from one page to

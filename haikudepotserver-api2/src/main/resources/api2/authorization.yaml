@@ -1,4 +1,4 @@
-# Copyright 2022-2023, Andrew Lindesay
+# Copyright 2022-2026, Andrew Lindesay
 # Distributed under the terms of the MIT License.
 
 openapi: 3.0.3
@@ -115,6 +115,8 @@ components:
           $ref: "./error.yaml#/components/schemas/error"
     checkAuthorizationResult:
       type: object
+      required:
+        - targetAndPermissions
       properties:
         targetAndPermissions:
           type: array
@@ -123,7 +125,7 @@ components:
     authorizationTargetAndPermissionRequest:
       type: object
       required:
-        - permissionCode
+        - permission
       properties:
         targetType:
           $ref: "#/components/schemas/authorizationTargetType"
@@ -132,15 +134,15 @@ components:
           description: >
             This identifier will identify an instance of the #targetType that has the authorization applied to it.  Some
             permissions may not require a target identifier; in which case this value can be supplied as null.
-        permissionCode:
-          type: string
+        permission:
+          $ref: "./common.yaml#/components/schemas/permission"
           description: >
             This is a list of permissions that the client would like to check for in the context of the target
             identified by other parameters in this request.
     authorizationTargetAndPermissionResult:
       type: object
       required:
-        - permissionCode
+        - permission
         - authorized
       properties:
         targetType:
@@ -150,10 +152,10 @@ components:
           description: >
             This identifier will identify an instance of the #targetType that has the authorization applied to it.  Some
             permissions may not require a target identifier; in which case this value can be supplied as null.
-        permissionCode:
-          type: string
+        permission:
+          $ref: "./common.yaml#/components/schemas/permission"
           description: >
-            This is a list of permissions that the client would like to check for in the context of the target
+            The permission that the client would like to check for in the context of the target
             identified by other parameters in this request.
         authorized:
           type: boolean
@@ -177,8 +179,8 @@ components:
           type: string
         pkgName:
           type: string
-        permissionCode:
-          type: string
+        permission:
+          $ref: "./common.yaml#/components/schemas/permission"
     createAuthorizationPkgRuleResponseEnvelope:
       type: object
       properties:
@@ -196,8 +198,8 @@ components:
           type: string
         pkgName:
           type: string
-        permissionCode:
-          type: string
+        permission:
+          $ref: "./common.yaml#/components/schemas/permission"
     removeAuthorizationPkgRuleResponseEnvelope:
       type: object
       properties:
@@ -217,13 +219,13 @@ components:
               type: string
             pkgName:
               type: string
-            permissionCodes:
+            permissions:
               type: array
               description: >
                 If permission codes are supplied then only rules related to those permission codes will be shown.  If this
                 field is blank then all permissions will be considered.
               items:
-                type: string
+                $ref: "./common.yaml#/components/schemas/permission"
     searchAuthorizationPkgRulesResponseEnvelope:
       type: object
       properties:
@@ -248,5 +250,5 @@ components:
           type: string
         pkgName:
           type: string
-        permissionCode:
-          type: string
+        permission:
+          $ref: "./common.yaml#/components/schemas/permission"

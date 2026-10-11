@@ -1,5 +1,5 @@
 /*
- * Copyright 2014-2022, Andrew Lindesay
+ * Copyright 2014-2026, Andrew Lindesay
  * Distributed under the terms of the MIT License.
  */
 
@@ -27,13 +27,13 @@ angular.module('haikudepotserver').controller(
 
             $scope.allPermissions = _.map(
                 [
-                    'pkg_editicon',
-                    'pkg_editscreenshot',
-                    'pkg_editcategories',
-                    'pkg_editnativedesktop',
-                    'pkg_editprominence',
-                    'pkg_editlocalization',
-                    'pkg_editchangelog'
+                    'PKG_EDITICON',
+                    'PKG_EDITSCREENSHOT',
+                    'PKG_EDITCATEGORIES',
+                    'PKG_EDITNATIVEDESKTOP',
+                    'PKG_EDITPROMINENCE',
+                    'PKG_EDITLOCALIZATION',
+                    'PKG_EDITCHANGELOG'
                 ],
                 function(permissionCode) {
                     var result = {
@@ -41,7 +41,7 @@ angular.module('haikudepotserver').controller(
                         title : '...'
                     };
 
-                    messageSource.get(userState.naturalLanguageCode(),'permission.' + permissionCode + '.title').then(
+                    messageSource.get(userState.naturalLanguageCode(),'permission.' + permissionCode.toLowerCase() + '.title').then(
                         function(value) {
                             result.title = value;
                         },
@@ -111,7 +111,7 @@ angular.module('haikudepotserver').controller(
 
                 var request = {
                     userNickname : $scope.workingRule.userNickname,
-                    permissionCode : $scope.workingRule.permission.code,
+                    permission : $scope.workingRule.permission.code,
                     pkgName : undefined
                 };
 

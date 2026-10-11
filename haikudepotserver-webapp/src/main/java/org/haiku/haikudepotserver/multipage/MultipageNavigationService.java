@@ -9,6 +9,7 @@ import jakarta.annotation.Nullable;
 import jakarta.servlet.http.HttpServletRequest;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.tuple.Pair;
+import org.haiku.haikudepotserver.api2.model.Permission;
 import org.haiku.haikudepotserver.multipage.controller.AboutController;
 import org.haiku.haikudepotserver.multipage.controller.PkgViewController;
 import org.haiku.haikudepotserver.multipage.controller.UserUsageConditionsAgreeController;
@@ -41,6 +42,7 @@ public class MultipageNavigationService {
 
     public List<MenuGroup> deriveMenuGroups(
             @Nullable HttpServletRequest request) {
+
         return List.of(
                 new MenuGroup(
                         null,
@@ -56,7 +58,8 @@ public class MultipageNavigationService {
                         List.of(
                                 new MenuItem(NavigationDestination.PKG_LIST, pkgListUri(request, null))
                         )
-                )
+                ),
+                createDataMenuGroup(request)
         );
     }
 
@@ -156,6 +159,15 @@ public class MultipageNavigationService {
         return builder;
     }
 
+    public UriComponentsBuilder repositoryListUri(@Nullable HttpServletRequest request) {
+        return baselineMultipageUri(request).pathSegment(MultipageConstants.SEGMENT_REPOSITORY);
+    }
+
+    public UriComponentsBuilder repositoryViewUri(@Nullable HttpServletRequest request, String repositoryCode) {
+        Preconditions.checkArgument(repositoryCode != null);
+        return baselineMultipageUri(request).pathSegment(MultipageConstants.SEGMENT_REPOSITORY, repositoryCode);
+    }
+
     public UriComponentsBuilder pkgViewUri(
             @Nullable HttpServletRequest request,
             String pkgName,
@@ -186,6 +198,20 @@ public class MultipageNavigationService {
             String pkgName) {
         Preconditions.checkArgument(StringUtils.isNotBlank(pkgName));
         return baselineMultipageUri(request).pathSegment("pkg", pkgName, "changelog");
+    }
+
+    private MenuGroup createDataMenuGroup(@Nullable HttpServletRequest request) {
+        List<MenuItem> items = new ArrayList<>();
+        Set<Permission> permissions = multipageSecurityService.filterPermissions(Set.of(Permission.REPOSITORY_LIST));
+
+        if (permissions.contains(Permission.REPOSITORY_LIST)) {
+            items.add(new MenuItem(NavigationDestination.REPOSITORY_LIST, repositoryListUri(request)));
+        }
+
+        return new MenuGroup(
+                "mp.menu.groups.data.title",
+                Collections.unmodifiableList(items)
+        );
     }
 
     private MenuGroup createUserAndPrivacyMenuGroup(@Nullable HttpServletRequest request) {

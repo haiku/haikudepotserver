@@ -21,6 +21,8 @@ public enum NavigationDestination {
 
     PKG_CHANGELOG,
     PKG_VIEW,
-    PKG_LIST
+    PKG_LIST,
+
+    REPOSITORY_LIST
 
 }

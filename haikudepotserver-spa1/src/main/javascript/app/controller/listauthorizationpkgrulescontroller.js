@@ -1,5 +1,5 @@
 /*
- * Copyright 2014-2025, Andrew Lindesay
+ * Copyright 2014-2026, Andrew Lindesay
  * Distributed under the terms of the MIT License.
  */
 
@@ -87,7 +87,7 @@ angular.module('haikudepotserver').controller(
                             function (item) {
                                 return {
                                     user : { nickname : item.userNickname },
-                                    permission : { code : item.permissionCode, title : '...' },
+                                    permission : { code : item.permission, title : '...' },
                                     pkg : item.pkgName ? { name : item.pkgName } : undefined
                                 };
                             }
@@ -96,7 +96,7 @@ angular.module('haikudepotserver').controller(
                         _.each(
                             $scope.rules.items,
                             function (item) {
-                                messageSource.get(userState.naturalLanguageCode(),'permission.' + item.permission.code + '.title').then(
+                                messageSource.get(userState.naturalLanguageCode(),'permission.' + item.permission.code.toLowerCase() + '.title').then(
                                     function (value) {
                                         item.permission.title = value;
                                     },
@@ -169,7 +169,7 @@ angular.module('haikudepotserver').controller(
                     {
                         userNickname : $scope.ruleToDelete.user.nickname,
                         pkgName : $scope.ruleToDelete.pkg ? $scope.ruleToDelete.pkg.name : null,
-                        permissionCode : $scope.ruleToDelete.permission.code
+                        permission : $scope.ruleToDelete.permission.code
                     }
                 ).then(
                     function () {

@@ -150,6 +150,7 @@ public class UserViewController {
 
     /**
      * <p>This is the data model for the page to be rendered from.</p>
+     * @param isAuthenticatedUser indicates that the user being viewed is currently authenticated.
      */
 
     public record UserViewData(

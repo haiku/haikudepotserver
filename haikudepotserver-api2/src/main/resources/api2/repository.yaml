@@ -355,7 +355,7 @@ components:
       properties:
         total:
           type: integer
-          format: int64
+          format: int32
         items:
           type: array
           items:
@@ -372,6 +372,8 @@ components:
 
     getRepositoryRequestEnvelope:
       type: object
+      required:
+        - code
       properties:
         code:
           type: string

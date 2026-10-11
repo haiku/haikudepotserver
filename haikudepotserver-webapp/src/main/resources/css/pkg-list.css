@@ -61,3 +61,32 @@
     display: flex;
 }
 
+/* == TABLE ================== */
+
+/* align the size column to the right */
+#pkg-list-table td:nth-child(3) {
+    text-align: right;
+}
+
+#pkg-list-table th:nth-child(3) {
+    text-align: right;
+}
+
+/* align the rating column to the middle */
+#pkg-list-table td:nth-child(4) {
+    text-align: center;
+}
+
+#pkg-list-table th:nth-child(4) {
+    text-align: center;
+}
+
+/* align the views column to the right */
+#pkg-list-table td:nth-child(6) {
+    text-align: right;
+}
+
+#pkg-list-table th:nth-child(6) {
+    text-align: right;
+}
+

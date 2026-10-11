@@ -211,7 +211,7 @@ angular.module('haikudepotserver').factory('userState',
                                 return {
                                     targetType: item.targetType,
                                     targetIdentifier: item.targetIdentifier,
-                                    permissionCode: item.permissionCode
+                                    permission: item.permissionCode
                                 };
                             }
                         );
@@ -223,7 +223,14 @@ angular.module('haikudepotserver').factory('userState',
                         ).then(
                             function (data) {
                                 _.each(data.targetAndPermissions, function (item) {
-                                    handleInboundDataItem(item);
+                                    handleInboundDataItem({
+                                        authorized: item.authorized,
+                                        targetType: item.targetType,
+                                        permissionCode: item.permission,
+                                            // The API key is called "permission" but the in-memory working version is
+                                            // "permissionCode".
+                                        targetIdentifier: item.targetIdentifier
+                                    });
                                 });
                                 if (0 !== localAd.checkQueue.length) {
                                     pollQueue();
