@@ -351,7 +351,7 @@ public class PkgApiService extends AbstractApiService {
 
                 PkgVersion pkgVersion = PkgVersion.tryGetForPkg(context, pkg, repositorySource, architecture, coordinates)
                         .filter(_PkgVersion::getActive)
-                        .orElseThrow(() -> new ObjectNotFoundException(PkgVersion.class.getSimpleName(), ""));
+                        .orElseThrow(() -> new ObjectNotFoundException(PkgVersion.class.getSimpleName(), coordinates.toString()));
 
                 return List.of(pkgVersion);
             }
