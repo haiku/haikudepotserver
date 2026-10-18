@@ -1,0 +1,11 @@
+#repository-source-view-repository-source-mirror-table td:nth-child(1),
+#repository-source-view-repository-source-mirror-table td:nth-child(2) {
+    width:64px;
+    text-align: center;
+}
+
+#repository-source-view-repository-source-mirror-table th:nth-child(1),
+#repository-source-view-repository-source-mirror-table th:nth-child(2) {
+    width:64px;
+    text-align: center;
+}

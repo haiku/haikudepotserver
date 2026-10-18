@@ -72,7 +72,11 @@ content = @`
                 @for (RepositoryViewController.RepositorySource repositorySource : data.repositorySources())
                     <tr>
                         <td>@template.multipage.common.common-active-indicator(value = repositorySource.active())</td>
-                        <td><code>${repositorySource.code()}</code></td>
+                        <td>
+                            <a href="${repositorySource.viewUriComponents().toUriString()}">
+                            <code>${repositorySource.code()}</code>
+                            </a>
+                        </td>
                         <td>${TimestampHelper.formatTimestamp(repositorySource.lastImportTimestamp())}</td>
                     </tr>
                 @endfor
@@ -107,6 +111,13 @@ content = @`
                     actionCode = RepositoryViewController.OneshotAction.REACTIVATE.name(),
                     uriComponents = data.oneshotActionUriComponents(),
                     content = @`${internationalizationSupplier.getMessage("mp.repository_view.action.reactivate.title")}`)
+                </li>
+            @endif
+            @if (data.canEdit() && !data.includeInactiveRepositorySources())
+                <li>
+                    <a href="${data.includeInactiveRepositorySourcesUriComponents().toUriString()}">
+                        ${internationalizationSupplier.getMessage("mp.repository_view.action.include_inactive_repository_sources.title")}
+                    </a>
                 </li>
             @endif
             @if (data.canImport())

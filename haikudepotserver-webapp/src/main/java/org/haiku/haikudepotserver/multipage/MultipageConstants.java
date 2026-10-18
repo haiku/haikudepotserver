@@ -24,6 +24,7 @@ public class MultipageConstants {
     public final static String PATH_MULTIPAGE = "/" + SEGMENT_MULTIPAGE;
 
     public final static String SEGMENT_REPOSITORY = "repository";
+    public final static String SEGMENT_REPOSITORY_SOURCE = "repository_source";
 
     // Model parameters
     public final static String KEY_DATA = "data";

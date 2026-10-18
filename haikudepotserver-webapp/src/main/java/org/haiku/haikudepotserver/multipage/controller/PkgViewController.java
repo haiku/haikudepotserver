@@ -219,6 +219,7 @@ public class PkgViewController {
                                         1),
                         screenshots
                 ),
+                navigationService.repositorySourceViewUri(httpServletRequest, pkgVersion0.getRepositorySourceCode()).build(),
                 getPkgResponse.getIsNativeDesktop(),
                 BooleanUtils.isTrue(pkgVersion0.getHasSource()),
                 Optional.ofNullable(pkgVersion0.getPayloadLength())
@@ -443,6 +444,8 @@ public class PkgViewController {
             List<PkgCategory> pkgCategories,
             UserRatingInfo userRatingInfo,
             ScreenshotInfo screenshotInfo,
+
+            UriComponents viewRepositorySourceUriComponents,
 
             boolean isNativeDesktop,
             boolean isSourceAvailable,

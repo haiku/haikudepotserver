@@ -168,6 +168,11 @@ public class MultipageNavigationService {
         return baselineMultipageUri(request).pathSegment(MultipageConstants.SEGMENT_REPOSITORY, repositoryCode);
     }
 
+    public UriComponentsBuilder repositorySourceViewUri(@Nullable HttpServletRequest request, String repositorySourceCode) {
+        Preconditions.checkArgument(repositorySourceCode != null);
+        return baselineMultipageUri(request).pathSegment(MultipageConstants.SEGMENT_REPOSITORY_SOURCE, repositorySourceCode);
+    }
+
     public UriComponentsBuilder pkgViewUri(
             @Nullable HttpServletRequest request,
             String pkgName,

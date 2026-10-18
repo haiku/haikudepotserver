@@ -96,7 +96,7 @@ content = @`
 
             <div>
                 <h4>${internationalizationSupplier.getMessage("mp.pkg_view.infoblocks.repository.title")}</h4>
-                <div><a href="#">${data.repositorySource().repository().name()}</a></div>
+                <div><a href="${data.viewRepositorySourceUriComponents().toUriString()}">${data.repositorySource().repository().name()}</a></div>
                 @if (null != data.architecture())
                     <div><code>${data.architecture().code()}</code></div>
                 @endif

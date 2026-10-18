@@ -22,10 +22,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.MediaType;
 import org.springframework.stereotype.Controller;
-import org.springframework.web.bind.annotation.ModelAttribute;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestMethod;
+import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.ModelAndView;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 import org.springframework.web.util.UriComponents;
@@ -45,6 +42,8 @@ public class RepositoryViewController {
     private static final Logger LOGGER = LoggerFactory.getLogger(RepositoryViewController.class);
 
     private static final String SEGMENT_ACTION = "action";
+
+    private static final String KEY_INCLUDE_INACTIVE_REPOSITORY_SOURCES = "iars";
 
     public enum OneshotAction {
         DELETE_PASSWORD,
@@ -73,12 +72,18 @@ public class RepositoryViewController {
     }
 
     @RequestMapping(value = "{repositoryCode}", method = RequestMethod.GET, produces = MediaType.TEXT_HTML_VALUE)
-    public ModelAndView viewPkg(
+    public ModelAndView view(
             HttpServletRequest httpServletRequest,
             Locale locale,
-            @PathVariable String repositoryCode
+            @PathVariable String repositoryCode,
+            @RequestParam(value = KEY_INCLUDE_INACTIVE_REPOSITORY_SOURCES, required = false) Boolean includeInactiveRepositorySources
     ) {
-        return goViewPkg(httpServletRequest, locale, repositoryCode, false);
+        return goViewRepository(
+                httpServletRequest,
+                locale,
+                repositoryCode,
+                BooleanUtils.isTrue(includeInactiveRepositorySources),
+                false);
     }
 
     /**
@@ -89,10 +94,11 @@ public class RepositoryViewController {
             method = RequestMethod.POST,
             consumes = MediaType.APPLICATION_FORM_URLENCODED_VALUE,
             produces = MediaType.TEXT_HTML_VALUE)
-    public ModelAndView oneshotActionPkg(
+    public ModelAndView oneshotAction(
             HttpServletRequest httpServletRequest,
             Locale locale,
             @PathVariable String repositoryCode,
+            @RequestParam(value = KEY_INCLUDE_INACTIVE_REPOSITORY_SOURCES, required = false) Boolean includeInactiveRepositorySources,
             @ModelAttribute OneshotActionData oneshotActionData
     ) {
         Preconditions.checkArgument(null != oneshotActionData, "the action is required.");
@@ -121,18 +127,28 @@ public class RepositoryViewController {
 
         LOGGER.info("did perform oneshot action [{}] for repository [{}]", oneshotActionData.action(), repositoryCode);
 
-        return goViewPkg(httpServletRequest, locale, repositoryCode, didTriggerImport);
+        return goViewRepository(
+                httpServletRequest,
+                locale,
+                repositoryCode,
+                BooleanUtils.isTrue(includeInactiveRepositorySources),
+                didTriggerImport);
     }
 
-    private ModelAndView goViewPkg(
+    private ModelAndView goViewRepository(
             HttpServletRequest httpServletRequest,
             Locale locale,
             String repositoryCode,
+            boolean includeInactiveRepositorySources,
             boolean didTriggerImport) {
         return new ModelAndView(
                 "multipage/repository-view",
                 Map.of(
-                        MultipageConstants.KEY_DATA, createData(httpServletRequest, repositoryCode, didTriggerImport),
+                        MultipageConstants.KEY_DATA, createData(
+                                httpServletRequest,
+                                repositoryCode,
+                                includeInactiveRepositorySources,
+                                didTriggerImport),
                         MultipageConstants.KEY_INTERNATIONALIZATION_SUPPLIER, internationalizationSupplierFactory.create(locale),
                         MultipageConstants.KEY_WEB_RESOURCE_PATH_PREFIXES, multipageWebResourceService.getPathPrefixes()
                 )
@@ -142,10 +158,12 @@ public class RepositoryViewController {
     private RepositoryViewData createData(
             HttpServletRequest httpServletRequest,
             String repositoryCode,
+            boolean includeInactiveRepositorySources,
             boolean didTriggerImport) {
 
         GetRepositoryResult result = repositoryApiService.getRepository(
                 new GetRepositoryRequestEnvelope()
+                        .includeInactiveRepositorySources(includeInactiveRepositorySources)
                         .code(repositoryCode));
 
         Set<Permission> permissions = multipageSecurityService.filterPermissionsForRepository(
@@ -154,6 +172,9 @@ public class RepositoryViewController {
         UriComponents uriComponents = ServletUriComponentsBuilder.fromRequest(httpServletRequest).build();
         UriComponents oneshotActionUriComponents = navigationService.repositoryViewUri(httpServletRequest, repositoryCode)
                         .pathSegment(SEGMENT_ACTION).build();
+        UriComponents includeInactiveRepositorySourcesUriComponents = navigationService.repositoryViewUri(httpServletRequest, repositoryCode)
+                .replaceQueryParam(KEY_INCLUDE_INACTIVE_REPOSITORY_SOURCES, "true")
+                .build();
 
         return new RepositoryViewData(
                 uriComponents,
@@ -175,7 +196,9 @@ public class RepositoryViewController {
                 permissions.contains(Permission.REPOSITORY_IMPORT),
 
                 oneshotActionUriComponents,
+                includeInactiveRepositorySourcesUriComponents,
 
+                includeInactiveRepositorySources,
                 didTriggerImport,
 
                 result.getRepositorySources().stream()
@@ -184,7 +207,8 @@ public class RepositoryViewController {
                                 rs.getCode(),
                                 Optional.ofNullable(rs.getLastImportTimestamp())
                                         .map(Instant::ofEpochMilli)
-                                        .orElse(null)
+                                        .orElse(null),
+                                navigationService.repositorySourceViewUri(httpServletRequest, rs.getCode()).build()
                         ))
                         .toList()
         );
@@ -212,8 +236,10 @@ public class RepositoryViewController {
             boolean canEdit,
             boolean canImport,
 
-            @NotNull UriComponents oneshotActionUriComponents,
+            UriComponents oneshotActionUriComponents,
+            UriComponents includeInactiveRepositorySourcesUriComponents,
 
+            boolean includeInactiveRepositorySources,
             boolean didTriggerImport,
 
             List<RepositorySource> repositorySources
@@ -222,8 +248,9 @@ public class RepositoryViewController {
 
     public record RepositorySource(
             boolean active,
-            String code,
-            Instant lastImportTimestamp
+            @NotNull String code,
+            @Nullable Instant lastImportTimestamp,
+            UriComponents viewUriComponents
     ) {
     }
 

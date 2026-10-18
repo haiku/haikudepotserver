@@ -529,6 +529,11 @@ components:
           $ref: "./error.yaml#/components/schemas/error"
     getRepositorySourceResult:
       type: object
+      required:
+        - code
+        - repositoryCode
+        - active
+        - repositorySourceMirrors
       properties:
         code:
           type: string

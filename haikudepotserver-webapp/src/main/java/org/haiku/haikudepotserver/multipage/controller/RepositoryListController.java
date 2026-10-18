@@ -88,7 +88,7 @@ public class RepositoryListController {
         Integer total = result.getTotal();
 
         UriComponents uriComponents = ServletUriComponentsBuilder.fromRequest(httpServletRequest).build();
-        UriComponents includeInactiveUriComponents = ServletUriComponentsBuilder.fromRequest(httpServletRequest)
+        UriComponents includeInactiveUriComponents = navigationService.repositoryListUri(httpServletRequest)
                 .replaceQueryParam(MultipageConstants.KEY_INCLUDE_INACTIVE, "true")
                 .build();
 

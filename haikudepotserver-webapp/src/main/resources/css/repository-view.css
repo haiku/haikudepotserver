@@ -2,3 +2,8 @@
     width: 64px;
     text-align: center;
 }
+
+#repository-view-repository-source-table th:nth-child(1) {
+    width: 64px;
+    text-align: center;
+}
