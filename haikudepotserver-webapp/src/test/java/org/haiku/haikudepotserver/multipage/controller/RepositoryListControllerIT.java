@@ -55,7 +55,7 @@ public class RepositoryListControllerIT extends AbstractIntegrationTest {
             DomElement codeTdEl = tableEl.getElementsByTagName("tbody").getFirst()
                     .getElementsByTagName("tr").getFirst()
                     .getElementsByTagName("td").get(1);
-            Assertions.assertThat(codeTdEl.getTextContent()).matches("^testrepo$");
+            Assertions.assertThat(codeTdEl.getTextContent()).matches("^\\s+testrepo\\s+$");
         }
     }
 

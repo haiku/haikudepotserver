@@ -51,7 +51,7 @@ public class RepositoryViewControllerIT extends AbstractIntegrationTest {
             DomElement codeTdEl = tableEl.getElementsByTagName("tbody").getFirst()
                     .getElementsByTagName("tr").getFirst()
                     .getElementsByTagName("td").get(1);
-            Assertions.assertThat(codeTdEl.getTextContent()).matches("^testreposrc_xyz_x86_gcc2$");
+            Assertions.assertThat(codeTdEl.getTextContent()).matches("^\\s+testreposrc_xyz_x86_gcc2\\s+$");
         }
 
         // check some of the code labels at the top
