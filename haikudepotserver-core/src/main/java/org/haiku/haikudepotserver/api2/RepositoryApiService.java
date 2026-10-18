@@ -64,12 +64,7 @@ import org.springframework.security.access.PermissionEvaluator;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Component;
 
-import java.util.Collections;
-import java.util.Date;
-import java.util.List;
-import java.util.Optional;
-import java.util.Set;
-import java.util.UUID;
+import java.util.*;
 import java.util.stream.Collectors;
 
 @Component("repositoryApiServiceV2")
@@ -273,6 +268,7 @@ public class RepositoryApiService extends AbstractApiService {
                 .repositorySources(repository.getRepositorySources()
                         .stream()
                         .filter(rs -> rs.getActive() || BooleanUtils.isTrue(request.getIncludeInactiveRepositorySources()))
+                        .sorted(Comparator.comparing(rs -> rs.getCode()))
                         .map(rs -> new GetRepositoryRepositorySource()
                                 .active(rs.getActive())
                                 .code(rs.getCode())
