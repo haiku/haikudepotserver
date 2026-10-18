@@ -140,8 +140,6 @@ public class SecurityConfig {
                 PrefixPathRequestMatcher.withFirstSegment(PkgDownloadController.SEGMENT_PKGDOWNLOAD),
                 PrefixPathRequestMatcher.withFirstSegment(PkgIconController.SEGMENT_PKGICON),
                 new ExactPathRequestMatcher("/%s".formatted(PkgIconController.SEGMENT_GENERICPKGICON)),
-                PrefixPathRequestMatcher.withFirstSegment(PkgScreenshotController.SEGMENT_SCREENSHOT),
-                PrefixPathRequestMatcher.withFirstSegment(PkgScreenshotController.SEGMENT_SCREENSHOT_LEGACY), // TODO (deprecated) be removed
                 PrefixPathRequestMatcher.withFirstSegment(PkgSearchController.SEGMENT_SEARCH),
                 PrefixPathRequestMatcher.withFirstSegment(PkgSearchController.SEGMENT_SEARCH_LEGACY), // TODO (deprecated) be removed
                 // reference
@@ -151,6 +149,14 @@ public class SecurityConfig {
                 PrefixPathRequestMatcher.withFirstSegment(RepositoryController.SEGMENT_REPOSITORY),
                 // user
                 new PrefixPathRequestMatcher("/%s/%s/".formatted(UserController.SEGMENT_USER, UserController.SEGMENT_USAGE_CONDITIONS)),
+                // screenshot; a bit more complex as it's necessary to avoid the "add endpoint"
+                new RegexRequestMatcher("^/%s/[A-Fa-f0-9-]+/raw$".formatted(PkgScreenshotController.SEGMENT_SCREENSHOT), HttpMethod.GET.name()),
+                new RegexRequestMatcher("^/%s/[A-Fa-f0-9-]+\\.png(\\?.+)?$".formatted(PkgScreenshotController.SEGMENT_SCREENSHOT), HttpMethod.GET.name()),
+                new RegexRequestMatcher("^/%s/[A-Fa-f0-9-]+\\.png(\\?.+)?$".formatted(PkgScreenshotController.SEGMENT_SCREENSHOT), HttpMethod.HEAD.name()),
+                // screenshot legacy // TODO (deprecated) be removed
+                new RegexRequestMatcher("^/%s/[A-Fa-f0-9-]+/raw$".formatted(PkgScreenshotController.SEGMENT_SCREENSHOT_LEGACY), HttpMethod.GET.name()),
+                new RegexRequestMatcher("^/%s/[A-Fa-f0-9-]+\\.png(\\?.+)?$".formatted(PkgScreenshotController.SEGMENT_SCREENSHOT_LEGACY), HttpMethod.GET.name()),
+                new RegexRequestMatcher("^/%s/[A-Fa-f0-9-]+\\.png(\\?.+)?$".formatted(PkgScreenshotController.SEGMENT_SCREENSHOT_LEGACY), HttpMethod.HEAD.name()),
 
                 // multipage support
                 new PrefixPathRequestMatcher(pathPrefixes.img()),
@@ -195,6 +201,7 @@ public class SecurityConfig {
                 "/%s".formatted(MultipageConstants.SEGMENT_MULTIPAGE),
                 "/%s/**".formatted(MultipageConstants.SEGMENT_MULTIPAGE),
                 "/%s/**".formatted(WebConstants.SEGMENT_SECURITY),
+                "/%s/*/add".formatted(PkgScreenshotController.SEGMENT_SCREENSHOT), // TODO (andponlin) be more specific
                 "/__api/**", // TODO (andponlin) use constants
                 "/api/**", // TODO (andponlin) remove; legacy
                 "/%s/**".formatted(WebConstants.PATH_COMPONENT_SECURED) // TODO (andponlin) look into this path format
