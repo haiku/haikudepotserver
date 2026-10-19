@@ -34,7 +34,8 @@ import java.time.Instant;
 import java.util.*;
 
 /**
- * <p>This controller takes responsibility for displaying all the details about a Repository.</p>
+ * <p>This controller takes responsibility for displaying all the details about a
+ * RepositorySource.</p>
  */
 
 @Controller
@@ -177,7 +178,8 @@ public class RepositorySourceViewController {
                                 BooleanUtils.isTrue(rsm.getActive()),
                                 BooleanUtils.isTrue(rsm.getIsPrimary()),
                                 rsm.getCountryCode(),
-                                rsm.getBaseUrl()
+                                rsm.getBaseUrl(),
+                                navigationService.repositorySourceMirrorViewUri(httpServletRequest, rsm.getCode()).build()
                         ))
                         .toList()
         );
@@ -220,7 +222,8 @@ public class RepositorySourceViewController {
             boolean active,
             boolean isPrimary,
             String countryCode,
-            String baseUrl
+            String baseUrl,
+            UriComponents viewUriComponents
     ) {
     }
 

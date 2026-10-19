@@ -618,7 +618,7 @@ public class RepositoryApiService extends AbstractApiService {
                 case ACTIVE:
                     if (repositorySourceMirror.getIsPrimary()) {
                         throw new ValidationException(new ValidationFailure(
-                                RepositorySourceMirror.ACTIVE.getName(), "confict"));
+                                RepositorySourceMirror.ACTIVE.getName(), "conflict"));
                     }
                     repositorySourceMirror.setActive(BooleanUtils.isTrue(request.getActive()));
                     break;
@@ -656,7 +656,7 @@ public class RepositoryApiService extends AbstractApiService {
                             repositorySourceMirror.setIsPrimary(true);
                         } else {
                             throw new ValidationException(new ValidationFailure(
-                                    RepositorySourceMirror.IS_PRIMARY.getName(), "confict"));
+                                    RepositorySourceMirror.IS_PRIMARY.getName(), "conflict"));
                         }
                     }
                     break;

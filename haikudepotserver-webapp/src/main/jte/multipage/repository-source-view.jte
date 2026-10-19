@@ -1,3 +1,7 @@
+<%--
+Copyright 2026, Andrew Lindesay
+Distributed under the terms of the MIT License.
+--%>
 @import java.util.List
 @import org.apache.commons.lang3.StringUtils
 @import org.haiku.haikudepotserver.multipage.controller.RepositorySourceViewController
@@ -138,7 +142,11 @@ content = @`
                     <tr>
                         <td>@template.multipage.common.common-active-indicator(value = repositorySourceMirror.isPrimary())</td>
                         <td>@template.multipage.common.common-active-indicator(value = repositorySourceMirror.active())</td>
-                        <td><code>${repositorySourceMirror.countryCode()}</code></td>
+                        <td>
+                            <a href="${repositorySourceMirror.viewUriComponents().toUriString()}">
+                                <code>${repositorySourceMirror.countryCode()}</code>
+                            </a>
+                        </td>
                         <td><code>${repositorySourceMirror.baseUrl()}</code></td>
                     </tr>
                 @endfor
