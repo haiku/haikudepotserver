@@ -23,12 +23,9 @@ import java.util.Optional;
  */
 public enum MultipageDomain {
 
-    LINK_TO_SSO(
-            PathPatternRequestMatcher.pathPattern("/%s/%s/**".formatted(
-                    MultipageConstants.SEGMENT_MULTIPAGE,
-                    LinkToSsoController.SEGMENT_LINK_TO_SSO
-            ))
-    );
+    LINK_TO_SSO(createMultipageFirstSegmentRequestMatcher(LinkToSsoController.SEGMENT_LINK_TO_SSO)),
+    REPOSITORY(createMultipageFirstSegmentRequestMatcher(MultipageConstants.SEGMENT_REPOSITORY)),
+    REPOSITORY_SOURCE_MIRROR_ADD_EDIT(createMultipageFirstSegmentRequestMatcher(MultipageConstants.SEGMENT_REPOSITORY_SOURCE_MIRROR_ADD_EDIT));
 
     private final RequestMatcher requestMatcher;
 
@@ -66,6 +63,12 @@ public enum MultipageDomain {
         }
 
         return Optional.empty();
+    }
+
+    private static RequestMatcher createMultipageFirstSegmentRequestMatcher(String firstSegment) {
+        return PathPatternRequestMatcher.pathPattern(
+                "/%s/%s/**".formatted(MultipageConstants.SEGMENT_MULTIPAGE, firstSegment)
+        );
     }
 
 }

@@ -39,7 +39,7 @@ import java.util.Optional;
 @RequestMapping(MultipageConstants.PATH_MULTIPAGE + "/" + UserUsageConditionsAgreeController.SEGMENT_USER_USAGE_CONDITIONS_AGREE)
 public class UserUsageConditionsAgreeController {
 
-    protected final static Logger LOGGER = LoggerFactory.getLogger(UserUsageConditionsAgreeController.class);
+    private final static Logger LOGGER = LoggerFactory.getLogger(UserUsageConditionsAgreeController.class);
 
     public final static String SEGMENT_USER_USAGE_CONDITIONS_AGREE = "user_usage_conditions_agree";
 
@@ -52,8 +52,7 @@ public class UserUsageConditionsAgreeController {
             InternationalizationSupplierFactory internationalizationSupplierFactory,
             UserApiService userApiService,
             MultipageNavigationService navigationService,
-            MultipageWebResourceService multipageWebResourceService,
-            MultipageSecurityService multipageSecurityService) {
+            MultipageWebResourceService multipageWebResourceService) {
         this.internationalizationSupplierFactory = internationalizationSupplierFactory;
         this.userApiService = userApiService;
         this.navigationService = navigationService;

@@ -10,10 +10,7 @@ import jakarta.servlet.http.HttpServletRequest;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.tuple.Pair;
 import org.haiku.haikudepotserver.api2.model.Permission;
-import org.haiku.haikudepotserver.multipage.controller.AboutController;
-import org.haiku.haikudepotserver.multipage.controller.PkgViewController;
-import org.haiku.haikudepotserver.multipage.controller.UserUsageConditionsAgreeController;
-import org.haiku.haikudepotserver.multipage.controller.UserViewController;
+import org.haiku.haikudepotserver.multipage.controller.*;
 import org.haiku.haikudepotserver.multipage.model.*;
 import org.haiku.haikudepotserver.support.VersionCoordinates;
 import org.haiku.haikudepotserver.support.web.WebConstants;
@@ -176,6 +173,22 @@ public class MultipageNavigationService {
     public UriComponentsBuilder repositorySourceMirrorViewUri(@Nullable HttpServletRequest request, String repositorySourceMirrorCode) {
         Preconditions.checkArgument(repositorySourceMirrorCode != null);
         return baselineMultipageUri(request).pathSegment(MultipageConstants.SEGMENT_REPOSITORY_SOURCE_MIRROR, repositorySourceMirrorCode);
+    }
+
+    public UriComponentsBuilder repositorySourceMirrorAddUri(@Nullable HttpServletRequest request, String repositorySourceCode) {
+        Preconditions.checkArgument(repositorySourceCode != null);
+        return baselineMultipageUri(request).pathSegment(
+                MultipageConstants.SEGMENT_REPOSITORY_SOURCE,
+                repositorySourceCode,
+                RepositorySourceMirrorAddEditController.SEGMENT_ADD_MIRROR);
+    }
+
+    public UriComponentsBuilder repositorySourceMirrorEditUri(@Nullable HttpServletRequest request, String repositorySourceMirrorCode) {
+        Preconditions.checkArgument(repositorySourceMirrorCode != null);
+        return baselineMultipageUri(request).pathSegment(
+                MultipageConstants.SEGMENT_REPOSITORY_SOURCE_MIRROR,
+                repositorySourceMirrorCode,
+                RepositorySourceMirrorAddEditController.SEGMENT_EDIT);
     }
 
     public UriComponentsBuilder pkgViewUri(

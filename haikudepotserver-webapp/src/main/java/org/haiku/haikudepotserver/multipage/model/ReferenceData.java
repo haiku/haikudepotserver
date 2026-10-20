@@ -15,8 +15,8 @@ import java.util.Set;
 public record ReferenceData(
       List<Architecture> architectures,
       List<PkgCategory> pkgCategories,
-      List<Repository> repositories
-) {
+      List<Repository> repositories,
+      List<Country> countries) {
 
     private final static Set<String> PSEUDO_ARCHITECTURE_CODES = Set.of(
             "any",

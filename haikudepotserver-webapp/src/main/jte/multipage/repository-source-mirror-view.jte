@@ -87,6 +87,13 @@ content = @`
                         content = @`${internationalizationSupplier.getMessage("mp.repository_source_mirror_view.action.remove.title")}`)
                     </li>
                 @endif
+                @if (data.canEdit())
+                    <li>
+                        <a href="${data.editUriComponents().toUriString()}">
+                            ${internationalizationSupplier.getMessage("mp.repository_source_mirror_view.action.edit.title")}
+                        </a>
+                    </li>
+                @endif
             </ul>
 
         @endif

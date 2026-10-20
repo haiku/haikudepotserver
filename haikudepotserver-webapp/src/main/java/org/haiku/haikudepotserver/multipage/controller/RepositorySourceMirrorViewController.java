@@ -187,7 +187,8 @@ public class RepositorySourceMirrorViewController {
 
                 oneshotActionUriComponents,
                 navigationService.repositoryViewUri(httpServletRequest, repositorySourceResult.getRepositoryCode()).build(),
-                navigationService.repositorySourceViewUri(httpServletRequest, repositorySourceResult.getCode()).build()
+                navigationService.repositorySourceViewUri(httpServletRequest, repositorySourceResult.getCode()).build(),
+                navigationService.repositorySourceMirrorEditUri(httpServletRequest, result.getCode()).build()
         );
     }
 
@@ -214,7 +215,8 @@ public class RepositorySourceMirrorViewController {
 
             @NotNull UriComponents oneshotActionUriComponents,
             @NotNull UriComponents viewRepositoryUriComponents,
-            @NotNull UriComponents viewRepositorySourceUriComponents
+            @NotNull UriComponents viewRepositorySourceUriComponents,
+            @NotNull UriComponents editUriComponents
     ) {
     }
 

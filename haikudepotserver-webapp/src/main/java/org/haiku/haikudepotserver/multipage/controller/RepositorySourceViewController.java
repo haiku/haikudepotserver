@@ -168,6 +168,7 @@ public class RepositorySourceViewController {
                 permissions.contains(Permission.REPOSITORY_IMPORT),
 
                 oneshotActionUriComponents,
+                navigationService.repositorySourceMirrorAddUri(httpServletRequest, result.getCode()).build(),
 
                 didTriggerImport,
 
@@ -210,6 +211,7 @@ public class RepositorySourceViewController {
             boolean canImport,
 
             @NotNull UriComponents oneshotActionUriComponents,
+            @NotNull UriComponents addRepositorySourceMirrorUriComponents,
 
             boolean didTriggerImport,
 

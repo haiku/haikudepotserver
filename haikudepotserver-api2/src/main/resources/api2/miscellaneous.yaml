@@ -549,6 +549,8 @@ components:
           $ref: "./error.yaml#/components/schemas/error"
     getAllCountriesResult:
       type: object
+      required:
+        - countries
       properties:
         countries:
           type: array
@@ -556,6 +558,9 @@ components:
             $ref: "#/components/schemas/country"
     country:
       type: object
+      required:
+        - code
+        - name
       properties:
         code:
           type: string

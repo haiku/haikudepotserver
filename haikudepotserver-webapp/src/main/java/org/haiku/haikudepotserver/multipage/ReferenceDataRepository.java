@@ -13,6 +13,7 @@ import org.haiku.haikudepotserver.api2.RepositoryApiService;
 import org.haiku.haikudepotserver.api2.model.*;
 import org.haiku.haikudepotserver.multipage.model.*;
 import org.haiku.haikudepotserver.multipage.model.Architecture;
+import org.haiku.haikudepotserver.multipage.model.Country;
 import org.haiku.haikudepotserver.multipage.model.PkgCategory;
 import org.springframework.stereotype.Service;
 
@@ -69,14 +70,16 @@ public class ReferenceDataRepository {
     }
 
     private ReferenceData getReferenceDataWithoutCache(String naturalLanguageCode) {
-        GetAllArchitecturesRequestEnvelope getAllArchitecturesRequest = new GetAllArchitecturesRequestEnvelope();
-        getAllArchitecturesRequest.setNaturalLanguageCode(naturalLanguageCode);
         List<org.haiku.haikudepotserver.api2.model.Architecture> architectures = miscellaneousApiService.getAllArchitectures(
-                getAllArchitecturesRequest).getArchitectures();
+                new GetAllArchitecturesRequestEnvelope()
+                        .naturalLanguageCode(naturalLanguageCode)).getArchitectures();
         List<org.haiku.haikudepotserver.api2.model.PkgCategory> pkgCategories = miscellaneousApiService.getAllPkgCategories(
                 new GetAllPkgCategoriesRequestEnvelope()).getPkgCategories();
         List<GetRepositoriesRepository> repositories = repositoryApiService.getRepositories(
                 new GetRepositoriesRequestEnvelope()).getRepositories();
+        List<org.haiku.haikudepotserver.api2.model.Country> countries = miscellaneousApiService.getAllCountries(
+                new GetAllCountriesRequestEnvelope()
+                        .naturalLanguageCode(naturalLanguageCode)).getCountries();
 
         return new ReferenceData(
                 architectures.stream()
@@ -90,6 +93,10 @@ public class ReferenceDataRepository {
                 repositories.stream()
                         .map(r -> new Repository(r.getCode(), r.getName()))
                         .sorted(Comparator.comparing(Repository::code))
+                        .toList(),
+                countries.stream()
+                        .map(c -> new Country(c.getCode(), c.getName()))
+                        .sorted(Comparator.comparing(Country::code))
                         .toList()
         );
     }

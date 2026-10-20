@@ -155,33 +155,40 @@ content = @`
         @endif
 
         @if (data.canImport() || data.canEdit())
-        <h3>${internationalizationSupplier.getMessage("mp.gen.actions")}</h3>
+            <h3>${internationalizationSupplier.getMessage("mp.gen.actions")}</h3>
 
             <ul>
-            @if (data.canEdit() && data.active())
-                <li>
-                    @template.multipage.common.common-oneshot-action-link(
-                    actionCode = RepositorySourceViewController.OneshotAction.DEACTIVATE.name(),
-                    uriComponents = data.oneshotActionUriComponents(),
-                    content = @`${internationalizationSupplier.getMessage("mp.repository_source_view.action.deactivate.title")}`)
-                </li>
-            @endif
-            @if (data.canEdit() && !data.active())
-                <li>
-                    @template.multipage.common.common-oneshot-action-link(
-                    actionCode = RepositorySourceViewController.OneshotAction.REACTIVATE.name(),
-                    uriComponents = data.oneshotActionUriComponents(),
-                    content = @`${internationalizationSupplier.getMessage("mp.repository_source_view.action.reactivate.title")}`)
-                </li>
-            @endif
-            @if (data.canImport())
-                <li>
-                    @template.multipage.common.common-oneshot-action-link(
-                    actionCode = RepositorySourceViewController.OneshotAction.TRIGGER_IMPORT.name(),
-                    uriComponents = data.oneshotActionUriComponents(),
-                    content = @`${internationalizationSupplier.getMessage("mp.repository_source_view.action.trigger_import.title")}`)
-                </li>
-            @endif
+                @if (data.canEdit() && data.active())
+                    <li>
+                        @template.multipage.common.common-oneshot-action-link(
+                        actionCode = RepositorySourceViewController.OneshotAction.DEACTIVATE.name(),
+                        uriComponents = data.oneshotActionUriComponents(),
+                        content = @`${internationalizationSupplier.getMessage("mp.repository_source_view.action.deactivate.title")}`)
+                    </li>
+                @endif
+                @if (data.canEdit() && !data.active())
+                    <li>
+                        @template.multipage.common.common-oneshot-action-link(
+                        actionCode = RepositorySourceViewController.OneshotAction.REACTIVATE.name(),
+                        uriComponents = data.oneshotActionUriComponents(),
+                        content = @`${internationalizationSupplier.getMessage("mp.repository_source_view.action.reactivate.title")}`)
+                    </li>
+                @endif
+                @if (data.canImport())
+                    <li>
+                        @template.multipage.common.common-oneshot-action-link(
+                        actionCode = RepositorySourceViewController.OneshotAction.TRIGGER_IMPORT.name(),
+                        uriComponents = data.oneshotActionUriComponents(),
+                        content = @`${internationalizationSupplier.getMessage("mp.repository_source_view.action.trigger_import.title")}`)
+                    </li>
+                @endif
+                @if (data.canEdit())
+                    <li>
+                        <a href="${data.addRepositorySourceMirrorUriComponents().toUriString()}">
+                            ${internationalizationSupplier.getMessage("mp.repository_source_view.action.add_repository_source_mirror.title")}
+                        </a>
+                    </li>
+                @endif
             </ul>
 
         @endif

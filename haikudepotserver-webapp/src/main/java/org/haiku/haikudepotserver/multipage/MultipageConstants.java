@@ -26,6 +26,7 @@ public class MultipageConstants {
     public final static String SEGMENT_REPOSITORY = "repository";
     public final static String SEGMENT_REPOSITORY_SOURCE = "repository_source";
     public final static String SEGMENT_REPOSITORY_SOURCE_MIRROR = "repository_source_mirror";
+    public final static String SEGMENT_REPOSITORY_SOURCE_MIRROR_ADD_EDIT = "repository_source_mirror_add_edit";
 
     // Model parameters
     public final static String KEY_DATA = "data";
