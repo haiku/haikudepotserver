@@ -1,6 +1,6 @@
 <?xml version='1.0' encoding='UTF-8'?>
 <!--
-  ~ Copyright 2018-2025, Andrew Lindesay
+  ~ Copyright 2018-2026, Andrew Lindesay
   ~ Distributed under the terms of the MIT License.
   -->
 
@@ -45,19 +45,19 @@
         <maven-compiler-plugin.version>3.15.0</maven-compiler-plugin.version>
 
         <jsonschema2pojo-maven-plugin.version>1.3.3</jsonschema2pojo-maven-plugin.version>
-        <openapi-generator-maven-plugin.version>7.25.0</openapi-generator-maven-plugin.version>
+        <openapi-generator-maven-plugin.version>7.26.0</openapi-generator-maven-plugin.version>
 
         <!-- runtime dependencies -->
 
         <spring-boot.version>4.1.1</spring-boot.version>
 
-        <postgresql.version>42.7.13</postgresql.version>
+        <postgresql.version>42.7.14</postgresql.version>
         <cayenne.version>4.2.3</cayenne.version>
 
         <flexmark.version>0.64.8</flexmark.version>
         <freemarker.version>2.3.35</freemarker.version>
         <jte.version>3.2.4</jte.version>
-        <aircompressor.version>3.10</aircompressor.version>
+        <aircompressor.version>3.11</aircompressor.version>
         <guava.version>33.7.2-jre</guava.version>
         <springfox.version>3.0.0</springfox.version>
         <nimbus-jose-jwt.version>10.9</nimbus-jose-jwt.version>
@@ -73,8 +73,8 @@
         <commons-text.version>1.15.0</commons-text.version>
 
         <avaje-http.version>3.10</avaje-http.version>
-        <avaje-inject.version>12.6</avaje-inject.version>
-        <avaje-http-inject-plugin.version>3.10</avaje-http-inject-plugin.version>
+        <avaje-inject.version>12.7</avaje-inject.version>
+        <avaje-http-inject-plugin.version>3.12</avaje-http-inject-plugin.version>
         <avaje-config.version>5.2</avaje-config.version>
         <avaje-simple-logger.version>2.0</avaje-simple-logger.version>
         <avaje-jex.version>3.6</avaje-jex.version>

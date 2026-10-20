@@ -8,8 +8,8 @@
 FROM base AS hvif2png-build
 
 # 2026-03-29
-ENV HAIKU_HASH=dd591bee7afb8b39198aed4494ceb349f85946d8
-ENV BUILDTOOLS_HASH=bfa561e3708c0e2d0155fb403b988ba515c9b16d
+ENV HAIKU_HASH=af754c7c26103286229c3251d4379023c4a934f0
+ENV BUILDTOOLS_HASH=33d46bf5c300bd34cd07c596431e4545c754ac03
 
 RUN apt-get update && \
     apt-get -y install git nasm bc autoconf automake texinfo flex bison gawk build-essential unzip wget \
