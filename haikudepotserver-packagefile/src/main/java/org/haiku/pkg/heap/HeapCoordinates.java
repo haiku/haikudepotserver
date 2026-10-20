@@ -21,7 +21,7 @@ public class HeapCoordinates {
     public HeapCoordinates(long offset, long length) {
         super();
 
-        Preconditions.checkState(offset >= 0 && offset < Integer.MAX_VALUE);
+        Preconditions.checkState(offset >= 0);
         Preconditions.checkState(length >= 0 && length < Integer.MAX_VALUE);
 
         this.offset = offset;

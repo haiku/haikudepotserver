@@ -51,7 +51,7 @@ public class RepositorySourceViewControllerIT extends AbstractIntegrationTest {
             DomElement codeTdEl = tableEl.getElementsByTagName("tbody").getFirst()
                     .getElementsByTagName("tr").getFirst()
                     .getElementsByTagName("td").get(2);
-            Assertions.assertThat(codeTdEl.getTextContent()).matches("^NZ$");
+            Assertions.assertThat(codeTdEl.getTextContent()).matches("^\\s+NZ\\s+$");
         }
 
         // check some of the code labels at the top

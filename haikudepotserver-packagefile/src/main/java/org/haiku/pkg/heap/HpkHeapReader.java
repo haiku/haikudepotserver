@@ -1,5 +1,5 @@
 /*
- * Copyright 2018-2024, Andrew Lindesay
+ * Copyright 2018-2027, Andrew Lindesay
  * Distributed under the terms of the MIT License.
  */
 
@@ -59,10 +59,10 @@ public class HpkHeapReader implements Closeable, HeapReader {
 
         Preconditions.checkNotNull(file);
         Preconditions.checkNotNull(compression);
-        Preconditions.checkState(heapOffset > 0 && heapOffset < Integer.MAX_VALUE);
+        Preconditions.checkState(heapOffset > 0);
         Preconditions.checkState(chunkSize > 0 && chunkSize < Integer.MAX_VALUE);
-        Preconditions.checkState(compressedSize >= 0 && compressedSize < Integer.MAX_VALUE);
-        Preconditions.checkState(uncompressedSize >= 0 && uncompressedSize < Integer.MAX_VALUE);
+        Preconditions.checkState(compressedSize >= 0);
+        Preconditions.checkState(uncompressedSize >= 0);
 
         this.compression = compression;
         this.heapOffset = heapOffset;
@@ -85,7 +85,16 @@ public class HpkHeapReader implements Closeable, HeapReader {
                             Preconditions.checkNotNull(key);
 
                             // TODO: best to avoid continuously allocating new byte buffers
-                            byte[] result = new byte[getHeapChunkUncompressedLength(key)];
+                            long uncompressedLength = getHeapChunkUncompressedLength(key);
+
+                            if (uncompressedLength > Integer.MAX_VALUE) {
+                                throw new IllegalStateException(
+                                        "the chunk size is %d which is great than the limit %d".formatted(
+                                                uncompressedLength, Integer.MAX_VALUE
+                                        ));
+                            }
+
+                            byte[] result = new byte[(int) uncompressedLength];
                             readHeapChunk(key,result);
                             return result;
                         }
@@ -117,25 +126,40 @@ public class HpkHeapReader implements Closeable, HeapReader {
     /**
      * <p>This gives the quantity of chunks that are in the heap.</p>
      */
-
     private int getHeapChunkCount() {
-        int count = (int) (uncompressedSize / chunkSize);
+        long countL = uncompressedSize / chunkSize;
 
-        if (0 != uncompressedSize % chunkSize) {
-            count++;
+        if (countL > Integer.MAX_VALUE) {
+            throw new IllegalStateException();
         }
 
-        return count;
+        if (0 != uncompressedSize % chunkSize) {
+            countL++;
+        }
+
+        return (int) countL;
     }
 
+    /**
+     * @param index index into the chunks.
+     */
     private int getHeapChunkUncompressedLength(int index) {
         if (index < getHeapChunkCount() - 1) {
             return (int) chunkSize;
         }
 
-        return (int) (uncompressedSize - (chunkSize * (getHeapChunkCount() - 1)));
+        long lengthL = uncompressedSize - (chunkSize * (getHeapChunkCount() - 1));
+
+        if (lengthL > Integer.MAX_VALUE) {
+            throw new IllegalStateException();
+        }
+
+        return (int) lengthL;
     }
 
+    /**
+     * @param index index into the chunks.
+     */
     private int getHeapChunkCompressedLength(int index) {
         return heapChunkCompressedLengths[index];
     }
@@ -196,7 +220,7 @@ public class HpkHeapReader implements Closeable, HeapReader {
 
     /**
      * <p>This will read from the current offset into the supplied buffer until the supplied buffer is completely
-     * filledup.</p>
+     * filled up.</p>
      */
 
     private void readFully(byte[] buffer) throws IOException {

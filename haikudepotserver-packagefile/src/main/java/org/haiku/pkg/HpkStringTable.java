@@ -1,5 +1,5 @@
 /*
- * Copyright 2018-2025, Andrew Lindesay
+ * Copyright 2018-2027, Andrew Lindesay
  * Distributed under the terms of the MIT License.
  */
 
@@ -37,7 +37,7 @@ public class HpkStringTable implements StringTable {
         super();
 
         Preconditions.checkNotNull(heapReader);
-        Preconditions.checkState(heapOffset >= 0 && heapOffset < Integer.MAX_VALUE);
+        Preconditions.checkState(heapOffset >= 0);
         Preconditions.checkState(heapLength >= 0 && heapLength < Integer.MAX_VALUE);
         Preconditions.checkState(expectedCount >= 0 && expectedCount < Integer.MAX_VALUE);
 
@@ -45,7 +45,6 @@ public class HpkStringTable implements StringTable {
         this.expectedCount = expectedCount;
         this.heapOffset = heapOffset;
         this.heapLength = heapLength;
-
     }
 
     // TODO; could avoid the big read into a buffer by reading the heap byte by byte or with a buffer.

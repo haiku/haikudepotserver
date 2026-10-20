@@ -1,5 +1,5 @@
 /*
- * Copyright 2018-2025, Andrew Lindesay
+ * Copyright 2018-2026, Andrew Lindesay
  * Distributed under the terms of the MIT License.
  */
 
@@ -63,7 +63,7 @@ public class AttributeIterator {
         super();
 
         Preconditions.checkNotNull(context);
-        Preconditions.checkState(offset >= 0 && offset < Integer.MAX_VALUE);
+        Preconditions.checkState(offset >= 0);
 
         this.offset = offset;
         this.context = context;
@@ -242,10 +242,6 @@ public class AttributeIterator {
 
         if (rawLength.compareTo(BigInteger.valueOf(Integer.MAX_VALUE)) > 0) {
             throw new HpkException("the length of the heap data is too large");
-        }
-
-        if (rawOffset.compareTo(BigInteger.valueOf(Integer.MAX_VALUE)) > 0) {
-            throw new HpkException("the offset of the heap data is too large");
         }
 
         return new RawHeapAttribute(
