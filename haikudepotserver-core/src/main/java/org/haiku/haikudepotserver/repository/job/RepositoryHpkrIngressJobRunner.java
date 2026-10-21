@@ -9,6 +9,7 @@ import com.google.common.base.Preconditions;
 import com.google.common.collect.Sets;
 import org.apache.cayenne.ObjectContext;
 import org.apache.cayenne.configuration.server.ServerRuntime;
+import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.haiku.driversettings.DriverSettings;
 import org.haiku.driversettings.DriverSettingsException;
@@ -44,6 +45,7 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.concurrent.TimeUnit;
 import java.util.regex.Pattern;
+import java.util.stream.Collectors;
 
 /**
  * <p>This object is responsible for migrating a HPKR file from a remote repository into the Haiku Depot Server
@@ -96,6 +98,10 @@ public class RepositoryHpkrIngressJobRunner extends AbstractJobRunner<Repository
 
         Preconditions.checkNotNull(specification);
 
+        jobService.setJobDescription(
+                specification.getGuid(),
+                createDescription(specification));
+
         ObjectContext mainContext = serverRuntime.newContext();
         Set<String> allowedRepositorySourceCodes = specification.getRepositorySourceCodes();
 
@@ -136,6 +142,26 @@ public class RepositoryHpkrIngressJobRunner extends AbstractJobRunner<Repository
                 return null;
             });
         }
+    }
+
+    private static String createDescription(RepositoryHpkrIngressJobSpecification specification) {
+        StringBuilder description = new StringBuilder();
+
+        description.append("hpkr import");
+
+        if (StringUtils.isNotBlank(specification.getRepositoryCode())) {
+            description.append("; repository [%s]".formatted(specification.getRepositoryCode()));
+        }
+
+        if (CollectionUtils.isNotEmpty(specification.getRepositorySourceCodes())) {
+            description.append("; repository sources [%s]".formatted(
+                    specification.getRepositorySourceCodes()
+                            .stream()
+                            .sorted()
+                            .collect(Collectors.joining(","))));
+        }
+
+        return description.toString();
     }
 
     private void runForRepositorySource(
