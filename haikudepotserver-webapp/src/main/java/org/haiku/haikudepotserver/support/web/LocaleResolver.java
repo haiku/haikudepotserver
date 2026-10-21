@@ -10,6 +10,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.haiku.haikudepotserver.naturallanguage.model.NaturalLanguageCoded;
 import org.haiku.haikudepotserver.naturallanguage.model.NaturalLanguageCoordinates;
 import org.haiku.haikudepotserver.naturallanguage.model.NaturalLanguageService;
+import org.haiku.haikudepotserver.reference.model.MalformedNaturalLanguageCodeException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpHeaders;
@@ -85,12 +86,16 @@ public class LocaleResolver implements org.springframework.web.servlet.LocaleRes
         List<Locale> headerLocales = Collections.list(request.getLocales());
 
         for (Locale headerLocale : headerLocales) {
-            Optional<NaturalLanguageCoordinates> result = naturalLanguageService.tryGetBestMatchFromList(
-                    codeSortedPossibleCoordinates,
-                    NaturalLanguageCoordinates.fromLocale(headerLocale));
+            try {
+                Optional<NaturalLanguageCoordinates> result = naturalLanguageService.tryGetBestMatchFromList(
+                        codeSortedPossibleCoordinates,
+                        NaturalLanguageCoordinates.fromLocale(headerLocale));
 
-            if (result.isPresent()) {
-                return result;
+                if (result.isPresent()) {
+                    return result;
+                }
+            } catch (MalformedNaturalLanguageCodeException mnlce) {
+                LOGGER.debug("ignoring malformed locale header [{}]", headerLocale);
             }
         }
 
