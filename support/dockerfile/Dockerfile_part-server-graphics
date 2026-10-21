@@ -1,5 +1,5 @@
 # =====================================
-# Copyright 2024-2025, Andrew Lindesay
+# Copyright 2024-2026, Andrew Lindesay
 # Distributed under the terms of the MIT License.
 # =====================================
 
@@ -27,6 +27,8 @@ ENV HDS_TOOL_HVIF2PNG_PATH=${X_HDS_HVIF2PNG_HOME}/bin/hvif2png.sh
 # The hvif2png tool requires the png library
 
 RUN apt-get update && \
+    apt-get -y install ca-certificates && \
+    update-ca-certificates && \
     apt-get -y install temurin-25-jre && \
     apt-get -y install libpng16-16 imagemagick optipng pngquant
 

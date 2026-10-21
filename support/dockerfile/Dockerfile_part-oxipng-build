@@ -1,5 +1,5 @@
 # =====================================
-# Copyright 2024, Andrew Lindesay
+# Copyright 2024-2026, Andrew Lindesay
 # Distributed under the terms of the MIT License.
 # =====================================
 
@@ -12,6 +12,8 @@ ARG OXIPNG_VERSION=10.2.1
 ARG OXIPNG_ROOT=/opt/oxipng
 
 RUN apt-get update && \
+    apt-get -y install ca-certificates && \
+    update-ca-certificates && \
     apt-get -y install curl gcc
 
 RUN curl --proto '=https' --tlsv1.3 https://sh.rustup.rs -sSf | bash -s -- -y

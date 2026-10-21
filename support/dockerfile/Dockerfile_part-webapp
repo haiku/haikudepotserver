@@ -1,5 +1,5 @@
 # =====================================
-# Copyright 2024-2025, Andrew Lindesay
+# Copyright 2024-2026, Andrew Lindesay
 # Distributed under the terms of the MIT License.
 # =====================================
 
@@ -12,6 +12,8 @@ RUN ./mvnw install --also-make --projects haikudepotserver-webapp
 FROM java_base AS runtime
 
 RUN apt-get update && \
+    apt-get -y install ca-certificates && \
+    update-ca-certificates && \
     apt-get -y install temurin-25-jre && \
     apt-get -y install curl fontconfig fonts-dejavu-core
 

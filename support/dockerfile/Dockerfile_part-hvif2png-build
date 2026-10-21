@@ -7,11 +7,13 @@
 
 FROM base AS hvif2png-build
 
-# 2026-03-29
+# 2026-10-XX
 ENV HAIKU_HASH=af754c7c26103286229c3251d4379023c4a934f0
 ENV BUILDTOOLS_HASH=33d46bf5c300bd34cd07c596431e4545c754ac03
 
 RUN apt-get update && \
+    apt-get -y install ca-certificates && \
+    update-ca-certificates && \
     apt-get -y install git nasm bc autoconf automake texinfo flex bison gawk build-essential unzip wget \
         zip less zlib1g-dev libzstd-dev xorriso libtool gcc-multilib python3 libpng16-16 libpng-dev
 

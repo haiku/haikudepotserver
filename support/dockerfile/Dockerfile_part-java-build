@@ -9,6 +9,8 @@
 FROM base AS java_base
 
 RUN apt-get update && \
+    apt-get -y install ca-certificates && \
+    update-ca-certificates && \
     apt-get -y install wget apt-transport-https gnupg locales
 
 RUN mkdir /adoptium
@@ -26,6 +28,9 @@ ENV LANG='en_US.UTF-8' LANGUAGE='en_US:en' LC_ALL='en_US.UTF-8'
 FROM java_base AS java_maven_build
 
 RUN apt-get update && \
+    # TODO (2026-10-22) remove on the next debian update
+    apt-get -y install ca-certificates && \
+    update-ca-certificates && \
     apt-get -y install temurin-25-jdk && \
     apt-get -y install wget python3 fontconfig fonts-dejavu-core lsb-release gnupg2 && \
     apt-get -y install postgresql postgresql-contrib
