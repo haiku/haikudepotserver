@@ -17,6 +17,12 @@ RUN apt-get update && \
     apt-get -y install temurin-25-jre && \
     apt-get -y install curl fontconfig fonts-dejavu-core
 
+# TODO (andponlin) remove for the Temurin release > 25.0.4.1
+#   https://ops.java/emudhra
+#   also remove the `-Dcom.sun.net.ssl.checkRevocation=true` and `-Dcom.sun.security.enableCRLDP=true`
+#   further down.
+COPY ./support/java/blocked.certs /usr/lib/jvm/temurin-25-jre-amd64/lib/security/blocked.certs
+
 # These will be picked up by Spring Boot as a property
 ENV SERVER_PORT=8080
 ENV MANGEMENT_SERVER_PORT=8081
@@ -29,6 +35,8 @@ COPY --from=java_maven_build_webapp /hds-src/haikudepotserver-core/target/classe
 COPY --from=java_maven_build_webapp /hds-src/haikudepotserver-webapp/target/haikudepotserver-webapp-*.jar ${X_HDS_B_INSTALL_ROOT}/app.jar
 
 CMD [ "java", \
+    "-Dcom.sun.net.ssl.checkRevocation=true", \
+    "-Dcom.sun.security.enableCRLDP=true", \
     "-Xms450m", \
     "-Xmx450m", \
     "-Dfile.encoding=UTF-8", \

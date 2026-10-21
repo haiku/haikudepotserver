@@ -32,6 +32,12 @@ RUN apt-get update && \
     apt-get -y install temurin-25-jre && \
     apt-get -y install libpng16-16 imagemagick optipng pngquant
 
+# TODO (andponlin) remove for the Temurin release > 25.0.4.1
+#   https://ops.java/emudhra
+#   also remove the `-Dcom.sun.net.ssl.checkRevocation=true` and `-Dcom.sun.security.enableCRLDP=true`
+#   further down.
+COPY ./support/java/blocked.certs /usr/lib/jvm/temurin-25-jre-amd64/lib/security/blocked.certs
+
 RUN mkdir -p "${X_HDS_HVIF2PNG_HOME}/bin"
 RUN mkdir -p "${X_HDS_HVIF2PNG_HOME}/lib"
 COPY --from=hvif2png-build /generated.x86_64/objects/linux/x86_64/release/tools/hvif2png/hvif2png "${X_HDS_HVIF2PNG_HOME}/bin/hvif2png"
@@ -48,6 +54,8 @@ COPY --from=java_maven_build_server_graphics /hds-src/haikudepotserver-server-gr
     ${X_HDS_SERVER_GRAPHICS_APP_HOME}/app.jar
 
 CMD [ "java", \
+    "-Dcom.sun.net.ssl.checkRevocation=true", \
+    "-Dcom.sun.security.enableCRLDP=true", \
     "-Xms32m", \
     "-Xmx32m", \
     "-Dfile.encoding=UTF-8", \

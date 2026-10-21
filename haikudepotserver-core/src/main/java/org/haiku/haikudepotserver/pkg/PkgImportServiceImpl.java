@@ -355,7 +355,11 @@ public class PkgImportServiceImpl implements PkgImportService {
                 return;
             }
 
-            if (!pkgServiceImpl.isDebugOrDevelopmentOrSourcePkgName(persistedPkgVersion.getPkg().getName())) {
+            // TODO (andponlin) remove this restriction once the HPKR parser is able to scale.
+            //  Some of the source packages are very large with a very large number of files which breaks
+            //  the HPKG walker. This should be fixed but until then just skip for source packages.
+
+            if (pkgServiceImpl.isDebugOrDevelopmentOrSourcePkgName(persistedPkgVersion.getPkg().getName())) {
                 LOGGER.info(
                         "skip populating icon or is_desktop for package [{}] as it's development",
                         persistedPkgVersion.getPkg().getName());
