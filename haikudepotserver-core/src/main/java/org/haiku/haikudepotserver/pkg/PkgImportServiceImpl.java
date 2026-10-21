@@ -355,8 +355,14 @@ public class PkgImportServiceImpl implements PkgImportService {
                 return;
             }
 
-            populateIconFromPayload(objectContext, persistedPkgVersion, hpkgFileExtractor);
-            populateIsDesktop(persistedPkgVersion, hpkgFileExtractor);
+            if (!pkgServiceImpl.isDebugOrDevelopmentOrSourcePkgName(persistedPkgVersion.getPkg().getName())) {
+                LOGGER.info(
+                        "skip populating icon or is_desktop for package [{}] as it's development",
+                        persistedPkgVersion.getPkg().getName());
+            } else {
+                populateIconFromPayload(objectContext, persistedPkgVersion, hpkgFileExtractor);
+                populateIsDesktop(persistedPkgVersion, hpkgFileExtractor);
+            }
 
         } catch (IOException ioe) {
             throw new UncheckedIOException(ioe);
