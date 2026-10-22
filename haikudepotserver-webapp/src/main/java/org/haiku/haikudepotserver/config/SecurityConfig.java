@@ -89,6 +89,7 @@ public class SecurityConfig {
     public SecurityFilterChain filterChainActuator(HttpSecurity http) {
         return http
                 .securityMatcher("/actuator/**")
+                .csrf(AbstractHttpConfigurer::disable)
                 .authorizeHttpRequests(ar -> ar.anyRequest().permitAll())
                 .build();
     }

@@ -89,7 +89,7 @@ public class MaintenanceServiceImpl implements MaintenanceService {
         LOGGER.info("will trigger hourly maintenance");
 
         // Remove any jobs which are too old and are no longer required. This will not run as a job because
-        // it has been quite difficult to get the job clean up running as a job and at the sametime to not
+        // it has been quite difficult to get the job clean up running as a job and at the same time to not
         // end up in tricky edge cases where the clean-up is mutating the job clean up job's data. For this
         // reason this logic happens in a separate executor.
 
