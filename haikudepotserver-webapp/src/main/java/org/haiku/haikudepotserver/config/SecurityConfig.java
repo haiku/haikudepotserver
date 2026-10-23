@@ -222,17 +222,15 @@ public class SecurityConfig {
                         .logoutSuccessHandler(new LogoutSuccessHandler())
         );
 
-// TODO (andponlin) re-enable this once SSO is configured.
-
-//        http.oauth2Login((c) -> {
-//                    c.authorizationEndpoint(e -> e.baseUri(
-//                            "/%s/oauth2/authorization".formatted(WebConstants.SEGMENT_SECURITY)
-//                    ));
-//                    c.redirectionEndpoint(e -> e.baseUri(
-//                            "/%s/login/oauth2/code/*".formatted(WebConstants.SEGMENT_SECURITY)
-//                    ));
-//                    c.successHandler(new AuthenticationSuccessHandler(serverRuntime, userService));
-//                });
+        http.oauth2Login((c) -> {
+                    c.authorizationEndpoint(e -> e.baseUri(
+                            "/%s/oauth2/authorization".formatted(WebConstants.SEGMENT_SECURITY)
+                    ));
+                    c.redirectionEndpoint(e -> e.baseUri(
+                            "/%s/login/oauth2/code/*".formatted(WebConstants.SEGMENT_SECURITY)
+                    ));
+                    c.successHandler(new AuthenticationSuccessHandler(serverRuntime, userService));
+                });
 
         // basic authentication; note that this covers both the regular user authentication
         // and the special authentication case for the repository security.

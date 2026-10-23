@@ -26,7 +26,7 @@ const HDSMenu = {
         if (menuToggleEl) {
             menuToggleEl.addEventListener("click", toggleMenu);
         } else {
-            console.error(`element #${EL_ID_MENU_TOGGLE} not found`);
+            console.info(`element #${EL_ID_MENU_TOGGLE} not found`);
         }
     }
 }
