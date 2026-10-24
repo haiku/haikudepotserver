@@ -140,7 +140,7 @@ content = @`
                 <tbody>
                 @for (RepositorySourceViewController.RepositorySourceMirror repositorySourceMirror : data.repositorySourceMirrors())
                     <tr>
-                        <td>@template.multipage.common.common-active-indicator(value = repositorySourceMirror.isPrimary())</td>
+                        <td>@template.multipage.common.common-boolean-indicator(value = repositorySourceMirror.isPrimary())</td>
                         <td>@template.multipage.common.common-active-indicator(value = repositorySourceMirror.active())</td>
                         <td>
                             <a href="${repositorySourceMirror.viewUriComponents().toUriString()}">

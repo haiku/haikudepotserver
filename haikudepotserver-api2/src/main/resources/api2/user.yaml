@@ -445,6 +445,7 @@ components:
         - nickname
         - active
         - isRoot
+        - hasSsoIdentifier
         - createTimestamp
         - modifyTimestamp
       properties:
@@ -456,6 +457,13 @@ components:
           type: boolean
         isRoot:
           type: boolean
+        hasSsoIdentifier:
+          type: boolean
+        ssoIdentifier:
+          type: string
+          description: >
+            The identifier linking the user to the Haiku SSO system. This field is only
+            provided for priviledged users.
         createTimestamp:
           type: integer
           format: int64

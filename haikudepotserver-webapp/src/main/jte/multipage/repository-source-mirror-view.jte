@@ -38,7 +38,7 @@ content = @`
                 </a>
             </dd>
             <dt>${internationalizationSupplier.getMessage("mp.repository_source_mirror_view.is_primary.title")}</dt>
-            <dd>@template.multipage.common.common-active-indicator(value = data.isPrimary())</dd>
+            <dd>@template.multipage.common.common-boolean-indicator(value = data.isPrimary())</dd>
             <dt>${internationalizationSupplier.getMessage("mp.repository_source_mirror_view.active.title")}</dt>
             <dd>@template.multipage.common.common-active-indicator(value = data.active())</dd>
             <dt>${internationalizationSupplier.getMessage("mp.repository_source_mirror_view.country_code.title")}</dt>

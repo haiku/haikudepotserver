@@ -94,6 +94,7 @@ public class UserViewController {
                 userResult.getNickname(),
                 userResult.getActive(),
                 userResult.getIsRoot(),
+                userResult.getHasSsoIdentifier(),
                 Instant.ofEpochMilli(userResult.getCreateTimestamp()),
                 Instant.ofEpochMilli(userResult.getModifyTimestamp()),
                 Optional.ofNullable(userResult.getLastAuthenticationTimestamp())
@@ -161,6 +162,7 @@ public class UserViewController {
             String nickname,
             boolean active,
             boolean isRoot,
+            boolean hasSsoIdentifier,
             Instant createTimestamp,
             Instant modifyTimestamp,
             Instant lastAuthenticationTimestamp,

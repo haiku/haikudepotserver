@@ -294,6 +294,7 @@ public class UserApiService extends AbstractApiService {
                 .nickname(user.getNickname())
                 .email(user.getEmail())
                 .isRoot(user.getIsRoot())
+                .hasSsoIdentifier(StringUtils.isNotBlank(user.getSsoIdentifier()))
                 .active(user.getActive())
                 .naturalLanguageCode(user.getNaturalLanguage().getCode())
                 .createTimestamp(user.getCreateTimestamp().getTime())

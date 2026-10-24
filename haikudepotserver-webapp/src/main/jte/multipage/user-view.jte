@@ -31,8 +31,10 @@ content = @`
             <dd>@template.multipage.common.common-active-indicator(value = data.active())</dd>
             @if (data.isRoot())
                 <dt>${internationalizationSupplier.getMessage("mp.user_view.is_root.title")}</dt>
-                <dd>&checkmark;</dd>
+                <dd>@template.multipage.common.common-boolean-indicator(value = true)</dd>
             @endif
+            <dt>${internationalizationSupplier.getMessage("mp.user_view.has_sso_identifier.title")}</dt>
+            <dd>@template.multipage.common.common-boolean-indicator(value = data.hasSsoIdentifier())</dd>
             <dt>${internationalizationSupplier.getMessage("mp.user_view.create_timestamp.title")}</dt>
             <dd>${TimestampHelper.formatTimestamp(data.createTimestamp())}</dd>
             <dt>${internationalizationSupplier.getMessage("mp.user_view.modify_timestamp.title")}</dt>
