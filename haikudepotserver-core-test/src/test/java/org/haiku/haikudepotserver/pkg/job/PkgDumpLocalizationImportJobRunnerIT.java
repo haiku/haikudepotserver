@@ -10,9 +10,8 @@ import com.google.common.net.MediaType;
 import jakarta.annotation.Resource;
 import org.apache.cayenne.ObjectContext;
 import org.fest.assertions.Assertions;
-import org.haiku.haikudepotserver.AbstractIntegrationTest;
+import org.haiku.haikudepotserver.AbstractCoreIntegrationTest;
 import org.haiku.haikudepotserver.IntegrationTestSupportService;
-import org.haiku.haikudepotserver.config.TestConfig;
 import org.haiku.haikudepotserver.dataobjects.*;
 import org.haiku.haikudepotserver.job.model.JobDataEncoding;
 import org.haiku.haikudepotserver.job.model.JobDataWithByteSource;
@@ -23,7 +22,6 @@ import org.haiku.haikudepotserver.pkg.model.PkgDumpLocalizationImportJobSpecific
 import org.haiku.haikudepotserver.support.SingleCollector;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.test.context.ContextConfiguration;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -33,8 +31,7 @@ import java.util.Locale;
 import java.util.stream.Stream;
 import java.util.zip.GZIPInputStream;
 
-@ContextConfiguration(classes = TestConfig.class)
-public class PkgDumpLocalizationImportJobRunnerIT extends AbstractIntegrationTest {
+public class PkgDumpLocalizationImportJobRunnerIT extends AbstractCoreIntegrationTest {
 
     @Resource
     private IntegrationTestSupportService integrationTestSupportService;

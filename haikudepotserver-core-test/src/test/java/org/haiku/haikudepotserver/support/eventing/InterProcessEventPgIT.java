@@ -9,11 +9,13 @@ import jakarta.annotation.Resource;
 import org.assertj.core.api.Assertions;
 import org.awaitility.Awaitility;
 import org.haiku.haikudepotserver.AbstractIntegrationTest;
-import org.haiku.haikudepotserver.config.TestConfig;
+import org.haiku.haikudepotserver.api2.JobApiServiceIT;
+import org.haiku.haikudepotserver.config.CoreTestConfig;
 import org.haiku.haikudepotserver.job.model.JobAvailableEvent;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.parallel.Execution;
 import org.junit.jupiter.api.parallel.ExecutionMode;
+import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.context.event.EventListener;
 import org.springframework.stereotype.Component;
 import org.springframework.test.annotation.DirtiesContext;
@@ -30,7 +32,7 @@ import java.util.concurrent.locks.ReentrantLock;
  */
 
 @Execution(ExecutionMode.SAME_THREAD)
-@ContextConfiguration(classes = { TestConfig.class, InterProcessEventPgIT.TestEventListener.class })
+@SpringBootTest(classes = { CoreTestConfig.class, InterProcessEventPgIT.TestEventListener.class })
 // Because of the addition of the `TestEventListener`, a new context is started for this test. By default,
 // the context is not torn down until the whole test process has completed which causes a problem because
 // then there may be two of some beans working off the same database. To avoid this, we mark the class

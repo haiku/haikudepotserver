@@ -3,16 +3,13 @@ package org.haiku.haikudepotserver.job;
 import jakarta.annotation.Resource;
 import org.apache.cayenne.ObjectContext;
 import org.fest.assertions.Assertions;
-import org.haiku.haikudepotserver.AbstractIntegrationTest;
-import org.haiku.haikudepotserver.config.TestConfig;
+import org.haiku.haikudepotserver.AbstractCoreIntegrationTest;
 import org.haiku.haikudepotserver.dataobjects.*;
 import org.junit.jupiter.api.Test;
-import org.springframework.test.context.ContextConfiguration;
 
 import java.util.Set;
 
-@ContextConfiguration(classes = TestConfig.class)
-public class DbJobDataStorageInUseCheckerIT extends AbstractIntegrationTest {
+public class DbJobDataStorageInUseCheckerIT extends AbstractCoreIntegrationTest {
 
     @Resource
     private DbJobDataStorageInUseChecker checker;

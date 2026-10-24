@@ -8,8 +8,9 @@ package org.haiku.haikudepotserver.userrating;
 import com.google.common.util.concurrent.Uninterruptibles;
 import org.apache.cayenne.ObjectContext;
 import org.fest.assertions.Assertions;
+import org.haiku.haikudepotserver.AbstractCoreIntegrationTest;
 import org.haiku.haikudepotserver.AbstractIntegrationTest;
-import org.haiku.haikudepotserver.config.TestConfig;
+import org.haiku.haikudepotserver.config.CoreTestConfig;
 import org.haiku.haikudepotserver.dataobjects.Architecture;
 import org.haiku.haikudepotserver.dataobjects.NaturalLanguage;
 import org.haiku.haikudepotserver.dataobjects.Pkg;
@@ -29,8 +30,7 @@ import jakarta.annotation.Resource;
 import java.util.Optional;
 import java.util.concurrent.TimeUnit;
 
-@ContextConfiguration(classes = TestConfig.class)
-public class UserRatingOrchestrationServiceIT extends AbstractIntegrationTest {
+public class UserRatingOrchestrationServiceIT extends AbstractCoreIntegrationTest {
 
     /**
      * <p>Note that this test will actually check the implementation and not the interface to the implementation.</p>

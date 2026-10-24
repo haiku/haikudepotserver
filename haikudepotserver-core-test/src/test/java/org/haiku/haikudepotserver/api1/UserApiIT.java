@@ -6,35 +6,23 @@
 package org.haiku.haikudepotserver.api1;
 
 import com.nimbusds.jwt.SignedJWT;
+import jakarta.annotation.Resource;
 import org.apache.cayenne.ObjectContext;
 import org.fest.assertions.Assertions;
-import org.haiku.haikudepotserver.AbstractIntegrationTest;
-import org.haiku.haikudepotserver.api1.model.user.AgreeUserUsageConditionsRequest;
-import org.haiku.haikudepotserver.api1.model.user.AgreeUserUsageConditionsResult;
-import org.haiku.haikudepotserver.api1.model.user.AuthenticateUserRequest;
-import org.haiku.haikudepotserver.api1.model.user.AuthenticateUserResult;
-import org.haiku.haikudepotserver.api1.model.user.CreateUserRequest;
-import org.haiku.haikudepotserver.api1.model.user.CreateUserResult;
-import org.haiku.haikudepotserver.api1.model.user.GetUserRequest;
-import org.haiku.haikudepotserver.api1.model.user.GetUserResult;
-import org.haiku.haikudepotserver.api1.model.user.GetUserUsageConditionsRequest;
-import org.haiku.haikudepotserver.api1.model.user.GetUserUsageConditionsResult;
+import org.haiku.haikudepotserver.AbstractCoreIntegrationTest;
+import org.haiku.haikudepotserver.api1.model.user.*;
 import org.haiku.haikudepotserver.captcha.model.Captcha;
 import org.haiku.haikudepotserver.captcha.model.CaptchaService;
-import org.haiku.haikudepotserver.config.TestConfig;
 import org.haiku.haikudepotserver.dataobjects.User;
 import org.haiku.haikudepotserver.dataobjects.UserPasswordResetToken;
 import org.haiku.haikudepotserver.passwordreset.PasswordResetServiceImpl;
 import org.junit.jupiter.api.Test;
-import org.springframework.test.context.ContextConfiguration;
 
-import jakarta.annotation.Resource;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 
-@ContextConfiguration(classes = TestConfig.class)
-public class UserApiIT extends AbstractIntegrationTest {
+public class UserApiIT extends AbstractCoreIntegrationTest {
 
     @Resource
     private UserApi userApi;

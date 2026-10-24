@@ -1,13 +1,14 @@
 /*
- * Copyright 2018-2026, Andrew Lindesay
+ * Copyright 2026, Andrew Lindesay
  * Distributed under the terms of the MIT License.
  */
-
 package org.haiku.haikudepotserver.config;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import io.micrometer.core.instrument.MeterRegistry;
+import io.micrometer.core.instrument.simple.SimpleMeterRegistry;
 import org.apache.cayenne.configuration.server.ServerRuntime;
+import org.haiku.haikudepotserver.CapturingMailSender;
 import org.haiku.haikudepotserver.job.BulkDataJobCoordinatorServiceImpl;
 import org.haiku.haikudepotserver.job.DbDistributedJob2ServiceImpl;
 import org.haiku.haikudepotserver.job.NoopJobServiceImpl;
@@ -22,22 +23,39 @@ import org.haiku.haikudepotserver.storage.model.DataStorageService;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.context.annotation.Bean;
-import org.springframework.context.annotation.Configuration;
-import org.springframework.context.annotation.Import;
+import org.springframework.mail.MailSender;
 
 import javax.sql.DataSource;
 import java.time.Clock;
 import java.time.Duration;
 import java.util.Collection;
 
-@Import({
-        BasicConfig.class,
-        ScheduleConfig.class,
-        MultipageAppConfig.class,
-        MessageSourceConfig.class
-})
-@Configuration
-public class AppConfig {
+/**
+ * <p>Configuration to put in place a default job and job data system that does nothing
+ * so that jobs don't interfere with tests.</p>
+ *
+ * <p>The test {@code JobApiServiceIT} will have specific setup when the actual concrete
+ * job service needs to be tested.</p>
+ */
+
+public class CoreTestDoublesConfig {
+
+    /**
+     * <p>This instance of {@link MeterRegistry} would be created by the
+     * Actuator system in SpringBoot, but it is only setup in the web
+     * application -- here an instance is created to support beans in the
+     * testing.</p>
+     */
+
+    @Bean
+    public MeterRegistry meterRegistry() {
+        return new SimpleMeterRegistry();
+    }
+
+    @Bean
+    public MailSender mailSender() {
+        return new CapturingMailSender();
+    }
 
     @Bean
     public JobService jobService(
@@ -49,14 +67,14 @@ public class AppConfig {
             ApplicationEventPublisher applicationEventPublisher
     ) {
         return switch (type) {
-            case "noop" -> new NoopJobServiceImpl();
             case "db2" -> new DbDistributedJob2ServiceImpl(
                     serverRuntime,
                     objectMapper,
                     dataStorageService,
                     jobRunners,
                     applicationEventPublisher);
-            default -> throw new IllegalStateException("unexpected job service type: " + type);
+            case "noop" -> new NoopJobServiceImpl();
+            default -> throw new IllegalStateException("unknown job service type [%s]".formatted(type));
         };
     }
 
@@ -66,11 +84,7 @@ public class AppConfig {
             JobService jobService,
             RepositoryService repositoryService,
             PkgService pkgService,
-            NaturalLanguageService naturalLanguageService,
-            @Value("${hds.bulk-data.renew-after-remaining-hours}") Integer renewAfterRemainingHours,
-            @Value("${hds.bulk-data.renew-standdown-since-last-start-minutes}") Integer renewStanddownSinceLastStartMinutes,
-            @Value("${hds.bulk-data.renew-for-natural-language-hours}") Integer renewForNaturalLanguageHours,
-            @Value("${hds.bulk-data.clear-expired-after-finished-hours}") Integer clearExpiredAfterFinishedHours
+            NaturalLanguageService naturalLanguageService
     ) {
         return new BulkDataJobCoordinatorServiceImpl(
                 Clock.systemUTC(),
@@ -79,20 +93,16 @@ public class AppConfig {
                 repositoryService,
                 pkgService,
                 naturalLanguageService,
-                Duration.ofHours(renewAfterRemainingHours),
-                Duration.ofMinutes(renewStanddownSinceLastStartMinutes),
-                Duration.ofHours(renewForNaturalLanguageHours),
-                Duration.ofHours(clearExpiredAfterFinishedHours)
+                Duration.ofHours(1), // renewAfterRemainingDuration
+                Duration.ofMinutes(10), // renewStanddownSinceLastStartDuration
+                Duration.ofHours(4), // renewForNaturalLanguageDuration
+                Duration.ofHours(1) // clearExpiredAfterFinishedDuration
         );
     }
 
     @Bean
-    public DataStorageService dataStorageService(
-            DataSource dataSource,
-            MeterRegistry meterRegistry,
-            @Value("${hds.storage.pg.part-size:262144}") Long partSize
-    ) {
-        return new PgDataStorageServiceImpl(dataSource, meterRegistry, partSize);
+    public DataStorageService dataStorageService(DataSource dataSource, MeterRegistry meterRegistry) {
+        return new PgDataStorageServiceImpl(dataSource, meterRegistry, 262144);
     }
 
 }

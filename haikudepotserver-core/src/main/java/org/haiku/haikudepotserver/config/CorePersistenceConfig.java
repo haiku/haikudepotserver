@@ -28,7 +28,11 @@ import org.springframework.context.annotation.Bean;
 import javax.sql.DataSource;
 import java.util.Collections;
 
-public class PersistenceConfig {
+/**
+ * <p>This config is repsonsible for the setup of Apache Cayenne ORM.</p>
+ */
+
+public class CorePersistenceConfig {
 
     @Bean(initMethod = "init")
     public UserUsageConditionsInitializer userUsageConditionsInitializer(

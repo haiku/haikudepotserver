@@ -13,12 +13,11 @@ import org.springframework.web.servlet.config.annotation.DelegatingWebMvcConfigu
 // see comment here;
 // https://github.com/spring-projects/spring-framework/issues/25290#issuecomment-802218753
 
-@Configuration
-public class WebMvcConfig extends DelegatingWebMvcConfiguration {
+public class ApplicationWebMvcConfig extends DelegatingWebMvcConfiguration {
 
     private final NaturalLanguageService naturalLanguageService;
 
-    public WebMvcConfig(NaturalLanguageService naturalLanguageService) {
+    public ApplicationWebMvcConfig(NaturalLanguageService naturalLanguageService) {
         this.naturalLanguageService = naturalLanguageService;
     }
 

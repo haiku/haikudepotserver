@@ -6,9 +6,9 @@ package org.haiku.haikudepotserver.multipage.controller;
 
 import jakarta.annotation.Resource;
 import org.fest.assertions.Assertions;
+import org.haiku.haikudepotserver.AbstractApplicationIntegrationTest;
 import org.haiku.haikudepotserver.AbstractIntegrationTest;
-import org.haiku.haikudepotserver.config.TestAppConfig;
-import org.haiku.haikudepotserver.config.TestServletConfig;
+import org.haiku.haikudepotserver.config.ApplicationTestConfig;
 import org.hamcrest.Matchers;
 import org.htmlunit.WebClient;
 import org.htmlunit.html.DomElement;
@@ -28,9 +28,7 @@ import org.springframework.web.context.WebApplicationContext;
 
 import java.util.Locale;
 
-@WebAppConfiguration
-@ContextConfiguration(classes = {TestAppConfig.class, TestServletConfig.class})
-public class AboutControllerIT extends AbstractIntegrationTest {
+public class AboutControllerIT extends AbstractApplicationIntegrationTest {
 
     @Resource
     private WebApplicationContext webApplicationContext;

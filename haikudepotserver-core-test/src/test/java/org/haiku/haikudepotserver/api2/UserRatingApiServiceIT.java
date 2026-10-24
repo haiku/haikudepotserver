@@ -9,25 +9,22 @@ import com.google.common.base.Strings;
 import jakarta.annotation.Resource;
 import org.apache.cayenne.ObjectContext;
 import org.fest.assertions.Assertions;
-import org.haiku.haikudepotserver.AbstractIntegrationTest;
+import org.haiku.haikudepotserver.AbstractCoreIntegrationTest;
 import org.haiku.haikudepotserver.api2.model.*;
-import org.haiku.haikudepotserver.config.TestConfig;
+import org.haiku.haikudepotserver.dataobjects.*;
 import org.haiku.haikudepotserver.dataobjects.Architecture;
 import org.haiku.haikudepotserver.dataobjects.NaturalLanguage;
 import org.haiku.haikudepotserver.dataobjects.UserRatingStability;
-import org.haiku.haikudepotserver.dataobjects.*;
 import org.haiku.haikudepotserver.naturallanguage.model.NaturalLanguageCoordinates;
 import org.haiku.haikudepotserver.pkg.model.PkgService;
 import org.haiku.haikudepotserver.support.SingleCollector;
 import org.junit.jupiter.api.Test;
-import org.springframework.test.context.ContextConfiguration;
 
 import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 
-@ContextConfiguration(classes = TestConfig.class)
-public class UserRatingApiServiceIT extends AbstractIntegrationTest {
+public class UserRatingApiServiceIT extends AbstractCoreIntegrationTest {
 
     @Resource
     UserRatingApiService userRatingApiService;

@@ -4,21 +4,23 @@
  */
 package org.haiku.haikudepotserver.config;
 
+import com.google.common.collect.ImmutableList;
 import org.springframework.context.annotation.Bean;
 
 import java.util.List;
 
 /**
- * <p>Configures the sources for key-value pairs for localization used during the
- * core tests.</p>
+ * Configures the source of the key-value pairs for the localization.
  */
 
-public class TestMessageSourceConfig {
+public class ApplicationMessageSourceConfig {
 
     @Bean("messageSourceBaseNames")
     public List<String> messageSourceBaseNames() {
-        return List.of(
+        return ImmutableList.of(
                 "classpath:messages",
+                "classpath:webmessages",
+                "classpath:multipagemessages",
                 "classpath:naturallanguagemessages"
         );
     }

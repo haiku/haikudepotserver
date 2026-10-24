@@ -8,18 +8,15 @@ import jakarta.annotation.Resource;
 import org.apache.cayenne.ObjectContext;
 import org.apache.cayenne.query.ObjectSelect;
 import org.fest.assertions.Assertions;
-import org.haiku.haikudepotserver.AbstractIntegrationTest;
-import org.haiku.haikudepotserver.config.TestConfig;
+import org.haiku.haikudepotserver.AbstractCoreIntegrationTest;
 import org.haiku.haikudepotserver.dataobjects.Response;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.test.context.ContextConfiguration;
 
 import java.sql.Timestamp;
 import java.time.Clock;
 
-@ContextConfiguration(classes = TestConfig.class)
-public class DatabaseCaptchaRepositoryIT extends AbstractIntegrationTest {
+public class DatabaseCaptchaRepositoryIT extends AbstractCoreIntegrationTest {
 
     @Value("${hds.captcha.expiry-seconds:120}")
     private Long expirySeconds;

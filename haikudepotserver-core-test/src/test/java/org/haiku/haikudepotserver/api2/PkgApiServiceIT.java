@@ -12,10 +12,9 @@ import org.apache.cayenne.ObjectContext;
 import org.apache.cayenne.query.ObjectSelect;
 import org.apache.cayenne.query.SortOrder;
 import org.fest.assertions.Assertions;
-import org.haiku.haikudepotserver.AbstractIntegrationTest;
+import org.haiku.haikudepotserver.AbstractCoreIntegrationTest;
 import org.haiku.haikudepotserver.IntegrationTestSupportService;
 import org.haiku.haikudepotserver.api2.model.*;
-import org.haiku.haikudepotserver.config.TestConfig;
 import org.haiku.haikudepotserver.dataobjects.*;
 import org.haiku.haikudepotserver.dataobjects.Architecture;
 import org.haiku.haikudepotserver.dataobjects.PkgCategory;
@@ -25,7 +24,6 @@ import org.haiku.haikudepotserver.support.VersionCoordinates;
 import org.haiku.haikudepotserver.support.exception.BadPkgIconException;
 import org.haiku.haikudepotserver.support.exception.ObjectNotFoundException;
 import org.junit.jupiter.api.Test;
-import org.springframework.test.context.ContextConfiguration;
 
 import java.time.Duration;
 import java.util.Base64;
@@ -34,8 +32,7 @@ import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
 
-@ContextConfiguration(classes = TestConfig.class)
-public class PkgApiServiceIT extends AbstractIntegrationTest {
+public class PkgApiServiceIT extends AbstractCoreIntegrationTest {
 
     @Resource
     private PkgApiService pkgApiService;

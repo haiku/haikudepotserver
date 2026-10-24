@@ -13,8 +13,9 @@ import io.micrometer.core.instrument.MeterRegistry;
 import jakarta.annotation.PostConstruct;
 import jakarta.annotation.Resource;
 import org.assertj.core.api.Assertions;
+import org.haiku.haikudepotserver.AbstractCoreIntegrationTest;
 import org.haiku.haikudepotserver.AbstractIntegrationTest;
-import org.haiku.haikudepotserver.config.TestConfig;
+import org.haiku.haikudepotserver.config.CoreTestConfig;
 import org.haiku.haikudepotserver.support.PgDataStorageTestHelper;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
@@ -31,8 +32,7 @@ import java.sql.SQLException;
 import java.time.Clock;
 import java.util.*;
 
-@ContextConfiguration(classes = TestConfig.class)
-public class PgDataStorageServiceImplIT extends AbstractIntegrationTest {
+public class PgDataStorageServiceImplIT extends AbstractCoreIntegrationTest {
 
     @Resource
     private DataSource dataSource;

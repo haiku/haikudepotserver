@@ -6,46 +6,27 @@
 package org.haiku.haikudepotserver.api2;
 
 import com.nimbusds.jwt.SignedJWT;
+import jakarta.annotation.Resource;
 import org.apache.cayenne.ObjectContext;
 import org.apache.cayenne.ObjectId;
 import org.fest.assertions.Assertions;
-import org.haiku.haikudepotserver.AbstractIntegrationTest;
-import org.haiku.haikudepotserver.api2.model.AgreeUserUsageConditionsRequestEnvelope;
-import org.haiku.haikudepotserver.api2.model.AuthenticateUserRequestEnvelope;
-import org.haiku.haikudepotserver.api2.model.AuthenticateUserResult;
-import org.haiku.haikudepotserver.api2.model.ChangePasswordRequestEnvelope;
-import org.haiku.haikudepotserver.api2.model.CompletePasswordResetRequestEnvelope;
-import org.haiku.haikudepotserver.api2.model.CreateUserRequestEnvelope;
-import org.haiku.haikudepotserver.api2.model.GetUserRequestEnvelope;
-import org.haiku.haikudepotserver.api2.model.GetUserResult;
-import org.haiku.haikudepotserver.api2.model.GetUserUsageConditionsRequestEnvelope;
-import org.haiku.haikudepotserver.api2.model.GetUserUsageConditionsResult;
-import org.haiku.haikudepotserver.api2.model.InitiatePasswordResetRequestEnvelope;
-import org.haiku.haikudepotserver.api2.model.RenewTokenRequestEnvelope;
-import org.haiku.haikudepotserver.api2.model.RenewTokenResult;
-import org.haiku.haikudepotserver.api2.model.SearchUsersRequestEnvelope;
-import org.haiku.haikudepotserver.api2.model.SearchUsersResult;
-import org.haiku.haikudepotserver.api2.model.UpdateUserFilter;
-import org.haiku.haikudepotserver.api2.model.UpdateUserRequestEnvelope;
+import org.haiku.haikudepotserver.AbstractCoreIntegrationTest;
+import org.haiku.haikudepotserver.api2.model.*;
 import org.haiku.haikudepotserver.captcha.model.Captcha;
 import org.haiku.haikudepotserver.captcha.model.CaptchaService;
-import org.haiku.haikudepotserver.config.TestConfig;
 import org.haiku.haikudepotserver.dataobjects.User;
 import org.haiku.haikudepotserver.dataobjects.UserPasswordResetToken;
+import org.haiku.haikudepotserver.naturallanguage.model.NaturalLanguageCoordinates;
 import org.haiku.haikudepotserver.passwordreset.PasswordResetException;
 import org.haiku.haikudepotserver.passwordreset.PasswordResetServiceImpl;
-import org.haiku.haikudepotserver.naturallanguage.model.NaturalLanguageCoordinates;
 import org.junit.jupiter.api.Test;
 import org.springframework.mail.SimpleMailMessage;
-import org.springframework.test.context.ContextConfiguration;
 
-import jakarta.annotation.Resource;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 
-@ContextConfiguration(classes = TestConfig.class)
-public class UserApiServiceIT extends AbstractIntegrationTest {
+public class UserApiServiceIT extends AbstractCoreIntegrationTest {
 
     @Resource
     private UserApiService userApiService;

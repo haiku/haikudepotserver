@@ -11,22 +11,19 @@ import com.google.common.util.concurrent.Uninterruptibles;
 import jakarta.annotation.Resource;
 import org.apache.cayenne.ObjectContext;
 import org.fest.assertions.Assertions;
-import org.haiku.haikudepotserver.AbstractIntegrationTest;
+import org.haiku.haikudepotserver.AbstractCoreIntegrationTest;
 import org.haiku.haikudepotserver.IntegrationTestSupportService;
-import org.haiku.haikudepotserver.config.TestConfig;
 import org.haiku.haikudepotserver.dataobjects.*;
 import org.haiku.haikudepotserver.pkg.model.NonUserPkgSupplementModificationAgent;
 import org.haiku.haikudepotserver.pkg.model.PkgIconService;
 import org.haiku.haikudepotserver.pkg.model.UserPkgSupplementModificationAgent;
 import org.junit.jupiter.api.Test;
-import org.springframework.test.context.ContextConfiguration;
 
 import java.io.InputStream;
 import java.time.Duration;
 import java.util.List;
 
-@ContextConfiguration(classes = TestConfig.class)
-public class PkgIconServiceImplIT extends AbstractIntegrationTest {
+public class PkgIconServiceImplIT extends AbstractCoreIntegrationTest {
 
     @Resource
     private PkgIconService pkgIconService;

@@ -29,11 +29,14 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.boot.jdbc.autoconfigure.DataSourceProperties;
+import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationContextInitializer;
 import org.springframework.context.ConfigurableApplicationContext;
+import org.springframework.context.annotation.Configuration;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 import org.springframework.test.context.support.TestPropertySourceUtils;
@@ -61,8 +64,8 @@ import java.util.stream.Stream;
  * transaction.</p>
  */
 
-@ExtendWith(SpringExtension.class)
 @ContextConfiguration(initializers = AbstractIntegrationTest.PostgresContainerInitializer.class)
+@ActiveProfiles("test")
 public abstract class AbstractIntegrationTest {
 
     protected static Logger LOGGER = LoggerFactory.getLogger(AbstractIntegrationTest.class);

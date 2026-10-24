@@ -8,24 +8,21 @@ package org.haiku.haikudepotserver.pkg.job;
 import com.google.common.io.ByteSource;
 import jakarta.annotation.Resource;
 import org.fest.assertions.Assertions;
-import org.haiku.haikudepotserver.AbstractIntegrationTest;
+import org.haiku.haikudepotserver.AbstractCoreIntegrationTest;
 import org.haiku.haikudepotserver.IntegrationTestSupportService;
-import org.haiku.haikudepotserver.config.TestConfig;
 import org.haiku.haikudepotserver.job.model.JobDataWithByteSource;
 import org.haiku.haikudepotserver.job.model.JobService;
 import org.haiku.haikudepotserver.job.model.JobSnapshot;
 import org.haiku.haikudepotserver.pkg.model.PkgVersionLocalizationCoverageExportSpreadsheetJobSpecification;
 import org.haiku.haikudepotserver.support.SingleCollector;
 import org.junit.jupiter.api.Test;
-import org.springframework.test.context.ContextConfiguration;
 
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.util.Optional;
 
-@ContextConfiguration(classes = TestConfig.class)
-public class PkgVersionLocalizationCoverageExportSpreadsheetJobRunnerIT extends AbstractIntegrationTest {
+public class PkgVersionLocalizationCoverageExportSpreadsheetJobRunnerIT extends AbstractCoreIntegrationTest {
 
     @Resource
     private IntegrationTestSupportService integrationTestSupportService;

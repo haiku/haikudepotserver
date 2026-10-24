@@ -1,0 +1,6 @@
+hds:
+  base-url: "http://localhost:8080"
+  repository:
+    default:
+      # This is the one from the integration tests' standard data.
+      code: testrepo

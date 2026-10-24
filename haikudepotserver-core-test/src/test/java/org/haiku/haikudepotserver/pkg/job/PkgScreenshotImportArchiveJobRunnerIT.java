@@ -10,9 +10,8 @@ import com.google.common.net.MediaType;
 import jakarta.annotation.Resource;
 import org.apache.cayenne.ObjectContext;
 import org.fest.assertions.Assertions;
-import org.haiku.haikudepotserver.AbstractIntegrationTest;
+import org.haiku.haikudepotserver.AbstractCoreIntegrationTest;
 import org.haiku.haikudepotserver.IntegrationTestSupportService;
-import org.haiku.haikudepotserver.config.TestConfig;
 import org.haiku.haikudepotserver.dataobjects.Pkg;
 import org.haiku.haikudepotserver.dataobjects.PkgScreenshot;
 import org.haiku.haikudepotserver.dataobjects.PkgSupplement;
@@ -24,7 +23,6 @@ import org.haiku.haikudepotserver.job.model.JobSnapshot;
 import org.haiku.haikudepotserver.pkg.model.PkgScreenshotImportArchiveJobSpecification;
 import org.haiku.haikudepotserver.support.SingleCollector;
 import org.junit.jupiter.api.Test;
-import org.springframework.test.context.ContextConfiguration;
 
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
@@ -61,8 +59,7 @@ import java.util.List;
  * </table>
  */
 
-@ContextConfiguration(classes = TestConfig.class)
-public class PkgScreenshotImportArchiveJobRunnerIT extends AbstractIntegrationTest {
+public class PkgScreenshotImportArchiveJobRunnerIT extends AbstractCoreIntegrationTest {
 
     @Resource
     private IntegrationTestSupportService integrationTestSupportService;

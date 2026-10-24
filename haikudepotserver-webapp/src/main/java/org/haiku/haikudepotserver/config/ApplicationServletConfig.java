@@ -11,25 +11,21 @@ import jakarta.servlet.http.HttpServlet;
 import org.apache.cayenne.configuration.server.ServerRuntime;
 import org.haiku.haikudepotserver.multipage.MultipageConstants;
 import org.haiku.haikudepotserver.multipage.MultipageDomainSessionAttributeFilter;
-import org.haiku.haikudepotserver.multipage.controller.LinkToSsoController;
 import org.haiku.haikudepotserver.support.desktopapplication.DesktopApplicationMetricsFilter;
 import org.haiku.haikudepotserver.support.desktopapplication.DesktopApplicationMinimumVersionFilter;
 import org.haiku.haikudepotserver.support.logging.LoggingFilter;
 import org.haiku.haikudepotserver.support.web.DelayFilter;
 import org.haiku.haikudepotserver.support.web.ErrorServlet;
 import org.haiku.haikudepotserver.support.web.RemoteLogCaptureServlet;
-import org.haiku.haikudepotserver.support.web.WebConstants;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.web.servlet.FilterRegistrationBean;
 import org.springframework.boot.web.servlet.ServletRegistrationBean;
 import org.springframework.context.annotation.Bean;
-import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Import;
 import org.springframework.web.filter.ForwardedHeaderFilter;
 
-@Configuration
-@Import(WebConfig.class)
-public class ServletConfig {
+@Import(ApplicationWebConfig.class)
+public class ApplicationServletConfig {
 
     @Bean
     public ServletRegistrationBean<HttpServlet> errorServlet() {

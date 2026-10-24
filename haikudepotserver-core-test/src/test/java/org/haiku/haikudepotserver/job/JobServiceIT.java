@@ -8,12 +8,10 @@ package org.haiku.haikudepotserver.job;
 import com.google.common.io.CharStreams;
 import jakarta.annotation.Resource;
 import org.fest.assertions.Assertions;
-import org.haiku.haikudepotserver.AbstractIntegrationTest;
-import org.haiku.haikudepotserver.config.TestConfig;
+import org.haiku.haikudepotserver.AbstractCoreIntegrationTest;
 import org.haiku.haikudepotserver.job.model.*;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.springframework.test.context.ContextConfiguration;
 import org.testcontainers.shaded.org.awaitility.Awaitility;
 
 import java.io.*;
@@ -26,8 +24,7 @@ import java.util.concurrent.locks.Lock;
 import java.util.stream.IntStream;
 import java.util.stream.Stream;
 
-@ContextConfiguration(classes = TestConfig.class)
-public class JobServiceIT extends AbstractIntegrationTest {
+public class JobServiceIT extends AbstractCoreIntegrationTest {
 
     private final static int TOLERANCE_SECONDS = 120;
 

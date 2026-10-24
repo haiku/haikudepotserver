@@ -8,22 +8,16 @@ package org.haiku.haikudepotserver.pkg.controller;
 import com.google.common.net.MediaType;
 import jakarta.annotation.Resource;
 import org.fest.assertions.Assertions;
-import org.haiku.haikudepotserver.AbstractIntegrationTest;
+import org.haiku.haikudepotserver.AbstractApplicationIntegrationTest;
 import org.haiku.haikudepotserver.IntegrationTestSupportService;
-import org.haiku.haikudepotserver.config.TestAppConfig;
-import org.haiku.haikudepotserver.config.TestServletConfig;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.springframework.http.HttpStatus;
 import org.springframework.mock.web.MockHttpServletResponse;
-import org.springframework.test.context.ContextConfiguration;
-import org.springframework.test.context.web.WebAppConfiguration;
 
 import java.io.IOException;
 
-@ContextConfiguration(classes = {TestAppConfig.class, TestServletConfig.class})
-@WebAppConfiguration
-public class PkgIconControllerIT extends AbstractIntegrationTest {
+public class PkgIconControllerIT extends AbstractApplicationIntegrationTest {
 
     @Resource
     private PkgIconController pkgIconController;

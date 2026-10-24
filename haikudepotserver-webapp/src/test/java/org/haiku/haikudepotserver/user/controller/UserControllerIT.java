@@ -5,18 +5,12 @@
 package org.haiku.haikudepotserver.user.controller;
 
 import org.fest.assertions.Assertions;
-import org.haiku.haikudepotserver.AbstractIntegrationTest;
-import org.haiku.haikudepotserver.config.TestAppConfig;
-import org.haiku.haikudepotserver.config.TestServletConfig;
+import org.haiku.haikudepotserver.AbstractApplicationIntegrationTest;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.mock.web.MockHttpServletResponse;
-import org.springframework.test.context.ContextConfiguration;
-import org.springframework.test.context.web.WebAppConfiguration;
 
-@ContextConfiguration(classes = {TestAppConfig.class, TestServletConfig.class})
-@WebAppConfiguration
-public class UserControllerIT extends AbstractIntegrationTest {
+public class UserControllerIT extends AbstractApplicationIntegrationTest {
 
     @Autowired
     public UserController userController;

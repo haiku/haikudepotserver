@@ -10,10 +10,9 @@ import com.nimbusds.jose.util.Pair;
 import jakarta.annotation.Resource;
 import org.apache.cayenne.ObjectContext;
 import org.fest.assertions.Assertions;
-import org.haiku.haikudepotserver.AbstractIntegrationTest;
+import org.haiku.haikudepotserver.AbstractCoreIntegrationTest;
 import org.haiku.haikudepotserver.IntegrationTestSupportService;
 import org.haiku.haikudepotserver.api2.model.*;
-import org.haiku.haikudepotserver.config.TestConfig;
 import org.haiku.haikudepotserver.dataobjects.NaturalLanguage;
 import org.haiku.haikudepotserver.dataobjects.PkgCategory;
 import org.haiku.haikudepotserver.dataobjects.UserRatingStability;
@@ -21,7 +20,6 @@ import org.haiku.haikudepotserver.feed.model.FeedService;
 import org.haiku.haikudepotserver.naturallanguage.model.NaturalLanguageCoordinates;
 import org.haiku.haikudepotserver.support.RuntimeInformationService;
 import org.junit.jupiter.api.Test;
-import org.springframework.test.context.ContextConfiguration;
 
 import java.net.MalformedURLException;
 import java.net.URI;
@@ -32,8 +30,7 @@ import java.util.Set;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-@ContextConfiguration(classes = TestConfig.class)
-public class MiscelaneousApiServiceIT extends AbstractIntegrationTest {
+public class MiscelaneousApiServiceIT extends AbstractCoreIntegrationTest {
 
     @Resource
     MiscellaneousApiService miscellaneousApiService;

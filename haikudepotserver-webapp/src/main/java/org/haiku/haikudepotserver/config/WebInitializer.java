@@ -27,7 +27,7 @@ public class WebInitializer implements WebApplicationInitializer {
     public void onStartup(ServletContext servletContext) {
 
         AnnotationConfigWebApplicationContext rootContext = new AnnotationConfigWebApplicationContext();
-        rootContext.register(AppConfig.class);
+        rootContext.register(ApplicationConfig.class);
 
         servletContext.addListener(new ContextLoaderListener(rootContext));
 
@@ -77,7 +77,7 @@ public class WebInitializer implements WebApplicationInitializer {
 
     private void registerSpringDispatcherServlet(ServletContext servletContext) {
         AnnotationConfigWebApplicationContext dispatcherContext = new AnnotationConfigWebApplicationContext();
-        dispatcherContext.register(ServletConfig.class);
+        dispatcherContext.register(ApplicationServletConfig.class);
 
         ServletRegistration.Dynamic dispatcher = servletContext.addServlet(
                 "dispatcher",

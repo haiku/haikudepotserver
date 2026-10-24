@@ -1,7 +1,8 @@
 /*
- * Copyright 2026, Andrew Lindesay
+ * Copyright 2018-2026, Andrew Lindesay
  * Distributed under the terms of the MIT License.
  */
+
 package org.haiku.haikudepotserver.config;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -21,21 +22,30 @@ import org.haiku.haikudepotserver.storage.model.DataStorageService;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Import;
+import org.springframework.context.annotation.Profile;
+import org.springframework.context.annotation.PropertySource;
 
 import javax.sql.DataSource;
 import java.time.Clock;
 import java.time.Duration;
 import java.util.Collection;
 
-/**
- * <p>Configuration to put in place a default job and job data system that does nothing
- * so that jobs don't interfere with tests.</p>
- *
- * <p>The test {@code JobApiServiceIT} will have specific setup when the actual concrete
- * job service needs to be tested.</p>
- */
+@Import({
 
-public class TestJobAndDataConfig {
+        CoreBasicConfig.class,
+        CorePersistenceConfig.class,
+        CoreSchedulingConfig.class,
+
+        ApplicationMessageSourceConfig.class,
+        ApplicationMultipageConfig.class,
+        ApplicationServletConfig.class,
+        ApplicationWebConfig.class,
+        ApplicationWebSecurityConfig.class,
+        ApplicationWebMvcConfig.class,
+
+})
+public class ApplicationConfig {
 
     @Bean
     public JobService jobService(
@@ -47,14 +57,14 @@ public class TestJobAndDataConfig {
             ApplicationEventPublisher applicationEventPublisher
     ) {
         return switch (type) {
+            case "noop" -> new NoopJobServiceImpl();
             case "db2" -> new DbDistributedJob2ServiceImpl(
                     serverRuntime,
                     objectMapper,
                     dataStorageService,
                     jobRunners,
                     applicationEventPublisher);
-            case "noop" -> new NoopJobServiceImpl();
-            default -> throw new IllegalStateException("unknown job service type [%s]".formatted(type));
+            default -> throw new IllegalStateException("unexpected job service type: " + type);
         };
     }
 
@@ -64,7 +74,11 @@ public class TestJobAndDataConfig {
             JobService jobService,
             RepositoryService repositoryService,
             PkgService pkgService,
-            NaturalLanguageService naturalLanguageService
+            NaturalLanguageService naturalLanguageService,
+            @Value("${hds.bulk-data.renew-after-remaining-hours}") Integer renewAfterRemainingHours,
+            @Value("${hds.bulk-data.renew-standdown-since-last-start-minutes}") Integer renewStanddownSinceLastStartMinutes,
+            @Value("${hds.bulk-data.renew-for-natural-language-hours}") Integer renewForNaturalLanguageHours,
+            @Value("${hds.bulk-data.clear-expired-after-finished-hours}") Integer clearExpiredAfterFinishedHours
     ) {
         return new BulkDataJobCoordinatorServiceImpl(
                 Clock.systemUTC(),
@@ -73,16 +87,20 @@ public class TestJobAndDataConfig {
                 repositoryService,
                 pkgService,
                 naturalLanguageService,
-                Duration.ofHours(1), // renewAfterRemainingDuration
-                Duration.ofMinutes(10), // renewStanddownSinceLastStartDuration
-                Duration.ofHours(4), // renewForNaturalLanguageDuration
-                Duration.ofHours(1) // clearExpiredAfterFinishedDuration
+                Duration.ofHours(renewAfterRemainingHours),
+                Duration.ofMinutes(renewStanddownSinceLastStartMinutes),
+                Duration.ofHours(renewForNaturalLanguageHours),
+                Duration.ofHours(clearExpiredAfterFinishedHours)
         );
     }
 
     @Bean
-    public DataStorageService dataStorageService(DataSource dataSource, MeterRegistry meterRegistry) {
-        return new PgDataStorageServiceImpl(dataSource, meterRegistry, 262144);
+    public DataStorageService dataStorageService(
+            DataSource dataSource,
+            MeterRegistry meterRegistry,
+            @Value("${hds.storage.pg.part-size:262144}") Long partSize
+    ) {
+        return new PgDataStorageServiceImpl(dataSource, meterRegistry, partSize);
     }
 
 }

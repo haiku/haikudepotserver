@@ -6,6 +6,7 @@ package org.haiku.haikudepotserver.config;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.apache.cayenne.configuration.server.ServerRuntime;
+import org.apache.commons.lang3.StringUtils;
 import org.haiku.haikudepotserver.feed.model.FeedService;
 import org.haiku.haikudepotserver.multipage.MultipageConstants;
 import org.haiku.haikudepotserver.multipage.MultipageWebResourceService;
@@ -23,8 +24,10 @@ import org.haiku.haikudepotserver.support.web.PrefixPathRequestMatcher;
 import org.haiku.haikudepotserver.support.web.WebConstants;
 import org.haiku.haikudepotserver.user.controller.UserController;
 import org.haiku.haikudepotserver.user.model.UserService;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
-import org.springframework.context.annotation.Configuration;
 import org.springframework.core.annotation.Order;
 import org.springframework.http.HttpMethod;
 import org.springframework.security.authentication.AuthenticationManager;
@@ -43,8 +46,9 @@ import org.springframework.web.util.UriComponentsBuilder;
  * <p>This will configure the security filters that are used by Spring Security.</p>
  */
 
-@Configuration
-public class SecurityConfig {
+public class ApplicationWebSecurityConfig {
+
+    private static final Logger LOGGER = LoggerFactory.getLogger(ApplicationWebSecurityConfig.class);
 
     private final ServerRuntime serverRuntime;
 
@@ -58,7 +62,7 @@ public class SecurityConfig {
 
     private final ObjectMapper objectMapper;
 
-    public SecurityConfig(
+    public ApplicationWebSecurityConfig(
             ServerRuntime serverRuntime,
             MultipageWebResourceService multipageWebResourceService,
             UserAuthenticationService userAuthenticationService,
@@ -193,7 +197,9 @@ public class SecurityConfig {
      */
     @Bean
     @Order(4)
-    public SecurityFilterChain filterChain(HttpSecurity http) {
+    public SecurityFilterChain filterChain(
+            HttpSecurity http,
+            @Value("${spring.security.oauth2.client.registration.haiku.provider:}") String oauth2HaikuProvider) {
         AuthenticationEntryPoint authenticationEntryPoint = new AuthenticationEntryPoint(objectMapper);
         AccessDeniedHandler accessDeniedHandler = new AccessDeniedHandler(objectMapper);
 
@@ -222,15 +228,19 @@ public class SecurityConfig {
                         .logoutSuccessHandler(new LogoutSuccessHandler())
         );
 
-        http.oauth2Login((c) -> {
-                    c.authorizationEndpoint(e -> e.baseUri(
-                            "/%s/oauth2/authorization".formatted(WebConstants.SEGMENT_SECURITY)
-                    ));
-                    c.redirectionEndpoint(e -> e.baseUri(
-                            "/%s/login/oauth2/code/*".formatted(WebConstants.SEGMENT_SECURITY)
-                    ));
-                    c.successHandler(new AuthenticationSuccessHandler(serverRuntime, userService));
-                });
+        if (StringUtils.isNotBlank(oauth2HaikuProvider)) {
+            http.oauth2Login((c) -> {
+                        c.authorizationEndpoint(e -> e.baseUri(
+                                "/%s/oauth2/authorization".formatted(WebConstants.SEGMENT_SECURITY)
+                        ));
+                        c.redirectionEndpoint(e -> e.baseUri(
+                                "/%s/login/oauth2/code/*".formatted(WebConstants.SEGMENT_SECURITY)
+                        ));
+                        c.successHandler(new AuthenticationSuccessHandler(serverRuntime, userService));
+                    });
+        } else {
+            LOGGER.warn("am not configuring oauth2 login as it is not configured.");
+        }
 
         // basic authentication; note that this covers both the regular user authentication
         // and the special authentication case for the repository security.

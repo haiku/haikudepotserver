@@ -7,15 +7,13 @@ package org.haiku.haikudepotserver.repository;
 import jakarta.annotation.Resource;
 import org.apache.cayenne.ObjectContext;
 import org.fest.assertions.Assertions;
-import org.haiku.haikudepotserver.AbstractIntegrationTest;
+import org.haiku.haikudepotserver.AbstractCoreIntegrationTest;
 import org.haiku.haikudepotserver.CapturingMailSender;
 import org.haiku.haikudepotserver.IntegrationTestSupportService;
-import org.haiku.haikudepotserver.config.TestConfig;
 import org.haiku.haikudepotserver.dataobjects.RepositorySource;
 import org.haiku.haikudepotserver.repository.model.RepositoryService;
 import org.junit.jupiter.api.Test;
 import org.springframework.mail.SimpleMailMessage;
-import org.springframework.test.context.ContextConfiguration;
 
 import javax.sql.DataSource;
 import java.sql.Connection;
@@ -24,8 +22,7 @@ import java.sql.SQLException;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
 
-@ContextConfiguration(classes = TestConfig.class)
-public class RepositoryServiceImplIT extends AbstractIntegrationTest {
+public class RepositoryServiceImplIT extends AbstractCoreIntegrationTest {
 
     @Resource
     private RepositoryService repositoryService;

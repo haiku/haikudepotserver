@@ -8,10 +8,9 @@ package org.haiku.haikudepotserver.api2;
 import jakarta.annotation.Resource;
 import org.apache.cayenne.ObjectContext;
 import org.fest.assertions.Assertions;
-import org.haiku.haikudepotserver.AbstractIntegrationTest;
+import org.haiku.haikudepotserver.AbstractCoreIntegrationTest;
 import org.haiku.haikudepotserver.IntegrationTestSupportService;
 import org.haiku.haikudepotserver.api2.model.*;
-import org.haiku.haikudepotserver.config.TestConfig;
 import org.haiku.haikudepotserver.dataobjects.PermissionUserPkg;
 import org.haiku.haikudepotserver.dataobjects.Pkg;
 import org.haiku.haikudepotserver.dataobjects.User;
@@ -19,15 +18,13 @@ import org.haiku.haikudepotserver.security.model.Permission;
 import org.haiku.haikudepotserver.support.exception.AuthorizationRuleConflictException;
 import org.junit.jupiter.api.Test;
 import org.springframework.security.access.AccessDeniedException;
-import org.springframework.test.context.ContextConfiguration;
 
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 
-@ContextConfiguration(classes = TestConfig.class)
-public class AuthorizationApiServiceIT extends AbstractIntegrationTest {
+public class AuthorizationApiServiceIT extends AbstractCoreIntegrationTest {
 
     @Resource
     AuthorizationApiService authorizationApiService;

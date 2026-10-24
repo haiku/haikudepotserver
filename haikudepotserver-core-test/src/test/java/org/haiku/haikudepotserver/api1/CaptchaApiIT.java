@@ -5,19 +5,15 @@
 
 package org.haiku.haikudepotserver.api1;
 
+import jakarta.annotation.Resource;
 import org.fest.assertions.Assertions;
-import org.haiku.haikudepotserver.AbstractIntegrationTest;
+import org.haiku.haikudepotserver.AbstractCoreIntegrationTest;
 import org.haiku.haikudepotserver.api1.model.captcha.GenerateCaptchaRequest;
 import org.haiku.haikudepotserver.api1.model.captcha.GenerateCaptchaResult;
 import org.haiku.haikudepotserver.captcha.model.CaptchaRepository;
-import org.haiku.haikudepotserver.config.TestConfig;
 import org.junit.jupiter.api.Test;
-import org.springframework.test.context.ContextConfiguration;
 
-import jakarta.annotation.Resource;
-
-@ContextConfiguration(classes = TestConfig.class)
-public class CaptchaApiIT extends AbstractIntegrationTest {
+public class CaptchaApiIT extends AbstractCoreIntegrationTest {
 
     @Resource
     CaptchaApi captchaApi;

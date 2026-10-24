@@ -1,18 +1,10 @@
 package org.haiku.haikudepotserver.multipage.controller;
 
 import jakarta.annotation.Resource;
-import org.haiku.haikudepotserver.AbstractIntegrationTest;
-import org.haiku.haikudepotserver.IntegrationTestSupportService;
-import org.haiku.haikudepotserver.config.TestAppConfig;
-import org.haiku.haikudepotserver.config.TestServletConfig;
-import org.hamcrest.Matchers;
-import org.htmlunit.WebClient;
+import org.haiku.haikudepotserver.AbstractApplicationIntegrationTest;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.springframework.test.context.ContextConfiguration;
-import org.springframework.test.context.web.WebAppConfiguration;
 import org.springframework.test.web.servlet.MockMvc;
-import org.springframework.test.web.servlet.htmlunit.MockMvcWebClientBuilder;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
@@ -20,9 +12,7 @@ import org.springframework.web.context.WebApplicationContext;
 
 import java.util.Locale;
 
-@WebAppConfiguration
-@ContextConfiguration(classes = {TestAppConfig.class, TestServletConfig.class})
-public class BannerSearchControllerIT extends AbstractIntegrationTest {
+public class BannerSearchControllerIT extends AbstractApplicationIntegrationTest {
 
     @Resource
     private WebApplicationContext webApplicationContext;

@@ -5,26 +5,22 @@
 
 package org.haiku.haikudepotserver.api1;
 
+import jakarta.annotation.Resource;
 import org.apache.cayenne.ObjectContext;
 import org.fest.assertions.Assertions;
-import org.haiku.haikudepotserver.AbstractIntegrationTest;
+import org.haiku.haikudepotserver.AbstractCoreIntegrationTest;
 import org.haiku.haikudepotserver.api1.model.pkg.GetPkgChangelogRequest;
 import org.haiku.haikudepotserver.api1.model.pkg.GetPkgChangelogResult;
 import org.haiku.haikudepotserver.api1.model.pkg.IncrementViewCounterRequest;
 import org.haiku.haikudepotserver.api1.model.pkg.IncrementViewCounterResult;
-import org.haiku.haikudepotserver.config.TestConfig;
 import org.haiku.haikudepotserver.dataobjects.Architecture;
 import org.haiku.haikudepotserver.dataobjects.Pkg;
 import org.haiku.haikudepotserver.dataobjects.PkgVersion;
 import org.haiku.haikudepotserver.dataobjects.RepositorySource;
 import org.haiku.haikudepotserver.support.VersionCoordinates;
 import org.junit.jupiter.api.Test;
-import org.springframework.test.context.ContextConfiguration;
 
-import jakarta.annotation.Resource;
-
-@ContextConfiguration(classes = TestConfig.class)
-public class PkgApiIT extends AbstractIntegrationTest {
+public class PkgApiIT extends AbstractCoreIntegrationTest {
 
     @Resource
     private PkgApi pkgApi;

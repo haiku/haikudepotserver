@@ -7,11 +7,9 @@ package org.haiku.haikudepotserver.multipage.controller;
 import jakarta.annotation.Resource;
 import org.apache.cayenne.ObjectContext;
 import org.fest.assertions.Assertions;
-import org.haiku.haikudepotserver.AbstractIntegrationTest;
+import org.haiku.haikudepotserver.AbstractApplicationIntegrationTest;
 import org.haiku.haikudepotserver.IntegrationTestSupportService;
 import org.haiku.haikudepotserver.api2.UserApiService;
-import org.haiku.haikudepotserver.config.TestAppConfig;
-import org.haiku.haikudepotserver.config.TestServletConfig;
 import org.haiku.haikudepotserver.dataobjects.User;
 import org.haiku.haikudepotserver.dataobjects.UserUsageConditions;
 import org.haiku.haikudepotserver.dataobjects.UserUsageConditionsAgreement;
@@ -22,8 +20,6 @@ import org.htmlunit.html.HtmlPage;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.test.context.ContextConfiguration;
-import org.springframework.test.context.web.WebAppConfiguration;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.htmlunit.MockMvcWebClientBuilder;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
@@ -35,9 +31,7 @@ import java.io.IOException;
 import java.util.Locale;
 import java.util.Objects;
 
-@WebAppConfiguration
-@ContextConfiguration(classes = {TestAppConfig.class, TestServletConfig.class})
-public class UserUsageConditionsAgreeControllerIT extends AbstractIntegrationTest {
+public class UserUsageConditionsAgreeControllerIT extends AbstractApplicationIntegrationTest {
 
     @Resource
     private IntegrationTestSupportService integrationTestSupportService;

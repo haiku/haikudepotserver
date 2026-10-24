@@ -8,15 +8,13 @@ import io.micrometer.core.instrument.MeterRegistry;
 import io.micrometer.core.instrument.Tag;
 import jakarta.annotation.Resource;
 import org.fest.assertions.Assertions;
-import org.haiku.haikudepotserver.AbstractIntegrationTest;
-import org.haiku.haikudepotserver.config.TestConfig;
+import org.haiku.haikudepotserver.AbstractCoreIntegrationTest;
 import org.haiku.haikudepotserver.job.model.JobDataWithByteSource;
 import org.haiku.haikudepotserver.job.model.JobService;
 import org.haiku.haikudepotserver.job.model.JobSnapshot;
 import org.haiku.haikudepotserver.metrics.model.MetricsGeneralReportJobSpecification;
 import org.haiku.haikudepotserver.support.SingleCollector;
 import org.junit.jupiter.api.Test;
-import org.springframework.test.context.ContextConfiguration;
 
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
@@ -26,8 +24,7 @@ import java.util.concurrent.TimeUnit;
 import java.util.regex.Pattern;
 import java.util.stream.Stream;
 
-@ContextConfiguration(classes = TestConfig.class)
-public class MetricsGeneralReportJobRunnerIT extends AbstractIntegrationTest {
+public class MetricsGeneralReportJobRunnerIT extends AbstractCoreIntegrationTest {
 
     @Resource
     private JobService jobService;

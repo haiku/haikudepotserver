@@ -11,10 +11,8 @@ import com.google.common.net.MediaType;
 import jakarta.annotation.Resource;
 import org.apache.cayenne.ObjectContext;
 import org.fest.assertions.Assertions;
-import org.haiku.haikudepotserver.AbstractIntegrationTest;
+import org.haiku.haikudepotserver.AbstractApplicationIntegrationTest;
 import org.haiku.haikudepotserver.IntegrationTestSupportService;
-import org.haiku.haikudepotserver.config.TestAppConfig;
-import org.haiku.haikudepotserver.config.TestServletConfig;
 import org.haiku.haikudepotserver.dataobjects.Pkg;
 import org.haiku.haikudepotserver.dataobjects.PkgScreenshot;
 import org.haiku.haikudepotserver.dataobjects.PkgSupplementModification;
@@ -23,16 +21,12 @@ import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.springframework.mock.web.MockHttpServletRequest;
 import org.springframework.mock.web.MockHttpServletResponse;
-import org.springframework.test.context.ContextConfiguration;
-import org.springframework.test.context.web.WebAppConfiguration;
 
 import java.io.IOException;
 import java.util.List;
 
 @Disabled("The underlying logic is making HTTP calls to downstream services for which there is no support in the test")
-@ContextConfiguration(classes = {TestAppConfig.class, TestServletConfig.class})
-@WebAppConfiguration
-public class PkgScreenshotControllerIT extends AbstractIntegrationTest {
+public class PkgScreenshotControllerIT extends AbstractApplicationIntegrationTest {
 
     @Resource
     private PkgScreenshotController pkgScreenshotController;

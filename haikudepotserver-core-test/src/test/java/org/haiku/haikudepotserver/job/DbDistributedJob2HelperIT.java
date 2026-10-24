@@ -9,8 +9,7 @@ import com.google.common.util.concurrent.Uninterruptibles;
 import jakarta.annotation.Resource;
 import org.apache.cayenne.ObjectContext;
 import org.fest.assertions.Assertions;
-import org.haiku.haikudepotserver.AbstractIntegrationTest;
-import org.haiku.haikudepotserver.config.TestConfig;
+import org.haiku.haikudepotserver.AbstractCoreIntegrationTest;
 import org.haiku.haikudepotserver.dataobjects.Job;
 import org.haiku.haikudepotserver.dataobjects.JobData;
 import org.haiku.haikudepotserver.job.model.JobFindRequest;
@@ -21,7 +20,6 @@ import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
 import org.opentest4j.AssertionFailedError;
-import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.TestPropertySource;
 
 import javax.sql.DataSource;
@@ -42,8 +40,7 @@ import java.util.stream.Stream;
         properties = """
                   hds.jobservice.type=noop
                 """)
-@ContextConfiguration(classes = TestConfig.class)
-class DbDistributedJob2HelperIT extends AbstractIntegrationTest {
+class DbDistributedJob2HelperIT extends AbstractCoreIntegrationTest {
 
     @Resource
     private DataSource dataSource;

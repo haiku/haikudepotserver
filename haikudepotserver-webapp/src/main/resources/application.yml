@@ -17,25 +17,6 @@ logging:
 
 
 spring:
-
-# The commented out OAuth2 elements should be provided either by a
-# developer config file or env-vars.
-
-  security:
-    oauth2:
-      client:
-#        provider:
-#          haiku-xyz:
-#            issuer-uri: http://localhost:7080/realms/haiku-dev
-        registration:
-          haiku:
-#            provider: haiku-xyz
-            redirect-uri: "{baseUrl}/__security/login/oauth2/code/haiku"
-            authorization-grant-type: authorization_code
-#            client-id: haikudepotserver-dev
-#            client-secret: FyL...jDW
-            scope:
-              - openid
   mail:
     host: stmp
 #    port: 25

@@ -6,14 +6,12 @@ package org.haiku.haikudepotserver.storage.job;
 
 import jakarta.annotation.Resource;
 import org.fest.assertions.Assertions;
-import org.haiku.haikudepotserver.AbstractIntegrationTest;
-import org.haiku.haikudepotserver.config.TestConfig;
+import org.haiku.haikudepotserver.AbstractCoreIntegrationTest;
 import org.haiku.haikudepotserver.job.model.JobService;
 import org.haiku.haikudepotserver.job.model.JobSnapshot;
 import org.haiku.haikudepotserver.storage.model.DataStorageGarbageCollectionJobSpecification;
 import org.haiku.haikudepotserver.support.PgDataStorageTestHelper;
 import org.junit.jupiter.api.Test;
-import org.springframework.test.context.ContextConfiguration;
 import org.testcontainers.shaded.com.google.common.collect.ImmutableSet;
 
 import javax.sql.DataSource;
@@ -27,8 +25,7 @@ import java.util.List;
 import java.util.Optional;
 import java.util.Set;
 
-@ContextConfiguration(classes = TestConfig.class)
-public class DataStorageGarbageCollectionJobRunnerIT extends AbstractIntegrationTest {
+public class DataStorageGarbageCollectionJobRunnerIT extends AbstractCoreIntegrationTest {
 
     private final static byte[] SAMPLE_PAYLOAD = new byte[] { 0x0a };
 

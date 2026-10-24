@@ -7,27 +7,23 @@ package org.haiku.haikudepotserver.repository.job;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import jakarta.annotation.Resource;
 import org.fest.assertions.Assertions;
-import org.haiku.haikudepotserver.AbstractIntegrationTest;
+import org.haiku.haikudepotserver.AbstractCoreIntegrationTest;
 import org.haiku.haikudepotserver.IntegrationTestSupportService;
-import org.haiku.haikudepotserver.config.TestConfig;
 import org.haiku.haikudepotserver.job.model.JobDataWithByteSource;
 import org.haiku.haikudepotserver.job.model.JobService;
 import org.haiku.haikudepotserver.job.model.JobSnapshot;
 import org.haiku.haikudepotserver.repository.model.RepositoryDumpExportJobSpecification;
 import org.haiku.haikudepotserver.support.DateTimeHelper;
 import org.junit.jupiter.api.Test;
-import org.springframework.test.context.ContextConfiguration;
 
-import jakarta.annotation.Resource;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.Date;
-import java.util.Optional;
 import java.util.zip.GZIPInputStream;
 
-@ContextConfiguration(classes = TestConfig.class)
-public class RepositoryDumpExportJobRunnerIT extends AbstractIntegrationTest {
+public class RepositoryDumpExportJobRunnerIT extends AbstractCoreIntegrationTest {
 
     @Resource
     private IntegrationTestSupportService integrationTestSupportService;

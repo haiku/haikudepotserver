@@ -5,28 +5,24 @@
 
 package org.haiku.haikudepotserver.pkg;
 
+import jakarta.annotation.Resource;
 import org.apache.cayenne.ObjectContext;
 import org.apache.cayenne.query.ObjectSelect;
 import org.apache.cayenne.query.SortOrder;
 import org.fest.assertions.Assertions;
-import org.haiku.haikudepotserver.AbstractIntegrationTest;
-import org.haiku.haikudepotserver.config.TestConfig;
+import org.haiku.haikudepotserver.AbstractCoreIntegrationTest;
 import org.haiku.haikudepotserver.dataobjects.NaturalLanguage;
 import org.haiku.haikudepotserver.dataobjects.PkgLocalization;
 import org.haiku.haikudepotserver.dataobjects.PkgSupplement;
 import org.haiku.haikudepotserver.dataobjects.PkgSupplementModification;
+import org.haiku.haikudepotserver.naturallanguage.model.NaturalLanguageCoordinates;
 import org.haiku.haikudepotserver.pkg.model.NonUserPkgSupplementModificationAgent;
 import org.haiku.haikudepotserver.pkg.model.PkgLocalizationService;
-import org.haiku.haikudepotserver.naturallanguage.model.NaturalLanguageCoordinates;
 import org.junit.jupiter.api.Test;
-import org.springframework.test.context.ContextConfiguration;
-
-import jakarta.annotation.Resource;
 
 import java.util.List;
 
-@ContextConfiguration(classes = TestConfig.class)
-public class PkgLocalizationServiceImplIT extends AbstractIntegrationTest {
+public class PkgLocalizationServiceImplIT extends AbstractCoreIntegrationTest {
 
     @Resource
     private PkgLocalizationService pkgLocalizationService;

@@ -17,7 +17,7 @@ import org.springframework.core.io.ResourceLoader;
  * <p>Configuration that is required for the multipage web interface.</p>
  */
 
-public class MultipageAppConfig {
+public class ApplicationMultipageConfig {
 
     @Bean
     public PassiveContentRepository passiveContentRepository(ResourceLoader resourceLoader) {

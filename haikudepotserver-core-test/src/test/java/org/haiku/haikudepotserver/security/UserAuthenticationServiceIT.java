@@ -8,9 +8,10 @@ package org.haiku.haikudepotserver.security;
 import org.apache.cayenne.ObjectContext;
 import org.apache.cayenne.ObjectId;
 import org.fest.assertions.Assertions;
+import org.haiku.haikudepotserver.AbstractCoreIntegrationTest;
 import org.haiku.haikudepotserver.AbstractIntegrationTest;
 import org.haiku.haikudepotserver.IntegrationTestSupportService;
-import org.haiku.haikudepotserver.config.TestConfig;
+import org.haiku.haikudepotserver.config.CoreTestConfig;
 import org.haiku.haikudepotserver.dataobjects.User;
 import org.haiku.haikudepotserver.security.model.UserAuthenticationService;
 import org.junit.jupiter.api.Test;
@@ -19,8 +20,7 @@ import org.springframework.test.context.ContextConfiguration;
 import jakarta.annotation.Resource;
 import java.util.Optional;
 
-@ContextConfiguration(classes = TestConfig.class)
-public class UserAuthenticationServiceIT extends AbstractIntegrationTest {
+public class UserAuthenticationServiceIT extends AbstractCoreIntegrationTest {
 
     @Resource
     private UserAuthenticationService userAuthenticationService;

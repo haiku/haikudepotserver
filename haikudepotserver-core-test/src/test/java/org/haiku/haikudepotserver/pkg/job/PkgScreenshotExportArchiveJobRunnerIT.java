@@ -7,13 +7,13 @@ package org.haiku.haikudepotserver.pkg.job;
 
 import com.google.common.collect.Sets;
 import com.google.common.io.ByteSource;
+import jakarta.annotation.Resource;
 import org.apache.commons.compress.archivers.ArchiveEntry;
 import org.apache.commons.compress.archivers.tar.TarArchiveInputStream;
 import org.fest.assertions.Assertions;
-import org.haiku.haikudepotserver.AbstractIntegrationTest;
+import org.haiku.haikudepotserver.AbstractCoreIntegrationTest;
 import org.haiku.haikudepotserver.IntegrationTestSupportService;
 import org.haiku.haikudepotserver.WrapWithNoCloseInputStream;
-import org.haiku.haikudepotserver.config.TestConfig;
 import org.haiku.haikudepotserver.job.model.JobDataWithByteSource;
 import org.haiku.haikudepotserver.job.model.JobService;
 import org.haiku.haikudepotserver.job.model.JobSnapshot;
@@ -21,9 +21,7 @@ import org.haiku.haikudepotserver.pkg.model.PkgScreenshotExportArchiveJobSpecifi
 import org.junit.jupiter.api.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.test.context.ContextConfiguration;
 
-import jakarta.annotation.Resource;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.Optional;
@@ -32,8 +30,7 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.zip.GZIPInputStream;
 
-@ContextConfiguration(classes = TestConfig.class)
-public class PkgScreenshotExportArchiveJobRunnerIT extends AbstractIntegrationTest {
+public class PkgScreenshotExportArchiveJobRunnerIT extends AbstractCoreIntegrationTest {
 
 
     private static final Logger LOGGER = LoggerFactory.getLogger(PkgIconExportArchiveJobRunnerIT.class);

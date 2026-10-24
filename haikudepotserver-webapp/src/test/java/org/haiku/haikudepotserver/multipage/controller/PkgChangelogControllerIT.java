@@ -6,24 +6,19 @@ package org.haiku.haikudepotserver.multipage.controller;
 
 import jakarta.annotation.Resource;
 import org.fest.assertions.Assertions;
-import org.haiku.haikudepotserver.AbstractIntegrationTest;
+import org.haiku.haikudepotserver.AbstractApplicationIntegrationTest;
 import org.haiku.haikudepotserver.IntegrationTestSupportService;
-import org.haiku.haikudepotserver.config.TestAppConfig;
-import org.haiku.haikudepotserver.config.TestServletConfig;
 import org.htmlunit.WebClient;
 import org.htmlunit.html.DomElement;
 import org.htmlunit.html.HtmlPage;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.web.WebAppConfiguration;
 import org.springframework.test.web.servlet.htmlunit.MockMvcWebClientBuilder;
 import org.springframework.web.context.WebApplicationContext;
 import org.springframework.web.util.UriComponentsBuilder;
 
-@WebAppConfiguration
-@ContextConfiguration(classes = {TestAppConfig.class, TestServletConfig.class})
-public class PkgChangelogControllerIT extends AbstractIntegrationTest {
+public class PkgChangelogControllerIT extends AbstractApplicationIntegrationTest {
 
     @Resource
     private IntegrationTestSupportService integrationTestSupportService;

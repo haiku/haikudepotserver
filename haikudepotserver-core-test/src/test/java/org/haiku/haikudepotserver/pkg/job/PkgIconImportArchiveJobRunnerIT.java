@@ -13,9 +13,8 @@ import org.apache.cayenne.ObjectContext;
 import org.apache.cayenne.query.ObjectSelect;
 import org.apache.cayenne.query.SortOrder;
 import org.fest.assertions.Assertions;
-import org.haiku.haikudepotserver.AbstractIntegrationTest;
+import org.haiku.haikudepotserver.AbstractCoreIntegrationTest;
 import org.haiku.haikudepotserver.IntegrationTestSupportService;
-import org.haiku.haikudepotserver.config.TestConfig;
 import org.haiku.haikudepotserver.dataobjects.Pkg;
 import org.haiku.haikudepotserver.dataobjects.PkgSupplementModification;
 import org.haiku.haikudepotserver.job.model.JobDataEncoding;
@@ -27,15 +26,13 @@ import org.haiku.haikudepotserver.pkg.model.PkgIconImportArchiveJobSpecification
 import org.haiku.haikudepotserver.pkg.model.PkgIconService;
 import org.haiku.haikudepotserver.support.SingleCollector;
 import org.junit.jupiter.api.Test;
-import org.springframework.test.context.ContextConfiguration;
 
 import java.io.BufferedReader;
 import java.io.InputStream;
 import java.nio.charset.StandardCharsets;
 import java.util.List;
 
-@ContextConfiguration(classes = TestConfig.class)
-public class PkgIconImportArchiveJobRunnerIT extends AbstractIntegrationTest {
+public class PkgIconImportArchiveJobRunnerIT extends AbstractCoreIntegrationTest {
 
     @Resource
     private IntegrationTestSupportService integrationTestSupportService;

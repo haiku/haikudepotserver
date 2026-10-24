@@ -5,24 +5,21 @@
 
 package org.haiku.haikudepotserver.security;
 
+import jakarta.annotation.Resource;
 import org.apache.cayenne.ObjectContext;
 import org.fest.assertions.Assertions;
-import org.haiku.haikudepotserver.AbstractIntegrationTest;
+import org.haiku.haikudepotserver.AbstractCoreIntegrationTest;
 import org.haiku.haikudepotserver.IntegrationTestSupportService;
-import org.haiku.haikudepotserver.config.TestConfig;
 import org.haiku.haikudepotserver.dataobjects.Pkg;
 import org.haiku.haikudepotserver.dataobjects.User;
 import org.haiku.haikudepotserver.dataobjects.UserUsageConditions;
 import org.haiku.haikudepotserver.security.model.Permission;
 import org.haiku.haikudepotserver.security.model.UserAuthorizationService;
 import org.junit.jupiter.api.Test;
-import org.springframework.test.context.ContextConfiguration;
 
-import jakarta.annotation.Resource;
 import java.util.stream.Stream;
 
-@ContextConfiguration(classes = TestConfig.class)
-public class UserAuthorizationServiceImplIT extends AbstractIntegrationTest {
+public class UserAuthorizationServiceImplIT extends AbstractCoreIntegrationTest {
 
     @Resource
     private UserAuthorizationService userAuthorizationService;

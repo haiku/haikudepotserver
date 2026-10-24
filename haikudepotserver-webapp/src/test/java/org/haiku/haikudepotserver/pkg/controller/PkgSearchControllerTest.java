@@ -7,9 +7,9 @@ package org.haiku.haikudepotserver.pkg.controller;
 
 import jakarta.annotation.Resource;
 import org.fest.assertions.Assertions;
+import org.haiku.haikudepotserver.AbstractApplicationIntegrationTest;
 import org.haiku.haikudepotserver.AbstractIntegrationTest;
-import org.haiku.haikudepotserver.config.TestAppConfig;
-import org.haiku.haikudepotserver.config.TestServletConfig;
+import org.haiku.haikudepotserver.config.ApplicationTestConfig;
 import org.junit.jupiter.api.Test;
 import org.springframework.mock.web.MockHttpServletRequest;
 import org.springframework.mock.web.MockHttpServletResponse;
@@ -19,9 +19,7 @@ import org.springframework.test.context.web.WebAppConfiguration;
 import java.io.IOException;
 import java.util.Locale;
 
-@ContextConfiguration(classes = {TestAppConfig.class, TestServletConfig.class})
-@WebAppConfiguration
-class PkgSearchControllerTest extends AbstractIntegrationTest {
+class PkgSearchControllerTest extends AbstractApplicationIntegrationTest {
 
     @Resource
     public PkgSearchController searchController;

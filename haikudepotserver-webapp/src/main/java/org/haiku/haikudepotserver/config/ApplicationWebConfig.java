@@ -9,12 +9,10 @@ import com.google.common.base.Preconditions;
 import org.haiku.haikudepotserver.multipage.MultipageWebResourceService;
 import org.haiku.haikudepotserver.multipage.model.WebResourcePathPrefixes;
 import org.haiku.haikudepotserver.support.web.WebConstants;
-import org.springframework.context.annotation.ComponentScan;
 import org.springframework.http.CacheControl;
 import org.springframework.http.converter.HttpMessageConverters;
 import org.springframework.http.converter.json.JacksonJsonHttpMessageConverter;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
-import org.springframework.stereotype.Controller;
 import org.springframework.web.servlet.config.annotation.ResourceHandlerRegistry;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 
@@ -22,18 +20,11 @@ import java.time.Duration;
 
 //@EnableWebMvc <-- is done manually so that locales can be setup
 @EnableWebSecurity
-@ComponentScan(
-        basePackages = { "org.haiku.haikudepotserver" },
-        useDefaultFilters = false,
-        includeFilters = {
-                @ComponentScan.Filter(Controller.class)
-        }
-)
-public class WebConfig implements WebMvcConfigurer {
+public class ApplicationWebConfig implements WebMvcConfigurer {
 
     private final MultipageWebResourceService multipageWebResourceService;
 
-    public WebConfig(MultipageWebResourceService multipageWebResourceService) {
+    public ApplicationWebConfig(MultipageWebResourceService multipageWebResourceService) {
         this.multipageWebResourceService = Preconditions.checkNotNull(multipageWebResourceService);
     }
 

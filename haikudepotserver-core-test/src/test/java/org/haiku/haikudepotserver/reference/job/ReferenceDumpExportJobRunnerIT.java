@@ -7,9 +7,9 @@ package org.haiku.haikudepotserver.reference.job;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import jakarta.annotation.Resource;
 import org.fest.assertions.Assertions;
-import org.haiku.haikudepotserver.AbstractIntegrationTest;
-import org.haiku.haikudepotserver.config.TestConfig;
+import org.haiku.haikudepotserver.AbstractCoreIntegrationTest;
 import org.haiku.haikudepotserver.job.model.JobDataWithByteSource;
 import org.haiku.haikudepotserver.job.model.JobService;
 import org.haiku.haikudepotserver.job.model.JobSnapshot;
@@ -17,16 +17,12 @@ import org.haiku.haikudepotserver.naturallanguage.model.NaturalLanguageCoordinat
 import org.haiku.haikudepotserver.reference.model.ReferenceDumpExportJobSpecification;
 import org.haiku.haikudepotserver.support.RuntimeInformationService;
 import org.junit.jupiter.api.Test;
-import org.springframework.test.context.ContextConfiguration;
 
-import jakarta.annotation.Resource;
 import java.io.InputStream;
-import java.util.Optional;
 import java.util.stream.IntStream;
 import java.util.zip.GZIPInputStream;
 
-@ContextConfiguration(classes = TestConfig.class)
-public class ReferenceDumpExportJobRunnerIT extends AbstractIntegrationTest {
+public class ReferenceDumpExportJobRunnerIT extends AbstractCoreIntegrationTest {
 
     @Resource
     private JobService jobService;

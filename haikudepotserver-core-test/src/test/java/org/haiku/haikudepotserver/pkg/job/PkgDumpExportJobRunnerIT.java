@@ -7,19 +7,17 @@ package org.haiku.haikudepotserver.pkg.job;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import jakarta.annotation.Resource;
 import org.fest.assertions.Assertions;
-import org.haiku.haikudepotserver.AbstractIntegrationTest;
+import org.haiku.haikudepotserver.AbstractCoreIntegrationTest;
 import org.haiku.haikudepotserver.IntegrationTestSupportService;
-import org.haiku.haikudepotserver.config.TestConfig;
 import org.haiku.haikudepotserver.job.model.JobDataWithByteSource;
 import org.haiku.haikudepotserver.job.model.JobService;
 import org.haiku.haikudepotserver.job.model.JobSnapshot;
 import org.haiku.haikudepotserver.pkg.model.PkgDumpExportJobSpecification;
 import org.haiku.haikudepotserver.support.DateTimeHelper;
 import org.junit.jupiter.api.Test;
-import org.springframework.test.context.ContextConfiguration;
 
-import jakarta.annotation.Resource;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.Date;
@@ -31,8 +29,7 @@ import java.util.zip.GZIPInputStream;
  * runs smoothly and that some basic data is present.</p>
  */
 
-@ContextConfiguration(classes = TestConfig.class)
-public class PkgDumpExportJobRunnerIT extends AbstractIntegrationTest {
+public class PkgDumpExportJobRunnerIT extends AbstractCoreIntegrationTest {
 
     @Resource
     private IntegrationTestSupportService integrationTestSupportService;

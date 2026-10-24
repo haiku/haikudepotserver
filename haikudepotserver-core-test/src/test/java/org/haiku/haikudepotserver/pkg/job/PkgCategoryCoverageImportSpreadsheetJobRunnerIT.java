@@ -10,9 +10,8 @@ import com.google.common.net.MediaType;
 import jakarta.annotation.Resource;
 import org.apache.cayenne.ObjectContext;
 import org.fest.assertions.Assertions;
-import org.haiku.haikudepotserver.AbstractIntegrationTest;
+import org.haiku.haikudepotserver.AbstractCoreIntegrationTest;
 import org.haiku.haikudepotserver.IntegrationTestSupportService;
-import org.haiku.haikudepotserver.config.TestConfig;
 import org.haiku.haikudepotserver.dataobjects.Pkg;
 import org.haiku.haikudepotserver.job.model.JobDataEncoding;
 import org.haiku.haikudepotserver.job.model.JobDataWithByteSource;
@@ -21,7 +20,6 @@ import org.haiku.haikudepotserver.job.model.JobSnapshot;
 import org.haiku.haikudepotserver.pkg.model.PkgCategoryCoverageImportSpreadsheetJobSpecification;
 import org.haiku.haikudepotserver.support.SingleCollector;
 import org.junit.jupiter.api.Test;
-import org.springframework.test.context.ContextConfiguration;
 
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -30,8 +28,7 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 
-@ContextConfiguration(classes = TestConfig.class)
-public class PkgCategoryCoverageImportSpreadsheetJobRunnerIT extends AbstractIntegrationTest {
+public class PkgCategoryCoverageImportSpreadsheetJobRunnerIT extends AbstractCoreIntegrationTest {
 
     @Resource
     private IntegrationTestSupportService integrationTestSupportService;

@@ -6,21 +6,18 @@ package org.haiku.haikudepotserver.naturallanguage;
 
 import jakarta.annotation.Resource;
 import org.fest.assertions.Assertions;
-import org.haiku.haikudepotserver.AbstractIntegrationTest;
-import org.haiku.haikudepotserver.config.TestConfig;
+import org.haiku.haikudepotserver.AbstractCoreIntegrationTest;
 import org.haiku.haikudepotserver.naturallanguage.model.NaturalLanguageCoded;
 import org.haiku.haikudepotserver.naturallanguage.model.NaturalLanguageCoordinates;
 import org.haiku.haikudepotserver.naturallanguage.model.NaturalLanguageService;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
-import org.springframework.test.context.ContextConfiguration;
 
 import java.util.List;
 import java.util.stream.Stream;
 
-@ContextConfiguration(classes = TestConfig.class)
-class NaturalLanguageServiceImplTest extends AbstractIntegrationTest {
+class NaturalLanguageServiceImplTest extends AbstractCoreIntegrationTest {
 
     @Resource
     public NaturalLanguageService naturalLanguageService;

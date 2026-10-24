@@ -12,8 +12,7 @@ import org.apache.cayenne.ObjectContext;
 import org.apache.cayenne.ObjectId;
 import org.apache.cayenne.query.ObjectSelect;
 import org.fest.assertions.Assertions;
-import org.haiku.haikudepotserver.AbstractIntegrationTest;
-import org.haiku.haikudepotserver.config.TestConfig;
+import org.haiku.haikudepotserver.AbstractCoreIntegrationTest;
 import org.haiku.haikudepotserver.dataobjects.*;
 import org.haiku.haikudepotserver.job.Jobs;
 import org.haiku.haikudepotserver.job.model.JobService;
@@ -23,7 +22,6 @@ import org.haiku.haikudepotserver.pkg.model.PkgService;
 import org.haiku.haikudepotserver.repository.model.RepositoryHpkrIngressJobSpecification;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
-import org.springframework.test.context.ContextConfiguration;
 
 import java.io.File;
 import java.util.List;
@@ -35,8 +33,7 @@ import java.util.concurrent.TimeUnit;
  * <p>This test will load in a fake repository HPKR file and will then check to see that it imported correctly.</p>
  */
 
-@ContextConfiguration(classes = TestConfig.class)
-public class RepositoryHpkrIngressServiceIT extends AbstractIntegrationTest {
+public class RepositoryHpkrIngressServiceIT extends AbstractCoreIntegrationTest {
 
     private final static long DELAY_PROCESSSUBMITTEDTESTJOB = 60 * 1000; // 60s
 

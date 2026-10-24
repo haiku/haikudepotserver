@@ -7,37 +7,22 @@ package org.haiku.haikudepotserver.api1;
 
 import com.google.common.base.Strings;
 import com.google.common.collect.ImmutableList;
+import jakarta.annotation.Resource;
 import org.apache.cayenne.ObjectContext;
 import org.fest.assertions.Assertions;
-import org.haiku.haikudepotserver.AbstractIntegrationTest;
+import org.haiku.haikudepotserver.AbstractCoreIntegrationTest;
 import org.haiku.haikudepotserver.api1.model.PkgVersionType;
-import org.haiku.haikudepotserver.api1.model.userrating.AbstractGetUserRatingResult;
-import org.haiku.haikudepotserver.api1.model.userrating.CreateUserRatingRequest;
-import org.haiku.haikudepotserver.api1.model.userrating.GetUserRatingByUserAndPkgVersionRequest;
-import org.haiku.haikudepotserver.api1.model.userrating.GetUserRatingByUserAndPkgVersionResult;
-import org.haiku.haikudepotserver.api1.model.userrating.SearchUserRatingsRequest;
-import org.haiku.haikudepotserver.api1.model.userrating.SearchUserRatingsResult;
-import org.haiku.haikudepotserver.api1.model.userrating.UpdateUserRatingRequest;
-import org.haiku.haikudepotserver.config.TestConfig;
-import org.haiku.haikudepotserver.dataobjects.Architecture;
-import org.haiku.haikudepotserver.dataobjects.NaturalLanguage;
-import org.haiku.haikudepotserver.dataobjects.Pkg;
-import org.haiku.haikudepotserver.dataobjects.RepositorySource;
-import org.haiku.haikudepotserver.dataobjects.User;
-import org.haiku.haikudepotserver.dataobjects.UserRating;
-import org.haiku.haikudepotserver.dataobjects.UserRatingStability;
-import org.haiku.haikudepotserver.pkg.model.PkgService;
+import org.haiku.haikudepotserver.api1.model.userrating.*;
+import org.haiku.haikudepotserver.dataobjects.*;
 import org.haiku.haikudepotserver.naturallanguage.model.NaturalLanguageCoordinates;
+import org.haiku.haikudepotserver.pkg.model.PkgService;
 import org.haiku.haikudepotserver.support.SingleCollector;
 import org.junit.jupiter.api.Test;
-import org.springframework.test.context.ContextConfiguration;
 
-import jakarta.annotation.Resource;
 import java.util.Collections;
 import java.util.Optional;
 
-@ContextConfiguration(classes = TestConfig.class)
-public class UserRatingApiIT extends AbstractIntegrationTest {
+public class UserRatingApiIT extends AbstractCoreIntegrationTest {
 
     @Resource
     UserRatingApi userRatingApi;

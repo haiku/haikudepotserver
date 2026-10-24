@@ -5,7 +5,9 @@
 
 package org.haiku.haikudepotserver.config;
 
+import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.SerializationFeature;
 import freemarker.template.Configuration;
 import org.apache.cayenne.configuration.server.ServerRuntime;
 import org.haiku.haikudepotserver.captcha.CaptchaServiceImpl;
@@ -30,32 +32,23 @@ import org.haiku.haikudepotserver.support.eventing.model.InterProcessApplication
 import org.haiku.haikudepotserver.support.eventing.model.InterProcessEvent;
 import org.haiku.haikudepotserver.support.freemarker.LocalizedTemplateLoader;
 import org.haiku.haikudepotserver.support.logging.LoggingSetupOrchestration;
+import org.springframework.beans.factory.FactoryBean;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.context.MessageSource;
 import org.springframework.context.annotation.Bean;
-import org.springframework.context.annotation.ComponentScan;
-import org.springframework.context.annotation.FilterType;
 import org.springframework.context.annotation.Import;
 import org.springframework.context.support.ReloadableResourceBundleMessageSource;
 import org.springframework.core.io.ResourceLoader;
 import org.springframework.security.crypto.keygen.KeyGenerators;
-import org.springframework.stereotype.Controller;
 
 import javax.sql.DataSource;
 import java.nio.charset.StandardCharsets;
 import java.util.List;
 import java.util.function.Consumer;
 
-@ComponentScan(
-        basePackages = "org.haiku.haikudepotserver",
-        excludeFilters = {
-                @ComponentScan.Filter(type = FilterType.ANNOTATION, value = Controller.class),
-        }
-)
-@Import({PersistenceConfig.class})
-public class BasicConfig {
+public class CoreBasicConfig {
 
     // -------------------------------------
     // SUNDRY
@@ -194,6 +187,33 @@ public class BasicConfig {
             DataSource dataSource,
             InterProcessEventPgConfig config) {
         return new InterProcessEventPgNotifyService(objectMapper, dataSource, config);
+    }
+
+    /**
+     * <p>The JSON handling class needs some special configuration in order for it to, for example, ignore
+     * missing fields on objects.  This factory is able to create those
+     * {@link ObjectMapper} objects correctly configured ready for use.</p>
+     */
+
+    public static class ObjectMapperFactory implements FactoryBean<ObjectMapper> {
+
+        @Override
+        public ObjectMapper getObject() {
+            ObjectMapper objectMapper = new ObjectMapper();
+            objectMapper.configure(SerializationFeature.FAIL_ON_EMPTY_BEANS, false);
+            objectMapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
+            return objectMapper;
+        }
+
+        @Override
+        public Class<?> getObjectType() {
+            return ObjectMapper.class;
+        }
+
+        @Override
+        public boolean isSingleton() {
+            return false;
+        }
     }
 
 }

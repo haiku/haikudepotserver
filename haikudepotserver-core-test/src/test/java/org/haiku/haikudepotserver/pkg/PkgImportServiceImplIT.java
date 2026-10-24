@@ -14,9 +14,8 @@ import org.apache.cayenne.ObjectId;
 import org.apache.cayenne.query.ObjectSelect;
 import org.apache.cayenne.query.SortOrder;
 import org.fest.assertions.Assertions;
-import org.haiku.haikudepotserver.AbstractIntegrationTest;
+import org.haiku.haikudepotserver.AbstractCoreIntegrationTest;
 import org.haiku.haikudepotserver.IntegrationTestSupportService;
-import org.haiku.haikudepotserver.config.TestConfig;
 import org.haiku.haikudepotserver.dataobjects.*;
 import org.haiku.haikudepotserver.naturallanguage.model.NaturalLanguageCoordinates;
 import org.haiku.haikudepotserver.pkg.model.*;
@@ -26,15 +25,13 @@ import org.haiku.pkg.model.Pkg;
 import org.haiku.pkg.model.PkgArchitecture;
 import org.haiku.pkg.model.PkgVersion;
 import org.junit.jupiter.api.Test;
-import org.springframework.test.context.ContextConfiguration;
 
 import java.io.File;
 import java.io.InputStream;
 import java.util.Collections;
 import java.util.List;
 
-@ContextConfiguration(classes = TestConfig.class)
-public class PkgImportServiceImplIT extends AbstractIntegrationTest {
+public class PkgImportServiceImplIT extends AbstractCoreIntegrationTest {
 
     private static final String RESOURCE_TEST = "tipster-1.1.1-1-x86_64.hpkg";
 

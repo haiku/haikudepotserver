@@ -5,48 +5,24 @@
 
 package org.haiku.haikudepotserver.api2;
 
+import jakarta.annotation.Resource;
 import org.apache.cayenne.ObjectContext;
 import org.apache.cayenne.query.ObjectSelect;
 import org.fest.assertions.Assertions;
-import org.haiku.haikudepotserver.AbstractIntegrationTest;
+import org.haiku.haikudepotserver.AbstractCoreIntegrationTest;
 import org.haiku.haikudepotserver.IntegrationTestSupportService;
-import org.haiku.haikudepotserver.api2.model.CreateRepositoryRequestEnvelope;
-import org.haiku.haikudepotserver.api2.model.CreateRepositorySourceMirrorRequestEnvelope;
-import org.haiku.haikudepotserver.api2.model.CreateRepositorySourceRequestEnvelope;
-import org.haiku.haikudepotserver.api2.model.GetRepositoriesRequestEnvelope;
-import org.haiku.haikudepotserver.api2.model.GetRepositoriesResult;
-import org.haiku.haikudepotserver.api2.model.GetRepositoryRepositorySource;
-import org.haiku.haikudepotserver.api2.model.GetRepositoryRequestEnvelope;
-import org.haiku.haikudepotserver.api2.model.GetRepositoryResult;
-import org.haiku.haikudepotserver.api2.model.GetRepositorySourceMirrorRequestEnvelope;
-import org.haiku.haikudepotserver.api2.model.GetRepositorySourceMirrorResult;
-import org.haiku.haikudepotserver.api2.model.GetRepositorySourceRepositorySourceMirror;
-import org.haiku.haikudepotserver.api2.model.GetRepositorySourceRequestEnvelope;
-import org.haiku.haikudepotserver.api2.model.GetRepositorySourceResult;
-import org.haiku.haikudepotserver.api2.model.RemoveRepositorySourceMirrorRequestEnvelope;
-import org.haiku.haikudepotserver.api2.model.SearchRepositoriesRequestEnvelope;
-import org.haiku.haikudepotserver.api2.model.SearchRepositoriesResult;
-import org.haiku.haikudepotserver.api2.model.UpdateRepositoryFilter;
-import org.haiku.haikudepotserver.api2.model.UpdateRepositoryRequestEnvelope;
-import org.haiku.haikudepotserver.api2.model.UpdateRepositorySourceFilter;
-import org.haiku.haikudepotserver.api2.model.UpdateRepositorySourceMirrorFilter;
-import org.haiku.haikudepotserver.api2.model.UpdateRepositorySourceMirrorRequestEnvelope;
-import org.haiku.haikudepotserver.api2.model.UpdateRepositorySourceRequestEnvelope;
-import org.haiku.haikudepotserver.support.exception.ValidationException;
-import org.haiku.haikudepotserver.config.TestConfig;
+import org.haiku.haikudepotserver.api2.model.*;
 import org.haiku.haikudepotserver.dataobjects.Repository;
 import org.haiku.haikudepotserver.dataobjects.RepositorySource;
 import org.haiku.haikudepotserver.dataobjects.RepositorySourceMirror;
+import org.haiku.haikudepotserver.support.exception.ValidationException;
 import org.junit.jupiter.api.Test;
-import org.springframework.test.context.ContextConfiguration;
 
-import jakarta.annotation.Resource;
 import java.util.Comparator;
 import java.util.List;
 import java.util.stream.Collectors;
 
-@ContextConfiguration(classes = TestConfig.class)
-public class RepositoryApiServiceIT extends AbstractIntegrationTest {
+public class RepositoryApiServiceIT extends AbstractCoreIntegrationTest {
 
     @Resource
     private RepositoryApiService repositoryApiService;

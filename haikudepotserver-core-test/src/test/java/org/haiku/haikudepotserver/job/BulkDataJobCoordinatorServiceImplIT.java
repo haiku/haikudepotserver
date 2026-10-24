@@ -7,8 +7,7 @@ package org.haiku.haikudepotserver.job;
 import jakarta.annotation.Resource;
 import org.apache.cayenne.ObjectContext;
 import org.assertj.core.api.Assertions;
-import org.haiku.haikudepotserver.AbstractIntegrationTest;
-import org.haiku.haikudepotserver.config.TestConfig;
+import org.haiku.haikudepotserver.AbstractCoreIntegrationTest;
 import org.haiku.haikudepotserver.dataobjects.Job;
 import org.haiku.haikudepotserver.dataobjects.NaturalLanguage;
 import org.haiku.haikudepotserver.dataobjects.NaturalLanguageUse;
@@ -19,7 +18,6 @@ import org.haiku.haikudepotserver.pkg.model.PkgDumpExportJobSpecification;
 import org.haiku.haikudepotserver.repository.model.RepositoryDumpExportJobSpecification;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.springframework.test.context.ContextConfiguration;
 
 import java.time.Duration;
 import java.time.Instant;
@@ -29,8 +27,7 @@ import java.util.UUID;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
-@ContextConfiguration(classes = TestConfig.class)
-public class BulkDataJobCoordinatorServiceImplIT extends AbstractIntegrationTest {
+public class BulkDataJobCoordinatorServiceImplIT extends AbstractCoreIntegrationTest {
 
     @Resource
     private BulkDataJobCoordinatorServiceImpl coordinatorService;

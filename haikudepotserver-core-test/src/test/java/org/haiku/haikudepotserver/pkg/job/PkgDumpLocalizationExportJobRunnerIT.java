@@ -6,13 +6,11 @@ package org.haiku.haikudepotserver.pkg.job;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.node.JsonNodeType;
 import jakarta.annotation.Resource;
 import org.apache.cayenne.ObjectContext;
 import org.fest.assertions.Assertions;
-import org.haiku.haikudepotserver.AbstractIntegrationTest;
+import org.haiku.haikudepotserver.AbstractCoreIntegrationTest;
 import org.haiku.haikudepotserver.IntegrationTestSupportService;
-import org.haiku.haikudepotserver.config.TestConfig;
 import org.haiku.haikudepotserver.dataobjects.NaturalLanguage;
 import org.haiku.haikudepotserver.dataobjects.Pkg;
 import org.haiku.haikudepotserver.dataobjects.PkgLocalization;
@@ -21,7 +19,6 @@ import org.haiku.haikudepotserver.job.model.JobService;
 import org.haiku.haikudepotserver.job.model.JobSnapshot;
 import org.haiku.haikudepotserver.pkg.model.PkgDumpLocalizationExportJobSpecification;
 import org.junit.jupiter.api.Test;
-import org.springframework.test.context.ContextConfiguration;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -29,8 +26,7 @@ import java.io.UncheckedIOException;
 import java.util.Optional;
 import java.util.zip.GZIPInputStream;
 
-@ContextConfiguration(classes = TestConfig.class)
-public class PkgDumpLocalizationExportJobRunnerIT extends AbstractIntegrationTest {
+public class PkgDumpLocalizationExportJobRunnerIT extends AbstractCoreIntegrationTest {
 
     @Resource
     private IntegrationTestSupportService integrationTestSupportService;
