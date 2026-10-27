@@ -17,9 +17,11 @@ public class RepositoryDumpExportJobSpecification extends AbstractJobSpecificati
      */
     private final static long TT_HOURS = 24;
 
+    public final Long ttl = TimeUnit.HOURS.toMillis(TT_HOURS) + createTimeToLiveJitterMillis(TimeUnit.HOURS);
+
     @Override
     public Optional<Long> tryGetTimeToLiveMillis() {
-        return Optional.of(TimeUnit.HOURS.toMillis(TT_HOURS) + createTimeToLiveJitterMillis(TimeUnit.HOURS));
+        return Optional.of(ttl);
     }
 
 }

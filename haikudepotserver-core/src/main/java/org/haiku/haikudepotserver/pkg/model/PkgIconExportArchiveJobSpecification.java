@@ -14,9 +14,11 @@ public class PkgIconExportArchiveJobSpecification extends AbstractJobSpecificati
 
     private final static long TTL_HOURS = 24;
 
+    private final Long ttl = TimeUnit.HOURS.toMillis(TTL_HOURS) + createTimeToLiveJitterMillis(TimeUnit.HOURS);
+
     @Override
     public Optional<Long> tryGetTimeToLiveMillis() {
-        return Optional.of(TimeUnit.HOURS.toMillis(TTL_HOURS) + createTimeToLiveJitterMillis(TimeUnit.HOURS));
+        return Optional.of(ttl);
     }
 
 }

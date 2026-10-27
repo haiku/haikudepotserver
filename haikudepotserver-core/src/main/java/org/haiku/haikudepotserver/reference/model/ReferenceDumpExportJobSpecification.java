@@ -36,9 +36,11 @@ public class ReferenceDumpExportJobSpecification extends AbstractJobSpecificatio
     @Deprecated
     private boolean filterForSimpleTwoCharLanguageCodes = false;
 
+    private final Long ttl = TimeUnit.HOURS.toMillis(TTL_HOURS) + createTimeToLiveJitterMillis(TimeUnit.HOURS);
+
     @Override
     public Optional<Long> tryGetTimeToLiveMillis() {
-        return Optional.of(TimeUnit.HOURS.toMillis(TTL_HOURS) + createTimeToLiveJitterMillis(TimeUnit.HOURS));
+        return Optional.of(ttl);
     }
 
     public String getNaturalLanguageCode() {

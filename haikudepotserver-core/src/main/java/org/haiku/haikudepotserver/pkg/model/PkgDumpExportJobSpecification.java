@@ -21,9 +21,11 @@ public class PkgDumpExportJobSpecification extends AbstractJobSpecification {
 
     private String naturalLanguageCode;
 
+    private final Long ttl = TimeUnit.HOURS.toMillis(TTL_HOURS) + createTimeToLiveJitterMillis(TimeUnit.HOURS);
+
     @Override
     public Optional<Long> tryGetTimeToLiveMillis() {
-        return Optional.of(TimeUnit.HOURS.toMillis(TTL_HOURS) + createTimeToLiveJitterMillis(TimeUnit.HOURS));
+        return Optional.of(ttl);
     }
 
     public String getRepositorySourceCode() {

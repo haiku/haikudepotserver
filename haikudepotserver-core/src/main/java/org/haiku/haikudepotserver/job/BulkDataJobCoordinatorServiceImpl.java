@@ -430,14 +430,28 @@ public class BulkDataJobCoordinatorServiceImpl implements BulkDataJobCoordinator
         if (expiryTimestamp.minus(renewAfterRemainingDuration).isBefore(now)) {
             LOGGER.info("the job [{}] is going to expire soon so renew it", job.getGuid());
             return true;
+        } else {
+            LOGGER.debug("the job [{}] is queued at [{}] with a TTL of {} ms so won't expire soon at [{}]",
+                    job.getGuid(),
+                    job.getQueuedTimestamp(),
+                    ttlOptional.get(),
+                    now);
         }
 
         // Make sure that the data is not replaced too quickly after it is generated; otherwise there is no benefit
         // from the publishing process.
 
         if (job.getStartTimestamp().toInstant().plus(renewStanddownSinceLastStartDuration).isAfter(now)) {
-            LOGGER.debug("the job [{}] is too new --> won't consider renew", job.getGuid());
+            LOGGER.debug("the job [{}] is too new [{}] --> won't consider renew at [{}]",
+                    job.getGuid(),
+                    job.getStartTimestamp(),
+                    now);
             return false;
+        } else {
+            LOGGER.debug("the job [{}] is started [{}] which means it is old enough to consider replacing in relation to [{}]",
+                    job.getGuid(),
+                    job.getStartTimestamp(),
+                    now);
         }
 
         // if the persisted data is greater than the data timestamp of the job.
