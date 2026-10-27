@@ -12,6 +12,7 @@ import org.haiku.haikudepotserver.multipage.MultipageConstants;
 import org.haiku.haikudepotserver.multipage.MultipageWebResourceService;
 import org.haiku.haikudepotserver.multipage.controller.LoginController;
 import org.haiku.haikudepotserver.multipage.model.WebResourcePathPrefixes;
+import org.haiku.haikudepotserver.passwordreset.controller.PasswordResetController;
 import org.haiku.haikudepotserver.pkg.controller.*;
 import org.haiku.haikudepotserver.reference.controller.ReferenceController;
 import org.haiku.haikudepotserver.repository.controller.RepositoryController;
@@ -142,6 +143,7 @@ public class ApplicationWebSecurityConfig {
                 new PrefixPathRequestMatcher("%s/".formatted(FeedService.PATH_ROOT)),
                 // pkg
                 PrefixPathRequestMatcher.withFirstSegment(PkgController.SEGMENT_PKG),
+                PrefixPathRequestMatcher.withFirstSegment(PasswordResetController.SEGMENT_PASSWORDRESET),
                 PrefixPathRequestMatcher.withFirstSegment(PkgDownloadController.SEGMENT_PKGDOWNLOAD),
                 PrefixPathRequestMatcher.withFirstSegment(PkgIconController.SEGMENT_PKGICON),
                 new ExactPathRequestMatcher("/%s".formatted(PkgIconController.SEGMENT_GENERICPKGICON)),

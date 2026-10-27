@@ -1,5 +1,5 @@
 /*
- * Copyright 2014-2019, Andrew Lindesay
+ * Copyright 2014-2026, Andrew Lindesay
  * Distributed under the terms of the MIT License.
  */
 
@@ -23,7 +23,7 @@ public class PasswordResetController {
     private final static String KEY_TOKEN = "token";
 
     // TODO; separate so that it is not configured from the orchestration service.
-    private final static String SEGMENT_PASSWORDRESET = PasswordResetServiceImpl.URL_SEGMENT_PASSWORDRESET;
+    public final static String SEGMENT_PASSWORDRESET = PasswordResetServiceImpl.URL_SEGMENT_PASSWORDRESET;
 
     @RequestMapping(value = "/" + SEGMENT_PASSWORDRESET + "/{"+KEY_TOKEN+"}", method = RequestMethod.GET)
     public ModelAndView handleGet(
