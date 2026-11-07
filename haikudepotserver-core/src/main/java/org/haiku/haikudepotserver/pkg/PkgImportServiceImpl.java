@@ -7,8 +7,12 @@ package org.haiku.haikudepotserver.pkg;
 
 import com.google.common.base.Preconditions;
 import com.google.common.collect.ImmutableList;
-import com.google.common.collect.Iterables;
+import com.google.common.hash.Funnels;
+import com.google.common.hash.HashCode;
+import com.google.common.hash.Hasher;
+import com.google.common.hash.Hashing;
 import com.google.common.io.ByteSource;
+import com.google.common.io.ByteStreams;
 import org.apache.cayenne.ObjectContext;
 import org.apache.cayenne.ObjectId;
 import org.apache.commons.lang3.BooleanUtils;
@@ -41,6 +45,8 @@ import java.util.Optional;
 public class PkgImportServiceImpl implements PkgImportService {
 
     protected final static Logger LOGGER = LoggerFactory.getLogger(PkgImportServiceImpl.class);
+
+    private final static int MAX_ICONS_IMPORT = 10;
 
     private final PkgServiceImpl pkgServiceImpl;
     private final PkgIconService pkgIconService;
@@ -358,6 +364,7 @@ public class PkgImportServiceImpl implements PkgImportService {
             // TODO (andponlin) remove this restriction once the HPKR parser is able to scale.
             //  Some of the source packages are very large with a very large number of files which breaks
             //  the HPKG walker. This should be fixed but until then just skip for source packages.
+            //  An example if the source packages for Firefox.
 
             if (pkgServiceImpl.isDebugOrDevelopmentOrSourcePkgName(persistedPkgVersion.getPkg().getName())) {
                 LOGGER.info(
@@ -402,18 +409,76 @@ public class PkgImportServiceImpl implements PkgImportService {
         AttributeContext tocContext = hpkgFileExtractor.getTocContext();
         List<Attribute> iconAttrs = HpkgHelper.findIconAttributesFromExecutableDirEntries(
                 tocContext, hpkgFileExtractor.getToc());
-        switch (iconAttrs.size()) {
-            case 0 -> LOGGER.info("package [{}] version [{}] has no icons",
+
+        if (iconAttrs.isEmpty()) {
+            LOGGER.info("package [{}] version [{}] has no icons",
                     persistedPkgVersion.getPkg(), persistedPkgVersion);
-            case 1 -> populateIconFromPayload(
-                    objectContext,
-                    persistedPkgVersion,
-                    tocContext,
-                    Iterables.getFirst(iconAttrs, null)
-            );
-            default -> LOGGER.info("package [{}] version [{}] has {} icons --> ambiguous so will not load any",
-                    persistedPkgVersion.getPkg(), persistedPkgVersion, iconAttrs.size());
+            return;
         }
+
+        // Check that there are < 10 icons found; more than that and it will be
+        // ambiguous.
+
+        if (iconAttrs.size() > 10) {
+            LOGGER.info("package [{}] version [{}] has {} icons (limit {}) --> ambiguous so will not load any",
+                    persistedPkgVersion.getPkg(), persistedPkgVersion, iconAttrs.size(), MAX_ICONS_IMPORT);
+            return;
+        }
+
+        // Get all those icons and check to see if they are all the same so there
+        // is no ambiguity; if so then use that icon.
+
+        try {
+            if (!allIconsTheSame(tocContext, iconAttrs)) {
+                LOGGER.info("package [{}] version [{}] has {} icons but they are not the same --> ambiguous so will not load any",
+                        persistedPkgVersion.getPkg(), persistedPkgVersion, iconAttrs.size());
+                return;
+            }
+        } catch (IOException ioe) {
+            throw new UncheckedIOException("failure checking the icons are the same", ioe);
+        }
+
+        populateIconFromPayload(
+                objectContext,
+                persistedPkgVersion,
+                tocContext,
+                iconAttrs.getFirst()
+        );
+    }
+
+    /**
+     * <p>Returns true if the icons are all identical.</p>
+     */
+    private boolean allIconsTheSame(
+            AttributeContext tocContext,
+            List<Attribute> iconAttrs) throws IOException {
+        Preconditions.checkArgument(!iconAttrs.isEmpty(), "there are no icons");
+
+        if (1 == iconAttrs.size()) {
+            return true;
+        }
+
+        HashCode hashCode0 = hashIcon(tocContext, iconAttrs.getFirst());
+
+        for (Attribute iconAttr : iconAttrs.subList(1, iconAttrs.size())) {
+            if (!hashIcon(tocContext, iconAttr).equals(hashCode0)) {
+                return false;
+            }
+        }
+
+        return true;
+    }
+
+    private HashCode hashIcon(AttributeContext tocContext, Attribute attribute) throws IOException {
+        Attribute dataAttr = attribute.tryGetChildAttribute(AttributeId.DATA).orElse(null);
+        ByteSource byteSource = (ByteSource) dataAttr.getValue(tocContext);
+        Hasher hasher = Hashing.sha256().newHasher();
+
+        try (InputStream inputStream = byteSource.openStream()) {
+            ByteStreams.copy(inputStream, Funnels.asOutputStream(hasher));
+        }
+
+        return hasher.hash();
     }
 
     private void populateIconFromPayload(

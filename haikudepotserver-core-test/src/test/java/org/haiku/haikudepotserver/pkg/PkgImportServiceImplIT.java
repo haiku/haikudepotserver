@@ -34,6 +34,7 @@ import java.util.List;
 public class PkgImportServiceImplIT extends AbstractCoreIntegrationTest {
 
     private static final String RESOURCE_TEST = "tipster-1.1.1-1-x86_64.hpkg";
+    private static final String RESOURCE_TWO_IDENTICAL_ICONS_TEST = "sample-twoidenticalhvificons.hpkg";
 
     @Resource
     private PkgImportService pkgImportService;
@@ -247,6 +248,79 @@ public class PkgImportServiceImplIT extends AbstractCoreIntegrationTest {
                 Assertions.assertThat(pkgSupplementModification.getOriginSystemDescription()).isEqualTo("hds-hpkg");
                 Assertions.assertThat(pkgSupplementModification.getContent()).isEqualTo(
                         "add icon for pkg [testpkg]; size [null]; media type [application/x-vnd.haiku-icon]; sha256 [871eefa1582c96f774b44f902eb6cac05885d6ccda88700ab2e0fe99dba2319c]");
+            }
+        }
+        finally {
+            if (null != repositoryDirectory) {
+                FileHelper.delete(repositoryDirectory);
+            }
+        }
+    }
+
+    /**
+     * <p>Tests the situation where an HPKG is imported where the data contains two binaries both of which contain
+     * the same icon. In this case, don't dismiss the icon because there's two of it as it's not ambiguous. This can
+     * be the case with Firefox packages for example. See
+     * <a href="https://github.com/haiku/haikudepotserver/issues/293>293</a>.</p>
+     */
+
+    @Test
+    public void testImport_payloadData_twoIdenticalIcons() throws Exception {
+
+        File repositoryDirectory = null;
+
+        try {
+            // create the repository
+
+            integrationTestSupportService.createStandardTestData();
+            Pkg inputPackage = createPkg("3");
+
+            // setup a test repository
+
+            {
+                ObjectContext context = serverRuntime.newContext();
+                RepositorySource repositorySource = RepositorySource.getByCode(context, "testreposrc_xyz");
+                repositoryDirectory = new File(repositorySource.tryGetPackagesBaseURI(ExposureType.INTERNAL_FACING).get().getPath());
+
+                if (!repositoryDirectory.mkdirs()) {
+                    throw new IllegalStateException("unable to create the on-disk repository");
+                }
+
+                File fileF = new File(repositoryDirectory, "testpkg-1.3.3~4-5-x86_64.hpkg");
+                byte[] payload = Resources.toByteArray(Resources.getResource(RESOURCE_TWO_IDENTICAL_ICONS_TEST));
+                Files.write(payload, fileF);
+            }
+
+            // now load the next package version in
+
+            {
+                ObjectContext context = serverRuntime.newContext();
+                RepositorySource repositorySource = RepositorySource.getByCode(context, "testreposrc_xyz");
+
+                // ---------------------------------
+
+                pkgImportService.importFrom(
+                        context,
+                        repositorySource.getObjectId(),
+                        inputPackage,
+                        true); // <--- NOTE
+
+                // ---------------------------------
+
+                context.commitChanges();
+            }
+
+            // Just check that the icon is present.
+
+            {
+                ObjectContext context = serverRuntime.newContext();
+                org.haiku.haikudepotserver.dataobjects.Pkg pkg = org.haiku.haikudepotserver.dataobjects.Pkg.getByName(context, "testpkg");
+
+                List<PkgIcon> pkgIcons = pkg.getPkgSupplement().getPkgIcons();
+                Assertions.assertThat(pkgIcons).hasSize(1);
+                PkgIcon pkgIcon = Iterables.getOnlyElement(pkgIcons);
+                byte[] actualIconData = pkgIcon.getPkgIconImage().getData();
+                Assertions.assertThat(actualIconData).hasSize(653);
             }
         }
         finally {
