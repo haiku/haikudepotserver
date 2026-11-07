@@ -49,18 +49,18 @@
 
         <!-- runtime dependencies -->
 
-        <spring-boot.version>4.1.1</spring-boot.version>
+        <spring-boot.version>4.1.2</spring-boot.version>
 
         <postgresql.version>42.7.14</postgresql.version>
         <cayenne.version>4.2.3</cayenne.version>
 
         <flexmark.version>0.64.8</flexmark.version>
         <freemarker.version>2.3.35</freemarker.version>
-        <jte.version>3.2.4</jte.version>
-        <aircompressor.version>3.11</aircompressor.version>
-        <guava.version>33.7.2-jre</guava.version>
+        <jte.version>3.2.5</jte.version>
+        <aircompressor.version>3.14</aircompressor.version>
+        <guava.version>33.8.0-jre</guava.version>
         <springfox.version>3.0.0</springfox.version>
-        <nimbus-jose-jwt.version>10.9</nimbus-jose-jwt.version>
+        <nimbus-jose-jwt.version>10.10</nimbus-jose-jwt.version>
 
         <!-- webjars -->
         <jquery.version>4.0.0</jquery.version>
