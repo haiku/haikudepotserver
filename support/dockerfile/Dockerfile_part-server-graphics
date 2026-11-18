@@ -53,11 +53,15 @@ RUN chmod +x "${HDS_TOOL_HVIF2PNG_PATH}"
 COPY --from=java_maven_build_server_graphics /hds-src/haikudepotserver-server-graphics/target/haikudepotserver-server-graphics-*.jar \
     ${X_HDS_SERVER_GRAPHICS_APP_HOME}/app.jar
 
+# The `-XX:-UseBASE64Intrinsics` is a short term work-around which will
+# no longer be required on or after 25.0.5.1
+# see CVE-2026-114938
 CMD [ "java", \
     "-Dcom.sun.net.ssl.checkRevocation=true", \
     "-Dcom.sun.security.enableCRLDP=true", \
     "-Xms32m", \
     "-Xmx32m", \
+    "-XX:-UseBASE64Intrinsics", \
     "-Dfile.encoding=UTF-8", \
     "-Duser.timezone=GMT0", \
     "-Djava.net.preferIPv4Stack=true", \

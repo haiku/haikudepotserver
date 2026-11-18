@@ -34,11 +34,15 @@ RUN mkdir ${X_HDS_B_INSTALL_ROOT}
 COPY --from=java_maven_build_webapp /hds-src/haikudepotserver-core/target/classes/build.properties ${X_HDS_B_INSTALL_ROOT}
 COPY --from=java_maven_build_webapp /hds-src/haikudepotserver-webapp/target/haikudepotserver-webapp-*.jar ${X_HDS_B_INSTALL_ROOT}/app.jar
 
+# The `-XX:-UseBASE64Intrinsics` is a short term work-around which will
+# no longer be required on or after 25.0.5.1
+# see CVE-2026-114938
 CMD [ "java", \
     "-Dcom.sun.net.ssl.checkRevocation=true", \
     "-Dcom.sun.security.enableCRLDP=true", \
     "-Xms450m", \
     "-Xmx450m", \
+    "-XX:-UseBASE64Intrinsics", \
     "-Dfile.encoding=UTF-8", \
     "-Duser.timezone=GMT0", \
     "-Djava.net.preferIPv4Stack=true", \
