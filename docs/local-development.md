@@ -36,7 +36,7 @@ For local development, say in an IDE system, HDS can be launched as a SpringBoot
 Start [KeyCloak](https://www.keycloak.org/) from a terminal.
 
 ```shell
-KC_HTTP_PORT=7080 ./bin/kc.sh start-dev
+KC_HTTP_HOST=0.0.0.0 KC_HTTP_PORT=7080 ./bin/kc.sh start-dev
 ```
 
 - Create a Realm `haiku-dev`.
